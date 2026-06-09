@@ -53,6 +53,7 @@ from app.config.settings import resolve_settings  # noqa: E402
 from app.database.repositories import Repository  # noqa: E402
 from app.database.sqlite_db import get_connection  # noqa: E402  # noqa: F401 — used via Repository
 from app.engine.live_trading_engine import LiveTradingEngine  # noqa: E402
+from app.notification.notifier import make_notifier_from_env  # noqa: E402
 from app.risk.safety_checker import SafetyChecker  # noqa: E402
 from app.risk.trading_window import is_within_trading_window  # noqa: E402
 
@@ -130,7 +131,10 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     repo = Repository(cfg.db_path)
-    engine = LiveTradingEngine(broker=broker, repo=repo)
+    notifier = make_notifier_from_env()
+    if notifier.enabled:
+        logger.info("[notify] Telegram 알림 활성 (chat_id 설정됨)")
+    engine = LiveTradingEngine(broker=broker, repo=repo, notifier=notifier)
 
     logger.info(
         "Engine ready. Polling every %d seconds. Press Ctrl-C to stop.",
