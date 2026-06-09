@@ -70,3 +70,26 @@ def list_decisions(limit: int = 10) -> list[dict]:
         return []
     files = sorted(_DECISIONS.glob("IC_*.md"), reverse=True)[:limit]
     return [{"file": f.name, "path": str(f)} for f in files]
+
+
+def extract_condition_from_ic(ic_result: dict) -> dict | None:
+    """CIO 결정 텍스트에서 매매 조건을 파싱 (best-effort). 파싱 실패 시 None.
+
+    결정문에 '종목코드 XXXXXX', '목표가 NNNNNN', '방향 매수/매도' 패턴을 찾아 반환.
+    """
+    import re
+    text = ic_result.get("decision", "")
+    sym_m = re.search(r"(?:종목코드|종목)[:\s]+([A-Z0-9]{6})", text)
+    price_m = re.search(r"목표가[:\s]+([0-9,]+)", text)
+    side_m = re.search(r"(매수|매도|BUY|SELL)", text, re.I)
+    qty_m = re.search(r"수량[:\s]+([0-9]+)주?", text)
+    if not (sym_m and price_m and side_m):
+        return None
+    side_raw = side_m.group(1).upper()
+    side = "BUY" if side_raw in ("매수", "BUY") else "SELL"
+    return {
+        "symbol": sym_m.group(1),
+        "side": side,
+        "target_price": float(price_m.group(1).replace(",", "")),
+        "quantity": int(qty_m.group(1)) if qty_m else 1,
+    }
