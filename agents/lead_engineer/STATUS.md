@@ -17,9 +17,12 @@
 - 회고/감사: `compound_log.md` · `AUDIT-LOG.md`
 - **프레임워크↔Autofolio 분리·업데이트 런북**: `docs/AGENT_RUNTIME_INTEGRATION.md` (틀=agent_runtime 정본 / 맥락=호스트 추가 파일 / 시임=AGENTS.md·roles.yml `unmanaged`)
 
-## 현재 상태
-- agent_runtime v0.1.5 프레임워크 전체 이식 완료 + 의존성(openai·PyYAML) + roles.yml Autofolio 튜닝 + 운영 문서 초기화(STATUS·INDEX·AUDIT-LOG·compound_log·BACKLOG).
-- 운영 사이클(CYCLE/REVIEW)은 아직 미시작 — 첫 실작업 사이클에서 생성.
+## 현재 상태 (2026-06-09 인계)
+- agent_runtime v0.1.5 전체 이식 + **분리 운영**(시임 `AGENTS.md`·`roles.yml` = `sync.unmanaged`, `docs/AGENT_RUNTIME_INTEGRATION.md`) 완료. check_agent_docs **0 error**, pytest(tests/) **9 passed**.
+- 업스트림 기여: agent_runtime **Issue #1**(통합보고+전수감사 코멘트) + **PR #2**(task.schema.json·AGENTS §13–14) OPEN. 누락 모듈(orchestrator_safety_gate·pipeline) 의도 로직은 업스트림 담당.
+- 작업물 커밋: 브랜치 **`feat/agent-runtime-integration`**(commit 4586fe2, 288파일). main 미병합·미푸시.
+- **KIS**: 사용자 **실전·모의계좌 개설 + API 신청 완료**(2026-06-09). 키 발급/입력 단계. 토큰 인증(`kis_auth`)은 구현됨, 시세·주문·잔고(`kis_client`)는 scaffold(NotImplementedError).
 
-## 활성 작업
-- 없음(설정 완료 단계). 다음 우선순위는 `docs/BACKLOG.md` §다음 참조.
+## 활성 작업 (다음 세션 시작점)
+- **P1.1b 실 KIS 연동** → `docs/BACKLOG.md §다음 1`. 순서: 모의 키 `.env` 입력(`KIS_ENV=paper`, base_url=`https://openapivts.koreainvestment.com:29443`, token_path=`/oauth2/tokenP`) → 토큰 스모크 → `kis_client.py` 메서드 구현 → 포트폴리오/손익 라이브화.
+- 운영 사이클(CYCLE/REVIEW)은 아직 미시작 — 첫 실작업 사이클에서 생성.

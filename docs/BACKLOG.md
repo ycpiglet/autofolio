@@ -22,11 +22,14 @@
 
 ## 🎯 다음 (우선순위)
 
-### 1. P1.1b — 실 KIS 연동 + 포트폴리오 모델  *(증권계좌 필요)*
-- [ ] 한국투자증권 KIS Developers에서 모의투자 App Key/Secret/계좌번호 발급 → `.env` 입력(또는 설정·연동 마법사).
-- [ ] `app/brokers/kis/kis_client.py` TODO 구현(토큰·현재가·잔고·주문·취소·체결) — `KIS_ENV=paper` 검증.
-- [ ] **포트폴리오/손익 백엔드 모델**(positions/잔고 테이블 또는 잔고조회) → 홈·포트폴리오·분석 화면 라이브화(현재 mock).
-- [ ] `app/ui/backend.py`에 포트폴리오·손익 어댑터 추가.
+### 1. P1.1b — 실 KIS 연동 + 포트폴리오 모델  ★다음 세션 즉시 시작 (계좌·API 신청 완료)
+> 사용자: **실전·모의계좌 개설 + API 신청 완료(2026-06-09)**. 키 발급되면 아래 순서로.
+- [ ] **자격증명 입력**: 모의(paper) App Key/Secret/계좌번호를 `.env`(또는 설정→연동 마법사)에. paper `KIS_BASE_URL=https://openapivts.koreainvestment.com:29443`, `KIS_TOKEN_PATH=/oauth2/tokenP`, `KIS_ENV=paper`. (실전은 **별도 키** + prod `https://openapi.koreainvestment.com:9443`.)
+- [ ] **토큰 스모크**: `kis_auth.get_access_token()`은 **이미 구현됨** → paper 토큰 발급 검증 스크립트 1개(`scripts/`).
+- [ ] **`app/brokers/kis/kis_client.py` 메서드 구현**(현재 전부 `NotImplementedError`): `get_current_price`·`get_positions`·`place_order`·`cancel_order`·`get_order_status` — TR ID(모의 `VTTC*`/실전 `TTTC*`)·hashkey·custtype 매핑, paper 우선 검증.
+- [ ] **환경별 base_url/token_path 자동 해석**(`KIS_ENV`→기본 URL) — 현재 `settings.py` 기본값 ""라 수동 입력 필요.
+- [ ] **포트폴리오/손익 백엔드 모델**(잔고조회/positions) → 홈·포트폴리오·분석 라이브화(현재 mock). `app/ui/backend.py` 어댑터.
+- [ ] 안전(MVP_SPEC §6.6): paper 검증 후에만 **1주 수동** 실주문, 자동 실주문 금지·사람 승인.
 
 ### 2. 거버넌스(④) 마무리
 - [ ] `performance-analyst`(로그 기반 회고·손익 기여 분석) + **`/retro` 워크플로**.
