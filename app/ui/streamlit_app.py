@@ -17,7 +17,7 @@ from app.config.settings import settings
 from app.database.repositories import Repository, WhitelistSymbol
 from app.database.sqlite_db import initialize_database
 from app.engine.live_trading_engine import LiveTradingEngine
-from app.notification.telegram_notifier import TelegramNotifier
+from app.notification.notifier import make_notifier_from_env
 
 
 st.set_page_config(page_title="KIS AutoTrading MVP", layout="wide")
@@ -32,7 +32,7 @@ def get_broker():
 
 
 broker = get_broker()
-notifier = TelegramNotifier()
+notifier = make_notifier_from_env()
 engine = LiveTradingEngine(broker=broker, repo=repo, notifier=notifier)
 research_agent = ResearchAgent()
 

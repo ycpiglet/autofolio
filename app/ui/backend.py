@@ -266,6 +266,58 @@ def retro_metrics() -> dict:
     }
 
 
+def circuit_breaker_status() -> dict:
+    """서킷브레이커 현황 — UI 상단 바에서 경고 표시에 사용한다.
+
+    반환 키:
+      triggered (bool)     — 현재 auto_trading_enabled=false 이고 서킷브레이커가 원인일 때 True
+      threshold_pct (float) — 일일 손실 트리거 기준(%)
+      consecutive_failures (int) — 연속 주문 실패 횟수
+      today_pnl (float)    — 오늘 실현 현금흐름 합계
+    """
+    repo, *_ = _ctx()
+    threshold_pct_str = repo.get_system_state("circuit_breaker_threshold_pct", "3.0")
+    try:
+        threshold_pct = float(threshold_pct_str)
+    except (ValueError, TypeError):
+        threshold_pct = 3.0
+
+    consecutive_failures_str = repo.get_system_state("consecutive_order_failures", "0")
+    try:
+        consecutive_failures = int(consecutive_failures_str)
+    except (ValueError, TypeError):
+        consecutive_failures = 0
+
+    today_pnl = repo.today_realized_pnl()
+
+    auto_enabled = repo.get_system_state("auto_trading_enabled", "false") == "true"
+    kill_active = repo.get_system_state("kill_switch_active", "false") == "true"
+
+    # Consider circuit breaker triggered if auto-trading was disabled and either
+    # the consecutive failure threshold or the daily-loss threshold is breached.
+    loss_tripped = False
+    if today_pnl < 0:
+        try:
+            limit = repo.get_global_risk_limit()
+            reference = float(limit["max_daily_amount"])
+        except Exception:
+            reference = 0.0
+        if reference > 0:
+            loss_pct = abs(today_pnl) / reference * 100.0
+            loss_tripped = loss_pct >= threshold_pct
+
+    triggered = (not auto_enabled) and (not kill_active) and (
+        consecutive_failures >= 3 or loss_tripped
+    )
+
+    return {
+        "triggered": triggered,
+        "threshold_pct": threshold_pct,
+        "consecutive_failures": consecutive_failures,
+        "today_pnl": today_pnl,
+    }
+
+
 def allocation_gap(target: dict | None = None) -> pd.DataFrame:
     """라이브 보유종목 기반 자산배분 vs 목표 갭.
 

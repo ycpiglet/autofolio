@@ -1,16 +1,23 @@
-"""Telegram 명령봇 — 읽기 전용 조회 명령. [Autofolio]
+"""Telegram 명령봇 — 읽기 전용 조회 + 상태 변경 명령. [Autofolio]
 
-지원 명령(읽기 전용, **주문 실행 없음**): `/help` `/status` `/pnl` `/positions`
-`/conditions` `/engine` `/propose`.
-주문·킬스위치 등 상태 변경 명령은 안전상 별도 사이클(사람 승인 게이트)에서 다룬다.
+지원 명령(읽기 전용): `/help` `/status` `/pnl` `/positions`
+`/conditions` `/engine` `/propose`
+상태 변경 명령: `/kill` `/kill off` `/approve confirm` `/pause`
 
 설계
 ----
 - 명령 해석(`handle_text`)은 순수 함수 → 단위 테스트가 쉽다(네트워크 불필요).
-- 데이터는 `PortfolioProvider`(상태/손익/포지션/조건/엔진/제안)로 주입 → `BackendProvider` 는
+- 데이터는 `PortfolioProvider`(상태/손익/포지션/조건/엔진/제안/상태변경)로 주입 → `BackendProvider` 는
   `app.ui.backend`(KIS_ENV 에 따라 mock/실 브로커)를 감싼다.
 - 전송은 `send_fn(chat_id, text)` 주입 → 운영은 Telegram API, 테스트는 기록용 페이크.
 - **보안**: allowlist(허용 chat_id)에 있는 대화에만 응답한다(기본 전체 거부).
+
+상태 변경 안전 규칙
+-------------------
+- /kill — 킬스위치 활성화(확인 불필요, 안전 방향).
+- /kill off — 킬스위치 해제("off" 키워드 필수).
+- /approve confirm — 자동매매 활성화("confirm" 키워드 필수).
+- /pause — 자동매매 비활성화(확인 불필요).
 """
 from __future__ import annotations
 
@@ -21,13 +28,17 @@ from app.common.logger import get_logger
 logger = get_logger("autofolio.telegram_bot")
 
 HELP_TEXT = (
-    "🤖 Autofolio 봇 (읽기 전용)\n"
+    "🤖 Autofolio 봇\n"
     "/status — 운영 상태(환경·자동매매·킬스위치·화이트리스트)\n"
     "/pnl — 평가손익 요약\n"
     "/positions — 보유 종목\n"
     "/conditions — 활성 거래 조건 목록\n"
     "/engine — 엔진 1회 실행(읽기 전용, 트리거 시뮬레이션)\n"
     "/propose <심볼> [BUY|SELL] — IC 에이전트 조건 제안\n"
+    "/kill — 킬스위치 즉시 활성화(주문 중단)\n"
+    "/kill off — 킬스위치 해제\n"
+    "/approve confirm — 자동매매 활성화(confirm 필수)\n"
+    "/pause — 자동매매 비활성화\n"
     "/help — 도움말"
 )
 
@@ -39,6 +50,8 @@ class PortfolioProvider(Protocol):
     def conditions(self) -> list[dict]: ...
     def run_engine(self) -> list[str]: ...
     def propose(self, symbol: str, side: str) -> str: ...
+    def set_auto_enabled(self, value: bool) -> None: ...
+    def set_kill_switch(self, value: bool) -> None: ...
 
 
 class TelegramCommandBot:
@@ -77,6 +90,12 @@ class TelegramCommandBot:
             return self._engine()
         if cmd == "/propose":
             return self._propose(args)
+        if cmd == "/kill":
+            return self._kill(args)
+        if cmd == "/approve":
+            return self._approve(args)
+        if cmd == "/pause":
+            return self._pause()
         if cmd in ("/help", "/start", ""):
             return HELP_TEXT
         return f"알 수 없는 명령: {cmd}\n\n{HELP_TEXT}"
@@ -98,7 +117,7 @@ class TelegramCommandBot:
                 logger.error("telegram reply 전송 실패: %s", exc)
         return reply
 
-    # ----- handlers -----
+    # ----- read-only handlers -----
     def _status(self) -> str:
         s = self.provider.status()
         return (
@@ -160,6 +179,39 @@ class TelegramCommandBot:
         if side not in ("BUY", "SELL"):
             return f"방향 오류: '{side}' — BUY 또는 SELL 을 입력하세요."
         return self.provider.propose(symbol, side)
+
+    # ----- state-changing handlers -----
+    def _kill(self, args: list[str]) -> str:
+        """킬스위치 활성화(/kill) 또는 해제(/kill off).
+
+        /kill     — 확인 없이 즉시 활성화(안전 방향).
+        /kill off — "off" 키워드 필수; 킬스위치 해제.
+        """
+        if args and args[0].lower() == "off":
+            self.provider.set_kill_switch(False)
+            logger.info("telegram: /kill off — 킬스위치 해제됨")
+            return "✅ 킬스위치 해제됨. 자동매매가 재개될 수 있습니다."
+        # 인자 없음 또는 다른 인자 → 즉시 활성화
+        self.provider.set_kill_switch(True)
+        logger.info("telegram: /kill — 킬스위치 활성화됨")
+        return "🚨 킬스위치 활성화됨. 모든 자동 주문이 즉시 중단됩니다."
+
+    def _approve(self, args: list[str]) -> str:
+        """자동매매 활성화 — 반드시 '/approve confirm' 형식이어야 한다."""
+        if not args or args[0].lower() != "confirm":
+            return (
+                "⚠️ 자동매매 활성화는 확인이 필요합니다.\n"
+                "명령: /approve confirm"
+            )
+        self.provider.set_auto_enabled(True)
+        logger.info("telegram: /approve confirm — 자동매매 활성화됨")
+        return "✅ 자동매매 활성화됨."
+
+    def _pause(self) -> str:
+        """자동매매 비활성화 — 확인 불필요."""
+        self.provider.set_auto_enabled(False)
+        logger.info("telegram: /pause — 자동매매 비활성화됨")
+        return "⏸️ 자동매매 비활성화됨."
 
 
 class BackendProvider:
@@ -226,6 +278,16 @@ class BackendProvider:
             f"수량: {proposal.quantity}\n"
             f"근거: {proposal.rationale}"
         )
+
+    def set_auto_enabled(self, value: bool) -> None:
+        from app.ui import backend
+
+        backend.set_flag("auto_trading_enabled", value)
+
+    def set_kill_switch(self, value: bool) -> None:
+        from app.ui import backend
+
+        backend.set_flag("kill_switch_active", value)
 
 
 def make_telegram_sender(bot_token: str) -> Callable[[object, str], None]:

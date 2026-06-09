@@ -34,6 +34,45 @@ class SafetyChecker:
         if self.repo.get_system_state("auto_trading_enabled", "false") != "true":
             return SafetyResult(False, "Auto trading is disabled.")
 
+        # --- Circuit breaker: consecutive order failures ---
+        consecutive_failures_str = self.repo.get_system_state("consecutive_order_failures", "0")
+        try:
+            consecutive_failures = int(consecutive_failures_str)
+        except (ValueError, TypeError):
+            consecutive_failures = 0
+        if consecutive_failures >= 3:
+            self.repo.set_system_state("auto_trading_enabled", "false")
+            return SafetyResult(False, "Circuit breaker: 3 consecutive order failures.")
+
+        # --- Circuit breaker: daily loss threshold ---
+        threshold_pct_str = self.repo.get_system_state("circuit_breaker_threshold_pct", "3.0")
+        try:
+            threshold_pct = float(threshold_pct_str)
+        except (ValueError, TypeError):
+            threshold_pct = 3.0
+
+        today_pnl = self.repo.today_realized_pnl()
+        # today_pnl is negative when net cash outflow exceeds inflow (net loss).
+        # We compare the absolute loss against the threshold expressed as a
+        # fraction of |today_pnl| relative to a reference. Because we do not
+        # track total portfolio value here, we use the magnitude of the realized
+        # loss directly: if the loss expressed as a positive percentage of the
+        # daily-amount limit exceeds the threshold, we trip the breaker.
+        if today_pnl < 0:
+            try:
+                limit = self.repo.get_global_risk_limit()
+                reference = float(limit["max_daily_amount"])
+            except Exception:
+                reference = 0.0
+            if reference > 0:
+                loss_pct = abs(today_pnl) / reference * 100.0
+                if loss_pct >= threshold_pct:
+                    self.repo.set_system_state("auto_trading_enabled", "false")
+                    return SafetyResult(
+                        False,
+                        "Circuit breaker triggered: daily loss exceeded threshold.",
+                    )
+
         symbol_info = self.repo.get_whitelist_symbol(condition["symbol"])
         if not symbol_info:
             return SafetyResult(False, "Symbol is not enabled in whitelist.")

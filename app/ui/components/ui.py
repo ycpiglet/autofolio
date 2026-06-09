@@ -6,6 +6,15 @@ import streamlit as st
 from app.ui import state, theme
 
 
+def _circuit_breaker_info() -> dict | None:
+    """서킷브레이커 상태를 조회한다. 백엔드 연결 실패 시 None 반환."""
+    try:
+        from app.ui import backend  # 로컬 import — demo 모드에서도 조용히 실패
+        return backend.circuit_breaker_status()
+    except Exception:
+        return None
+
+
 @st.dialog("⚠️ 킬스위치")
 def _confirm_kill() -> None:
     st.write("**모든 자동매매를 즉시 중단**합니다. 진행할까요?")
@@ -48,6 +57,23 @@ def top_bar() -> None:
 
     if kill:
         st.error("🔴 킬스위치 활성 — 자동매매 강제 OFF")
+
+    # Circuit breaker warning (only shown in backend/live mode)
+    if not st.session_state.get("demo"):
+        cb = _circuit_breaker_info()
+        if cb and cb.get("triggered"):
+            parts = []
+            if cb["consecutive_failures"] >= 3:
+                parts.append(f"연속 실패 {cb['consecutive_failures']}회")
+            if cb["today_pnl"] < 0:
+                parts.append(f"당일손실 {cb['today_pnl']:,.0f}원")
+            detail = " · ".join(parts) if parts else ""
+            st.warning(
+                f"⚠️ 서킷브레이커 발동 — 자동매매 일시 중단"
+                + (f" ({detail})" if detail else ""),
+                icon="🟠",
+            )
+
     st.divider()
 
     if open_kill:

@@ -5,11 +5,15 @@ from app.notification.telegram_bot import HELP_TEXT, TelegramCommandBot
 
 
 class FakeProvider:
+    def __init__(self):
+        self._auto_enabled: bool = False
+        self._kill_switch: bool = False
+
     def status(self) -> dict:
         return {
             "env": "paper",
-            "auto_enabled": False,
-            "kill_switch": False,
+            "auto_enabled": self._auto_enabled,
+            "kill_switch": self._kill_switch,
             "whitelist_count": 3,
             "order_log_count": 2,
         }
@@ -52,15 +56,22 @@ class FakeProvider:
             "근거: 52주 저점 근접, PBR 0.8x"
         )
 
+    def set_auto_enabled(self, value: bool) -> None:
+        self._auto_enabled = value
+
+    def set_kill_switch(self, value: bool) -> None:
+        self._kill_switch = value
+
 
 def _bot(allowed=("100",)):
+    provider = FakeProvider()
     sent: list[tuple] = []
     bot = TelegramCommandBot(
-        provider=FakeProvider(),
+        provider=provider,
         send_fn=lambda chat_id, text: sent.append((chat_id, text)),
         allowed_chat_ids=list(allowed),
     )
-    return bot, sent
+    return bot, sent, provider
 
 
 def _update(text: str, chat_id="100") -> dict:
@@ -69,7 +80,7 @@ def _update(text: str, chat_id="100") -> dict:
 
 # ----- 명령 해석 -----
 def test_help_for_unknown_and_help():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     assert bot.handle_text("/help") == HELP_TEXT
     assert bot.handle_text("") == HELP_TEXT
     assert "알 수 없는 명령" in bot.handle_text("/frobnicate")
@@ -77,7 +88,7 @@ def test_help_for_unknown_and_help():
 
 
 def test_status_command():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/status")
     assert "환경: paper" in out
     assert "자동매매: OFF" in out
@@ -86,7 +97,7 @@ def test_status_command():
 
 
 def test_pnl_command_formats_numbers():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/pnl")
     assert "1,234,567" in out
     assert "89,000" in out
@@ -94,14 +105,14 @@ def test_pnl_command_formats_numbers():
 
 
 def test_positions_command_lists_holdings():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/positions")
     assert "005930" in out and "10주" in out
     assert "069500" in out and "40주" in out
 
 
 def test_command_normalizes_botname_suffix():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     assert "환경: paper" in bot.handle_text("/status@AutofolioBot")
 
 
@@ -116,7 +127,7 @@ def test_positions_empty():
 
 # ----- /conditions -----
 def test_conditions_command_lists_active():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/conditions")
     assert "활성 거래 조건" in out
     assert "005930" in out
@@ -137,14 +148,14 @@ def test_conditions_empty():
 
 
 def test_conditions_shows_status_field():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/conditions")
     assert "ACTIVE" in out
 
 
 # ----- /engine -----
 def test_engine_command_shows_results():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/engine")
     assert "엔진 실행 결과" in out
     assert "005930" in out
@@ -162,7 +173,7 @@ def test_engine_command_no_triggers():
 
 
 def test_engine_each_result_on_own_line():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/engine")
     lines = out.splitlines()
     # header + 2 result lines
@@ -171,7 +182,7 @@ def test_engine_each_result_on_own_line():
 
 # ----- /propose -----
 def test_propose_command_returns_proposal():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/propose 005930 BUY")
     assert "IC 제안" in out
     assert "005930" in out
@@ -181,19 +192,19 @@ def test_propose_command_returns_proposal():
 
 
 def test_propose_defaults_to_buy_when_side_omitted():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/propose 005930")
     assert "BUY" in out
 
 
 def test_propose_sell_side():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/propose 035420 SELL")
     assert "SELL" in out
 
 
 def test_propose_symbol_uppercased():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     # lowercase symbol → should still work (uppercased internally)
     out = bot.handle_text("/propose 005930 buy")
     # invalid side "BUY" normalised, but "buy" → upper → "BUY" which is valid
@@ -201,13 +212,13 @@ def test_propose_symbol_uppercased():
 
 
 def test_propose_invalid_side_returns_error():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/propose 005930 LONG")
     assert "방향 오류" in out
 
 
 def test_propose_no_args_returns_usage():
-    bot, _ = _bot()
+    bot, _, _ = _bot()
     out = bot.handle_text("/propose")
     assert "사용법" in out
 
@@ -219,9 +230,15 @@ def test_help_text_includes_new_commands():
     assert "/propose" in HELP_TEXT
 
 
+def test_help_text_includes_state_commands():
+    assert "/kill" in HELP_TEXT
+    assert "/approve" in HELP_TEXT
+    assert "/pause" in HELP_TEXT
+
+
 # ----- allowlist + 전송 -----
 def test_handle_update_allowed_sends_reply():
-    bot, sent = _bot(allowed=("100",))
+    bot, sent, _ = _bot(allowed=("100",))
     reply = bot.handle_update(_update("/status", chat_id="100"))
     assert reply is not None and "상태" in reply
     assert len(sent) == 1
@@ -229,7 +246,7 @@ def test_handle_update_allowed_sends_reply():
 
 
 def test_handle_update_unauthorized_ignored():
-    bot, sent = _bot(allowed=("100",))
+    bot, sent, _ = _bot(allowed=("100",))
     reply = bot.handle_update(_update("/status", chat_id="999"))  # 허용 외
     assert reply is None
     assert sent == []  # 전송 없음
@@ -251,7 +268,7 @@ def test_send_failure_does_not_raise():
 
 
 def test_conditions_via_handle_update_sends_reply():
-    bot, sent = _bot(allowed=("100",))
+    bot, sent, _ = _bot(allowed=("100",))
     reply = bot.handle_update(_update("/conditions", chat_id="100"))
     assert reply is not None
     assert "005930" in reply
@@ -259,7 +276,7 @@ def test_conditions_via_handle_update_sends_reply():
 
 
 def test_engine_via_handle_update_sends_reply():
-    bot, sent = _bot(allowed=("100",))
+    bot, sent, _ = _bot(allowed=("100",))
     reply = bot.handle_update(_update("/engine", chat_id="100"))
     assert reply is not None
     assert "엔진 실행 결과" in reply
@@ -267,8 +284,113 @@ def test_engine_via_handle_update_sends_reply():
 
 
 def test_propose_via_handle_update_sends_reply():
-    bot, sent = _bot(allowed=("100",))
+    bot, sent, _ = _bot(allowed=("100",))
     reply = bot.handle_update(_update("/propose 005930 BUY", chat_id="100"))
     assert reply is not None
     assert "IC 제안" in reply
     assert len(sent) == 1
+
+
+# ----- /kill -----
+def test_kill_activates_kill_switch():
+    bot, _, provider = _bot()
+    assert provider._kill_switch is False
+    out = bot.handle_text("/kill")
+    assert provider._kill_switch is True
+    assert "킬스위치 활성화" in out
+
+
+def test_kill_off_deactivates_kill_switch():
+    bot, _, provider = _bot()
+    provider._kill_switch = True
+    out = bot.handle_text("/kill off")
+    assert provider._kill_switch is False
+    assert "킬스위치 해제" in out
+
+
+def test_kill_off_case_insensitive():
+    bot, _, provider = _bot()
+    provider._kill_switch = True
+    out = bot.handle_text("/kill OFF")
+    assert provider._kill_switch is False
+    assert "킬스위치 해제" in out
+
+
+def test_kill_with_unknown_arg_still_activates():
+    """알 수 없는 인자는 무시하고 활성화."""
+    bot, _, provider = _bot()
+    out = bot.handle_text("/kill now")
+    assert provider._kill_switch is True
+    assert "킬스위치 활성화" in out
+
+
+# ----- /approve -----
+def test_approve_without_confirm_is_refused():
+    bot, _, provider = _bot()
+    out = bot.handle_text("/approve")
+    assert provider._auto_enabled is False
+    assert "confirm" in out.lower() or "확인" in out
+
+
+def test_approve_with_wrong_keyword_is_refused():
+    bot, _, provider = _bot()
+    out = bot.handle_text("/approve yes")
+    assert provider._auto_enabled is False
+    assert "confirm" in out.lower() or "확인" in out
+
+
+def test_approve_confirm_enables_auto_trading():
+    bot, _, provider = _bot()
+    assert provider._auto_enabled is False
+    out = bot.handle_text("/approve confirm")
+    assert provider._auto_enabled is True
+    assert "자동매매 활성화" in out
+
+
+def test_approve_confirm_case_insensitive():
+    bot, _, provider = _bot()
+    out = bot.handle_text("/approve CONFIRM")
+    assert provider._auto_enabled is True
+    assert "자동매매 활성화" in out
+
+
+# ----- /pause -----
+def test_pause_disables_auto_trading():
+    bot, _, provider = _bot()
+    provider._auto_enabled = True
+    out = bot.handle_text("/pause")
+    assert provider._auto_enabled is False
+    assert "비활성화" in out
+
+
+def test_pause_when_already_disabled_is_idempotent():
+    bot, _, provider = _bot()
+    assert provider._auto_enabled is False
+    out = bot.handle_text("/pause")
+    assert provider._auto_enabled is False
+    assert "비활성화" in out
+
+
+# ----- state change commands blocked for unauthorized users -----
+def test_kill_unauthorized_is_ignored():
+    bot, sent, provider = _bot(allowed=("100",))
+    reply = bot.handle_update(_update("/kill", chat_id="999"))
+    assert reply is None
+    assert provider._kill_switch is False
+    assert sent == []
+
+
+def test_approve_confirm_unauthorized_is_ignored():
+    bot, sent, provider = _bot(allowed=("100",))
+    reply = bot.handle_update(_update("/approve confirm", chat_id="999"))
+    assert reply is None
+    assert provider._auto_enabled is False
+    assert sent == []
+
+
+def test_pause_unauthorized_is_ignored():
+    bot, sent, provider = _bot(allowed=("100",))
+    reply = bot.handle_update(_update("/pause", chat_id="999"))
+    assert reply is None
+    assert provider._auto_enabled is False
+    assert sent == []
