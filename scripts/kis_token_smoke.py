@@ -40,36 +40,14 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(ROOT / ".env")
 
-from app.config.settings import Settings  # noqa: E402
+from app.config.settings import resolve_settings  # noqa: E402
 from app.brokers.kis.kis_auth import KisAuth  # noqa: E402
 from app.common.errors import ConfigurationError, BrokerError  # noqa: E402
 
-DEFAULT_BASE = {
-    "paper": "https://openapivts.koreainvestment.com:29443",
-    "prod": "https://openapi.koreainvestment.com:9443",
-}
-DEFAULT_TOKEN_PATH = "/oauth2/tokenP"
-
-
-def _cred(env: str, suffix: str) -> str:
-    """환경별(KIS_PAPER_APP_KEY 등) 우선, 없으면 generic(KIS_APP_KEY) 폴백."""
-    return os.getenv(f"KIS_{env.upper()}_APP_{suffix}") or os.getenv(f"KIS_APP_{suffix}", "")
-
-
-def _settings_for(env: str) -> Settings:
-    base = os.getenv(f"KIS_{env.upper()}_BASE_URL") or os.getenv("KIS_BASE_URL") or DEFAULT_BASE[env]
-    token_path = os.getenv("KIS_TOKEN_PATH") or DEFAULT_TOKEN_PATH
-    return Settings(
-        kis_env=env,
-        kis_app_key=_cred(env, "KEY"),
-        kis_app_secret=_cred(env, "SECRET"),
-        kis_base_url=base,
-        kis_token_path=token_path,
-    )
-
 
 def smoke_one(env: str) -> dict:
-    s = _settings_for(env)
+    # 환경별 자격증명·엔드포인트 해석은 app.config.settings 의 단일 지점을 공유한다.
+    s = resolve_settings(env)
     out: dict = {"env": env, "base_url": s.kis_base_url}
     if not s.kis_app_key or not s.kis_app_secret:
         out.update(status="skip", detail=f"키 없음 (KIS_{env.upper()}_APP_KEY 또는 KIS_APP_KEY 미설정)")

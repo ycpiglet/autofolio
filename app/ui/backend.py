@@ -74,6 +74,20 @@ def price(symbol: str) -> float:
     return float(broker.get_current_price(symbol).price)
 
 
+def positions() -> pd.DataFrame:
+    """현재 보유 포지션 (mock 또는 실 KIS 잔고). symbol/quantity/avg_price 컬럼.
+
+    KIS_ENV=mock 이면 MockBrokerClient(빈 잔고로 시작), paper/prod 면 실 잔고조회.
+    """
+    _, broker, _, _ = _ctx()
+    rows = broker.get_positions()
+    if not rows:
+        return pd.DataFrame(columns=["symbol", "quantity", "avg_price"])
+    return pd.DataFrame(
+        [{"symbol": p.symbol, "quantity": p.quantity, "avg_price": p.avg_price} for p in rows]
+    )
+
+
 def list_conditions() -> pd.DataFrame:
     repo, *_ = _ctx()
     rows = repo.list_conditions()

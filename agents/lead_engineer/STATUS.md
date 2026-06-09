@@ -17,12 +17,14 @@
 - 회고/감사: `compound_log.md` · `AUDIT-LOG.md`
 - **프레임워크↔Autofolio 분리·업데이트 런북**: `docs/AGENT_RUNTIME_INTEGRATION.md` (틀=agent_runtime 정본 / 맥락=호스트 추가 파일 / 시임=AGENTS.md·roles.yml `unmanaged`)
 
-## 현재 상태 (2026-06-09 인계)
-- agent_runtime v0.1.5 전체 이식 + **분리 운영**(시임 `AGENTS.md`·`roles.yml` = `sync.unmanaged`, `docs/AGENT_RUNTIME_INTEGRATION.md`) 완료. check_agent_docs **0 error**, pytest(tests/) **9 passed**.
+## 현재 상태 (2026-06-09T15:37 갱신)
+- agent_runtime v0.1.5 전체 이식 + **분리 운영**(시임 `AGENTS.md`·`roles.yml` = `sync.unmanaged`, `docs/AGENT_RUNTIME_INTEGRATION.md`) 완료. check_agent_docs **0 error**, pytest(tests/) **26 passed**(+KisClient 17).
 - 업스트림 기여: agent_runtime **Issue #1**(통합보고+전수감사 코멘트) + **PR #2**(task.schema.json·AGENTS §13–14) OPEN. 누락 모듈(orchestrator_safety_gate·pipeline) 의도 로직은 업스트림 담당.
-- 작업물 커밋: 브랜치 **`feat/agent-runtime-integration`**(commit 4586fe2, 288파일). main 미병합·미푸시.
-- **KIS**: 사용자 **실전·모의계좌 개설 + API 신청 완료**(2026-06-09). 키 발급/입력 단계. 토큰 인증(`kis_auth`)은 구현됨, 시세·주문·잔고(`kis_client`)는 scaffold(NotImplementedError).
+- 작업물 커밋: 브랜치 **`feat/agent-runtime-integration`**(commit 4586fe2, 288파일) + KIS 스모크(94e37b5). **P1.1b 코어는 미커밋**. main 미병합·미푸시.
+- **KIS (P1.1b 코어 완료)**: paper·prod 키 `.env` 입력 + 토큰 발급 검증 완료. `kis_client.py` **5메서드 실구현**(현행 TR ID·rt_cd envelope·레이트리밋 재시도, 근거 `docs/KIS_API_SPEC.md`) — 단위테스트 17, **라이브 paper 읽기검증(현재가·잔고) 통과**. 환경별 자격증명/URL 해석은 `settings.resolve_settings()`로 중앙화(라이브 인증 실패 버그 동시 수정).
 
 ## 활성 작업 (다음 세션 시작점)
-- **P1.1b 실 KIS 연동** → `docs/BACKLOG.md §다음 1`. 순서: 모의 키 `.env` 입력(`KIS_ENV=paper`, base_url=`https://openapivts.koreainvestment.com:29443`, token_path=`/oauth2/tokenP`) → 토큰 스모크 → `kis_client.py` 메서드 구현 → 포트폴리오/손익 라이브화.
+- **P1.1b 잔여** → `docs/BACKLOG.md §다음 1`: (a) 포트폴리오/손익 **UI 라이브 와이어링**(`backend.positions()` 어댑터는 추가됨; 홈·포트폴리오·분석 화면 연결 남음), (b) **1주 수동 실주문**은 사람 승인 게이트(자동 실주문 금지), (c) 후속: 엔진 market-fallback 의미 보정(KIS 주문=접수/PENDING이라 즉시-FILLED 가정과 어긋남).
+- **미커밋 변경**: `app/config/settings.py`·`app/brokers/kis/kis_client.py`·`tests/unit/test_kis_client.py`·`app/ui/backend.py`·`scripts/kis_token_smoke.py`·`docs/KIS_API_SPEC.md`(신규). `.env`(미추적). → 커밋 권장.
+- 환경 메모: 이 dev Python 에 `pandas` 미설치 → `app/ui/backend.py`/streamlit import 불가(UI 실행 환경엔 필요). 테스트/스크립트는 영향 없음.
 - 운영 사이클(CYCLE/REVIEW)은 아직 미시작 — 첫 실작업 사이클에서 생성.

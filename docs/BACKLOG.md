@@ -22,14 +22,15 @@
 
 ## 🎯 다음 (우선순위)
 
-### 1. P1.1b — 실 KIS 연동 + 포트폴리오 모델  ★다음 세션 즉시 시작 (계좌·API 신청 완료)
-> 사용자: **실전·모의계좌 개설 + API 신청 완료(2026-06-09)**. 키 발급되면 아래 순서로.
-- [ ] **자격증명 입력**: 모의(paper) App Key/Secret/계좌번호를 `.env`(또는 설정→연동 마법사)에. paper `KIS_BASE_URL=https://openapivts.koreainvestment.com:29443`, `KIS_TOKEN_PATH=/oauth2/tokenP`, `KIS_ENV=paper`. (실전은 **별도 키** + prod `https://openapi.koreainvestment.com:9443`.)
-- [x] **토큰 스모크 스크립트 작성 완료**: `scripts/kis_token_smoke.py`(paper+prod, **토큰 발급만이라 실전도 안전**). 키 입력 후 `python scripts/kis_token_smoke.py` 실행만 하면 검증(`kis_auth.get_access_token()` 사용, 종료코드 0/1/2).
-- [ ] **`app/brokers/kis/kis_client.py` 메서드 구현**(현재 전부 `NotImplementedError`): `get_current_price`·`get_positions`·`place_order`·`cancel_order`·`get_order_status` — TR ID(모의 `VTTC*`/실전 `TTTC*`)·hashkey·custtype 매핑, paper 우선 검증.
-- [ ] **환경별 base_url/token_path 자동 해석**(`KIS_ENV`→기본 URL) — 현재 `settings.py` 기본값 ""라 수동 입력 필요.
-- [ ] **포트폴리오/손익 백엔드 모델**(잔고조회/positions) → 홈·포트폴리오·분석 라이브화(현재 mock). `app/ui/backend.py` 어댑터.
-- [ ] 안전(MVP_SPEC §6.6): paper 검증 후에만 **1주 수동** 실주문, 자동 실주문 금지·사람 승인.
+### 1. P1.1b — 실 KIS 연동 + 포트폴리오 모델  ★진행중 (코어 구현·검증 완료, 2026-06-09)
+> 사용자: **실전·모의계좌 개설 + API 신청 완료(2026-06-09)**. 키 발급·입력 완료.
+- [x] **자격증명 입력**: paper·prod App Key/Secret/계좌번호 `.env` 입력 완료. `KIS_PAPER_BASE_URL`(vts:29443)·`KIS_PROD_BASE_URL`(:9443)·`KIS_TOKEN_PATH=/oauth2/tokenP` 명시. 환경별 해석은 `settings.resolve_settings()` 단일 지점.
+- [x] **토큰 스모크 스크립트**: `scripts/kis_token_smoke.py`(paper+prod, 토큰 발급만이라 실전도 안전). **paper·prod 둘 다 발급 검증 완료**(올바른 엔드포인트), `resolve_settings()` 공유로 리팩터.
+- [x] **`app/brokers/kis/kis_client.py` 5메서드 구현** — `get_current_price`·`get_positions`·`place_order`·`cancel_order`·`get_order_status`. 현행(2025) TR ID(매수 `TTTC0012U`/매도 `TTTC0011U`/취소 `TTTC0013U`/잔고 `TTTC8434R`/체결 `TTTC0081R`, paper `T/J/C→V` 치환·시세 `F`예외), rt_cd envelope·레이트리밋(EGW00201) 재시도. 근거 정본: **`docs/KIS_API_SPEC.md`**(공식 GitHub 교차검증). 단위테스트 17개. **라이브 paper 읽기검증(현재가·잔고) 완료**.
+- [x] **환경별 base_url/token_path 자동 해석**(`KIS_ENV`→기본 URL + 환경별 키) — `resolve_settings()`. (이전: `settings.py`가 generic 키만 읽어 라이브 인증 실패하던 버그 동시 수정.)
+- [~] **포트폴리오/손익 백엔드 모델**: `backend.positions()` 어댑터 추가(broker→DataFrame). **홈·포트폴리오·분석 화면 라이브 와이어링은 남음**(현재 mock 데이터).
+- [ ] 안전(MVP_SPEC §10/오류표): paper 검증 후에만 **1주 수동** 실주문(사람 승인 게이트). 자동 실주문 금지.
+- [ ] (후속) 엔진 market-fallback 의미 보정: KIS 주문은 접수(PENDING) 응답이라 `_fallback_to_market`의 즉시-FILLED 가정과 어긋남 → 시장가도 체결 폴링 경유하도록.
 
 ### 2. 거버넌스(④) 마무리
 - [ ] `performance-analyst`(로그 기반 회고·손익 기여 분석) + **`/retro` 워크플로**.
