@@ -20,7 +20,7 @@ def render() -> None:
 def _live() -> None:
     from app.ui import backend
 
-    cond_tab, run_tab = st.tabs(["목표가 조건", "엔진 실행 / 결과"])
+    cond_tab, run_tab, log_tab = st.tabs(["목표가 조건", "엔진 실행 / 결과", "주문로그"])
 
     with cond_tab:
         opts = backend.symbol_options()
@@ -55,7 +55,18 @@ def _live() -> None:
                     st.write("•", m)
             else:
                 st.info("활성 조건이 없습니다. 먼저 조건을 등록하세요.")
-        st.caption("실행 결과는 '내역·손익'(라이브)에서 주문로그로 확인.")
+        st.caption("실행 결과는 '주문로그' 탭에서 확인.")
+
+    with log_tab:
+        st.caption("🟢 라이브 — 실제 주문로그")
+        try:
+            df = backend.list_order_logs(limit=100)
+            if df.empty:
+                st.info("아직 주문로그가 없습니다. 엔진을 실행해 보세요.")
+            else:
+                st.dataframe(df, hide_index=True, width="stretch")
+        except Exception as exc:  # noqa: BLE001 — UI 폴백
+            st.warning(f"주문로그 조회 실패: {exc}")
 
 
 def _demo() -> None:
@@ -82,7 +93,7 @@ def _demo() -> None:
         c3.selectbox("자율성", ["L1 자문", "L2 반자동", "L3 감독형 자동"], key="cond_mode")
         c3.button("조건 등록 (데모)", width="stretch")
         st.divider()
-        st.caption("등록된 목표가 조건 (mock)")
+        st.caption("🧪 데모 — 등록된 목표가 조건 (mock)")
         st.dataframe(
             data.open_orders().assign(자동="ON")[["종목", "방향", "지정가", "수량", "자동"]],
             hide_index=True,
@@ -90,5 +101,6 @@ def _demo() -> None:
         )
 
     with open_tab:
+        st.caption("🧪 데모")
         st.dataframe(data.open_orders(), hide_index=True, width="stretch")
         st.caption("미체결 주문은 정책상 일정 시간 후 자동 취소(엔진).")
