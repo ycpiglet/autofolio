@@ -290,3 +290,41 @@ class Repository:
                 '''
             ).fetchone()
             return float(row["amount"] or 0.0)
+
+    def today_realized_pnl(self) -> float:
+        """오늘 체결된 실현 현금흐름 합계.
+
+        SELL: 양수(현금 유입), BUY: 음수(현금 유출).
+        execution_logs 와 order_logs 를 조인해 당일 체결 행만 집계한다.
+        체결 내역이 없으면 0.0 을 반환한다.
+        """
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                '''
+                SELECT COALESCE(
+                    SUM(
+                        CASE WHEN ol.side = 'SELL'
+                             THEN el.filled_price * el.filled_quantity
+                             ELSE -el.filled_price * el.filled_quantity
+                        END
+                    ), 0
+                ) AS net_pnl
+                FROM execution_logs el
+                JOIN order_logs ol ON el.order_log_id = ol.id
+                WHERE DATE(el.filled_at) = DATE('now')
+                '''
+            ).fetchone()
+            return float(row["net_pnl"] or 0.0)
+
+    def increment_consecutive_failures(self) -> None:
+        """연속 주문 실패 카운터를 1 증가시킨다."""
+        current = self.get_system_state("consecutive_order_failures", "0")
+        try:
+            count = int(current)
+        except (ValueError, TypeError):
+            count = 0
+        self.set_system_state("consecutive_order_failures", str(count + 1))
+
+    def reset_consecutive_failures(self) -> None:
+        """연속 주문 실패 카운터를 0으로 초기화한다."""
+        self.set_system_state("consecutive_order_failures", "0")
