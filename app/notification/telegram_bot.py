@@ -1,12 +1,13 @@
 """Telegram 명령봇 — 읽기 전용 조회 명령. [Autofolio]
 
-지원 명령(읽기 전용, **주문 실행 없음**): `/help` `/status` `/pnl` `/positions`.
+지원 명령(읽기 전용, **주문 실행 없음**): `/help` `/status` `/pnl` `/positions`
+`/conditions` `/engine` `/propose`.
 주문·킬스위치 등 상태 변경 명령은 안전상 별도 사이클(사람 승인 게이트)에서 다룬다.
 
 설계
 ----
 - 명령 해석(`handle_text`)은 순수 함수 → 단위 테스트가 쉽다(네트워크 불필요).
-- 데이터는 `PortfolioProvider`(상태/손익/포지션)로 주입 → `BackendProvider` 는
+- 데이터는 `PortfolioProvider`(상태/손익/포지션/조건/엔진/제안)로 주입 → `BackendProvider` 는
   `app.ui.backend`(KIS_ENV 에 따라 mock/실 브로커)를 감싼다.
 - 전송은 `send_fn(chat_id, text)` 주입 → 운영은 Telegram API, 테스트는 기록용 페이크.
 - **보안**: allowlist(허용 chat_id)에 있는 대화에만 응답한다(기본 전체 거부).
@@ -24,6 +25,9 @@ HELP_TEXT = (
     "/status — 운영 상태(환경·자동매매·킬스위치·화이트리스트)\n"
     "/pnl — 평가손익 요약\n"
     "/positions — 보유 종목\n"
+    "/conditions — 활성 거래 조건 목록\n"
+    "/engine — 엔진 1회 실행(읽기 전용, 트리거 시뮬레이션)\n"
+    "/propose <심볼> [BUY|SELL] — IC 에이전트 조건 제안\n"
     "/help — 도움말"
 )
 
@@ -32,6 +36,9 @@ class PortfolioProvider(Protocol):
     def status(self) -> dict: ...
     def pnl(self) -> dict: ...
     def positions(self) -> list[dict]: ...
+    def conditions(self) -> list[dict]: ...
+    def run_engine(self) -> list[str]: ...
+    def propose(self, symbol: str, side: str) -> str: ...
 
 
 class TelegramCommandBot:
@@ -53,14 +60,23 @@ class TelegramCommandBot:
     # ----- 명령 해석 (순수) -----
     def handle_text(self, text: str) -> str:
         raw = (text or "").strip()
-        cmd = raw.split()[0].lower() if raw else ""
+        parts = raw.split() if raw else []
+        cmd = parts[0].lower() if parts else ""
         cmd = cmd.split("@", 1)[0]  # /status@MyBot → /status
+        args = parts[1:]
+
         if cmd == "/status":
             return self._status()
         if cmd == "/pnl":
             return self._pnl()
         if cmd == "/positions":
             return self._positions()
+        if cmd == "/conditions":
+            return self._conditions()
+        if cmd == "/engine":
+            return self._engine()
+        if cmd == "/propose":
+            return self._propose(args)
         if cmd in ("/help", "/start", ""):
             return HELP_TEXT
         return f"알 수 없는 명령: {cmd}\n\n{HELP_TEXT}"
@@ -114,9 +130,40 @@ class TelegramCommandBot:
             lines.append(f"- {r.get('symbol')} {r.get('quantity')}주 @ {avg_s}")
         return "\n".join(lines)
 
+    def _conditions(self) -> str:
+        rows = self.provider.conditions()
+        if not rows:
+            return "활성 거래 조건이 없습니다."
+        lines = ["📋 활성 거래 조건"]
+        for r in rows:
+            symbol = r.get("symbol", "?")
+            side = r.get("side", "?")
+            target = r.get("target_price")
+            target_s = f"{target:,.0f}" if isinstance(target, (int, float)) else "-"
+            qty = r.get("quantity", "-")
+            status = r.get("status", "-")
+            lines.append(f"- {symbol} {side} {qty}주 @ {target_s} [{status}]")
+        return "\n".join(lines)
+
+    def _engine(self) -> str:
+        results = self.provider.run_engine()
+        if not results:
+            return "엔진 실행 결과: 트리거된 조건 없음"
+        lines = ["⚙️ 엔진 실행 결과"] + [f"- {r}" for r in results]
+        return "\n".join(lines)
+
+    def _propose(self, args: list[str]) -> str:
+        if not args:
+            return "사용법: /propose <심볼> [BUY|SELL]\n예: /propose 005930 BUY"
+        symbol = args[0].upper()
+        side = args[1].upper() if len(args) > 1 else "BUY"
+        if side not in ("BUY", "SELL"):
+            return f"방향 오류: '{side}' — BUY 또는 SELL 을 입력하세요."
+        return self.provider.propose(symbol, side)
+
 
 class BackendProvider:
-    """`app.ui.backend` 를 감싼 라이브 provider. backend 는 KIS_ENV 로 mock/실 브로커 결정."""
+    "`app.ui.backend` 를 감싼 라이브 provider. backend 는 KIS_ENV 로 mock/실 브로커 결정."
 
     def status(self) -> dict:
         from app.ui import backend
@@ -150,6 +197,35 @@ class BackendProvider:
         if df is None or df.empty:
             return []
         return df.to_dict("records")
+
+    def conditions(self) -> list[dict]:
+        from app.ui import backend
+
+        df = backend.list_conditions()
+        if df is None or df.empty:
+            return []
+        # active only
+        if "status" in df.columns:
+            df = df[df["status"] == "ACTIVE"]
+        return df.to_dict("records")
+
+    def run_engine(self) -> list[str]:
+        from app.ui import backend
+
+        return backend.run_engine_once()
+
+    def propose(self, symbol: str, side: str) -> str:
+        from app.ui import backend
+
+        proposal = backend.propose(symbol, side)
+        target = proposal.target_price
+        target_s = f"{target:,.0f}" if isinstance(target, (int, float)) else str(target)
+        return (
+            f"💡 IC 제안 [{proposal.symbol} {proposal.side}]\n"
+            f"목표가: {target_s}\n"
+            f"수량: {proposal.quantity}\n"
+            f"근거: {proposal.rationale}"
+        )
 
 
 def make_telegram_sender(bot_token: str) -> Callable[[object, str], None]:

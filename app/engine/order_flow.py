@@ -179,8 +179,60 @@ class OrderFlow:
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(True, "Market fallback filled.", order_log_id)
 
+        # KIS 실브로커는 place_order가 PENDING(접수)만 반환한다. Mock과 달리 즉시
+        # FILLED가 아니므로, 지정가 폴링과 동일하게 체결 대기 후 판정한다.
+        if result.status == OrderStatus.PENDING:
+            return self._poll_fill(
+                condition, result.broker_order_id, order_log_id,
+                fallback_label="Market fallback",
+            )
+
         self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
-        return OrderFlowResult(False, "Market fallback failed.", order_log_id)
+        return OrderFlowResult(False, f"Market fallback failed: {result.message}", order_log_id)
+
+    def _poll_fill(
+        self,
+        condition: dict,
+        broker_order_id: str,
+        order_log_id: int,
+        *,
+        fallback_label: str = "Order",
+    ) -> OrderFlowResult:
+        """PENDING 주문을 timeout 후 체결조회로 판정하는 공통 헬퍼."""
+        if self.order_timeout_sec > 0:
+            time.sleep(self.order_timeout_sec)
+
+        status = self.broker.get_order_status(broker_order_id)
+        if status.status == OrderStatus.FILLED:
+            self.repo.update_order_status(order_log_id, OrderStatus.FILLED.value)
+            self.repo.create_execution_log(
+                order_log_id=order_log_id,
+                symbol=condition["symbol"],
+                filled_price=status.filled_price,
+                filled_quantity=status.filled_quantity,
+                raw_status=status.message,
+            )
+            self._mark_condition_triggered(condition["id"])
+            return OrderFlowResult(True, f"{fallback_label} filled.", order_log_id)
+
+        if status.status == OrderStatus.CANCELED:
+            self.repo.update_order_status(order_log_id, OrderStatus.CANCELED.value)
+            self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
+            return OrderFlowResult(False, f"{fallback_label} canceled by exchange.", order_log_id)
+
+        if status.status == OrderStatus.FAILED:
+            self.repo.update_order_status(order_log_id, OrderStatus.FAILED.value)
+            self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
+            return OrderFlowResult(False, f"{fallback_label} failed: {status.message}", order_log_id)
+
+        # 여전히 PENDING — 부분체결 포함, 다음 run_once에서 재판정하지 않도록 ERROR 처리
+        self.repo.update_order_status(order_log_id, OrderStatus.PENDING.value)
+        self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
+        return OrderFlowResult(
+            False,
+            f"{fallback_label} failed: still pending after timeout (filled={status.filled_quantity}).",
+            order_log_id,
+        )
 
     def _mark_condition_triggered(self, condition_id: int) -> None:
         self.repo.update_condition_status(condition_id, ConditionStatus.TRIGGERED.value)

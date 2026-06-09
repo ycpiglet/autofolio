@@ -140,6 +140,49 @@ def holdings_df() -> pd.DataFrame:
     )
 
 
+def kpis() -> dict:
+    """라이브 KPI — 총자산·평가손익·현금비중. holdings_df 기반.
+
+    현금 잔고는 현재 DB/API에서 직접 조회하지 못하므로 0.0 placeholder.
+    반환 키: 총자산, 일손익률, 누적손익률, 현금비중, 평가손익.
+    """
+    df = holdings_df()
+    total_market = float(df["평가금액"].sum()) if not df.empty else 0.0
+    total_pnl = float(df["평가손익"].sum()) if not df.empty else 0.0
+    # 현금 잔고: 현재 Mock 브로커에서는 미지원 → 0.0 placeholder
+    cash = 0.0
+    total_assets = total_market + cash
+    cash_ratio = (cash / total_assets * 100) if total_assets else 0.0
+    return {
+        "총자산": total_assets,
+        "일손익률": 0.0,
+        "누적손익률": 0.0,
+        "현금비중": cash_ratio,
+        "평가손익": total_pnl,
+    }
+
+
+def recent_fills(limit: int = 10) -> pd.DataFrame:
+    """최근 체결 내역 — order_logs에서 FILLED 상태만.
+
+    컬럼: 시각·종목·방향·수량·체결가.
+    order_logs.created_at(YYYY-MM-DD HH:MM:SS)에서 HH:MM 부분만 추출한다.
+    """
+    df = list_order_logs(limit=limit * 10)  # FILLED가 드물 수 있으므로 넉넉히 조회
+    if df.empty:
+        return pd.DataFrame(columns=["시각", "종목", "방향", "수량", "체결가"])
+    filled = df[df["order_status"] == "FILLED"].copy()
+    if filled.empty:
+        return pd.DataFrame(columns=["시각", "종목", "방향", "수량", "체결가"])
+    filled = filled.head(limit)
+    # created_at 은 'YYYY-MM-DD HH:MM:SS' 형식(SQLite CURRENT_TIMESTAMP)
+    filled["시각"] = filled["created_at"].str[11:16]
+    result = filled[["시각", "symbol", "side", "quantity", "order_price"]].rename(
+        columns={"symbol": "종목", "side": "방향", "quantity": "수량", "order_price": "체결가"}
+    )
+    return result.reset_index(drop=True)
+
+
 def list_conditions() -> pd.DataFrame:
     repo, *_ = _ctx()
     rows = repo.list_conditions()
