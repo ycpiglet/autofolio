@@ -73,3 +73,22 @@
 검증: 클론 pytest tests(94) · 템플릿 pytest scripts/test_validate_task_schema.py(12) · gh 반환 URL
 관련 기록: AUDIT-2026-06-09-004, docs/agent_runtime_handoff_report.md, docs/agent_runtime_feedback.md
 남은 리스크: 외부 레포 main에 직접 푸시 아님(브랜치+PR로 리뷰 경유). PR 병합 여부는 owner 판단. 로컬 클론은 후속 PR 위해 유지
+
+### AUDIT-2026-06-09-006
+시각: 2026-06-09T22:11:08+09:00
+기록 시각: 2026-06-09T22:11:08+09:00
+요청자: Owner ("에러 분석·기록·해결, upstream 자동 보고 규칙 강제")
+수행자: Lead Engineer (Claude) + Research Agent (증거 수집)
+의도: v0.1.8 업그레이드 중 발생한 에러 3건 육하원칙 분석·기록·수정 + upstream bug 자동 분류/보고 규칙 도입
+대상: BUG-001(build_sync_plan API 오용/미문서화), BUG-002(Windows cp949 UnicodeEncodeError), BUG-003(precedence check false positive)
+작업:
+  1) EVIDENCE-2026-06-09-001 작성(육하원칙 3건 분석·출처·재현코드)
+  2) BUG-003 로컬 수정(ADDENDUM 상태 감지 → exit 0)
+  3) scripts/report_upstream_bug.py 작성(upstream bug 자동 분류·Issue 생성)
+  4) AGENTS.md §4 Upstream Bug Reporting 절차 + SessionStart 경고 규칙 추가
+  5) upstream Issue 2건(BUG-001, BUG-002) 생성 + 패치 PR
+방법: Evidence 분석(pip installed sync.py 소스 검사) + git + gh CLI
+결과: BUG-003 fix(exit 0 확인), 자동화 스크립트 생성, upstream Issues/PR 예정
+검증: pytest 39 passed, check_agent_docs 0 error, precedence exit 0
+관련 기록: EVIDENCE-2026-06-09-001, Autofolio PR #4 예정, upstream agent_runtime Issue 예정
+남은 리스크: BUG-001/002는 upstream 패치 필요(Autofolio는 우회로만 사용 가능)
