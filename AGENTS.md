@@ -358,4 +358,49 @@ If a check cannot run, report exactly why and what remains unverified.
 
 전체 게이트·우선순위: [agents/lead_engineer/MERGE-POLICY.md](agents/lead_engineer/MERGE-POLICY.md) 참조.
 코드 정본: `scripts/auto_merge.py`.
+
+## 17. Upstream Bug Reporting (강제 규칙)
+
+에러·버그·이슈 발생 시 **반드시** 다음 절차를 따른다.
+
+### 분류 (is_upstream_bug)
+
+아래 중 하나라도 해당하면 upstream(agent_runtime) 버그다:
+- 스택트레이스에 `site-packages/agent_runtime` 경로 포함
+- `agent_runtime.sync`, `agent_runtime.config` 등 upstream 모듈 에러
+- EVIDENCE의 `scope`에 `agent_runtime upstream` 포함
+
+그 외는 Autofolio 로컬 버그.
+
+### 보고 의무 (육하원칙 + BRIEF)
+
+| 항목 | 로컬 버그 | upstream 버그 |
+|------|-----------|---------------|
+| EVIDENCE 파일 작성 | 필수 (EVIDENCE-YYYY-MM-DD-NNN) | 필수 |
+| 육하원칙(6W1H) | 필수 | 필수 |
+| AUDIT-LOG 기록 | 필수 | 필수 |
+| GitHub Issue | 선택 | **72h 내 필수** |
+| GitHub PR (패치) | 해당 시 | 가능하면 동반 |
+| 보고 도구 | — | `scripts/report_upstream_bug.py` |
+
+### 자동 분류 + 보고
+
+```powershell
+# EVIDENCE 작성 후 자동 분류·Issue 생성
+python scripts/report_upstream_bug.py --evidence EVIDENCE-YYYY-MM-DD-NNN-xxx.md
+# dry-run으로 내용 미리보기
+python scripts/report_upstream_bug.py --evidence EVIDENCE-*.md --dry-run
+```
+
+### SessionStart 경고
+
+`.remember/now.md` 또는 AUDIT-LOG에 미보고 upstream 버그가 있으면 세션 시작 시 경고한다.
+`scripts/check_upstream_issues.py --warn`으로 확인.
+
+### 양방향 강제
+
+이 규칙은 **Autofolio와 agent_runtime 양쪽에 적용**된다:
+- Autofolio: 이 §17 + `scripts/report_upstream_bug.py`
+- agent_runtime: upstream PR을 통해 `AGENTS.md §N Downstream Bug Intake` 추가 요청
+  (Autofolio가 발견한 버그를 upstream이 체계적으로 수신·처리하도록)
 <!-- AUTOFOLIO-OVERLAY:end -->

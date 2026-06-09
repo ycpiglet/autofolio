@@ -78,17 +78,33 @@ def main() -> int:
     text = template.read_text(encoding="utf-8")
     has_35, why = upstream_has_section_35(text)
     if has_35:
-        print("[ACTION REQUIRED] 업스트림이 자율 머지 거버넌스(§3.5)를 도입했습니다 — 우선순위 교체 필요.")
+        # 이미 교체(precedence swap) 완료 여부: MERGE-POLICY.md 상태로 판정
+        policy_path = ROOT / "agents" / "lead_engineer" / "MERGE-POLICY.md"
+        already_done = False
+        if policy_path.exists():
+            first_lines = policy_path.read_text(encoding="utf-8", errors="replace")[:600]
+            # 상태가 ADDENDUM(교체완료) 이면 swap 완료로 간주
+            if "ADDENDUM" in first_lines or "addendum" in first_lines.lower():
+                already_done = True
+
+        if already_done:
+            print("[OK] 업스트림 자율 머지 거버넌스 발견 + precedence swap 완료 — MERGE-POLICY.md=ADDENDUM.")
+            print(f"  근거: {why}")
+            print(f"  템플릿: {template}")
+            print("  MERGE-POLICY.md는 Autofolio R3 surface 애드덤만 담고 있음(공통부=업스트림 §6 정본).")
+            return 0
+
+        print("[ACTION REQUIRED] 업스트림이 자율 머지 거버넌스를 도입했습니다 — 우선순위 교체 필요.")
         print(f"  근거: {why}")
         print(f"  템플릿: {template}")
         print("  교체 절차(MERGE-POLICY.md §우선순위 / INTEGRATION §3.1):")
-        print("   1) 업스트림 §3.5 전부 채택(정본) — §4-4 로 AGENTS.md 본문에 수동 병합")
-        print("   2) agents/lead_engineer/MERGE-POLICY.md → Autofolio R3 surface 애드덤만 잔존")
-        print("   3) AGENTS.md 오버레이 §15 → 한 줄 포인터로 축소")
+        print("   1) 업스트림 §6(Autonomous Delivery Lane) 전부 채택(정본) — §4-4 로 AGENTS.md 수동 병합")
+        print("   2) agents/lead_engineer/MERGE-POLICY.md → ADDENDUM 상태로 갱신, 공통부 제거")
+        print("   3) AGENTS.md 오버레이 §16 R3 surface 애드덤만 잔존")
         print("   4) INTEGRATION §3.1 을 '반영 완료'로 갱신")
         return 1
 
-    print("[OK] 업스트림 §3.5 미존재 — 호스트 잠정 정책(MERGE-POLICY.md + AGENTS.md §15) 활성. 충돌 없음.")
+    print("[OK] 업스트림에 자율 머지 거버넌스 섹션 미존재 — 호스트 잠정 정책 활성. 충돌 없음.")
     print(f"  점검 대상: {template}")
     return 0
 
