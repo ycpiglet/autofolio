@@ -28,7 +28,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # §3.5 헤더(예: "## 3.5", "### 3.5.2 ...") 또는 자율-머지 거버넌스 헤더 키워드.
 _HEADER_35 = re.compile(r"^#{2,4}\s*3\.5(?:\b|\.|\s)", re.M)
-_MERGE_KEYS = re.compile(r"(auto[- ]?merge|autonomous\s+merge|자율\s*머지|merge\s*gate)", re.I)
+# v0.1.8+ 에서 §6 Autonomous Delivery Lane 으로 정본화됨
+_DELIVERY_LANE = re.compile(r"^#{2,4}.*autonomous\s+delivery", re.I | re.M)
+_MERGE_KEYS = re.compile(r"(auto[- ]?merge|autonomous\s+merge|자율\s*머지|merge\s*gate|delivery\s+lane)", re.I)
 
 
 def find_template_agents_md() -> Path | None:
@@ -56,6 +58,10 @@ def upstream_has_section_35(text: str) -> tuple[bool, str]:
     m = _HEADER_35.search(text)
     if m:
         return True, "업스트림 템플릿 AGENTS.md 에 '§3.5' 헤더 존재"
+    # v0.1.8+ §6 Autonomous Delivery Lane 감지
+    m2 = _DELIVERY_LANE.search(text)
+    if m2:
+        return True, f"업스트림 §6 Autonomous Delivery Lane 발견 (v0.1.8+): '{m2.group().strip()}'"
     for line in text.splitlines():
         stripped = line.lstrip()
         if stripped.startswith("#") and _MERGE_KEYS.search(stripped):
