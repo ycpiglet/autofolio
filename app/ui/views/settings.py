@@ -1,0 +1,154 @@
+"""설정 · 연동 — SSO / 채널 / 증권 다계좌 / 운영모드 / 리스크 (P1.0c 실연동)."""
+from __future__ import annotations
+
+import streamlit as st
+
+from app.ui import auth, store, theme
+from app.ui.components import ui
+from app.ui.mock import data
+from app.ui.services import connectors
+
+
+def render() -> None:
+    ui.page_header("⚙️ 설정 · 연동", "로그인 한 번으로 SNS·채널·증권 다계좌를 한곳에서 관리")
+    sso_tab, ch_tab, broker_tab, mode_tab, risk_tab = st.tabs(
+        ["계정(SSO)", "알림채널", "증권계좌", "운영모드", "리스크"]
+    )
+    with sso_tab:
+        _sso()
+    with ch_tab:
+        _channels()
+    with broker_tab:
+        _brokers()
+    with mode_tab:
+        _modes()
+    with risk_tab:
+        _risk()
+
+
+def _sso() -> None:
+    user = st.session_state.user or {}
+    st.write(f"로그인: **{user.get('name', '?')}** · {user.get('provider', '')}")
+    if auth.oidc_configured():
+        st.success("Google OIDC 설정됨 — 로그인 화면에서 1클릭 로그인됩니다.")
+    else:
+        st.info("Google OIDC 미설정. `.streamlit/secrets.toml`에 `[auth]` 추가 시 활성화 (secrets.toml.example 참고).")
+    st.caption("Kakao/Naver는 streamlit-oauth 컴포넌트로 확장 예정.")
+
+
+def _channels() -> None:
+    for c in store.get()["channels"]:
+        col1, col2, col3 = st.columns([2, 3, 2])
+        col1.write(f"**{c['채널']}**")
+        col2.markdown(ui.badge(c["status"]) + (f" · {c['detail']}" if c["detail"] else ""))
+        if c["status"] == "연결":
+            if col3.button("해제", key=f"chx_{c['채널']}", width="stretch"):
+                store.disconnect_channel(c["채널"])
+                st.rerun()
+        else:
+            with col3.popover("연결"):
+                _channel_form(c["채널"])
+
+
+def _channel_form(name: str) -> None:
+    if name == "Telegram":
+        token = st.text_input("봇 토큰", type="password", key=f"tg_{name}")
+        st.text_input("Chat ID", key=f"tgc_{name}")
+        if st.button("연결 테스트", key=f"tgb_{name}"):
+            ok, msg = connectors.test_telegram(token)
+            if ok:
+                store.connect_channel(name, "봇 연결됨")
+                st.rerun()
+            st.warning(msg)
+        if st.button("토큰 저장(검증 생략)", key=f"tgs_{name}"):
+            store.connect_channel(name, "저장됨")
+            st.rerun()
+    else:
+        detail = st.text_input("연결 정보(토큰/주소)", key=f"gen_{name}")
+        if st.button("연결", key=f"genb_{name}"):
+            store.connect_channel(name, detail or "저장됨")
+            st.rerun()
+
+
+def _brokers() -> None:
+    st.caption("⚠️ 소셜 로그인 아님 — 자격증명(암호화 보관). 1원인증 불필요(토큰/잔고 테스트로 검증).")
+    brokers = store.brokers_public()
+    if not brokers:
+        ui.empty_state("연동된 증권계좌가 없습니다", "아래 '계좌 추가'로 첫 계좌를 연결하세요.")
+    else:
+        for i, b in enumerate(brokers):
+            c1, c2, c3, c4 = st.columns([3, 2, 2, 2])
+            star = "⭐ " if b.get("기본") else ""
+            c1.write(f"{star}**{b['별칭']}** · {b['증권사']}")
+            c2.markdown(ui.badge(b["상태"]) + f" · {b['환경']}")
+            if not b.get("기본"):
+                if c3.button("기본 설정", key=f"bd_{i}", width="stretch"):
+                    store.set_default_broker(i)
+                    st.rerun()
+            if c4.button("삭제", key=f"brm_{i}", width="stretch"):
+                store.remove_broker(i)
+                st.rerun()
+
+    with st.expander("➕ 계좌 추가 (연동 마법사)"):
+        alias = st.text_input("별칭", placeholder="내 KIS(실전)", key="b_alias")
+        sec = st.selectbox("증권사", ["한국투자증권 (KIS)"], key="b_sec")
+        app_key = st.text_input("App Key", key="b_key")
+        app_secret = st.text_input("App Secret", type="password", key="b_secret")
+        account = st.text_input("계좌번호", placeholder="00000000-00", key="b_acct")
+        env = st.radio("환경", ["mock", "모의", "실전"], horizontal=True, key="b_env")
+        if st.button("🔗 연동하기 (토큰 테스트)", type="primary", key="b_go"):
+            if env == "mock":
+                store.add_broker(alias, sec, app_key, app_secret, account, env)
+                st.success("✅ 연동 완료 (mock 저장)")
+                st.rerun()
+            else:
+                ok, msg = connectors.test_kis(app_key, app_secret, env)
+                store.add_broker(alias, sec, app_key, app_secret, account, env)
+                (st.success if ok else st.warning)(f"{'✅' if ok else '⚠️'} {msg} — 저장됨")
+                st.rerun()
+
+
+def _modes() -> None:
+    st.select_slider(
+        "전역 기본 자율성",
+        options=theme.MODES,
+        format_func=lambda m: f"{m} · {theme.MODE_LABELS[m]}",
+        key="mode",
+    )
+
+    confirmed = True
+    if st.session_state.mode in ("L3", "L4") and not st.session_state.auto_enabled:
+        st.warning("자동 실행 모드(L3+) — 예산·주문한도·서킷브레이커가 적용됩니다.")
+        confirmed = st.checkbox("위험을 이해했고 자동매매를 활성화합니다", key="auto_confirm")
+    st.toggle(
+        "자동매매 활성",
+        key="auto_enabled",
+        disabled=st.session_state.kill_switch
+        or (st.session_state.mode in ("L3", "L4") and not confirmed),
+    )
+    st.caption("킬스위치 활성 시 자동매매는 강제 OFF.")
+    st.toggle("손익 색: 상승=빨강 / 하락=파랑 (한국식)", key="pnl_kr_colors")
+
+    st.divider()
+    st.markdown("**종목별 자율성**")
+    df = data.holdings_df()[["종목", "티커"]].copy()
+    df["모드"] = [st.session_state.symbol_modes.get(t, st.session_state.mode) for t in df["티커"]]
+    edited = st.data_editor(
+        df,
+        hide_index=True,
+        width="stretch",
+        key="symmode_editor",
+        disabled=["종목", "티커"],
+        column_config={"모드": st.column_config.SelectboxColumn(options=theme.MODES)},
+    )
+    for _, r in edited.iterrows():
+        st.session_state.symbol_modes[r["티커"]] = r["모드"]
+
+
+def _risk() -> None:
+    c1, c2 = st.columns(2)
+    c1.number_input("일일 예산 (₩)", min_value=0, value=300_000, step=50_000)
+    c1.number_input("건당 주문 한도 (₩)", min_value=0, value=100_000, step=10_000)
+    c2.number_input("종목당 비중 상한 (%)", min_value=1, max_value=100, value=15)
+    c2.number_input("서킷브레이커 일손실 (%)", min_value=1, max_value=50, value=3)
+    st.text_input("자동매매 거래시간", value="09:10 ~ 15:20")

@@ -1,0 +1,75 @@
+# AUDIT LOG
+
+> 비파괴·외부·고위험 작업의 감사 기록. 각 엔트리는 `### AUDIT-YYYY-MM-DD-NNN`.
+
+## 기록
+
+### AUDIT-2026-06-09-001
+시각: 2026-06-09T07:31:39+09:00
+기록 시각: 2026-06-09T07:31:39+09:00
+요청자: Owner
+수행자: Lead Engineer (Claude)
+의도: agent_runtime v0.1.5 프레임워크 전체 이식 및 호스트 운영 문서 초기화
+대상: agents/, scripts/, docs/agent_bootstrap/, specs/, 루트 규약(AGENTS/CLAUDE/AGENT_RUNTIME/GEMINI/CURSOR), agents/lead_engineer/{STATUS,AUDIT-LOG,compound_log,tasks/INDEX}
+작업: 공식 sync apply(150 파일) + 의존성(openai·PyYAML) + roles.yml Autofolio 튜닝 + 운영 문서 seed + generate_views
+방법: agent_runtime CLI(sync/lock) + 수동 seed + scripts/generate_views.py
+결과: check_agent_docs 에러 0(green) 목표 — 본 엔트리로 AUDIT-LOG 충족
+검증: python scripts/check_agent_docs.py
+관련 기록: tasks/INDEX.md TASK-001, agent_runtime.lock.json, docs/BACKLOG.md
+남은 리스크: 운영 사이클(CYCLE/REVIEW) 미생성 — 첫 실작업 사이클에서 생성. dev 역할 중복(.claude/agents/dev-team) 정리 예정.
+
+### AUDIT-2026-06-09-002
+시각: 2026-06-09T07:31:39+09:00
+기록 시각: 2026-06-09T07:31:39+09:00
+요청자: Owner ("1, 2 진행 및 다음 에러 해결")
+수행자: Lead Engineer (Claude)
+의도: check_agent_docs GREEN(운영 문서 초기화) + dev 역할 중복 정리
+대상: agents/lead_engineer/{STATUS,AUDIT-LOG,compound_log,tasks/INDEX·BACKLOG·VIEW-*}, schemas/task.schema.json, AGENTS.md §13/§14, app/ui/agents_runtime.py, agents/kis_api_engineer/SKILL.md, pytest.ini, (삭제) .claude/agents/dev-team/
+작업: 운영 문서 seed + generate_views + task.schema.json 생성 + agents_runtime이 정본 agents/ 도 읽도록 확장 + 중복 .claude/agents/dev-team 제거(디렉터리 삭제, R3) + pytest testpaths=tests
+방법: Write/Edit + scripts/generate_views.py + scripts/check_agent_docs.py 반복 검증 + pytest
+결과: check_agent_docs 0 error(경고 145→107) · 앱 33 에이전트 로드 · tests/ 9 passed · schema test 12 passed · 프레임워크 scripts 480/517 pass
+검증: python scripts/check_agent_docs.py · pytest tests · pytest scripts/test_validate_task_schema.py
+관련 기록: AUDIT-2026-06-09-001, docs/BACKLOG.md(중복정리·운영스캐폴딩 [x])
+남은 리스크: 상위 v0.1.5 템플릿에 orchestrator_safety_gate.py 누락 → agent_orchestrator import 불가(업스트림 패치 필요). 프레임워크 자체 테스트 36 fail(코퍼스 의존). CYCLE/reviews 미생성.
+
+### AUDIT-2026-06-09-003
+시각: 2026-06-09T07:31:39+09:00
+기록 시각: 2026-06-09T07:31:39+09:00
+요청자: Owner ("agent_runtime 업데이트가 Autofolio 튜닝을 덮어쓰지 않게 분리 운영")
+수행자: Lead Engineer (Claude)
+의도: 프레임워크(틀)↔Autofolio(맥락) 계층 분리 — 업데이트가 호스트 튜닝을 덮어쓰지 않도록
+대상: agent_runtime.yml(sync.unmanaged), AGENTS.md(오버레이 마커), docs/AGENT_RUNTIME_INTEGRATION.md(신설), agents/lead_engineer/STATUS.md(포인터)
+작업: sync.py/config.py 메커니즘 분석 → 분기 실측(conflicts=2: AGENTS.md·roles.yml) → 두 시임 파일을 sync.unmanaged 로 호스트 소유 선언 → 통합/링크 문서 작성(계층 모델·분기 원장·업데이트 런북·업스트림 결함)
+방법: agent_runtime CLI(sync --check) + 템플릿 digest 스윕 + 문서화
+결과: sync --check conflicts 2→0(status=ready), sync --apply 전체차단 해소. check_agent_docs 0 error·tests/ 9 passed 유지. Autofolio 튜닝(②)은 sync 비대상, 시임(③)은 unmanaged 로 건드리지 않음
+검증: agent_runtime sync --check --root . · python scripts/check_agent_docs.py · pytest
+관련 기록: AUDIT-2026-06-09-002, docs/AGENT_RUNTIME_INTEGRATION.md, agent_runtime.yml
+남은 리스크: 업스트림 결함 2건(AGENTS §14 누락·orchestrator_safety_gate 누락) 미보고 — 보고 시 시임 축소 가능. 시임 파일의 업스트림 변경은 수동 재조정 필요(런북 §4-4)
+
+### AUDIT-2026-06-09-004
+시각: 2026-06-09T07:31:39+09:00
+기록 시각: 2026-06-09T07:31:39+09:00
+요청자: Owner ("관련된 모든 내용 넘기고 ... 분석/재설계/구현/이슈/검토/피드백 모두 agent_runtime에서 결정")
+수행자: Lead Engineer (Claude)
+의도: agent_runtime 재구조화를 위해 호스트 이식 경위·충돌·결과를 육하원칙으로 종합해 업스트림에 기록(입력 형식, 결정권 위임)
+대상: docs/agent_runtime_handoff_report.md(신설, 호스트 기록) · GitHub ycpiglet/agent_runtime Issue #1(외부 공개 생성)
+작업: 종합 핸드오프 보고서 작성(핵심3/부속5/타임라인/결과/부록 task.schema·AGENTS §14·재현명령) + gh issue create
+방법: Write + gh issue create --repo ycpiglet/agent_runtime --body-file
+결과: Issue #1 생성(https://github.com/ycpiglet/agent_runtime/issues/1). 핵심/부속 명확 구분, 해법 강제 없이 자유도 부여
+검증: gh 반환 URL 확인 · 본문에 비밀/자격증명 없음(파일경로·구조·스키마·버전만) 확인
+관련 기록: docs/agent_runtime_feedback.md, docs/AGENT_RUNTIME_INTEGRATION.md, AUDIT-2026-06-09-003
+남은 리스크: 외부 공개 이슈(PUBLIC 레포) — 민감정보 미포함 확인됨. 업스트림 반영 여부·시점은 그쪽 판단
+
+### AUDIT-2026-06-09-005
+시각: 2026-06-09T07:31:39+09:00
+기록 시각: 2026-06-09T07:31:39+09:00
+요청자: Owner ("제안한 내용 전부 진행 + 누락 파일·온보딩 경위 등 전반 이슈 전부 기록 및 PR")
+수행자: Lead Engineer (Claude)
+의도: agent_runtime 결함 중 안전·검증 가능한 2건을 PR로 직접 기여 + 전수 감사 결과를 이슈에 기록
+대상: GitHub ycpiglet/agent_runtime — branch fix/template-clean-install-green, PR #2, Issue #1(라벨+코멘트). 로컬 클론 C:\Users\ycpig\agent_runtime_work
+작업: 레포 클론 → 템플릿 전수 감사(깨진 import 2종·skills/hooks/schemas/tests 부재·README 온보딩 묻힘) → schemas/task.schema.json 동봉 + AGENTS §13–§14 추가 → 패키지테스트 94 passed·스키마테스트 12 passed 확인 → 브랜치 푸시·PR #2 생성 → 이슈 #1 라벨+보강코멘트
+방법: gh repo clone / git push / gh pr create / gh issue edit·comment (owner ycpiglet 인증)
+결과: PR #2(https://github.com/ycpiglet/agent_runtime/pull/2) · Issue #1 코멘트. orchestrator_safety_gate·pipeline은 의도 로직 불명으로 미작성(이슈로만 보고)
+검증: 클론 pytest tests(94) · 템플릿 pytest scripts/test_validate_task_schema.py(12) · gh 반환 URL
+관련 기록: AUDIT-2026-06-09-004, docs/agent_runtime_handoff_report.md, docs/agent_runtime_feedback.md
+남은 리스크: 외부 레포 main에 직접 푸시 아님(브랜치+PR로 리뷰 경유). PR 병합 여부는 owner 판단. 로컬 클론은 후속 PR 위해 유지

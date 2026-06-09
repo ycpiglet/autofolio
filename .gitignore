@@ -1,0 +1,17 @@
+.env
+*.db
+*.sqlite
+*.sqlite3
+__pycache__/
+.pytest_cache/
+.venv/
+.env.*
+!.env.example
+*.log
+dist/
+build/
+*.egg-info/
+.autofolio/
+.streamlit/secrets.toml
+.tmp/
+.agent_runtime/
