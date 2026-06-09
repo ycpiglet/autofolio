@@ -380,3 +380,110 @@ roles:
       정지 기준)로 사용자에게 batched 질문을 던진다. 최종 결정·우선순위·구현·감사는
       하지 않는다(결정 근거만 제공). 근거: EVIDENCE-2026-06-03-001, COMPOUND-029
       (증상 아닌 목표로 ladder-up). plan: CYCLE-NNN.
+
+  - id: kis-api-engineer
+    aliases: [kis, kis-api]
+    skill_file: agents/kis_api_engineer/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/kis_api_engineer/SKILL.md
+      - docs/KIS_API_SPEC.md
+      - "관련 TASK 본문"
+    forbidden_inputs: []
+    output_contract:
+      - "KIS Open API 연동 코드 (app/brokers/kis/**)"
+      - "TR ID·인증·엔드포인트·응답 파싱 구현 + 단위테스트"
+    audit_gate: false
+    default_subagents: [implementer, reviewer]
+    notes: |
+      KIS Open API(국내주식 현금주문·시세·잔고) 전문 역할.
+      실주문 코드는 paper 검증 후 Owner 승인 단계에서만 사용.
+
+  - id: execution-trader
+    aliases: [execution, exec-trader]
+    skill_file: agents/execution_trader/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/execution_trader/SKILL.md
+      - "IC 결정 또는 조건 ID"
+    forbidden_inputs:
+      - "직접 주문 실행 (app/brokers 코드 호출)"
+    output_contract:
+      - "실행 계획 (주문 타입/수량/시점/분할/취소 조건)"
+    audit_gate: false
+    default_subagents: [reviewer]
+
+  - id: compliance-officer
+    aliases: [compliance, co]
+    skill_file: agents/compliance_officer/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/compliance_officer/SKILL.md
+      - "거래 내역 또는 IC 제안"
+    forbidden_inputs:
+      - "법률 확정 자문 (disclaimer 필수)"
+    output_contract:
+      - "준수 판정 (통과/주의/거부) + 근거 + 권고사항"
+    audit_gate: true
+    default_subagents: [auditor]
+
+  - id: performance-analyst
+    aliases: [perf, performance]
+    skill_file: agents/performance_analyst/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/performance_analyst/SKILL.md
+      - "DB 주문로그 또는 scripts/run_retro.py 출력"
+    forbidden_inputs: []
+    output_contract:
+      - "성과 리포트 (KPI표) + attribution + 습관 진단 + 개선사항"
+    audit_gate: false
+    default_subagents: [reviewer]
+
+  - id: quant-researcher
+    aliases: [quant, quant-researcher]
+    skill_file: agents/quant_researcher/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/quant_researcher/SKILL.md
+    forbidden_inputs: []
+    output_contract:
+      - "시그널 개발 제안 + 팩터 리서치 노트"
+    audit_gate: false
+    default_subagents: [skeptic, reviewer]
+
+  - id: backtest-engineer
+    aliases: [backtest, bt]
+    skill_file: agents/backtest_engineer/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/backtest_engineer/SKILL.md
+    forbidden_inputs: []
+    output_contract:
+      - "백테스트 결과 + 과최적화/생존편향 방어 보고"
+    audit_gate: false
+    default_subagents: [skeptic]
+
+  - id: data-engineer
+    aliases: [data, de]
+    skill_file: agents/data_engineer/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/data_engineer/SKILL.md
+    forbidden_inputs: []
+    output_contract:
+      - "데이터 파이프라인 설계 + point-in-time DB 스펙"
+    audit_gate: false
+    default_subagents: [reviewer]
+
+  - id: optimization-quant
+    aliases: [optimization, opt-quant]
+    skill_file: agents/optimization_quant/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/optimization_quant/SKILL.md
+    forbidden_inputs: []
+    output_contract:
+      - "포트폴리오 최적화 제안 + 리밸런싱 알고리즘"
+    audit_gate: false
+    default_subagents: [skeptic, reviewer]
