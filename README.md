@@ -1,59 +1,90 @@
 # Autofolio
 
-**Autofolio**는 한국투자증권(KIS) Open API 기반 개인용 국장 자동매매 시스템이다.
-최종 지향점은 단순 자동매매 봇이 아니라 **에이전트 기반 개인 투자 운용체계(Agentic Quant Portfolio OS)**다.
+**Autofolio** — 한국투자증권(KIS) Open API 기반 **에이전트 자동매매 OS (Agentic Quant Portfolio OS)**.
 
-현재 기본 실행 모드는 `mock`이다.  
-즉, 실제 주문이 나가지 않는다.
+멀티에이전트(자산팀·퀀트팀·거버넌스)가 협업하고, Streamlit UI + Telegram 봇으로 어디서든 관제·명령.
 
-## 핵심 목표
+| | |
+|---|---|
+| **브로커** | 한국투자증권(KIS) Open API |
+| **에이전트** | 40개 (개발·자산·퀀트·거버넌스) |
+| **언어** | Python 3.10+ |
+| **DB** | SQLite |
+| **UI** | Streamlit |
+| **알림** | Telegram 봇 (`/status /pnl /positions /conditions /engine /propose`) |
+| **CI** | GitHub Actions (pytest + check_agent_docs) |
 
-- 국장 ETF/대형주 화이트리스트 관리
-- 목표 가격 도달형 매수/매도 조건 설정
-- 기본 안전조건 검사
-- Mock Broker 기반 주문 흐름 검증
-- SQLite 로그 저장
-- Streamlit UI 관제
-- Telegram 알림 확장
-- 한투 Open API 어댑터 확장 준비
+---
 
-## 빠른 시작: Windows PowerShell
+## 빠른 시작
 
 ```powershell
-cd autofolio
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+# 1. 환경 설정
+.venv\Scripts\Activate.ps1          # 또는 python -m venv .venv
 pip install -r requirements.txt
-copy .env.example .env
+
+# 2. 자격증명
+copy .env.example .env              # .env 편집: KIS_PAPER_APP_KEY 등
+
+# 3. DB 초기화
 python scripts/init_db.py
-python scripts/seed_sample_data.py
-streamlit run app/ui/streamlit_app.py
+
+# 4. 앱 실행 (신 멀티페이지 셸)
+run_ui.bat                           # 또는 streamlit run app/ui/autofolio_app.py
 ```
 
-## 테스트 실행
+> **구 MVP 단일화면**: `streamlit run app/ui/streamlit_app.py` (레거시·참조용)
+
+---
+
+## 주요 스크립트
+
+| 스크립트 | 설명 |
+|---|---|
+| `scripts/kis_token_smoke.py` | KIS 토큰 발급 연결 검증 (paper+prod) |
+| `scripts/kis_paper_order_smoke.py` | paper 전용 주문 생애주기 스모크 (정규장 사람 실행) |
+| `scripts/run_paper_engine.py` | 모의투자 자동 실행 스케줄러 (`--dry-run` 지원) |
+| `scripts/run_retro.py` | 멀티에이전트 회고 워크플로 |
+| `scripts/run_daily_summary.py` | 일일 요약 리포트 |
+| `scripts/tail_events.py` | `logs/events.jsonl` 실시간 모니터링 |
+| `scripts/auto_merge.py <PR>` | 자율 PR 머지 게이트 |
+| `scripts/report_upstream_bug.py` | upstream 버그 자동 Issue 생성 |
+
+---
+
+## 운영 모드 (자율성 레벨)
+
+| 레벨 | 이름 | 동작 |
+|---|---|---|
+| L0 | 관찰 | 정보 표시만 |
+| L1 | 자문 | 제안 생성, 건건이 사람 승인 |
+| L2 | 반자동 | 사전 플레이북 내 조건 자동 대기 |
+| L3 | 감독형 자동 | 예산/가드레일 내 자율 실행 (서킷브레이커 필수) |
+| L4 | 완전자동 | 하드리밋 내 완전 자율 |
+
+---
+
+## 안전 기본값
+
+- `KIS_ENV=mock` (기본) — 실주문 없음
+- 자동매매 기본값 OFF
+- 킬스위치 1버튼 전체 중단
+- 화이트리스트 종목만 거래
+- 서킷브레이커 (일손실 한도 초과 시 자동 정지)
+- mock → paper(모의) → prod 단계 승급
+
+---
+
+## 테스트
 
 ```powershell
-pytest
+pytest                          # 128개 테스트
+python scripts/check_agent_docs.py   # 0 error 게이트
 ```
 
-## 현재 안전 기본값
+---
 
-- `KIS_ENV=mock`
-- 자동주문 기본값 OFF
-- 실 API 주문부는 바로 주문하지 않도록 어댑터 형태
-- Kill Switch 제공
-- Mock API 통합 테스트 포함
+## 면책
 
-## 다음 개발 순서
-
-1. 한투 Open API 모의투자 키 발급
-2. `.env`에 모의투자 키 입력
-3. `app/brokers/kis/kis_client.py`의 TODO 부분을 공식 문서 기준으로 구현
-4. 현재가 조회부터 검증
-5. 주문은 모의투자에서만 먼저 검증
-6. 실전은 1주 수동 버튼 테스트 후 단계적으로 진행
-
-## 주의
-
-이 프로젝트는 개발용 스캐폴딩이며 투자 권유, 수익 보장, 실전 자동매매 안전 보장을 의미하지 않는다.  
-실 API 주문 코드를 구현할 때는 반드시 모의투자와 소액 실전 테스트를 거쳐야 한다.
+이 프로젝트는 개인 학습·자동화 도구이며 투자 권유·수익 보장이 아닙니다.  
+실전 자동매매 전에 반드시 모의투자와 소액 수동 테스트를 거치세요.

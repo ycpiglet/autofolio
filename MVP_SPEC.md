@@ -175,56 +175,73 @@ Telegram 알림
 
 ---
 
-## 5. 프로젝트 구조
+## 5. 프로젝트 구조 (2026-06-10 현행)
 
-도메인 기반 구조를 사용한다.
+도메인 기반 구조. **신 멀티페이지 셸 = ** (구 는 레거시).
 
 ```text
 autofolio/
 ├── app/
 │   ├── brokers/
-│   │   └── kis/
-│   │       ├── kis_client.py
-│   │       ├── kis_auth.py
-│   │       └── kis_models.py
+│   │   ├── kis/            # KIS Open API 클라이언트 (5메서드, paper/prod TR ID)
+│   │   │   ├── kis_client.py
+│   │   │   ├── kis_auth.py
+│   │   │   └── kis_models.py
+│   │   ├── mock/           # 테스트용 Mock 브로커
+│   │   └── factory.py
 │   ├── database/
 │   │   ├── sqlite_db.py
 │   │   ├── schema.sql
-│   │   └── repositories.py
+│   │   └── repositories.py  # 22+ 메서드 (whitelist/conditions/orders/execution/risk)
 │   ├── engine/
-│   │   ├── live_trading_engine.py
-│   │   ├── condition_evaluator.py
-│   │   └── order_flow.py
+│   │   ├── live_trading_engine.py  # 구조화 로깅, Notifier 연동
+│   │   ├── order_flow.py    # _poll_fill 포함 PENDING 완전 처리
+│   │   └── condition_evaluator.py
 │   ├── risk/
-│   │   ├── safety_checker.py
+│   │   ├── safety_checker.py  # 킬스위치·자동매매·화이트리스트·시간·한도·서킷브레이커
 │   │   ├── duplicate_guard.py
 │   │   └── trading_window.py
 │   ├── agents/
-│   │   └── research_agent.py
+│   │   └── research_agent.py  # IC 제안 생성
 │   ├── notification/
-│   │   └── telegram_notifier.py
+│   │   ├── notifier.py        # 통합 Notifier (Telegram+로그 fallback)
+│   │   ├── telegram_bot.py    # 명령봇 (/status /pnl /positions /conditions /engine /propose)
+│   │   └── telegram_notifier.py  # 레거시
 │   ├── ui/
-│   │   └── streamlit_app.py
+│   │   ├── autofolio_app.py   # ★ 신 멀티페이지 셸 (8화면)
+│   │   ├── streamlit_app.py   # 구 단일화면 (레거시·참조)
+│   │   ├── backend.py         # UI ↔ 브로커/DB 어댑터 (30+ 함수)
+│   │   ├── agents_runtime.py  # 40개 에이전트 Anthropic API 연결
+│   │   ├── ic.py              # 투자위원회 워크플로
+│   │   ├── views/             # 8화면 (home/portfolio/trade/history/analysis/alerts/settings/agents)
+│   │   ├── components/        # ui.py (top_bar·서킷브레이커 배지)
+│   │   └── mock/data.py       # 데모 데이터 (라이브 없을 때 폴백)
 │   ├── config/
-│   │   └── settings.py
+│   │   └── settings.py        # resolve_settings() — 환경별 KIS 자격증명 자동 해석
+│   ├── quant/                 # 퀀트팀 (스캐폴딩)
 │   └── common/
 │       ├── enums.py
 │       ├── errors.py
-│       └── logger.py
+│       └── logger.py          # get_structured_logger / log_event → logs/events.jsonl
+├── agents/                    # 40개 에이전트 SKILL.md (개발·자산·퀀트·거버넌스)
+│   ├── roles.yml
+│   └── <role>/SKILL.md
 ├── tests/
-│   ├── unit/
+│   ├── unit/                  # 128 tests
 │   └── integration/
-├── scripts/
-│   ├── init_db.py
-│   ├── test_kis_auth.py
-│   ├── test_kis_price.py
-│   └── test_mock_order_flow.py
-├── .env
-├── .env.example
-├── .gitignore
-├── requirements.txt
-├── README.md
-└── MVP_SPEC.md
+├── scripts/                   # 스크립트 30+
+│   ├── auto_merge.py          # 자율 PR 머지 게이트
+│   ├── run_paper_engine.py    # 모의투자 스케줄러
+│   ├── run_retro.py           # 회고 워크플로
+│   ├── run_daily_summary.py   # 일일 요약
+│   └── tail_events.py         # events.jsonl 모니터링
+├── docs/                      # 기획서·스펙·런북
+│   ├── PRODUCT_BLUEPRINT.md
+│   ├── KIS_API_SPEC.md
+│   └── BACKLOG.md
+├── .github/workflows/test.yml # CI (pytest + check_agent_docs)
+├── .env                       # 시크릿 (gitignore)
+└── agent_runtime.yml          # framework v0.1.8 pin
 ```
 
 ---
