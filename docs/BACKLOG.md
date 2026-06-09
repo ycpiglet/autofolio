@@ -64,6 +64,7 @@
 ### 개발팀 활용 (이식 에이전트)
 - [ ] PR/코드리뷰 워크플로에 `independent-auditor`·`qa`·`lead-engineer` 연결.
 - [ ] 요구→스펙 흐름에 `requirements-interviewer`·`research-agent` 활용.
+- [~] **자율 머지 거버넌스**: 호스트 잠정 정본 `agents/lead_engineer/MERGE-POLICY.md`(+ `AGENTS.md` §15, `scripts/check_merge_policy_precedence.py`) 작성 — `auto_merge.py` 게이트 정본화·Autofolio R3 surface·업스트림 우선 교체 규칙. **업스트림 보고 필요**: `auto_merge.py`가 참조하는 `AGENTS.md §3.5`+`MEETING/EVIDENCE-2026-06-01`이 업스트림 미커밋(스크립트만 배포된 자기-불일치, §14 누락과 동류) → Issue 등록 후 §3.5 템플릿화되면 precedence swap.
 
 ### 기술부채 · 정리
 - [x] 이식 비엔지니어 에이전트(ceo/owner/scribe 등 9종) Autofolio 맥락 튜닝 — 제품/역할 컨텍스트(개발팀 ≠ 투자결정) 주입 완료.

@@ -254,4 +254,8 @@ If a check cannot run, report exactly why and what remains unverified.
 ## 14. Token Budget
 
 세션 토큰 카탈로그·예산 규약은 [agents/lead_engineer/TOKEN-BUDGET.md](agents/lead_engineer/TOKEN-BUDGET.md)를 따른다. 대형 작업 전 예상 비용을 BRIEF/PLAN의 Cost에 기재한다.
+
+## 15. Autonomous Merge Gate (provisional — pending upstream §3.5)
+
+호스트 잠정 정책: 심의(council/seminar/cycle_gate) → 결정 → PR → 게이트 통과 시 자율 squash 머지(**main 머지 = R2**, §5 보정). 전체 게이트·Autofolio R3 surface·하네스 주의·우선순위는 [agents/lead_engineer/MERGE-POLICY.md](agents/lead_engineer/MERGE-POLICY.md) 참조(코드 정본 `scripts/auto_merge.py`). **업스트림 템플릿 `AGENTS.md`가 §3.5를 얻으면 그쪽이 정본(전부 반영)이고 본 §15는 제거**된다 — `scripts/check_merge_policy_precedence.py`가 감지·강제, 절차는 `docs/AGENT_RUNTIME_INTEGRATION.md §3.1`. 실행 환경 안전 분류기는 별개 층(정책 ≠ 하네스 권한).
 <!-- AUTOFOLIO-OVERLAY:end -->

@@ -48,6 +48,16 @@
 
 **원칙**: 이 표에 없는 템플릿 파일은 편집하지 않는다. 새 편집이 불가피하면 먼저 이 표에 등록하고 `agent_runtime.yml` 의 `unmanaged` 에 추가한다.
 
+### 3.1 자율 머지 거버넌스 — 우선순위(업스트림 우선, 충돌 회피)
+
+업스트림 v0.1.5 는 자율 머지/심의 **스크립트**(`auto_merge.py` 등)는 실어 보냈으나, 그것이 참조하는 **거버넌스 §3.5(자율 머지 규칙)·`MEETING/EVIDENCE-2026-06-01`** 은 레포에 미커밋(2026-06-09 확인). 그래서 호스트가 잠정 정본 [agents/lead_engineer/MERGE-POLICY.md](../agents/lead_engineer/MERGE-POLICY.md)(오버레이 ②) + `AGENTS.md` 오버레이 §15(포인터)로 둔다.
+
+**설계상 충돌 회피**: 공통 규칙을 **공유 본문(`AGENTS.md §0–§12`)에 넣지 않고** 호스트 전용 파일(②)·오버레이 포인터로 격리한다. ② 는 sync 비대상이라 업스트림과 **병렬 진화·자동충돌 없음**. 업스트림 §3.5 가 §0–§12 에 추가돼도 우리 §15(오버레이)·MERGE-POLICY 와 텍스트 충돌이 없다.
+
+**우선순위(업스트림 완성 시 강제 반영)**: 설치된 업스트림 템플릿 `AGENTS.md` 가 §3.5 를 얻으면 →
+1. 업스트림 §3.5 **전부 채택(정본)**, 2. `MERGE-POLICY.md` 는 **Autofolio R3 surface 애드덤만 잔존(조금)**, 3. `AGENTS.md` 오버레이 §15 제거→한 줄 포인터, 4. 본 §3.1 "반영 완료"로 갱신.
+**감지/강제**: `python scripts/check_merge_policy_precedence.py`(업스트림 §3.5 발견 시 non-zero). §4 런북 4-bis 단계로 돌린다.
+
 ---
 
 ## 4. 업데이트 런북
@@ -67,6 +77,9 @@
 
 # 4) 시임 점검 — unmanaged 라 sync 가 안 보므로, 정본 템플릿과 우리 파일을 직접 비교
 .\.venv\Scripts\python.exe -c "import agent_runtime,os,difflib; from pathlib import Path; tp=Path(os.path.dirname(agent_runtime.__file__))/'templates'/'project'; [print('=== '+r+' ==='+chr(10)+((chr(10).join(difflib.unified_diff((tp/r).read_text(encoding='utf-8').splitlines(),Path(r).read_text(encoding='utf-8').splitlines(),'upstream/'+r,'host/'+r,lineterm=''))) or '(차이 없음)')) for r in ['AGENTS.md','agents/roles.yml']]"
+
+# 4-bis) 자율 머지 거버넌스 우선순위 점검 (§3.1) — 업스트림이 §3.5 를 얻었으면 교체 강제
+.\.venv\Scripts\python.exe scripts/check_merge_policy_precedence.py
 
 # 5) 검증
 .\.venv\Scripts\python.exe scripts/check_agent_docs.py   # 0 error 유지

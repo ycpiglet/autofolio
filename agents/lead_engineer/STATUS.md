@@ -28,4 +28,5 @@
 - **P1.1b 잔여**: (a) **1주 수동 실주문** — 사람 승인 게이트(에이전트 자동발주는 안전분류기도 차단). 정규장에 `! python scripts/kis_paper_order_smoke.py`로 paper 검증 후 실전. (b) 홈 KPI/자산곡선·분석(백테스트·기여도) 라이브화는 이력DB·에이전트·백테스트 엔진 의존 → 후속. (c) 엔진 market-fallback 의미 보정(KIS 주문=접수/PENDING).
 - **커밋 상태**: `01eb310`(kis_client+settings 코어) 커밋됨. step2/3 산출물(`backend.holdings_df`·`portfolio.py`·`kis_paper_order_smoke.py`·`test_backend_holdings.py`)은 이어서 커밋.
 - 환경 메모: dev Python 에 `pandas`·`streamlit` 설치 완료(2.3.3/1.58.0, 선언 의존성). UI AppTest 가능.
+- **자율 머지 거버넌스(신규, provisional)**: 업스트림이 `auto_merge.py`(스크립트)는 실었으나 그 근거 `AGENTS.md §3.5`·`MEETING/EVIDENCE-2026-06-01`은 **미커밋**(2026-06-09 확인). 호스트가 잠정 정본 [MERGE-POLICY.md](MERGE-POLICY.md) + `AGENTS.md` 오버레이 §15 로 정의(코드 정본 `auto_merge.py`). **우선순위=업스트림 우선**: 업스트림 §3.5 출현 시 `scripts/check_merge_policy_precedence.py`(검증 완료)가 감지·강제, 절차는 `docs/AGENT_RUNTIME_INTEGRATION.md §3.1`. 충돌 회피 위해 공통부는 공유 본문(§0–§12)에 안 박고 ②/오버레이로 격리. ⚠ 실제 자율 머지는 하네스 안전분류기(별개 층)가 여전히 게이트.
 - 운영 사이클(CYCLE/REVIEW)은 아직 미시작 — 첫 실작업 사이클에서 생성.
