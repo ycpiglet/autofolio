@@ -3,11 +3,12 @@ from __future__ import annotations
 
 import streamlit as st
 
-from app.ui.mock import data
+from app.ui.mock import data as mock_data
 
 
 def render() -> None:
     st.header("🔔 알림")
+    live = st.session_state.get("data_source") == "backend"
 
     st.subheader("채널")
     channels = [("Telegram", True), ("Kakao", False), ("Discord", False), ("Notion", True), ("Email", True)]
@@ -22,6 +23,40 @@ def render() -> None:
     )
 
     st.subheader("피드")
-    icons = {"info": "🟢", "warn": "🟡", "error": "🔴"}
-    for a in data.alerts_feed():
-        st.write(f"{icons.get(a['level'], '⚪')} `{a['t']}` **{a['유형']}** — {a['msg']}")
+    if live:
+        _live_feed()
+    else:
+        icons = {"info": "🟢", "warn": "🟡", "error": "🔴"}
+        for a in mock_data.alerts_feed():
+            st.write(f"{icons.get(a['level'], '⚪')} `{a['t']}` **{a['유형']}** — {a['msg']}")
+
+
+def _live_feed() -> None:
+    """라이브: 최근 주문로그를 알림 피드 형식으로 표시."""
+    try:
+        from app.ui import backend
+
+        logs = backend.list_order_logs(limit=50)
+        if logs.empty:
+            st.caption("🟢 라이브 — 주문 이력이 없습니다.")
+            return
+
+        st.caption(f"🟢 라이브 — 최근 주문로그 {len(logs)}건")
+        status_icon = {
+            "FILLED": "✅",
+            "CANCELED": "🚫",
+            "FAILED": "❌",
+            "PENDING": "⏳",
+            "REQUESTED": "📤",
+        }
+        for _, row in logs.iterrows():
+            icon = status_icon.get(str(row.get("order_status", "")), "⚪")
+            ts = str(row.get("created_at", ""))[:16]
+            side = row.get("side", "")
+            sym = row.get("symbol", "")
+            qty = row.get("quantity", "")
+            price = row.get("order_price") or row.get("current_price")
+            price_str = f"@{float(price):,.0f}" if price else ""
+            st.write(f"{icon} `{ts}` **{sym}** {side} {qty}주 {price_str} — {row.get('order_status', '')}")
+    except Exception as exc:  # noqa: BLE001
+        st.warning(f"라이브 피드 오류: {exc}")
