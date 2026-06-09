@@ -216,3 +216,16 @@ def propose(symbol: str, side: str = "BUY") -> ConditionProposal:
     _, broker, _, agent = _ctx()
     cur = broker.get_current_price(symbol).price
     return agent.propose_price_condition(symbol=symbol, current_price=cur, side=side)
+
+
+def set_risk_limits(
+    *,
+    max_order_amount: float | None = None,
+    max_daily_amount: float | None = None,
+) -> None:
+    """리스크 한도를 DB에 저장 (설정 화면 → SafetyChecker 실시간 반영)."""
+    repo, *_ = _ctx()
+    repo.update_global_risk_limit(
+        max_order_amount=max_order_amount,
+        max_daily_amount=max_daily_amount,
+    )

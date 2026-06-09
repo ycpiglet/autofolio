@@ -257,6 +257,28 @@ class Repository:
                 raise RuntimeError("Global risk limit is not initialized.")
             return dict(row)
 
+    def update_global_risk_limit(
+        self,
+        *,
+        max_order_amount: float | None = None,
+        max_daily_amount: float | None = None,
+    ) -> None:
+        fields, params = [], []
+        if max_order_amount is not None:
+            fields.append("max_order_amount = ?")
+            params.append(max_order_amount)
+        if max_daily_amount is not None:
+            fields.append("max_daily_amount = ?")
+            params.append(max_daily_amount)
+        if not fields:
+            return
+        params.append("GLOBAL")
+        with get_connection(self.db_path) as conn:
+            conn.execute(
+                f"UPDATE risk_limits SET {', '.join(fields)}, updated_at = CURRENT_TIMESTAMP WHERE scope = ?",
+                params,
+            )
+
     def today_order_amount(self) -> float:
         with get_connection(self.db_path) as conn:
             row = conn.execute(

@@ -109,6 +109,8 @@ def _brokers() -> None:
 
 
 def _modes() -> None:
+    live = st.session_state.get("data_source") == "backend"
+
     st.select_slider(
         "전역 기본 자율성",
         options=theme.MODES,
@@ -120,35 +122,86 @@ def _modes() -> None:
     if st.session_state.mode in ("L3", "L4") and not st.session_state.auto_enabled:
         st.warning("자동 실행 모드(L3+) — 예산·주문한도·서킷브레이커가 적용됩니다.")
         confirmed = st.checkbox("위험을 이해했고 자동매매를 활성화합니다", key="auto_confirm")
+
+    prev_auto = st.session_state.get("auto_enabled", False)
     st.toggle(
         "자동매매 활성",
         key="auto_enabled",
         disabled=st.session_state.kill_switch
         or (st.session_state.mode in ("L3", "L4") and not confirmed),
     )
-    st.caption("킬스위치 활성 시 자동매매는 강제 OFF.")
+
+    # 라이브 모드: auto_enabled 토글 변경 → DB 즉시 동기화
+    if live and st.session_state.auto_enabled != prev_auto:
+        try:
+            from app.ui import backend
+            backend.set_flag("auto_trading_enabled", st.session_state.auto_enabled)
+            st.toast(f"자동매매 {'ON' if st.session_state.auto_enabled else 'OFF'} — DB 저장됨")
+        except Exception as exc:  # noqa: BLE001
+            st.warning(f"DB 동기화 실패: {exc}")
+
+    if live:
+        # DB 실제 상태 표시
+        try:
+            from app.ui import backend
+            db_auto = backend.get_flag("auto_trading_enabled")
+            db_kill = backend.get_flag("kill_switch_active")
+            st.caption(
+                f"DB 상태: 자동매매={'ON' if db_auto else 'OFF'} · "
+                f"킬스위치={'활성' if db_kill else '해제'} 🟢 라이브"
+            )
+        except Exception:  # noqa: BLE001
+            pass
+    else:
+        st.caption("킬스위치 활성 시 자동매매는 강제 OFF.")
+
     st.toggle("손익 색: 상승=빨강 / 하락=파랑 (한국식)", key="pnl_kr_colors")
 
     st.divider()
     st.markdown("**종목별 자율성**")
-    df = data.holdings_df()[["종목", "티커"]].copy()
-    df["모드"] = [st.session_state.symbol_modes.get(t, st.session_state.mode) for t in df["티커"]]
-    edited = st.data_editor(
-        df,
-        hide_index=True,
-        width="stretch",
-        key="symmode_editor",
-        disabled=["종목", "티커"],
-        column_config={"모드": st.column_config.SelectboxColumn(options=theme.MODES)},
-    )
-    for _, r in edited.iterrows():
-        st.session_state.symbol_modes[r["티커"]] = r["모드"]
+    if live:
+        try:
+            from app.ui import backend
+            wl = backend.list_whitelist()
+            if not wl.empty:
+                wl = wl[["symbol", "name"]].rename(columns={"symbol": "티커", "name": "종목"})
+                wl["모드"] = [st.session_state.symbol_modes.get(t, st.session_state.mode) for t in wl["티커"]]
+                edited = st.data_editor(wl, hide_index=True, width="stretch", key="symmode_editor_live",
+                    disabled=["종목", "티커"],
+                    column_config={"모드": st.column_config.SelectboxColumn(options=theme.MODES)})
+                for _, r in edited.iterrows():
+                    st.session_state.symbol_modes[r["티커"]] = r["모드"]
+            else:
+                st.caption("화이트리스트가 비어있습니다.")
+        except Exception as exc:  # noqa: BLE001
+            st.caption(f"종목별 모드 로딩 실패: {exc}")
+    else:
+        df = data.holdings_df()[["종목", "티커"]].copy()
+        df["모드"] = [st.session_state.symbol_modes.get(t, st.session_state.mode) for t in df["티커"]]
+        edited = st.data_editor(df, hide_index=True, width="stretch", key="symmode_editor",
+            disabled=["종목", "티커"],
+            column_config={"모드": st.column_config.SelectboxColumn(options=theme.MODES)})
+        for _, r in edited.iterrows():
+            st.session_state.symbol_modes[r["티커"]] = r["모드"]
 
 
 def _risk() -> None:
+    live = st.session_state.get("data_source") == "backend"
+
     c1, c2 = st.columns(2)
-    c1.number_input("일일 예산 (₩)", min_value=0, value=300_000, step=50_000)
-    c1.number_input("건당 주문 한도 (₩)", min_value=0, value=100_000, step=10_000)
-    c2.number_input("종목당 비중 상한 (%)", min_value=1, max_value=100, value=15)
-    c2.number_input("서킷브레이커 일손실 (%)", min_value=1, max_value=50, value=3)
-    st.text_input("자동매매 거래시간", value="09:10 ~ 15:20")
+    daily = c1.number_input("일일 예산 (₩)", min_value=0, value=300_000, step=50_000, key="risk_daily")
+    order_limit = c1.number_input("건당 주문 한도 (₩)", min_value=0, value=100_000, step=10_000, key="risk_order")
+    c2.number_input("종목당 비중 상한 (%)", min_value=1, max_value=100, value=15, key="risk_sym")
+    c2.number_input("서킷브레이커 일손실 (%)", min_value=1, max_value=50, value=3, key="risk_cb")
+    st.text_input("자동매매 거래시간", value="09:10 ~ 15:20", key="risk_window")
+
+    if live and st.button("💾 리스크 한도 저장", type="primary", key="risk_save"):
+        try:
+            from app.ui import backend
+            backend.set_risk_limits(
+                max_order_amount=float(order_limit),
+                max_daily_amount=float(daily),
+            )
+            st.success("✅ 리스크 한도 DB 저장됨")
+        except Exception as exc:  # noqa: BLE001
+            st.error(f"저장 실패: {exc}")
