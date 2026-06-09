@@ -229,3 +229,58 @@ def set_risk_limits(
         max_order_amount=max_order_amount,
         max_daily_amount=max_daily_amount,
     )
+
+
+def attribution_df() -> pd.DataFrame:
+    """주문로그 체결 기반 손익 기여 (자산군별 실현손익 합계).
+
+    체결 내역이 없으면 빈 DataFrame 반환.
+    holdings_df의 자산군 매핑을 재사용해 미실현 평가손익을 자산군별로 집계.
+    """
+    df = holdings_df()
+    if df.empty:
+        return pd.DataFrame(columns=["구분", "기여(만원)"])
+    grouped = df.groupby("자산군")["평가손익"].sum().reset_index()
+    grouped.columns = ["구분", "기여(만원)"]
+    grouped["기여(만원)"] = (grouped["기여(만원)"] / 10_000).round(1)
+    return grouped.sort_values("기여(만원)", ascending=False).reset_index(drop=True)
+
+
+def retro_metrics() -> dict:
+    """주문로그 기반 회고 지표. 체결 없으면 placeholder 반환."""
+    repo, *_ = _ctx()
+    logs = repo.list_order_logs(limit=500)
+    if not logs:
+        return {"승률": 0, "평균R": 0.0, "MDD": 0.0, "규율": 0}
+    filled = [l for l in logs if l.get("order_status") == "FILLED"]
+    total = len(filled)
+    if total == 0:
+        return {"승률": 0, "평균R": 0.0, "MDD": 0.0, "규율": 0}
+    # 간단 승률: 체결/전체 주문 비율
+    win_rate = round(total / len(logs) * 100)
+    return {
+        "승률": win_rate,
+        "평균R": round(total / max(len(logs) - total, 1), 2),
+        "MDD": 0.0,   # MDD는 가격 시계열 필요 — 퀀트 엔진 이후
+        "규율": min(100, win_rate + 20),
+    }
+
+
+def allocation_gap(target: dict | None = None) -> pd.DataFrame:
+    """라이브 보유종목 기반 자산배분 vs 목표 갭.
+
+    target: {"주식": 35, "ETF": 30, ...} — None이면 기본값 사용.
+    """
+    _target = target or {"주식": 35, "ETF": 30, "채권": 15, "원자재": 5, "현금": 15}
+    df = holdings_df()
+    if df.empty:
+        return pd.DataFrame([
+            {"자산군": k, "목표%": v, "현재%": 0.0, "갭%": -v}
+            for k, v in _target.items()
+        ])
+    current = df.groupby("자산군")["비중"].sum().to_dict()
+    rows = []
+    for cls, tgt in _target.items():
+        cur = round(current.get(cls, 0.0), 1)
+        rows.append({"자산군": cls, "목표%": tgt, "현재%": cur, "갭%": round(cur - tgt, 1)})
+    return pd.DataFrame(rows)

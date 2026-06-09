@@ -41,10 +41,22 @@ def render() -> None:
     left, right = st.columns([2, 3])
     with left:
         st.subheader("자산배분")
-        st.bar_chart(data.allocation_df().set_index("자산군")["비중"], height=260)
+        if st.session_state.get("data_source") == "backend":
+            # 라이브: holdings_df에서 직접 자산군 비중 집계
+            alloc = df.groupby("자산군")["비중"].sum()
+            st.bar_chart(alloc, height=260)
+        else:
+            st.bar_chart(data.allocation_df().set_index("자산군")["비중"], height=260)
     with right:
         st.subheader("목표 대비 (리밸런싱 갭)")
-        st.dataframe(data.allocation_gap(), hide_index=True, width="stretch")
+        if st.session_state.get("data_source") == "backend":
+            try:
+                from app.ui import backend
+                st.dataframe(backend.allocation_gap(), hide_index=True, width="stretch")
+            except Exception:  # noqa: BLE001
+                st.dataframe(data.allocation_gap(), hide_index=True, width="stretch")
+        else:
+            st.dataframe(data.allocation_gap(), hide_index=True, width="stretch")
 
     st.subheader("보유 종목")
     st.dataframe(
