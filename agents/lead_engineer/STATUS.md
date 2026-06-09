@@ -24,7 +24,8 @@
 - **KIS (P1.1b 코어 완료)**: paper·prod 키 `.env` 입력 + 토큰 발급 검증 완료. `kis_client.py` **5메서드 실구현**(현행 TR ID·rt_cd envelope·레이트리밋 재시도, 근거 `docs/KIS_API_SPEC.md`) — 단위테스트 17, **라이브 paper 읽기검증(현재가·잔고) 통과**. 환경별 자격증명/URL 해석은 `settings.resolve_settings()`로 중앙화(라이브 인증 실패 버그 동시 수정).
 
 ## 활성 작업 (다음 세션 시작점)
-- **P1.1b 잔여** → `docs/BACKLOG.md §다음 1`: (a) 포트폴리오/손익 **UI 라이브 와이어링**(`backend.positions()` 어댑터는 추가됨; 홈·포트폴리오·분석 화면 연결 남음), (b) **1주 수동 실주문**은 사람 승인 게이트(자동 실주문 금지), (c) 후속: 엔진 market-fallback 의미 보정(KIS 주문=접수/PENDING이라 즉시-FILLED 가정과 어긋남).
-- **미커밋 변경**: `app/config/settings.py`·`app/brokers/kis/kis_client.py`·`tests/unit/test_kis_client.py`·`app/ui/backend.py`·`scripts/kis_token_smoke.py`·`docs/KIS_API_SPEC.md`(신규). `.env`(미추적). → 커밋 권장.
-- 환경 메모: 이 dev Python 에 `pandas` 미설치 → `app/ui/backend.py`/streamlit import 불가(UI 실행 환경엔 필요). 테스트/스크립트는 영향 없음.
+- **P1.1b 거의 완료** → `docs/BACKLOG.md §다음 1`. 이번 세션 추가: (1) `kis_client` 5메서드+테스트+라이브 paper 읽기검증, (2) `kis_paper_order_smoke.py`(paper 전용 주문 생애주기, 사람이 직접 실행), (3) `backend.holdings_df()` 라이브 어댑터 + 포트폴리오 화면 보유표 라이브 분기(데모 렌더 회귀검증). pytest **29 passed**.
+- **P1.1b 잔여**: (a) **1주 수동 실주문** — 사람 승인 게이트(에이전트 자동발주는 안전분류기도 차단). 정규장에 `! python scripts/kis_paper_order_smoke.py`로 paper 검증 후 실전. (b) 홈 KPI/자산곡선·분석(백테스트·기여도) 라이브화는 이력DB·에이전트·백테스트 엔진 의존 → 후속. (c) 엔진 market-fallback 의미 보정(KIS 주문=접수/PENDING).
+- **커밋 상태**: `01eb310`(kis_client+settings 코어) 커밋됨. step2/3 산출물(`backend.holdings_df`·`portfolio.py`·`kis_paper_order_smoke.py`·`test_backend_holdings.py`)은 이어서 커밋.
+- 환경 메모: dev Python 에 `pandas`·`streamlit` 설치 완료(2.3.3/1.58.0, 선언 의존성). UI AppTest 가능.
 - 운영 사이클(CYCLE/REVIEW)은 아직 미시작 — 첫 실작업 사이클에서 생성.

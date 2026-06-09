@@ -8,10 +8,25 @@ from app.ui.components import ui
 from app.ui.mock import data
 
 
+def _holdings_df():
+    """보유 종목 표 — data_source=='backend' 면 실 KIS 잔고, 아니면 데모(mock).
+
+    라이브 조회 실패 시 데모로 안전 폴백한다(화면이 죽지 않도록).
+    """
+    if st.session_state.get("data_source") == "backend":
+        try:
+            from app.ui import backend
+
+            return backend.holdings_df()
+        except Exception as exc:  # noqa: BLE001 — UI 폴백
+            st.warning(f"라이브 잔고 조회 실패 — 데모 데이터로 대체합니다: {exc}")
+    return data.holdings_df()
+
+
 def render() -> None:
     ui.page_header("💼 포트폴리오")
 
-    df = data.holdings_df()
+    df = _holdings_df()
     if df.empty:
         ui.empty_state("보유 종목이 없습니다", "매매 화면에서 첫 주문을 넣어보세요.")
         return

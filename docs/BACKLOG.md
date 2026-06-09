@@ -28,8 +28,8 @@
 - [x] **토큰 스모크 스크립트**: `scripts/kis_token_smoke.py`(paper+prod, 토큰 발급만이라 실전도 안전). **paper·prod 둘 다 발급 검증 완료**(올바른 엔드포인트), `resolve_settings()` 공유로 리팩터.
 - [x] **`app/brokers/kis/kis_client.py` 5메서드 구현** — `get_current_price`·`get_positions`·`place_order`·`cancel_order`·`get_order_status`. 현행(2025) TR ID(매수 `TTTC0012U`/매도 `TTTC0011U`/취소 `TTTC0013U`/잔고 `TTTC8434R`/체결 `TTTC0081R`, paper `T/J/C→V` 치환·시세 `F`예외), rt_cd envelope·레이트리밋(EGW00201) 재시도. 근거 정본: **`docs/KIS_API_SPEC.md`**(공식 GitHub 교차검증). 단위테스트 17개. **라이브 paper 읽기검증(현재가·잔고) 완료**.
 - [x] **환경별 base_url/token_path 자동 해석**(`KIS_ENV`→기본 URL + 환경별 키) — `resolve_settings()`. (이전: `settings.py`가 generic 키만 읽어 라이브 인증 실패하던 버그 동시 수정.)
-- [~] **포트폴리오/손익 백엔드 모델**: `backend.positions()` 어댑터 추가(broker→DataFrame). **홈·포트폴리오·분석 화면 라이브 와이어링은 남음**(현재 mock 데이터).
-- [ ] 안전(MVP_SPEC §10/오류표): paper 검증 후에만 **1주 수동** 실주문(사람 승인 게이트). 자동 실주문 금지.
+- [~] **포트폴리오/손익 라이브화**: `backend.positions()`·`backend.holdings_df()`(positions+현재가+화이트리스트명 → 평가금액/평가손익/손익률/비중, mock과 동일 스키마) 어댑터. **포트폴리오 화면 보유종목 표 라이브 분기 완료**(`data_source==backend` 시 실 KIS, 실패 시 데모 폴백; 데모 렌더 AppTest 회귀검증). 홈 KPI·자산곡선·제안, 분석(백테스트·기여도)은 이력DB·에이전트·백테스트 엔진 의존이라 **후속**.
+- [ ] 안전(MVP_SPEC §10/오류표): paper 검증 후에만 **1주 수동** 실주문(사람 승인 게이트). **paper 전용 주문 생애주기 스모크 `scripts/kis_paper_order_smoke.py`**(prod 하드가드·미체결가·자동취소) 추가 — 사람이 정규장에 `! python scripts/kis_paper_order_smoke.py`로 직접 실행. 자동 실주문 금지(에이전트 발주는 안전분류기도 차단).
 - [ ] (후속) 엔진 market-fallback 의미 보정: KIS 주문은 접수(PENDING) 응답이라 `_fallback_to_market`의 즉시-FILLED 가정과 어긋남 → 시장가도 체결 폴링 경유하도록.
 
 ### 2. 거버넌스(④) 마무리
