@@ -1,0 +1,70 @@
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "iteration_done", "iteration": 1, "mode": "plan", "status": "ok", "actions_count": 3}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 5, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_stop", "iteration": 1, "reason": "stop file present: C:\\Users\\ycpig\\AppData\\Local\\Temp\\pytest-of-ycpig\\pytest-814\\test_stop_file_halts_immediate0\\STOP_LOOP"}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 1, "dry_run": true, "allow_dirty": false, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_stop", "iteration": 1, "reason": "dirty worktree (use --allow-dirty to override): dirty stub"}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "iteration_done", "iteration": 1, "mode": "plan", "status": "ok", "actions_count": 3}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "iteration_done", "iteration": 1, "mode": "plan", "status": "ok", "actions_count": 3}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_start", "mode": "build", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "iteration_done", "iteration": 1, "mode": "build", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:48+09:00", "event": "loop_start", "mode": "review", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:49+09:00", "event": "iteration_done", "iteration": 1, "mode": "review", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:49+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:49+09:00", "event": "loop_start", "mode": "review", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "review", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "audit", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "audit", "status": "ok", "actions_count": 3}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "audit", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "audit", "status": "failed", "actions_count": 3}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "build", "max_iterations": 1, "dry_run": false, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "build", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "build", "max_iterations": 1, "dry_run": false, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "build", "status": "failed", "actions_count": 4}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "build", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "build", "status": "ok", "actions_count": 5}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "build", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "build", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "retro", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "retro", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "retro", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "retro", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "retro", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "retro", "status": "ok", "actions_count": 4}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "audit", "max_iterations": 5, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "audit", "status": "failed", "actions_count": 3}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 2, "mode": "audit", "status": "failed", "actions_count": 3}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_halt_max_failures", "iteration": 2, "failures": 2, "max_failures": 2}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 2, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 1, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 1, "mode": "plan", "status": "ok", "actions_count": 3}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "iteration_done", "iteration": 2, "mode": "plan", "status": "ok", "actions_count": 3}
+{"ts": "2026-06-09T07:43:50+09:00", "event": "loop_stop", "iteration": 3, "reason": "max_iterations reached (2)"}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 1, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 0, "backoff_max_seconds": 0, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "iteration_done", "iteration": 1, "mode": "plan", "status": "ok", "actions_count": 3}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "loop_stop", "iteration": 2, "reason": "max_iterations reached (1)"}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 2, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 0, "backoff_max_seconds": 8, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "iteration_error", "iteration": 1, "error": "RuntimeError('boom')", "failures": 1}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "iteration_backoff", "iteration": 1, "seconds": 2.0, "failures": 1}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "iteration_error", "iteration": 2, "error": "RuntimeError('boom')", "failures": 2}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "iteration_backoff", "iteration": 2, "seconds": 4.0, "failures": 2}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "loop_stop", "iteration": 3, "reason": "max_iterations reached (2)"}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "loop_start", "mode": "plan", "max_iterations": 5, "dry_run": true, "allow_dirty": true, "heartbeat_interval": 0, "backoff_max_seconds": 8, "dispatch_session_budget": 50000, "dispatch_max": 5, "explicit_auth": false, "goal": null, "safety_caps": []}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "iteration_error", "iteration": 1, "error": "RuntimeError('boom')", "failures": 1}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "iteration_backoff", "iteration": 1, "seconds": 2.0, "failures": 1}
+{"ts": "2026-06-09T07:43:51+09:00", "event": "loop_stop", "iteration": 1, "reason": "stop file during backoff sleep"}

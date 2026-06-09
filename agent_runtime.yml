@@ -1,0 +1,14 @@
+project: autofolio
+upstream:
+  package: agent_runtime
+  remote_url: https://github.com/ycpiglet/agent_runtime.git
+  ref: v0.1.5
+sync:
+  mode: check-diff-apply
+  allow_silent_overwrite: false
+  # 호스트 소유(분기) 템플릿 파일 — sync 가 건너뜀(업데이트도 충돌도 없음).
+  # 이걸로 Autofolio 튜닝이 업스트림 업데이트에 덮어써지지 않게 분리한다.
+  # 근거·재조정 절차는 docs/AGENT_RUNTIME_INTEGRATION.md (§3 분기 원장 · §4 런북).
+  unmanaged:
+    - AGENTS.md
+    - agents/roles.yml
