@@ -24,14 +24,15 @@ Before non-trivial work, read:
 
 1. `AGENTS.md`
 2. `README.md`
-3. `AGENT_RUNTIME.md`
-4. `agents/lead_engineer/STATUS.md`
-5. `agents/lead_engineer/AUDIT-LOG.md`
-6. `agents/roles.yml`
-7. Tool-specific guidance, if relevant
-8. Your role file: `agents/{role}/SKILL.md`
-9. `agents/lead_engineer/tasks/BACKLOG.md`
-10. The latest relevant `CYCLE`, `REVIEW`, and `TASK` files
+3. `agents/project/PROJECT-CONTEXT.yml` if present
+4. `AGENT_RUNTIME.md`
+5. `agents/lead_engineer/STATUS.md`
+6. `agents/lead_engineer/AUDIT-LOG.md`
+7. `agents/roles.yml`
+8. Tool-specific guidance, if relevant
+9. Your role file: `agents/{role}/SKILL.md`
+10. `agents/lead_engineer/tasks/BACKLOG.md`
+11. The latest relevant `CYCLE`, `REVIEW`, and `TASK` files
 
 Create an internal context snapshot:
 
@@ -54,6 +55,7 @@ Only print the snapshot when it would clarify ambiguity or risk.
 | Topic | Source |
 |-------|--------|
 | Project overview and setup | `README.md` |
+| Host project context | `agents/project/PROJECT-CONTEXT.yml` and `agents/project/*.md` |
 | Shared agent protocol | `AGENTS.md` |
 | Current operating status | `agents/lead_engineer/STATUS.md` |
 | Decisions and operating changes | `agents/lead_engineer/AUDIT-LOG.md` |
@@ -67,7 +69,27 @@ Only print the snapshot when it would clarify ambiguity or risk.
 Do not hard-code the current cycle number in tool-specific documents. Determine
 the latest cycle from the files in `agents/lead_engineer/`.
 
-## 3. Roles
+## 3. Project Context Overlay
+
+Reusable runtime skills stay generic. Host-specific product identity, MVP
+scope, vision, roadmap, organization, and external references live under
+`agents/project/`.
+
+When adapting this runtime to a new project:
+
+1. Copy `agents/project/PROJECT-CONTEXT.example.yml` to
+   `agents/project/PROJECT-CONTEXT.yml`.
+2. Fill product-specific files such as `VISION.md`, `ROADMAP.md`, `ORG.md`,
+   `TEAMS.md`, and `LINKS.md`.
+3. Reference those files from TASK records and context packets.
+4. Do not edit `agents/*/SKILL.md` or `scripts/*` to encode project-specific
+   product behavior.
+
+If a role needs project-specific nuance, add a host-owned note under
+`agents/project/` and link it from the task. Promote it upstream only when it is
+generic across projects.
+
+## 4. Roles
 
 | Role | Responsibility |
 |------|----------------|
@@ -91,7 +113,7 @@ the latest cycle from the files in `agents/lead_engineer/`.
 One task has one accountable owner. Collaborators may contribute, but the owner
 closes the record.
 
-## 4. Work Selection
+## 5. Work Selection
 
 When a request arrives:
 
@@ -110,7 +132,7 @@ Allowed task states:
 - `완료`
 - `보류`
 
-## 5. Reversibility Gate
+## 6. Reversibility Gate
 
 Use reversibility and blast radius to decide whether to act or ask.
 
@@ -119,6 +141,29 @@ Use reversibility and blast radius to decide whether to act or ask.
 | R1 | Reversible and in scope: act, verify, record |
 | R2 | Reversible but slightly ambiguous or cross-scope: act, flag assumptions and undo path |
 | R3 | Irreversible, destructive, external, secret-bearing, production-data, or high-risk: ask Owner |
+
+### Autonomous Delivery Lane
+
+Branch, commit, PR, and merge work should be automated by default when the
+repository has deterministic gates and the change is not critical.
+
+| Step | Default | Required evidence |
+|------|---------|-------------------|
+| Branch | Agent may create a scoped task branch | task id, scope, rollback path |
+| Commit | Agent may commit scoped changes | focused check result and changed-file summary |
+| PR | Agent may open/update PR | review summary, test evidence, risk label |
+| Merge | Agent may merge when configured gates pass | green checks, no critical findings, merge log |
+
+Owner approval is not required for routine branch/commit/PR/merge execution
+when all of these are true:
+
+1. the change is scoped to an approved task or direct user request;
+2. no secret, production data, billing, legal, destructive, or public release
+   boundary is crossed;
+3. required checks pass or a documented waiver is approved by the accountable
+   non-Owner role named in the task;
+4. the merge target and branch protection rules permit automation;
+5. rollback is possible through normal VCS history.
 
 Examples that require Owner approval:
 
@@ -129,11 +174,12 @@ Examples that require Owner approval:
 - secret access or rotation
 - production data writes
 - disabling safety checks
+- critical security, legal, billing, data-loss, or irreversible release changes
 
 If the execution platform asks for permission, do not bypass it. Present the
 smallest safe command scope.
 
-## 6. File Edits
+## 7. File Edits
 
 1. Check the worktree before edits.
 2. Preserve user changes.
@@ -142,7 +188,7 @@ smallest safe command scope.
 5. Use structured parsers or existing scripts where available.
 6. If behavior changes, update the relevant docs and verification records.
 
-## 7. Records
+## 8. Records
 
 New task records should include:
 
@@ -174,12 +220,27 @@ Completion records must state:
 - verification commands and outcomes
 - remaining issues or handoff notes
 
-## 8. Reporting
+## 9. Reporting
 
-Final task reports use BRIEF format:
+Final task reports use the human-centered, machine-readable Executive BRIEF
+format. Keep it concise, visually scannable, and action-oriented.
+
+```yaml
+---
+type: brief
+id: BRIEF-YYYY-MM-DD-NNN
+audience: owner|ceo|agent-team
+status: G|Y|R
+priority: Critical|High|Medium|Low
+tags: [release, automation]
+actions: [approve, review, no-action]
+evidence:
+  - path/or/url
+---
+```
 
 ```text
-Bottom Line: <one-line status and decision>.
+Bottom Line: <one-line outcome and decision>.
 
 ## Signal
 | Item | State | Evidence |
@@ -191,11 +252,16 @@ Bottom Line: <one-line status and decision>.
 
 ## Decision
 1. <decision needed, or "없음">
+
+## Next
+| Step | Owner | Trigger |
+|------|-------|---------|
+| <action> | <role> | <condition> |
 ```
 
 Use `G`, `Y`, and `R` for state. Do not use emoji.
 
-## 9. Time
+## 10. Time
 
 Use these commands for timestamps:
 
@@ -207,19 +273,44 @@ python scripts/now.py --date
 
 If Python is unavailable, mark time as `unknown` rather than guessing.
 
-## 10. Git
+## 11. Git
 
-Default flow:
+Default flow is automated unless a critical boundary is detected:
 
 1. Create a task branch.
 2. Make small scoped commits.
 3. Run focused checks.
-4. Open a PR or follow the repository's release plan.
-5. Merge only through the configured gate.
+4. Open or update a PR.
+5. Dispatch review agents or CI checks.
+6. Merge through the configured gate when checks pass.
+7. Record branch, commit, PR, merge, and evidence links.
 
 Do not push directly to `main` unless this repository explicitly allows it.
+Do not ask Owner for routine branch/commit/PR/merge approval when the
+Autonomous Delivery Lane conditions are met.
 
-## 11. Agent Runtime Sync
+## 11.5 Release Council
+
+Routine patch/minor releases may be decided by an agent release council instead
+of Owner approval when all release gates pass and no critical boundary exists.
+
+Required council roles:
+
+1. Lead Engineer: scope and version readiness.
+2. QA: validation evidence.
+3. Independent Auditor: risk and evidence integrity.
+4. Doc Steward: changelog, reports, and handoff quality.
+
+Owner approval is required only for critical releases:
+
+1. major version or breaking change;
+2. secret, credential, production data, billing, or legal impact;
+3. failed, missing, or waived critical gate;
+4. external publication to a new or untrusted target;
+5. destructive rollback, force push, or irreversible operation;
+6. explicit user or organization policy requiring Owner sign-off.
+
+## 12. Agent Runtime Sync
 
 This repository may consume reusable automation through `agent_runtime`.
 Host projects pin the upstream in `agent_runtime.yml` and update through:
@@ -234,7 +325,7 @@ agent_runtime lock --root . --write
 
 The update path must preserve host edits and only apply managed template files.
 
-## 12. Validation
+## 13. Validation
 
 Before closure, run the narrowest useful checks first, then the repository gate:
 
@@ -247,15 +338,24 @@ If a check cannot run, report exactly why and what remains unverified.
 <!-- AUTOFOLIO-OVERLAY:start — 아래는 호스트(Autofolio) 추가분이며 업스트림 템플릿에는 없다.
      AGENTS.md 는 agent_runtime.yml 의 sync.unmanaged 로 분리(sync 가 건드리지 않음).
      분기 원장·업데이트 재조정 절차: docs/AGENT_RUNTIME_INTEGRATION.md §3–§4. -->
-## 13. Handoff Protocol
+## 14. Handoff Protocol
 
 다른 모델/세션으로 인계할 때는 4섹션으로 남긴다: (1) 한 일·검증, (2) 열린 작업·블로커, (3) 봐야 할 파일·문서·TASK, (4) 주의/리스크.
 
-## 14. Token Budget
+## 15. Token Budget
 
 세션 토큰 카탈로그·예산 규약은 [agents/lead_engineer/TOKEN-BUDGET.md](agents/lead_engineer/TOKEN-BUDGET.md)를 따른다. 대형 작업 전 예상 비용을 BRIEF/PLAN의 Cost에 기재한다.
 
-## 15. Autonomous Merge Gate (provisional — pending upstream §3.5)
+## 16. Autofolio R3 Surface (Autonomous Delivery Lane 보정)
 
-호스트 잠정 정책: 심의(council/seminar/cycle_gate) → 결정 → PR → 게이트 통과 시 자율 squash 머지(**main 머지 = R2**, §5 보정). 전체 게이트·Autofolio R3 surface·하네스 주의·우선순위는 [agents/lead_engineer/MERGE-POLICY.md](agents/lead_engineer/MERGE-POLICY.md) 참조(코드 정본 `scripts/auto_merge.py`). **업스트림 템플릿 `AGENTS.md`가 §3.5를 얻으면 그쪽이 정본(전부 반영)이고 본 §15는 제거**된다 — `scripts/check_merge_policy_precedence.py`가 감지·강제, 절차는 `docs/AGENT_RUNTIME_INTEGRATION.md §3.1`. 실행 환경 안전 분류기는 별개 층(정책 ≠ 하네스 권한).
+§6 Autonomous Delivery Lane의 "critical boundary" 를 Autofolio 고유 surface로 구체화한다. 아래가 하나라도 포함되면 Owner 에스컬레이션:
+
+- `.env`, KIS 앱키·계좌(`KIS_*`), 시크릿
+- `app/brokers/kis/` 실주문 경로(`place_order`/`cancel_order`), `app/engine/order_flow.py`, `app/risk/**` 안전 게이트 변경
+- DB 스키마·마이그레이션(`app/database/schema.sql`, `*migrate*`)
+- 자동 실매매 ON 전환·킬스위치 무력화 등 안전 정책 변경(MVP_SPEC §10)
+- `.github/workflows/**` CI 변경
+
+전체 게이트·우선순위: [agents/lead_engineer/MERGE-POLICY.md](agents/lead_engineer/MERGE-POLICY.md) 참조.
+코드 정본: `scripts/auto_merge.py`.
 <!-- AUTOFOLIO-OVERLAY:end -->

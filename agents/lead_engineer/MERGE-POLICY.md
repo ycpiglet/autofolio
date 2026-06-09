@@ -1,8 +1,8 @@
 # MERGE-POLICY — 자율 머지 게이트 (호스트 provisional)
 
-> **상태: PROVISIONAL (호스트 작성).** 업스트림 `AGENTS.md §3.5`(자율 머지 거버넌스)가
-> 아직 커밋되지 않아(아래 §근거) Autofolio 가 잠정 정본으로 둔다. **업스트림 §3.5 가
-> 생기면 그쪽이 우선(전부 반영)이고, 이 문서는 Autofolio 전용 애드덤만 남긴다(§우선순위).**
+> **상태: ADDENDUM (v0.1.8 precedence swap 완료).** 업스트림 v0.1.8 `AGENTS.md §6
+> Autonomous Delivery Lane`이 자율 PR+머지 규칙을 정본화했다(2026-06-09). **공통 규칙은
+> 업스트림 §6을 따른다.** 이 문서는 **Autofolio 전용 R3 surface 애드덤**만 담는다.
 > 소유: 호스트(오버레이 ②) — `agent_runtime sync` 가 건드리지 않으므로 업스트림과 **병렬
 > 진화·자동충돌 없음**. AGENTS.md 에는 §15 포인터만 둔다(본문 §0–§12 pristine 유지).
 > 작성: 2026-06-09T19:20+09:00 · 근거 스크립트: `scripts/auto_merge.py`, `scripts/cycle_gate.py`
