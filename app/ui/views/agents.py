@@ -11,10 +11,11 @@ from app.ui.mock import data
 def render() -> None:
     st.header("🤖 에이전트")
     ok, info = ar.available()
+    agent_count = len(ar.list_agents())
     if ok:
-        st.caption(f"🟢 에이전트 실연결 (Anthropic · {info})")
+        st.caption(f"🟢 에이전트 실연결 (Anthropic · {info}) · {agent_count}개 에이전트 로드")
     else:
-        st.caption(f"🟡 데모 모드 — {info}. `.env`에 ANTHROPIC_API_KEY 설정 시 실연결.")
+        st.caption(f"🟡 데모 모드 — {info}. `.env`에 ANTHROPIC_API_KEY 설정 시 실연결. · {agent_count}개 에이전트 등록")
 
     chat_tab, ic_tab = st.tabs(["에이전트 채팅", "투자위원회 (IC)"])
     with chat_tab:

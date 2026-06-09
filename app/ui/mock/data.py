@@ -244,8 +244,8 @@ def agents_tree() -> dict:
         "자산팀 · Korea Desk": ["kr-equity-specialist", "kr-etf-specialist", "kr-fund-specialist", "kr-fixed-income-specialist"],
         "자산팀 · US Desk": ["us-equity-specialist", "us-etf-specialist", "us-fixed-income-specialist"],
         "자산팀 · Global Desk": ["commodities-specialist", "futures-specialist", "options-specialist", "fx-specialist"],
-        "퀀트팀 (설계)": ["quant-researcher", "backtest-engineer", "data-engineer", "optimization-quant"],
-        "거버넌스 (설계)": ["devils-advocate", "performance-analyst", "execution-trader", "compliance-officer"],
+        "퀀트팀 (스캐폴딩)": ["quant-researcher", "backtest-engineer", "data-engineer", "optimization-quant"],
+        "거버넌스": ["devils-advocate", "performance-analyst", "execution-trader", "compliance-officer"],
     }
 
 
