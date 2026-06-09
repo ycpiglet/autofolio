@@ -33,9 +33,10 @@
 - [ ] (후속) 엔진 market-fallback 의미 보정: KIS 주문은 접수(PENDING) 응답이라 `_fallback_to_market`의 즉시-FILLED 가정과 어긋남 → 시장가도 체결 폴링 경유하도록.
 
 ### 2. 거버넌스(④) 마무리
-- [ ] `performance-analyst`(로그 기반 회고·손익 기여 분석) + **`/retro` 워크플로**.
+- [x] **`/retro` 워크플로** — `scripts/run_retro.py` (Performance Analyst→DA→Risk→Forward Actions, DB 주문로그 기반, 멀티에이전트, dry-run 지원, `.autofolio/retro/RETRO_*.md` 저장). (2026-06-10)
+- [x] **IC 결정 → 매매 조건 자동 연결** — `agents.py` IC 결정문 파싱(`extract_condition_from_ic`) → 사람 확인 버튼 → `backend.add_condition(created_by="IC", auto_enabled=False)`. (2026-06-10)
 - [ ] `execution-trader`, `compliance-officer` 에이전트.
-- [ ] **IC 결정 → 매매 조건 자동 연결**(승인 시 `backend.add_condition`로, 사람 확인 후).
+- [ ] performance-analyst 에이전트 전용 SKILL.md + UI 탭.
 
 ### 3. 퀀트 리서치팀(③)
 - [ ] `quant-researcher`·`backtest-engineer`·`data-engineer`·`optimization-quant` 에이전트 + 스킬.
@@ -53,9 +54,10 @@
 - [ ] SSO 실연결: Google OIDC(`st.login`) + Kakao/Naver(`streamlit-oauth`), 채널 OAuth 토큰.
 
 ### 자동 모드 · 안전
-- [ ] 스케줄러/데몬(auto 모드 실행 루프 + 주기 알림).
-- [ ] **L2→L3 감독형 자동** + 서킷브레이커·일일예산·주문한도 실집행 + 전수 알림.
-- [ ] 종목별 모드(L0–L4) 실제 엔진 반영.
+- [x] **스케줄러/데몬** — `scripts/run_paper_engine.py` (paper-only, 거래시간 가드, --dry-run, --interval, Telegram 알림 연동). (2026-06-10)
+- [x] **L2 자동매매 토글 DB 연결** — settings.py auto_enabled 토글 → DB 즉시 반영, 리스크 한도 DB 저장. (2026-06-10)
+- [ ] L3 감독형 자동 + 서킷브레이커 실집행.
+- [ ] 종목별 모드(L0–L4) 실제 엔진 반영(현재 session_state만).
 
 ### 분석 (과거/미래)
 - [ ] 과거: 트레이드 저널·손익 기여(attribution)·습관 진단(거버넌스/퀀트 연계).
@@ -67,10 +69,13 @@
 - [~] **자율 머지 거버넌스**: 호스트 잠정 정본 `agents/lead_engineer/MERGE-POLICY.md`(+ `AGENTS.md` §15, `scripts/check_merge_policy_precedence.py`) 작성 — `auto_merge.py` 게이트 정본화·Autofolio R3 surface·업스트림 우선 교체 규칙. **업스트림 보고 필요**: `auto_merge.py`가 참조하는 `AGENTS.md §3.5`+`MEETING/EVIDENCE-2026-06-01`이 업스트림 미커밋(스크립트만 배포된 자기-불일치, §14 누락과 동류) → Issue 등록 후 §3.5 템플릿화되면 precedence swap.
 
 ### 기술부채 · 정리
-- [x] 이식 비엔지니어 에이전트(ceo/owner/scribe 등 9종) Autofolio 맥락 튜닝 — 제품/역할 컨텍스트(개발팀 ≠ 투자결정) 주입 완료.
-- [ ] `lead-engineer` 부속 문서(RALPH/TOKEN-BUDGET 등) Autofolio 운영에 맞게 취사선택.
-- [ ] MVP_SPEC §5 구조도에 `app/ui`(신규 셸)·`agents_runtime`·`ic` 반영.
-- [ ] 테스트: AppTest 외 핵심 로직 pytest 커버리지 확대(엔진·리스크·backend 어댑터).
+- [x] 이식 비엔지니어 에이전트(ceo/owner/scribe 등 9종) Autofolio 맥락 튜닝 완료.
+- [x] **엔진 market-fallback PENDING 보정** — `_poll_fill()` 헬퍼로 KIS 실브로커 PENDING 처리. (2026-06-10)
+- [x] **구조화 로깅** — `get_structured_logger/log_event`, `logs/events.jsonl`, `scripts/tail_events.py`. (2026-06-10)
+- [x] **GitHub Actions CI** — `.github/workflows/test.yml` (pytest + check_agent_docs). (2026-06-10)
+- [ ] MVP_SPEC §5 구조도 업데이트.
+- [ ] L3 서킷브레이커·일일예산 실집행.
+- [ ] 테스트 커버리지 확대(리스크·backend 어댑터 AppTest).
 - [ ] 기존 MVP UI(`streamlit_app.py`)와 신규 셸 통합 또는 역할 정리.
 - [x] ~~Full agent_runtime 스캐폴딩 이식~~ ✅ 프레임워크 전체 설치(공식 sync, 150파일).
 - [x] **중복 정리 완료** — dev 16역할은 프레임워크 정본 `agents/<role>/SKILL.md` 단일 소스, `kis-api-engineer`는 `agents/kis_api_engineer/SKILL.md`로 승격. 앱 `agents_runtime`이 정본 `agents/`(프론트매터 無, 폴더=이름) + `.claude/agents`(자산·거버넌스) 양쪽을 읽도록 확장, 중복 `.claude/agents/dev-team/` 제거(교차링크 경고 145→107).
