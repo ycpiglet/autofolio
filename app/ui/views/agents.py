@@ -68,6 +68,31 @@ def _ic() -> None:
         st.success(f"결정 로그 저장: `{result['path']}`")
         st.subheader("🏛️ CIO 결정")
         st.markdown(result["decision"])
+
+        # IC 결정 → 매매 조건 자동 연결
+        if st.session_state.get("data_source") == "backend":
+            cond = ic_mod.extract_condition_from_ic(result)
+            if cond:
+                st.info(
+                    f"📌 자동 파싱된 조건: **{cond['symbol']}** {cond['side']} "
+                    f"{cond['quantity']}주 @ {cond['target_price']:,.0f}"
+                )
+                if st.button("✅ 이 조건으로 매매 등록 (사람 확인)", key="ic_apply_cond"):
+                    from app.ui import backend
+                    cid = backend.add_condition(
+                        symbol=cond["symbol"],
+                        side=cond["side"],
+                        target_price=cond["target_price"],
+                        quantity=cond["quantity"],
+                        order_type="LIMIT",
+                        auto_enabled=False,   # 자동주문은 별도 ON 필요
+                        created_by="IC",
+                        rationale=result["decision"][:300],
+                    )
+                    st.success(f"✅ 조건 등록 완료 (id={cid}). 자동주문은 매매 화면에서 별도 활성화하세요.")
+            else:
+                st.caption("ℹ️ 결정문에서 종목코드/목표가/방향 자동 파싱 불가 — 매매 화면에서 수동 등록.")
+
         with st.expander("전체 회의록"):
             for t in result["transcript"]:
                 st.markdown(f"**{t['role']}** (`{t['agent']}`)")
