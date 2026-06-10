@@ -418,3 +418,26 @@ def add_journal_entry(
         grade=grade, lesson=lesson,
         plan_followed=plan_followed, emotion_flag=emotion_flag,
     )
+
+
+def daily_pnl_series() -> "pd.DataFrame":
+    """일별 실현손익 시계열 (execution_logs 기반).
+
+    컬럼: date (YYYY-MM-DD), pnl (원).
+    """
+    repo, *_ = _ctx()
+    from app.database.sqlite_db import get_connection
+    with get_connection(repo.db_path) as conn:
+        rows = conn.execute(
+            """
+            SELECT DATE(el.filled_at) AS date,
+                   SUM(CASE WHEN ol.side='SELL'
+                            THEN el.filled_price * el.filled_quantity
+                            ELSE -el.filled_price * el.filled_quantity END) AS pnl
+            FROM execution_logs el
+            JOIN order_logs ol ON el.order_log_id = ol.id
+            GROUP BY DATE(el.filled_at)
+            ORDER BY date
+            """
+        ).fetchall()
+    return pd.DataFrame([dict(r) for r in rows]) if rows else pd.DataFrame(columns=["date", "pnl"])
