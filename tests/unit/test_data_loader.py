@@ -40,7 +40,7 @@ def test_load_price_history_kis_client_returns_dataframe():
 
     assert len(df) == 1
     assert df["close"].iloc[0] == 302000.0
-    assert str(df["date"].dtype) == "datetime64[ns]"
+    assert "datetime64" in str(df["date"].dtype)  # ns on older pandas, us on pandas 3+
 
 
 def test_load_price_history_empty_rows_returns_empty_df():
