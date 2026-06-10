@@ -23,8 +23,10 @@ _PATH_ORDER_CASH = "/uapi/domestic-stock/v1/trading/order-cash"
 _PATH_RVSECNCL = "/uapi/domestic-stock/v1/trading/order-rvsecncl"
 _PATH_DAILY_CCLD = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"
 _PATH_PSBL_RVSECNCL = "/uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl"
+_PATH_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
 
 _TR_PRICE = "FHKST01010100"
+_TR_CHART = "FHKST03010100"  # 일봉, paper/prod 동일 (F* TR — no V prefix needed)
 _TR_BALANCE = "TTTC8434R"
 _TR_BUY = "TTTC0012U"
 _TR_SELL = "TTTC0011U"
@@ -241,6 +243,55 @@ class KisClient(BrokerClient):
                 break
         return positions
 
+    def get_cash_balance(self) -> float:
+        """예수금(D+2 결제 가능 현금). output2.dnca_tot_amt. 실패 시 0.0 반환."""
+        cano, acnt = self._account()
+        params = {
+            "CANO": cano, "ACNT_PRDT_CD": acnt,
+            "AFHR_FLPR_YN": "N", "OFL_YN": "", "INQR_DVSN": "02",
+            "UNPR_DVSN": "01", "FUND_STTL_ICLD_YN": "N",
+            "FNCG_AMT_AUTO_RDPT_YN": "N", "PRCS_DVSN": "01",
+            "CTX_AREA_FK100": "", "CTX_AREA_NK100": "",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_BALANCE, _TR_BALANCE, params=params)
+            return float(data.get("output2", {}).get("dnca_tot_amt") or 0)
+        except BrokerError:
+            return 0.0
+
+    def get_price_history(self, symbol: str, period: str = "D", count: int = 100) -> list[dict]:
+        """일봉(D)/주봉(W)/월봉(M) OHLCV. count 건 상한. BrokerError 시 [] 반환.
+
+        반환 항목: {date: str(YYYYMMDD), open, high, low, close: float, volume: int}.
+        """
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": symbol,
+            "FID_INPUT_DATE_1": "",
+            "FID_INPUT_DATE_2": "",
+            "FID_PERIOD_DIV_CODE": period,
+            "FID_ORG_ADJ_PRC": "0",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_CHART, _TR_CHART, params=params)
+            rows = data.get("output2") or []
+            return [
+                {
+                    "date": r["stck_bsop_date"],
+                    "open": float(r.get("stck_oprc") or 0),
+                    "high": float(r.get("stck_hgpr") or 0),
+                    "low": float(r.get("stck_lwpr") or 0),
+                    "close": float(r.get("stck_clpr") or 0),
+                    "volume": int(r.get("acml_vol") or 0),
+                }
+                for r in rows[:count]
+                if r.get("stck_bsop_date")
+            ]
+        except BrokerError as exc:
+            import logging
+            logging.getLogger(__name__).warning("get_price_history %s failed: %s", symbol, exc)
+            return []
+
     # ----- 주문 -------------------------------------------------------------
     def place_order(self, request: OrderRequest) -> OrderResult:
         cano, acnt = self._account()
@@ -373,6 +424,40 @@ class KisClient(BrokerClient):
             filled_quantity=ccld_qty,
             message=f"Partial/pending: {ccld_qty}/{ord_qty} filled.",
         )
+
+    def get_today_orders(self) -> list[dict]:
+        """오늘 전체 주문 내역 조회 (KIS inquire-daily-ccld, ODNO="" = 전체).
+
+        Returns list of dicts with keys: odno, pdno, sll_buy_dvsn_cd, ord_qty,
+        tot_ccld_qty, rmn_qty, ord_unpr, avg_prvs, cncl_yn, ord_tmd.
+        모의투자 미지원 시 빈 리스트 반환.
+        """
+        cano, acnt = self._account()
+        today = datetime.now().strftime("%Y%m%d")
+        params = {
+            "CANO": cano,
+            "ACNT_PRDT_CD": acnt,
+            "INQR_STRT_DT": today,
+            "INQR_END_DT": today,
+            "SLL_BUY_DVSN_CD": "00",
+            "INQR_DVSN": "00",
+            "PDNO": "",
+            "CCLD_DVSN": "00",
+            "ORD_GNO_BRNO": "",
+            "ODNO": "",
+            "INQR_DVSN_3": "00",
+            "INQR_DVSN_1": "",
+            "EXCG_ID_DVSN_CD": _EXCG_KRX,
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": "",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_DAILY_CCLD, _TR_DAILY_CCLD, params=params)
+            return data.get("output1") or []
+        except BrokerError as exc:
+            import logging
+            logging.getLogger(__name__).warning("get_today_orders failed: %s", exc)
+            return []
 
     # ----- 취소용 거래소 주문조직번호 조회 (캐시 미스 시 best-effort) ----------
     def _lookup_org_no(self, broker_order_id: str) -> str | None:

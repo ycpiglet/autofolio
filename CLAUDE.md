@@ -39,6 +39,18 @@ generalist.
 
 For substantial work, record which roles or perspectives contributed.
 
+## Multi-Agent Execution (MANDATORY)
+
+**모든 실질적 작업은 반드시 멀티에이전트로 수행한다. 이 규칙은 예외 없이 강제된다.**
+
+1. **플랜이 있으면** `superpowers:subagent-driven-development` 스킬로 실행한다.
+   - Task당 implementer 서브에이전트 1개 → spec reviewer → code quality reviewer 순서.
+   - 리뷰가 이슈를 찾으면 implementer가 수정 → 재리뷰. 이슈가 없어야 다음 Task로 넘어간다.
+2. **독립적인 작업 2개 이상이면** `superpowers:dispatching-parallel-agents`로 병렬 처리한다.
+3. **백로그 자동화 사이클은** Ralph Loop(`/ralph-loop`)로 구동한다. 세션 시작 시 `.claude/ralph-loop.local.md`를 읽고 active면 즉시 재개한다.
+4. **단일 에이전트 인라인 구현 금지** — 간단해 보여도 서브에이전트로 위임한다.
+   - 허용 예외: 한 줄 수정, 설정 조회, 상태 확인, 사람에게 설명하는 응답.
+
 ## Implementation Rules
 
 1. Prefer existing local helpers and scripts.

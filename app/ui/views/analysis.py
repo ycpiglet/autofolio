@@ -333,11 +333,9 @@ def render() -> None:
                     st.caption(f"포트폴리오: {var_res.total_value:,.0f}원 · {var_res.note}")
                     p = var_res.percentiles
                     st.markdown(
-                        f"| 최하 1% | 5% | 10% | 25% | 중간 |"
-                        f"
-|---|---|---|---|---|"
-                        f"
-| {p.get(1,0):,.0f} | {p.get(5,0):,.0f} | {p.get(10,0):,.0f} | {p.get(25,0):,.0f} | {p.get(50,0):,.0f} |"
+                        f"| 최하 1% | 5% | 10% | 25% | 중간 |\n"
+                        f"|---|---|---|---|---|\n"
+                        f"| {p.get(1,0):,.0f} | {p.get(5,0):,.0f} | {p.get(10,0):,.0f} | {p.get(25,0):,.0f} | {p.get(50,0):,.0f} |"
                     )
                     st.caption("⚠️ 과거 수익률 분포 기반 통계 추정. 실제 미래 손실을 보장하지 않습니다.")
         else:

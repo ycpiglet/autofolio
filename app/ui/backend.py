@@ -149,8 +149,11 @@ def kpis() -> dict:
     df = holdings_df()
     total_market = float(df["평가금액"].sum()) if not df.empty else 0.0
     total_pnl = float(df["평가손익"].sum()) if not df.empty else 0.0
-    # 현금 잔고: 현재 Mock 브로커에서는 미지원 → 0.0 placeholder
-    cash = 0.0
+    try:
+        _, broker, _, _ = _ctx()
+        cash = float(broker.get_cash_balance()) if hasattr(broker, "get_cash_balance") else 0.0
+    except Exception:
+        cash = 0.0
     total_assets = total_market + cash
     cash_ratio = (cash / total_assets * 100) if total_assets else 0.0
     return {

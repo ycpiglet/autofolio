@@ -10,7 +10,14 @@ from app.ui.mock import data
 def render() -> None:
     st.header("🧾 매매 / 주문")
     if st.session_state.get("data_source") == "backend":
-        st.caption("🟢 라이브 (Mock 브로커 + SQLite, 증권 키 불필요) — 실제 주문은 발생하지 않습니다.")
+        from app.ui import backend as _be
+        env = _be.env()
+        if env == "paper":
+            st.caption("🟡 모의투자(paper) — KIS 모의투자 계좌로 실제 주문이 전송됩니다.")
+        elif env == "prod":
+            st.caption("🔴 실전투자(prod) — 실제 자금으로 주문이 집행됩니다. 주의하세요.")
+        else:
+            st.caption("🟢 라이브 (Mock 브로커 + SQLite) — 실제 주문은 발생하지 않습니다.")
         _live()
     else:
         st.caption("⚠️ 데모: 실제 주문은 발생하지 않습니다 (mock).")
@@ -20,7 +27,7 @@ def render() -> None:
 def _live() -> None:
     from app.ui import backend
 
-    cond_tab, run_tab, log_tab, check_tab = st.tabs(["목표가 조건", "엔진 실행 / 결과", "주문로그", "📋 장전 체크리스트"])
+    cond_tab, run_tab, log_tab, kis_tab, check_tab = st.tabs(["목표가 조건", "엔진 실행 / 결과", "주문로그(SQLite)", "KIS 주문내역", "📋 장전 체크리스트"])
 
     with cond_tab:
         opts = backend.symbol_options()
@@ -31,9 +38,13 @@ def _live() -> None:
             label = c1.selectbox("종목", list(opts.keys()), key="lv_sym")
             sym = opts[label]
             cur = backend.price(sym)
-            c1.metric("현재가 (mock)", f"{cur:,.0f}")
+            c1.metric("현재가", f"{cur:,.0f}")
             side = c2.radio("방향", ["BUY", "SELL"], horizontal=True, key="lv_side")
-            tp = c2.number_input("목표가", min_value=0.0, value=float(round(cur * 0.99)), step=100.0, key="lv_tp")
+            default_tp = float(round(cur * 1.01)) if side == "BUY" else float(round(cur * 0.99))
+            tp = c2.number_input(
+                "목표가 (BUY: 현재가 이상이면 즉시 실행)",
+                min_value=0.0, value=default_tp, step=500.0, key="lv_tp",
+            )
             qty = c3.number_input("수량", min_value=1, value=1, key="lv_qty")
             auto = c3.checkbox("자동주문 ON", value=False, key="lv_auto")
             compliance_check = st.toggle("Compliance 검토 후 저장", value=True, key="lv_compliance")
@@ -73,7 +84,9 @@ def _live() -> None:
         st.dataframe(backend.list_conditions(), hide_index=True, width="stretch")
 
     with run_tab:
-        if st.button("⚙️ 엔진 1회 실행 (mock)", key="lv_run"):
+        from app.ui import backend as _be_run
+        _env_label = {"paper": "모의투자", "prod": "실전"}.get(_be_run.env(), "mock")
+        if st.button(f"⚙️ 엔진 1회 실행 ({_env_label})", key="lv_run"):
             msgs = backend.run_engine_once()
             if msgs:
                 for m in msgs:
@@ -92,6 +105,19 @@ def _live() -> None:
                 st.dataframe(df, hide_index=True, width="stretch")
         except Exception as exc:  # noqa: BLE001 — UI 폴백
             st.warning(f"주문로그 조회 실패: {exc}")
+
+    with kis_tab:
+        st.caption("KIS 서버에서 오늘 주문내역을 직접 조회합니다 (스크립트로 넣은 주문 포함).")
+        if st.button("🔄 새로고침", key="kis_refresh"):
+            st.rerun()
+        try:
+            df = backend.kis_today_orders()
+            if df.empty:
+                st.info("오늘 주문내역이 없거나 mock 환경입니다.")
+            else:
+                st.dataframe(df, hide_index=True, use_container_width=True)
+        except Exception as exc:  # noqa: BLE001
+            st.warning(f"KIS 주문내역 조회 실패: {exc}")
 
     with check_tab:
         _pre_trade_checklist(backend)
