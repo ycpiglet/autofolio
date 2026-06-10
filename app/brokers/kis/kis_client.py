@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import time
 from datetime import datetime
 
@@ -39,7 +40,8 @@ _TR_PSBL_ORDER = "TTTC8908R"
 _ORD_DVSN_LIMIT = "00"   # 지정가
 _ORD_DVSN_MARKET = "01"  # 시장가 (ORD_UNPR="0")
 _EXCG_KRX = "KRX"
-_RVSE_CNCL_CANCEL = "02"  # 01=정정, 02=취소
+_RVSE_CNCL_MODIFY = "01"  # 정정
+_RVSE_CNCL_CANCEL = "02"  # 취소
 
 _DEFAULT_TIMEOUT_SEC = 10
 _MAX_BALANCE_PAGES = 20  # 연속조회 무한루프 방지 상한
@@ -303,7 +305,6 @@ class KisClient(BrokerClient):
                 "available_cash": float(output.get("ord_psbl_cash") or 0),
             }
         except BrokerError as exc:
-            import logging
             logging.getLogger(__name__).warning("get_buying_power %s failed: %s", symbol, exc)
             return {"max_quantity": 0, "available_cash": 0.0}
 
@@ -336,7 +337,6 @@ class KisClient(BrokerClient):
                 if r.get("stck_bsop_date")
             ]
         except BrokerError as exc:
-            import logging
             logging.getLogger(__name__).warning("get_price_history %s failed: %s", symbol, exc)
             return []
 
@@ -439,7 +439,7 @@ class KisClient(BrokerClient):
             "KRX_FWDG_ORD_ORGNO": org_no,
             "ORGN_ODNO": broker_order_id,
             "ORD_DVSN": ctx.get("ord_dvsn", _ORD_DVSN_LIMIT),
-            "RVSE_CNCL_DVSN_CD": "01",  # 정정
+            "RVSE_CNCL_DVSN_CD": _RVSE_CNCL_MODIFY,
             "ORD_QTY": str(int(new_quantity)),
             "ORD_UNPR": str(adjusted_price),
             "QTY_ALL_ORD_YN": "N",
@@ -544,7 +544,6 @@ class KisClient(BrokerClient):
             data, _ = self._request("GET", _PATH_DAILY_CCLD, _TR_DAILY_CCLD, params=params)
             return data.get("output1") or []
         except BrokerError as exc:
-            import logging
             logging.getLogger(__name__).warning("get_today_orders failed: %s", exc)
             return []
 
