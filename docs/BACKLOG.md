@@ -80,6 +80,21 @@
 - [x] T-30/21/22: 백테스트 실행 UI, PnL 캘린더, 장전 체크리스트
 - [x] T-43/45/42: pyproject.toml, CI 커버리지 게이트, review_pr.py
 
+
+### Wave 7~9 완료 (2026-06-10 오후)
+- [x] T-06 홈 자산곡선 라이브화 (backend.asset_curve())
+- [x] T-19 IC /approve /ic Telegram 명령
+- [x] T-31 시나리오 분석 라이브 (bull/base/bear, holdings 기반)
+- [x] T-33 What-if 계산기 (종목 비중 변경 영향)
+- [x] T-36 퀀트 시그널 (RSI/SMA/MACD/볼린저, look-ahead 방어)
+- [x] T-37 포트폴리오 최적화 (균등비중/역변동성/모멘텀 + 리밸런싱 제안)
+- [x] T-40 E2E 통합 테스트 6개 (엔진→DB 전 흐름, 킬스위치·L1 게이트)
+- [x] T-44 Dockerfile + docker-compose.yml (app + scheduler 서비스)
+- [x] T-16 Notion 어댑터 (IC 결정·회고 DB 기록)
+- [x] T-34 Windows Task Scheduler 등록 스크립트
+- [x] T-23 Google Sheets 어댑터 (포트폴리오 미러·알림)
+- [x] T-20 Attribution Sankey 다이어그램 (plotly, bar chart 폴백)
+
 ### 기술부채 · 정리 (잔여)
 - [ ] `streamlit_app.py` vs `autofolio_app.py` 통합 정리.
 - [ ] 테스트 커버리지 60%+ (현재 50% 게이트).
