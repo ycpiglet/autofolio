@@ -241,6 +241,22 @@ class KisClient(BrokerClient):
                 break
         return positions
 
+    def get_cash_balance(self) -> float:
+        """예수금(D+2 결제 가능 현금). output2.dnca_tot_amt. 실패 시 0.0 반환."""
+        cano, acnt = self._account()
+        params = {
+            "CANO": cano, "ACNT_PRDT_CD": acnt,
+            "AFHR_FLPR_YN": "N", "OFL_YN": "", "INQR_DVSN": "02",
+            "UNPR_DVSN": "01", "FUND_STTL_ICLD_YN": "N",
+            "FNCG_AMT_AUTO_RDPT_YN": "N", "PRCS_DVSN": "01",
+            "CTX_AREA_FK100": "", "CTX_AREA_NK100": "",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_BALANCE, _TR_BALANCE, params=params)
+            return float(data.get("output2", {}).get("dnca_tot_amt") or 0)
+        except BrokerError:
+            return 0.0
+
     # ----- 주문 -------------------------------------------------------------
     def place_order(self, request: OrderRequest) -> OrderResult:
         cano, acnt = self._account()

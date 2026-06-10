@@ -149,8 +149,11 @@ def kpis() -> dict:
     df = holdings_df()
     total_market = float(df["평가금액"].sum()) if not df.empty else 0.0
     total_pnl = float(df["평가손익"].sum()) if not df.empty else 0.0
-    # 현금 잔고: 현재 Mock 브로커에서는 미지원 → 0.0 placeholder
-    cash = 0.0
+    try:
+        _, broker, _, _ = _ctx()
+        cash = float(broker.get_cash_balance()) if hasattr(broker, "get_cash_balance") else 0.0
+    except Exception:
+        cash = 0.0
     total_assets = total_market + cash
     cash_ratio = (cash / total_assets * 100) if total_assets else 0.0
     return {
@@ -205,36 +208,6 @@ def list_order_logs(limit: int = 200) -> pd.DataFrame:
     repo, *_ = _ctx()
     rows = repo.list_order_logs(limit=limit)
     return pd.DataFrame(rows) if rows else pd.DataFrame()
-
-
-def kis_today_orders() -> pd.DataFrame:
-    """KIS paper/prod 오늘 주문내역 직접 조회. mock 환경이면 빈 DataFrame."""
-    from app.brokers.kis.kis_client import KisClient
-    _, broker, _, _ = _ctx()
-    if not isinstance(broker, KisClient):
-        return pd.DataFrame()
-    rows = broker.get_today_orders()
-    if not rows:
-        return pd.DataFrame()
-    _side = {"01": "매도", "02": "매수"}
-    result = []
-    for r in rows:
-        cncl = r.get("cncl_yn", "N").upper() == "Y"
-        ccld = int(r.get("tot_ccld_qty") or 0)
-        ord_qty = int(r.get("ord_qty") or 0)
-        status = "취소" if cncl else ("체결" if ccld >= ord_qty > 0 else "미체결")
-        result.append({
-            "주문번호": r.get("odno", ""),
-            "종목": r.get("pdno", ""),
-            "구분": _side.get(str(r.get("sll_buy_dvsn_cd", "")), "-"),
-            "주문수량": ord_qty,
-            "체결수량": ccld,
-            "주문가": int(r.get("ord_unpr") or 0),
-            "체결평균가": int(float(r.get("avg_prvs") or 0)),
-            "상태": status,
-            "주문시각": str(r.get("ord_tmd", ""))[:6],
-        })
-    return pd.DataFrame(result)
 
 
 def run_engine_once() -> list[str]:
