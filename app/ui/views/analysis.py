@@ -109,7 +109,21 @@ def render() -> None:
         st.subheader("손익 기여 (Attribution)")
         attr = _attribution()
         if not attr.empty:
-            st.bar_chart(attr.set_index("구분")["기여(만원)"], height=240)
+            try:
+                import plotly.graph_objects as go
+                labels = ["포트폴리오"] + attr["구분"].tolist()
+                sources = [0] * len(attr)
+                targets = list(range(1, len(attr) + 1))
+                values = attr["기여(만원)"].abs().tolist()
+                colors = ["#2ecc71" if v >= 0 else "#e74c3c" for v in attr["기여(만원)"].tolist()]
+                fig = go.Figure(go.Sankey(
+                    node=dict(label=labels, color=["#3498db"] + colors),
+                    link=dict(source=sources, target=targets, value=values, color=colors),
+                ))
+                fig.update_layout(height=280, margin=dict(t=20, b=10, l=10, r=10))
+                st.plotly_chart(fig, use_container_width=True)
+            except ImportError:
+                st.bar_chart(attr.set_index("구분")["기여(만원)"], height=240)
         else:
             st.caption("체결 내역이 없습니다.")
 

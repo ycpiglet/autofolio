@@ -17,10 +17,11 @@ Autofolio 백로그 T-01~T-45 작업을 의존성 그래프 순서로 사이클 
 - Wave 5 ✅ PR #19: T-30/21/22 (백테스트 UI, PnL 캘린더, 장전 체크리스트)
 - Wave 6 ✅ PR #20: T-43/45/42
 - Wave 7 ✅ PR #22: T-06/31/33/36/37
-- Wave 8 🔄 진행중: T-40/44/16 (pyproject, CI 커버리지, PR 자동 리뷰)
+- Wave 8 ✅ PR #23: T-40/44/16
+- Wave 9 ✅ 진행: T-34/23/20 (pyproject, CI 커버리지, PR 자동 리뷰)
 
 ## 포인터: main=54e9eef → 최신 PR #20 머지 후 갱신
-## tests=149 passed | 40 agents | check_agent_docs=0 error
+## tests=149 passed · iteration=9 · 12:52 | 40 agents | check_agent_docs=0 error
 
 ## 남은 작업 (Wave 7+)
 T-06 홈 자산곡선 | T-16 Notion | T-19 IC /approve | T-20 Attribution Sankey
