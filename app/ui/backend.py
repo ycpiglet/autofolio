@@ -336,3 +336,53 @@ def allocation_gap(target: dict | None = None) -> pd.DataFrame:
         cur = round(current.get(cls, 0.0), 1)
         rows.append({"자산군": cls, "목표%": tgt, "현재%": cur, "갭%": round(cur - tgt, 1)})
     return pd.DataFrame(rows)
+
+
+def account_summary() -> dict:
+    """KIS 잔고 output2(계좌 요약) — 총평가금액·예수금·순자산.
+
+    KIS_ENV=paper/prod: KisClient.get_positions() 시 output2가 있으면 backend._ctx()의
+    broker를 통해 KisClient._account_summary()를 호출. mock이면 holdings_df 기반 추정.
+    """
+    env_name = env()
+    if env_name in ("paper", "prod"):
+        try:
+            _, broker, _, _ = _ctx()
+            # KisClient에 account_summary() 메서드가 있으면 사용
+            if hasattr(broker, "get_account_summary"):
+                return broker.get_account_summary()
+        except Exception:  # noqa: BLE001
+            pass
+    # mock/폴백: holdings_df 기반 추정
+    df = holdings_df()
+    market_val = float(df["평가금액"].sum()) if not df.empty else 0.0
+    return {
+        "scts_evlu_amt": market_val,    # 유가증권 평가금액
+        "dnca_tot_amt": 0.0,            # 예수금 (mock에선 불명)
+        "tot_evlu_amt": market_val,     # 총평가금액
+        "nass_amt": market_val,         # 순자산
+        "source": "estimated",
+    }
+
+
+def watchlist() -> pd.DataFrame:
+    """화이트리스트 종목 현재가 일괄 조회 (와치리스트).
+
+    KIS_ENV=paper/prod: KisClient.get_current_price() 호출 (레이트리밋 주의).
+    mock: MockBrokerClient.get_current_price().
+    컬럼: symbol, name, price, env.
+    """
+    repo, broker, _, _ = _ctx()
+    wl = repo.list_whitelist_symbols(enabled_only=True)
+    if not wl:
+        return pd.DataFrame(columns=["symbol", "name", "price"])
+    rows = []
+    for item in wl:
+        try:
+            import time
+            price = broker.get_current_price(item["symbol"]).price
+            rows.append({"symbol": item["symbol"], "name": item.get("name", ""), "price": price})
+            time.sleep(0.15)  # 레이트리밋 방지
+        except Exception:  # noqa: BLE001
+            rows.append({"symbol": item["symbol"], "name": item.get("name", ""), "price": None})
+    return pd.DataFrame(rows)

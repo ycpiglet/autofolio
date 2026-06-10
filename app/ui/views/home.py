@@ -76,6 +76,26 @@ def render() -> None:
     with right:
         st.subheader("최근 체결")
         st.dataframe(_recent_fills(), hide_index=True, width="stretch")
+
+        # 와치리스트 (라이브 or mock)
+        st.subheader("와치리스트")
+        if st.session_state.get("data_source") == "backend":
+            try:
+                from app.ui import backend
+                wl = backend.watchlist()
+                if not wl.empty:
+                    def _pct(row):
+                        p = row.get("price")
+                        return f"{p:,.0f}" if p else "-"
+                    wl["현재가"] = wl["price"].apply(lambda p: f"{p:,.0f}" if p else "-")
+                    st.dataframe(wl[["symbol", "name", "현재가"]], hide_index=True, width="stretch")
+                else:
+                    st.caption("화이트리스트가 비어있습니다.")
+            except Exception:  # noqa: BLE001
+                st.dataframe(data.watchlist(), hide_index=True, width="stretch")
+        else:
+            st.dataframe(data.watchlist(), hide_index=True, width="stretch")
+
         st.subheader("알림")
         for a in data.alerts_feed()[:4]:
             st.caption(f"`{a['t']}` {a['msg']}")
