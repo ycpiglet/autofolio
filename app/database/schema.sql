@@ -82,3 +82,18 @@ CREATE TABLE IF NOT EXISTS price_alerts (
     triggered_at TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS trade_journal (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_log_id INTEGER,
+    symbol TEXT NOT NULL,
+    side TEXT NOT NULL,
+    entry_reason TEXT,
+    exit_reason TEXT,
+    grade TEXT CHECK(grade IN ('A','B','C','D','F', NULL)),
+    lesson TEXT,
+    plan_followed INTEGER NOT NULL DEFAULT 1,
+    emotion_flag INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

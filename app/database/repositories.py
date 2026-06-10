@@ -349,3 +349,31 @@ class Repository:
                 "UPDATE price_alerts SET active=0, triggered_at=CURRENT_TIMESTAMP WHERE id=?",
                 (alert_id,),
             )
+    # ---- trade journal ----
+    def add_journal_entry(
+        self, symbol: str, side: str, *,
+        order_log_id: int | None = None,
+        entry_reason: str = "",
+        exit_reason: str = "",
+        grade: str | None = None,
+        lesson: str = "",
+        plan_followed: bool = True,
+        emotion_flag: bool = False,
+    ) -> int:
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                """INSERT INTO trade_journal
+                    (order_log_id, symbol, side, entry_reason, exit_reason,
+                     grade, lesson, plan_followed, emotion_flag)
+                    VALUES(?,?,?,?,?,?,?,?,?)""",
+                (order_log_id, symbol, side, entry_reason, exit_reason,
+                 grade, lesson, int(plan_followed), int(emotion_flag)),
+            )
+            return cur.lastrowid
+
+    def list_journal_entries(self, limit: int = 100) -> list:
+        with get_connection(self.db_path) as conn:
+            return [dict(r) for r in conn.execute(
+                "SELECT * FROM trade_journal ORDER BY created_at DESC LIMIT ?",
+                (limit,),
+            ).fetchall()]
