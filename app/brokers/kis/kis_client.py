@@ -224,6 +224,28 @@ class KisClient(BrokerClient):
             raise BrokerError(f"KIS price response missing stck_prpr for {symbol}: {data}")
         return PriceQuote(symbol=symbol, price=price)
 
+    def get_prices_batch(self, symbols: list[str], max_workers: int = 5) -> dict[str, float]:
+        """복수 종목 현재가 병렬 조회. 실패 종목은 결과에서 제외.
+
+        반환: {symbol: price} dict.
+        """
+        if not symbols:
+            return {}
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        result: dict[str, float] = {}
+        with ThreadPoolExecutor(max_workers=min(max_workers, len(symbols))) as pool:
+            futures = {pool.submit(self.get_current_price, sym): sym for sym in symbols}
+            for future in as_completed(futures):
+                sym = futures[future]
+                try:
+                    result[sym] = future.result().price
+                except Exception as exc:
+                    logging.getLogger(__name__).warning(
+                        "get_prices_batch: %s failed: %s", sym, exc
+                    )
+        return result
+
     # ----- 잔고 -------------------------------------------------------------
     def get_positions(self) -> list[Position]:
         cano, acnt = self._account()
@@ -579,6 +601,40 @@ class KisClient(BrokerClient):
             return data.get("output1") or []
         except BrokerError as exc:
             logging.getLogger(__name__).warning("get_today_orders failed: %s", exc)
+            return []
+
+
+    def get_order_history(self, start_date: str, end_date: str) -> list[dict]:
+        """날짜 범위 주문 내역 조회 (당일 포함). inquire-daily-ccld ODNO="" 전체 조회.
+
+        start_date, end_date: 'YYYYMMDD' 형식.
+        반환: get_today_orders() 와 동일 dict 리스트.
+        BrokerError 시 [] 반환.
+        """
+        if len(start_date) != 8 or len(end_date) != 8 or not start_date.isdigit():
+            raise ValueError("start_date/end_date must be 'YYYYMMDD' format.")
+        cano, acnt = self._account()
+        params = {
+            "CANO": cano, "ACNT_PRDT_CD": acnt,
+            "INQR_STRT_DT": start_date,
+            "INQR_END_DT": end_date,
+            "SLL_BUY_DVSN_CD": "00",
+            "INQR_DVSN": "00",
+            "PDNO": "",
+            "CCLD_DVSN": "00",
+            "ORD_GNO_BRNO": "",
+            "ODNO": "",
+            "INQR_DVSN_3": "00",
+            "INQR_DVSN_1": "",
+            "EXCG_ID_DVSN_CD": _EXCG_KRX,
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": "",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_DAILY_CCLD, _TR_DAILY_CCLD, params=params)
+            return data.get("output1") or []
+        except BrokerError as exc:
+            logging.getLogger(__name__).warning("get_order_history failed: %s", exc)
             return []
 
     # ----- 취소용 거래소 주문조직번호 조회 (캐시 미스 시 best-effort) ----------

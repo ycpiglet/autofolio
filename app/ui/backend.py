@@ -546,6 +546,49 @@ def whatif_weight_change(symbol: str, new_weight_pct: float) -> dict:
     }
 
 
+
+def kis_today_orders() -> pd.DataFrame:
+    """KIS 당일 주문내역. mock 환경이면 빈 DataFrame."""
+    from app.brokers.kis.kis_client import KisClient
+    _, broker, _, _ = _ctx()
+    if not isinstance(broker, KisClient):
+        return pd.DataFrame()
+    rows = broker.get_today_orders()
+    if not rows:
+        return pd.DataFrame()
+    return pd.DataFrame(rows)
+
+
+def kis_order_history(start_date: str, end_date: str) -> pd.DataFrame:
+    """KIS 날짜 범위 주문내역. mock 환경이면 빈 DataFrame."""
+    from app.brokers.kis.kis_client import KisClient
+    _, broker, _, _ = _ctx()
+    if not isinstance(broker, KisClient):
+        return pd.DataFrame()
+    rows = broker.get_order_history(start_date, end_date)
+    if not rows:
+        return pd.DataFrame()
+    _side = {"01": "매도", "02": "매수"}
+    result = []
+    for r in rows:
+        cncl = r.get("cncl_yn", "N").upper() == "Y"
+        ccld = int(r.get("tot_ccld_qty") or 0)
+        ord_qty = int(r.get("ord_qty") or 0)
+        status = "취소" if cncl else ("체결" if ccld >= ord_qty > 0 else "미체결")
+        result.append({
+            "날짜": r.get("ord_dt", "")[:8],
+            "주문번호": r.get("odno", ""),
+            "종목": r.get("pdno", ""),
+            "구분": _side.get(str(r.get("sll_buy_dvsn_cd", "")), "-"),
+            "주문수량": ord_qty,
+            "체결수량": ccld,
+            "주문가": int(r.get("ord_unpr") or 0),
+            "체결평균가": int(float(r.get("avg_prvs") or 0)),
+            "상태": status,
+        })
+    return pd.DataFrame(result)
+
+
 def daily_pnl_series() -> "pd.DataFrame":
     """일별 실현손익 시계열 (execution_logs 기반).
 
