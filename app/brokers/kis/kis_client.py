@@ -403,7 +403,9 @@ class KisClient(BrokerClient):
         try:
             data, _ = self._request("GET", _PATH_DAILY_CCLD, _TR_DAILY_CCLD, params=params)
             return data.get("output1") or []
-        except BrokerError:
+        except BrokerError as exc:
+            import logging
+            logging.getLogger(__name__).warning("get_today_orders failed: %s", exc)
             return []
 
     # ----- 취소용 거래소 주문조직번호 조회 (캐시 미스 시 best-effort) ----------

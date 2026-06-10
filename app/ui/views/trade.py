@@ -40,8 +40,7 @@ def _live() -> None:
             cur = backend.price(sym)
             c1.metric("현재가", f"{cur:,.0f}")
             side = c2.radio("방향", ["BUY", "SELL"], horizontal=True, key="lv_side")
-            side_val = st.session_state.get("lv_side", "BUY")
-            default_tp = float(round(cur * 1.01)) if side_val == "BUY" else float(round(cur * 0.99))
+            default_tp = float(round(cur * 1.01)) if side == "BUY" else float(round(cur * 0.99))
             tp = c2.number_input(
                 "목표가 (BUY: 현재가 이상이면 즉시 실행)",
                 min_value=0.0, value=default_tp, step=500.0, key="lv_tp",
@@ -85,7 +84,9 @@ def _live() -> None:
         st.dataframe(backend.list_conditions(), hide_index=True, width="stretch")
 
     with run_tab:
-        if st.button("⚙️ 엔진 1회 실행 (mock)", key="lv_run"):
+        from app.ui import backend as _be_run
+        _env_label = {"paper": "모의투자", "prod": "실전"}.get(_be_run.env(), "mock")
+        if st.button(f"⚙️ 엔진 1회 실행 ({_env_label})", key="lv_run"):
             msgs = backend.run_engine_once()
             if msgs:
                 for m in msgs:

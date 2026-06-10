@@ -80,7 +80,7 @@ def main(argv: list[str] | None = None) -> int:
                                  order_type=OrderType.MARKET, quantity=1, price=None)
                 )
                 print(f"  PLACE -> {res2.status.value} | odno={res2.broker_order_id} | {res2.message}")
-                import time as _time; _time.sleep(1.5)
+                time.sleep(1.5)
                 st2 = client.get_order_status(res2.broker_order_id)
                 print(f"  STATUS -> {st2.status.value} | filled={st2.filled_quantity} | {st2.message}")
             except BrokerError as exc:
