@@ -1,7 +1,7 @@
 # Autofolio 할 일 목록 · 백로그
 
 > 현황 스냅샷 + 우선순위 백로그. 로드맵 근거: [PRODUCT_BLUEPRINT.md](PRODUCT_BLUEPRINT.md) §8(P0–P4) · [ORG_PLAN.md](ORG_PLAN.md) §6–7 · [UI_SPEC.md](UI_SPEC.md) §7.
-> 갱신: 2026-06-10T09:28 · main=54e9eef · pytest 131 passed · PR #1–#20 완료
+> 갱신: 2026-06-10T23:39 · main=54e9eef · pytest 131 passed · PR #1–#20 완료
 
 ---
 
@@ -95,10 +95,26 @@
 - [x] T-23 Google Sheets 어댑터 (포트폴리오 미러·알림)
 - [x] T-20 Attribution Sankey 다이어그램 (plotly, bar chart 폴백)
 
+### KIS API 확장 (P1.2)
+- [ ] **TASK-010** KIS WebSocket 실시간 (체결통보·현재가·호가) — `kis_ws_client.py` 신규, H0STCNT0/H0STASP0/H0STCNI0
+- [ ] **TASK-011** KIS 분봉 데이터 조회 — `inquire-time-itemchartprice`, TR `FHKST03010200`, `get_intraday_chart()`
+- [ ] **TASK-012** KIS 장기 거래내역 조회 (3개월+) — TR `CTSC9215R`/`VTSC9215R`, `get_order_history()`
+- [ ] **TASK-013** KIS 복수 종목 현재가 배치 조회 — `inquire-price-2`, `get_prices_batch()`
+- [ ] **TASK-014** KIS 시간외 주문 (장전·장후 단일가) — ORD_DVSN 05/06, `after_hours` 파라미터
+- [ ] **TASK-015** KIS 지수 조회 (KOSPI·KOSDAQ·KRX) — `inquire-index-price`, `get_index_price()`
+- [ ] **TASK-016** KIS 기업 재무정보 (PER·PBR·EPS·시가총액) — `inquire-finance-ratio`, `get_fundamental()`
+- [ ] **TASK-017** KIS 배당 정보 조회 — `inquire-dividend`, `get_dividend_info()`, 포트폴리오 배당 수익률 표시
+- [ ] **TASK-018** KIS 호가창 10단계 조회 — `inquire-asking-price-exp-ccn`, `get_order_book()`
+- [ ] **TASK-019** KIS 업종별 시세 조회 — `inquire-upjong-price`, `get_sector_price()`, 분석 탭 히트맵
+- [ ] **TASK-020** KIS 공시 정보 조회 — `get_disclosures()`, Compliance Agent 공시 차단 게이트
+- [ ] **TASK-021** KIS 신용·공매도 주문 — `SLL_TYPE` 02/05 확장, 리스크 게이트 연동 (Owner 승인 필요)
+- [ ] **TASK-022** KIS 해외주식 주문 (미국·홍콩 등) — TR `TTTT1002U`, 환율 처리, US 화이트리스트
+- [ ] **TASK-023** UI 엔진 → KIS 실주문 E2E 검증 — `--market-test`, 체결·로그·UI 전 흐름 확인
+
 ### 기술부채 · 정리 (잔여)
 - [ ] `streamlit_app.py` vs `autofolio_app.py` 통합 정리.
 - [ ] 테스트 커버리지 60%+ (현재 50% 게이트).
-- [ ] `agent_orchestrator` import 재확인 (v0.1.8 이식됨).
+- [x] `agent_orchestrator` import 재확인 (v0.1.8 이식됨).
 ### 개발팀 활용
 - [ ] PR/코드리뷰 워크플로 — independent-auditor·qa·lead-engineer 연결.
 - [ ] 요구→스펙 흐름 — requirements-interviewer·research-agent 활용.
