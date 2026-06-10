@@ -23,8 +23,10 @@ _PATH_ORDER_CASH = "/uapi/domestic-stock/v1/trading/order-cash"
 _PATH_RVSECNCL = "/uapi/domestic-stock/v1/trading/order-rvsecncl"
 _PATH_DAILY_CCLD = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"
 _PATH_PSBL_RVSECNCL = "/uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl"
+_PATH_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
 
 _TR_PRICE = "FHKST01010100"
+_TR_CHART = "FHKST03010100"  # 일봉, paper/prod 동일 (F* TR — no V prefix needed)
 _TR_BALANCE = "TTTC8434R"
 _TR_BUY = "TTTC0012U"
 _TR_SELL = "TTTC0011U"
@@ -256,6 +258,39 @@ class KisClient(BrokerClient):
             return float(data.get("output2", {}).get("dnca_tot_amt") or 0)
         except BrokerError:
             return 0.0
+
+    def get_price_history(self, symbol: str, period: str = "D", count: int = 100) -> list[dict]:
+        """일봉(D)/주봉(W)/월봉(M) OHLCV. count 건 상한. BrokerError 시 [] 반환.
+
+        반환 항목: {date: str(YYYYMMDD), open, high, low, close: float, volume: int}.
+        """
+        params = {
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": symbol,
+            "FID_INPUT_DATE_1": "",
+            "FID_INPUT_DATE_2": "",
+            "FID_PERIOD_DIV_CODE": period,
+            "FID_ORG_ADJ_PRC": "0",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_CHART, _TR_CHART, params=params)
+            rows = data.get("output2") or []
+            return [
+                {
+                    "date": r["stck_bsop_date"],
+                    "open": float(r.get("stck_oprc") or 0),
+                    "high": float(r.get("stck_hgpr") or 0),
+                    "low": float(r.get("stck_lwpr") or 0),
+                    "close": float(r.get("stck_clpr") or 0),
+                    "volume": int(r.get("acml_vol") or 0),
+                }
+                for r in rows[:count]
+                if r.get("stck_bsop_date")
+            ]
+        except BrokerError as exc:
+            import logging
+            logging.getLogger(__name__).warning("get_price_history %s failed: %s", symbol, exc)
+            return []
 
     # ----- 주문 -------------------------------------------------------------
     def place_order(self, request: OrderRequest) -> OrderResult:
