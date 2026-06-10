@@ -25,10 +25,12 @@ _PATH_RVSECNCL = "/uapi/domestic-stock/v1/trading/order-rvsecncl"
 _PATH_DAILY_CCLD = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"
 _PATH_PSBL_RVSECNCL = "/uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl"
 _PATH_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+_PATH_INTRADAY = "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice"
 _PATH_PSBL_ORDER = "/uapi/domestic-stock/v1/trading/inquire-psbl-order"
 
 _TR_PRICE = "FHKST01010100"
 _TR_CHART = "FHKST03010100"  # 일봉, paper/prod 동일 (F* TR — no V prefix needed)
+_TR_INTRADAY = "FHKST03010200"  # 분봉, paper/prod 동일 (F* TR)
 _TR_BALANCE = "TTTC8434R"
 _TR_BUY = "TTTC0012U"
 _TR_SELL = "TTTC0011U"
@@ -222,6 +224,28 @@ class KisClient(BrokerClient):
             raise BrokerError(f"KIS price response missing stck_prpr for {symbol}: {data}")
         return PriceQuote(symbol=symbol, price=price)
 
+    def get_prices_batch(self, symbols: list[str], max_workers: int = 5) -> dict[str, float]:
+        """복수 종목 현재가 병렬 조회. 실패 종목은 결과에서 제외.
+
+        반환: {symbol: price} dict.
+        """
+        if not symbols:
+            return {}
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        result: dict[str, float] = {}
+        with ThreadPoolExecutor(max_workers=min(max_workers, len(symbols))) as pool:
+            futures = {pool.submit(self.get_current_price, sym): sym for sym in symbols}
+            for future in as_completed(futures):
+                sym = futures[future]
+                try:
+                    result[sym] = future.result().price
+                except Exception as exc:
+                    logging.getLogger(__name__).warning(
+                        "get_prices_batch: %s failed: %s", sym, exc
+                    )
+        return result
+
     # ----- 잔고 -------------------------------------------------------------
     def get_positions(self) -> list[Position]:
         cano, acnt = self._account()
@@ -338,6 +362,38 @@ class KisClient(BrokerClient):
             ]
         except BrokerError as exc:
             logging.getLogger(__name__).warning("get_price_history %s failed: %s", symbol, exc)
+            return []
+
+    def get_intraday_chart(self, symbol: str, time_unit: str = "1", count: int = 100) -> list[dict]:
+        """분봉 OHLCV. time_unit: '1'=1분봉, '3', '5', '10', '15', '30', '60'.
+
+        반환 항목: {datetime: 'YYYYMMDD HHMMSS', open, high, low, close: float, volume: int}.
+        BrokerError 시 [] 반환.
+        """
+        params = {
+            "FID_ETC_CLS_CODE": "",
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": symbol,
+            "FID_INPUT_HOUR_1": "",
+            "FID_PW_DATA_INCU_YN": "N",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_INTRADAY, _TR_INTRADAY, params=params)
+            rows = data.get("output2") or []
+            return [
+                {
+                    "datetime": f"{r['stck_bsop_date']} {r['stck_cntg_hour']}",
+                    "open": float(r.get("stck_oprc") or 0),
+                    "high": float(r.get("stck_hgpr") or 0),
+                    "low": float(r.get("stck_lwpr") or 0),
+                    "close": float(r.get("stck_prpr") or 0),
+                    "volume": int(r.get("cntg_vol") or 0),
+                }
+                for r in rows[:count]
+                if r.get("stck_bsop_date") and r.get("stck_cntg_hour")
+            ]
+        except BrokerError as exc:
+            logging.getLogger(__name__).warning("get_intraday_chart %s failed: %s", symbol, exc)
             return []
 
     # ----- 주문 -------------------------------------------------------------
@@ -545,6 +601,40 @@ class KisClient(BrokerClient):
             return data.get("output1") or []
         except BrokerError as exc:
             logging.getLogger(__name__).warning("get_today_orders failed: %s", exc)
+            return []
+
+
+    def get_order_history(self, start_date: str, end_date: str) -> list[dict]:
+        """날짜 범위 주문 내역 조회 (당일 포함). inquire-daily-ccld ODNO="" 전체 조회.
+
+        start_date, end_date: 'YYYYMMDD' 형식.
+        반환: get_today_orders() 와 동일 dict 리스트.
+        BrokerError 시 [] 반환.
+        """
+        if len(start_date) != 8 or len(end_date) != 8 or not start_date.isdigit():
+            raise ValueError("start_date/end_date must be 'YYYYMMDD' format.")
+        cano, acnt = self._account()
+        params = {
+            "CANO": cano, "ACNT_PRDT_CD": acnt,
+            "INQR_STRT_DT": start_date,
+            "INQR_END_DT": end_date,
+            "SLL_BUY_DVSN_CD": "00",
+            "INQR_DVSN": "00",
+            "PDNO": "",
+            "CCLD_DVSN": "00",
+            "ORD_GNO_BRNO": "",
+            "ODNO": "",
+            "INQR_DVSN_3": "00",
+            "INQR_DVSN_1": "",
+            "EXCG_ID_DVSN_CD": _EXCG_KRX,
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": "",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_DAILY_CCLD, _TR_DAILY_CCLD, params=params)
+            return data.get("output1") or []
+        except BrokerError as exc:
+            logging.getLogger(__name__).warning("get_order_history failed: %s", exc)
             return []
 
     # ----- 취소용 거래소 주문조직번호 조회 (캐시 미스 시 best-effort) ----------
