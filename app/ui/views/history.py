@@ -22,6 +22,22 @@ def render() -> None:
             )
         else:
             st.dataframe(logs, hide_index=True, width="stretch")
+
+        st.divider()
+        st.subheader("KIS 날짜별 주문내역")
+        import datetime
+        col1, col2 = st.columns(2)
+        start = col1.date_input("시작일", value=datetime.date.today() - datetime.timedelta(days=30), key="hist_start")
+        end = col2.date_input("종료일", value=datetime.date.today(), key="hist_end")
+        if st.button("🔍 조회", key="hist_search"):
+            try:
+                df_hist = backend.kis_order_history(start.strftime("%Y%m%d"), end.strftime("%Y%m%d"))
+                if df_hist.empty:
+                    st.info("조회 결과가 없습니다.")
+                else:
+                    st.dataframe(df_hist, hide_index=True, use_container_width=True)
+            except Exception as exc:
+                st.warning(f"조회 실패: {exc}")
         return
 
     fills_tab, pnl_tab, div_tab = st.tabs(["체결내역", "일·월 손익", "배당"])
