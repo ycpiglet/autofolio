@@ -24,6 +24,7 @@ _PATH_RVSECNCL = "/uapi/domestic-stock/v1/trading/order-rvsecncl"
 _PATH_DAILY_CCLD = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"
 _PATH_PSBL_RVSECNCL = "/uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl"
 _PATH_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+_PATH_PSBL_ORDER = "/uapi/domestic-stock/v1/trading/inquire-psbl-order"
 
 _TR_PRICE = "FHKST01010100"
 _TR_CHART = "FHKST03010100"  # 일봉, paper/prod 동일 (F* TR — no V prefix needed)
@@ -33,6 +34,7 @@ _TR_SELL = "TTTC0011U"
 _TR_RVSECNCL = "TTTC0013U"
 _TR_DAILY_CCLD = "TTTC0081R"
 _TR_PSBL_RVSECNCL = "TTTC0084R"
+_TR_PSBL_ORDER = "TTTC8908R"
 
 _ORD_DVSN_LIMIT = "00"   # 지정가
 _ORD_DVSN_MARKET = "01"  # 시장가 (ORD_UNPR="0")
@@ -86,6 +88,23 @@ def _as_float(value):
 def _odno_eq(a, b) -> bool:
     """주문번호는 zero-padding 이 다를 수 있어 선행 0 무시 비교."""
     return str(a or "").lstrip("0") == str(b or "").lstrip("0")
+
+
+def _tick_size(price: float) -> int:
+    """KRX 호가단위."""
+    if price < 2_000:
+        return 1
+    if price < 5_000:
+        return 5
+    if price < 20_000:
+        return 10
+    if price < 50_000:
+        return 50
+    if price < 200_000:
+        return 100
+    if price < 500_000:
+        return 500
+    return 1_000
 
 
 class KisClient(BrokerClient):
@@ -259,6 +278,35 @@ class KisClient(BrokerClient):
         except BrokerError:
             return 0.0
 
+    def get_buying_power(self, symbol: str, price: float) -> dict:
+        """종목별 매수가능수량·금액 조회. inquire-psbl-order.
+
+        반환: {max_quantity: int, available_cash: float}.
+        BrokerError 시 {max_quantity: 0, available_cash: 0.0} 반환.
+        """
+        cano, acnt = self._account()
+        tick = _tick_size(price)
+        adjusted = int(price // tick * tick)
+        params = {
+            "CANO": cano, "ACNT_PRDT_CD": acnt,
+            "PDNO": symbol,
+            "ORD_UNPR": str(adjusted),
+            "ORD_DVSN": _ORD_DVSN_LIMIT,
+            "CMA_EVLU_AMT_ICLD_YN": "N",
+            "OVRS_ICLD_YN": "N",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_PSBL_ORDER, _TR_PSBL_ORDER, params=params)
+            output = data.get("output") or {}
+            return {
+                "max_quantity": int(output.get("psbl_qty") or 0),
+                "available_cash": float(output.get("ord_psbl_cash") or 0),
+            }
+        except BrokerError as exc:
+            import logging
+            logging.getLogger(__name__).warning("get_buying_power %s failed: %s", symbol, exc)
+            return {"max_quantity": 0, "available_cash": 0.0}
+
     def get_price_history(self, symbol: str, period: str = "D", count: int = 100) -> list[dict]:
         """일봉(D)/주봉(W)/월봉(M) OHLCV. count 건 상한. BrokerError 시 [] 반환.
 
@@ -370,6 +418,47 @@ class KisClient(BrokerClient):
             broker_order_id=broker_order_id,
             status=OrderStatus.CANCELED,
             message=data.get("msg1"),
+        )
+
+    def modify_order(self, broker_order_id: str, new_price: float, new_quantity: int) -> OrderResult:
+        """주문 정정 — 지정가 가격/수량 변경. order-rvsecncl RVSE_CNCL_DVSN_CD=01.
+
+        broker_order_id에 대응하는 org_no는 _orders 캐시 또는 _lookup_org_no로 조회한다.
+        """
+        cano, acnt = self._account()
+        ctx = self._orders.get(broker_order_id, {})
+        org_no = ctx.get("org_no") or self._lookup_org_no(broker_order_id)
+        if not org_no:
+            raise BrokerError(
+                f"Cannot modify order {broker_order_id}: KRX_FWDG_ORD_ORGNO not found."
+            )
+        tick = _tick_size(new_price)
+        adjusted_price = int(new_price // tick * tick)
+        body = {
+            "CANO": cano, "ACNT_PRDT_CD": acnt,
+            "KRX_FWDG_ORD_ORGNO": org_no,
+            "ORGN_ODNO": broker_order_id,
+            "ORD_DVSN": ctx.get("ord_dvsn", _ORD_DVSN_LIMIT),
+            "RVSE_CNCL_DVSN_CD": "01",  # 정정
+            "ORD_QTY": str(int(new_quantity)),
+            "ORD_UNPR": str(adjusted_price),
+            "QTY_ALL_ORD_YN": "N",
+            "EXCG_ID_DVSN_CD": _EXCG_KRX,
+            "CNDT_PRIC": "",
+        }
+        data, _ = self._request("POST", _PATH_RVSECNCL, _TR_RVSECNCL, json_body=body)
+        output = data.get("output") or {}
+        new_odno = output.get("ODNO") or broker_order_id
+        if new_odno and new_odno != broker_order_id:
+            self._orders[new_odno] = {
+                "org_no": output.get("KRX_FWDG_ORD_ORGNO") or org_no,
+                "ord_dvsn": ctx.get("ord_dvsn", _ORD_DVSN_LIMIT),
+                "quantity": int(new_quantity),
+            }
+        return OrderResult(
+            broker_order_id=new_odno,
+            status=OrderStatus.PENDING,
+            message=f"Order modified: {data.get('msg1')}",
         )
 
     def get_order_status(self, broker_order_id: str) -> OrderResult:
