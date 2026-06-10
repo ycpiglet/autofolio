@@ -374,6 +374,38 @@ class KisClient(BrokerClient):
             message=f"Partial/pending: {ccld_qty}/{ord_qty} filled.",
         )
 
+    def get_today_orders(self) -> list[dict]:
+        """오늘 전체 주문 내역 조회 (KIS inquire-daily-ccld, ODNO="" = 전체).
+
+        Returns list of dicts with keys: odno, pdno, sll_buy_dvsn_cd, ord_qty,
+        tot_ccld_qty, rmn_qty, ord_unpr, avg_prvs, cncl_yn, ord_tmd.
+        모의투자 미지원 시 빈 리스트 반환.
+        """
+        cano, acnt = self._account()
+        today = datetime.now().strftime("%Y%m%d")
+        params = {
+            "CANO": cano,
+            "ACNT_PRDT_CD": acnt,
+            "INQR_STRT_DT": today,
+            "INQR_END_DT": today,
+            "SLL_BUY_DVSN_CD": "00",
+            "INQR_DVSN": "00",
+            "PDNO": "",
+            "CCLD_DVSN": "00",
+            "ORD_GNO_BRNO": "",
+            "ODNO": "",
+            "INQR_DVSN_3": "00",
+            "INQR_DVSN_1": "",
+            "EXCG_ID_DVSN_CD": _EXCG_KRX,
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": "",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_DAILY_CCLD, _TR_DAILY_CCLD, params=params)
+            return data.get("output1") or []
+        except BrokerError:
+            return []
+
     # ----- 취소용 거래소 주문조직번호 조회 (캐시 미스 시 best-effort) ----------
     def _lookup_org_no(self, broker_order_id: str) -> str | None:
         cano, acnt = self._account()

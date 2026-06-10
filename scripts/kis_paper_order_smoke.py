@@ -45,6 +45,23 @@ from app.common.enums import OrderType, Side  # noqa: E402
 from app.common.errors import BrokerError  # noqa: E402
 
 
+def _tick(price: float) -> int:
+    """KRX 호가단위 (2023 기준)."""
+    if price < 2_000:
+        return 1
+    if price < 5_000:
+        return 5
+    if price < 20_000:
+        return 10
+    if price < 50_000:
+        return 50
+    if price < 200_000:
+        return 100
+    if price < 500_000:
+        return 500
+    return 1_000
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="KIS 모의(paper) 전용 주문 생애주기 스모크")
     ap.add_argument("--symbol", default="005930")
@@ -68,8 +85,11 @@ def main(argv: list[str] | None = None) -> int:
     client = KisClient(settings)
 
     cur = client.get_current_price(args.symbol).price
-    target = int(cur * 0.5)  # 시장가 한참 아래 → 미체결 의도
-    print(f"현재가 {args.symbol} = {cur:,.0f} → 지정가 매수 {args.qty}주 @ {target:,} (미체결 예상)")
+    # 상/하한가(±30%) 이내, 미체결 의도. 모의서버 내부 기준가와 차이를 줄이기 위해 95% 사용
+    raw = cur * 0.95
+    tick = _tick(raw)
+    target = int(raw // tick * tick)  # 호가단위 정합
+    print(f"현재가 {args.symbol} = {cur:,.0f} → 지정가 매수 {args.qty}주 @ {target:,} (미체결 예상, 호가단위 {tick:,.0f}원)")
     time.sleep(0.7)
 
     try:
