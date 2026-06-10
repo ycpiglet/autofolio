@@ -291,3 +291,28 @@ def test_request_http_error_reports_parsed_korean_msg(monkeypatch):
     msg = str(exc.value)
     assert "EGW00123" in msg
     assert "권한이 없습니다" in msg  # mojibake 아님
+
+
+# --------------------------------------------------------------------------- #
+# 오늘 주문 내역
+# --------------------------------------------------------------------------- #
+def test_get_today_orders_returns_parsed_list(monkeypatch):
+    fake_output1 = [
+        {
+            "odno": "0000037101", "pdno": "005930", "sll_buy_dvsn_cd": "02",
+            "ord_qty": "1", "tot_ccld_qty": "0", "rmn_qty": "1",
+            "ord_unpr": "287500", "avg_prvs": "0", "cncl_yn": "N", "ord_tmd": "150708",
+        },
+    ]
+    client, _ = make_client(monkeypatch, lambda call: _ok(output1=fake_output1, output2=[{}]))
+    orders = client.get_today_orders()
+    assert len(orders) == 1
+    assert orders[0]["odno"] == "0000037101"
+    assert orders[0]["pdno"] == "005930"
+
+
+def test_get_today_orders_returns_empty_on_error(monkeypatch):
+    bad = FakeResponse({"rt_cd": "1", "msg_cd": "ERR01", "msg1": "fail"})
+    client, _ = make_client(monkeypatch, lambda call: bad)
+    orders = client.get_today_orders()
+    assert orders == []
