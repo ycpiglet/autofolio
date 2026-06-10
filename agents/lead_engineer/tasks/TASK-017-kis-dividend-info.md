@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-017
-status: 열림
+status: 대기
 owner: KIS API Engineer
 assignees: [KIS API Engineer]
 priority: Low
@@ -17,7 +17,7 @@ created_at: 2026-06-10T23:39:38+09:00
 # TASK-017 KIS 배당 정보 조회
 
 작업 ID: TASK-017
-상태: 열림
+상태: 대기
 Owner: KIS API Engineer
 요청 시각: 2026-06-10T23:39:38+09:00
 기록 시각: 2026-06-10T23:39:38+09:00

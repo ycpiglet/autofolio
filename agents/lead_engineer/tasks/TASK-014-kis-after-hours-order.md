@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-014
-status: 열림
+status: 대기
 owner: KIS API Engineer
 assignees: [KIS API Engineer]
 priority: Medium
@@ -17,7 +17,7 @@ created_at: 2026-06-10T23:39:38+09:00
 # TASK-014 KIS 시간외 주문 (장전·장후 단일가)
 
 작업 ID: TASK-014
-상태: 열림
+상태: 대기
 Owner: KIS API Engineer
 요청 시각: 2026-06-10T23:39:38+09:00
 기록 시각: 2026-06-10T23:39:38+09:00
