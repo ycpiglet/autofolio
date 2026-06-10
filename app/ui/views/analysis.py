@@ -301,6 +301,47 @@ def render() -> None:
 
         st.divider()
 
+
+        st.divider()
+
+        # ── T-32: VaR/MDD 몬테카를로 시뮬레이션 ─────────────────────────
+        st.subheader("리스크 시뮬레이션 (VaR)")
+        if _live():
+            with st.expander("🎲 몬테카를로 VaR/MDD 추정", expanded=False):
+                v_horizon = st.slider("시뮬레이션 기간 (거래일)", 5, 60, 10, key="var_h")
+                v_n = st.select_slider("시뮬레이션 횟수", [1000, 3000, 5000, 10000], value=5000, key="var_n")
+                if st.button("▶ 시뮬레이션 실행", key="var_run"):
+                    try:
+                        from app.ui import backend
+                        from app.quant.risk_sim import simulate_portfolio_var
+                        df = backend.holdings_df()
+                        with st.spinner(f"{v_n:,}회 시뮬레이션 중…"):
+                            result = simulate_portfolio_var(
+                                df, horizon_days=v_horizon, n_simulations=v_n
+                            )
+                        st.session_state["var_result"] = result
+                    except Exception as exc:  # noqa: BLE001
+                        st.warning(f"시뮬레이션 실패: {exc}")
+
+                var_res = st.session_state.get("var_result")
+                if var_res and var_res.total_value > 0:
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("95% VaR", f"{var_res.var_95:,.0f}원",
+                              help=f"{v_horizon}일 기간 중 5% 확률로 초과하는 손실")
+                    c2.metric("99% VaR", f"{var_res.var_99:,.0f}원")
+                    c3.metric("평균 MDD", f"-{var_res.max_drawdown_pct:.1f}%")
+                    st.caption(f"포트폴리오: {var_res.total_value:,.0f}원 · {var_res.note}")
+                    p = var_res.percentiles
+                    st.markdown(
+                        f"| 최하 1% | 5% | 10% | 25% | 중간 |"
+                        f"
+|---|---|---|---|---|"
+                        f"
+| {p.get(1,0):,.0f} | {p.get(5,0):,.0f} | {p.get(10,0):,.0f} | {p.get(25,0):,.0f} | {p.get(50,0):,.0f} |"
+                    )
+                    st.caption("⚠️ 과거 수익률 분포 기반 통계 추정. 실제 미래 손실을 보장하지 않습니다.")
+        else:
+            st.caption("🧪 데모 — VaR 시뮬레이션은 라이브 모드에서 사용 가능합니다.")
         # ── 리밸런싱 플랜 ─────────────────────────────────────────────
         st.subheader("리밸런싱 플랜")
         st.dataframe(_alloc_gap(), hide_index=True, use_container_width=True)
