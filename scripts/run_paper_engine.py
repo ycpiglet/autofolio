@@ -55,7 +55,7 @@ from app.database.sqlite_db import get_connection  # noqa: E402  # noqa: F401 â€
 from app.engine.live_trading_engine import LiveTradingEngine  # noqa: E402
 from app.notification.notifier import make_notifier_from_env  # noqa: E402
 from app.risk.safety_checker import SafetyChecker  # noqa: E402
-from app.risk.trading_window import is_within_trading_window  # noqa: E402
+from app.risk.trading_window import is_within_trading_window, now_kst  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -144,7 +144,7 @@ def main(argv: list[str] | None = None) -> int:
     run_count = 0
     try:
         while True:
-            now = datetime.now()
+            now = now_kst()
 
             in_window = is_within_trading_window(
                 now,

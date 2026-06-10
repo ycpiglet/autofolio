@@ -6,7 +6,7 @@ from datetime import datetime
 from app.config.settings import settings
 from app.database.repositories import Repository
 from app.risk.duplicate_guard import is_condition_executable
-from app.risk.trading_window import is_within_trading_window
+from app.risk.trading_window import is_within_trading_window, now_kst
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,7 @@ class SafetyChecker:
         current_price: float,
         now: datetime | None = None,
     ) -> SafetyResult:
-        now = now or datetime.now()
+        now = now or now_kst()
 
         if self.repo.get_system_state("kill_switch_active", "false") == "true":
             return SafetyResult(False, "Kill switch is active.")
