@@ -180,8 +180,114 @@ def render() -> None:
                     st.error(f"저장 실패: {exc}")
 
     with future_tab:
-        st.subheader("시나리오")
-        st.dataframe(mock_data.scenarios(), hide_index=True, width="stretch")
+        # ── 시나리오 분석 ──────────────────────────────────────────────
+        st.subheader("시나리오 분석")
+        if _live():
+            st.caption("🟢 라이브 — 보유 포트폴리오 기반 시나리오 영향 계산")
+            try:
+                from app.ui import backend
+                scen_df = backend.scenario_analysis()
+                if scen_df.empty:
+                    st.info("보유 종목이 없어 시나리오를 계산할 수 없습니다.")
+                else:
+                    for scenario_name in scen_df["시나리오"].unique():
+                        sub = scen_df[scen_df["시나리오"] == scenario_name].copy()
+                        totals_row = sub[sub["자산군"] == "합계"].iloc[0]
+                        delta_pct = totals_row["변동률(%)"]
+                        delta_won = totals_row["변동액(원)"]
+                        sign = "+" if delta_pct >= 0 else ""
+                        with st.expander(
+                            f"**{scenario_name}** — 포트폴리오 예상 변동: {sign}{delta_pct:.2f}% "
+                            f"({sign}{delta_won:,.0f}원)",
+                            expanded=(scenario_name == "Base"),
+                        ):
+                            detail = sub[sub["자산군"] != "합계"].reset_index(drop=True)
+                            # 숫자 포맷팅
+                            display = detail[["자산군", "현재금액(원)", "변동률(%)", "변동액(원)", "시나리오후금액(원)"]].copy()
+                            display["현재금액(원)"] = display["현재금액(원)"].apply(lambda x: f"{x:,.0f}")
+                            display["변동액(원)"] = display["변동액(원)"].apply(
+                                lambda x: f"+{x:,.0f}" if x >= 0 else f"{x:,.0f}"
+                            )
+                            display["시나리오후금액(원)"] = display["시나리오후금액(원)"].apply(lambda x: f"{x:,.0f}")
+                            display["변동률(%)"] = display["변동률(%)"].apply(
+                                lambda x: f"+{x:.1f}%" if x >= 0 else f"{x:.1f}%"
+                            )
+                            st.dataframe(display, hide_index=True, use_container_width=True)
+                            c1, c2, c3 = st.columns(3)
+                            c1.metric("총 변동액", f"{sign}{delta_won:,.0f}원")
+                            c2.metric("총 변동률", f"{sign}{delta_pct:.2f}%")
+                            c3.metric("시나리오 후 총자산", f"{totals_row['시나리오후금액(원)']:,.0f}원")
+            except Exception as exc:  # noqa: BLE001
+                st.warning(f"라이브 시나리오 계산 실패: {exc}")
+                st.caption("⬇ 데모 시나리오")
+                st.dataframe(mock_data.scenarios(), hide_index=True, use_container_width=True)
+        else:
+            st.caption("🧪 데모 (mock 데이터)")
+            st.dataframe(mock_data.scenarios(), hide_index=True, use_container_width=True)
+
+        st.divider()
+
+        # ── What-if 계산기 ────────────────────────────────────────────
+        st.subheader("What-if 계산기")
+        if _live():
+            st.caption("🟢 종목 비중을 변경했을 때의 포트폴리오 영향을 계산합니다.")
+            with st.expander("⚙️ What-if 비중 시뮬레이터 열기", expanded=False):
+                try:
+                    from app.ui import backend
+                    wl_df = backend.watchlist()
+                    if wl_df.empty:
+                        st.info("화이트리스트가 비어있습니다. 먼저 화이트리스트를 구성하세요.")
+                    else:
+                        symbol_list = wl_df["symbol"].tolist()
+                        wi_col1, wi_col2 = st.columns(2)
+                        wi_symbol = wi_col1.selectbox("종목 (ticker)", symbol_list, key="wi_symbol")
+                        wi_weight = wi_col2.number_input(
+                            "목표 비중 (%)", min_value=0.0, max_value=100.0,
+                            value=10.0, step=0.5, format="%.1f", key="wi_weight"
+                        )
+                        if st.button("계산", key="wi_calc", type="primary"):
+                            result = backend.whatif_weight_change(wi_symbol, wi_weight)
+                            st.session_state["wi_result"] = result
+
+                        r = st.session_state.get("wi_result")
+                        if r and r.get("symbol") == wi_symbol:
+                            st.markdown("---")
+                            c1, c2, c3 = st.columns(3)
+                            c1.metric("현재 비중", f"{r['current_weight']:.2f}%")
+                            c2.metric("목표 비중", f"{r['new_weight']:.1f}%")
+                            delta_sign = "+" if r["delta_shares"] >= 0 else ""
+                            c3.metric(
+                                "추가매수/매도 주수",
+                                f"{delta_sign}{r['delta_shares']:,}주",
+                                delta=f"{delta_sign}{r['delta_cost']:,.0f}원",
+                            )
+                            c4, c5 = st.columns(2)
+                            c4.metric("예상 총자산 (거래 후)", f"{r['new_total_assets_estimated']:,.0f}원")
+                            c5.metric(
+                                "거래 비용 추정",
+                                f"{abs(r['delta_cost']):,.0f}원",
+                                delta=("매수" if r["delta_shares"] >= 0 else "매도"),
+                            )
+                            if r["risk_note"] and r["risk_note"] != "이상 없음.":
+                                st.warning(f"⚠️ 리스크 노트: {r['risk_note']}")
+                            else:
+                                st.success(f"리스크 노트: {r['risk_note']}")
+                except Exception as exc:  # noqa: BLE001
+                    st.warning(f"What-if 계산기 로딩 실패: {exc}")
+        else:
+            with st.expander("⚙️ What-if 비중 시뮬레이터 (데모)", expanded=False):
+                st.caption("🧪 데모 모드 — 실제 계산은 라이브 모드에서 가능합니다.")
+                mock_symbols = [f"{r['종목']} ({r['티커']})" for _, r in mock_data.holdings_df().iterrows()]
+                wi_demo_sym = st.selectbox("종목", mock_symbols, key="wi_demo_sym")
+                wi_demo_w = st.number_input(
+                    "목표 비중 (%)", min_value=0.0, max_value=100.0,
+                    value=10.0, step=0.5, format="%.1f", key="wi_demo_w"
+                )
+                st.info("라이브 모드로 전환하면 실제 보유종목 기반 시뮬레이션이 가능합니다.")
+
+        st.divider()
+
+        # ── 리밸런싱 플랜 ─────────────────────────────────────────────
         st.subheader("리밸런싱 플랜")
-        st.dataframe(_alloc_gap(), hide_index=True, width="stretch")
+        st.dataframe(_alloc_gap(), hide_index=True, use_container_width=True)
         st.caption("📐 몬테카를로·예측 시그널은 P3 + 퀀트팀(③) 구현 예정.")

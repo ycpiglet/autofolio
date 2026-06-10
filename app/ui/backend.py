@@ -420,6 +420,124 @@ def add_journal_entry(
     )
 
 
+_DEFAULT_SCENARIOS: dict = {
+    "Bull": {"주식": +15.0, "ETF": +12.0, "채권": +3.0, "원자재": +8.0, "기타": +5.0},
+    "Base": {"주식": +5.0, "ETF": +4.0, "채권": +2.0, "원자재": +1.0, "기타": +2.0},
+    "Bear": {"주식": -15.0, "ETF": -12.0, "채권": +5.0, "원자재": -5.0, "기타": -8.0},
+}
+
+
+def scenario_analysis(scenarios: dict | None = None) -> pd.DataFrame:
+    """보유 포트폴리오에 시나리오 적용 — 주가 변동 효과 계산.
+
+    scenarios: {"Bull": {"주식": +15, "ETF": +12, "채권": +3, "원자재": +8},
+                "Base": {"주식": +5, "ETF": +4, "채권": +2, "원자재": +1},
+                "Bear": {"주식": -15, "ETF": -12, "채권": +5, "원자재": -5}}
+    반환: DataFrame columns = [시나리오, 자산군, 현재금액(원), 변동률(%), 변동액(원), 시나리오후금액(원)]
+    포트폴리오 전체 합계 행(자산군="합계")도 포함.
+    """
+    _scenarios = scenarios or _DEFAULT_SCENARIOS
+    df = holdings_df()
+    if df.empty:
+        return pd.DataFrame(columns=["시나리오", "자산군", "현재금액(원)", "변동률(%)", "변동액(원)", "시나리오후금액(원)"])
+
+    # 자산군별 현재 평가금액 합계
+    asset_totals = df.groupby("자산군")["평가금액"].sum().to_dict()
+    total_current = df["평가금액"].sum()
+
+    rows = []
+    for scenario_name, changes in _scenarios.items():
+        scenario_total_delta = 0.0
+        for asset_cls, pct_change in changes.items():
+            current_val = asset_totals.get(asset_cls, 0.0)
+            if current_val == 0.0:
+                continue  # 해당 자산군 미보유 → 스킵
+            delta = current_val * pct_change / 100.0
+            new_val = current_val + delta
+            scenario_total_delta += delta
+            rows.append({
+                "시나리오": scenario_name,
+                "자산군": asset_cls,
+                "현재금액(원)": round(current_val),
+                "변동률(%)": round(pct_change, 1),
+                "변동액(원)": round(delta),
+                "시나리오후금액(원)": round(new_val),
+            })
+        # 합계 행
+        rows.append({
+            "시나리오": scenario_name,
+            "자산군": "합계",
+            "현재금액(원)": round(total_current),
+            "변동률(%)": round(scenario_total_delta / total_current * 100, 2) if total_current else 0.0,
+            "변동액(원)": round(scenario_total_delta),
+            "시나리오후금액(원)": round(total_current + scenario_total_delta),
+        })
+    return pd.DataFrame(rows, columns=["시나리오", "자산군", "현재금액(원)", "변동률(%)", "변동액(원)", "시나리오후금액(원)"])
+
+
+def whatif_weight_change(symbol: str, new_weight_pct: float) -> dict:
+    """종목 비중을 new_weight_pct%로 변경했을 때 포트폴리오 영향 계산.
+
+    반환: {symbol, current_weight, new_weight, delta_shares, delta_cost,
+           new_total_assets_estimated, risk_note}
+    delta_shares > 0 이면 추가매수, < 0 이면 일부매도.
+    """
+    df = holdings_df()
+    if df.empty:
+        return {
+            "symbol": symbol,
+            "current_weight": 0.0,
+            "new_weight": new_weight_pct,
+            "delta_shares": 0,
+            "delta_cost": 0,
+            "new_total_assets_estimated": 0.0,
+            "risk_note": "보유 종목 없음 — 포트폴리오가 비어있습니다.",
+        }
+    total = float(df["평가금액"].sum())
+    row = df[df["티커"] == symbol]
+    if row.empty:
+        # 화이트리스트에는 있지만 미보유 종목
+        _, broker, _, _ = _ctx()
+        try:
+            cur_price = float(broker.get_current_price(symbol).price)
+        except Exception:  # noqa: BLE001
+            cur_price = 0.0
+        current_weight = 0.0
+        current_value = 0.0
+        current_price = cur_price
+        current_shares = 0
+    else:
+        row = row.iloc[0]
+        current_weight = float(row["비중"])
+        current_value = float(row["평가금액"])
+        current_price = float(row["현재가"])
+        current_shares = int(row["수량"])
+
+    target_value = total * new_weight_pct / 100.0
+    delta_value = target_value - current_value
+    delta_shares = int(delta_value / current_price) if current_price else 0
+    delta_cost = delta_shares * current_price
+
+    # 리스크 노트
+    risk_notes = []
+    if new_weight_pct > 30:
+        risk_notes.append(f"단일 종목 비중 {new_weight_pct:.1f}% > 30% — 집중 리스크 주의.")
+    if abs(new_weight_pct - current_weight) > 10:
+        risk_notes.append(f"비중 변화 {abs(new_weight_pct - current_weight):.1f}%p — 한 번에 집행 시 시장충격 고려.")
+    if new_weight_pct == 0 and current_shares > 0:
+        risk_notes.append("전량 매도 시나리오 — 세금·수수료 감안 필요.")
+
+    return {
+        "symbol": symbol,
+        "current_weight": round(current_weight, 2),
+        "new_weight": round(new_weight_pct, 2),
+        "delta_shares": delta_shares,
+        "delta_cost": round(delta_cost),
+        "new_total_assets_estimated": round(total + delta_cost),
+        "risk_note": " ".join(risk_notes) if risk_notes else "이상 없음.",
+    }
+
+
 def daily_pnl_series() -> "pd.DataFrame":
     """일별 실현손익 시계열 (execution_logs 기반).
 
@@ -441,3 +559,26 @@ def daily_pnl_series() -> "pd.DataFrame":
             """
         ).fetchall()
     return pd.DataFrame([dict(r) for r in rows]) if rows else pd.DataFrame(columns=["date", "pnl"])
+
+
+def asset_curve(days: int = 90) -> pd.DataFrame:
+    """누적 자산 곡선 — execution_logs 기반 일별 누적 손익 + 현재 보유 자산.
+
+    컬럼: date (index), 자산 (float).
+    체결 내역이 없으면 현재 보유 평가금액 단일 값으로 반환.
+    """
+    pnl_df = daily_pnl_series()
+    holdings = holdings_df()
+    base_value = float(holdings["평가금액"].sum()) if not holdings.empty else 0.0
+
+    if pnl_df.empty:
+        import datetime as dt
+        today = dt.date.today().isoformat()
+        return pd.DataFrame({"자산": [base_value]}, index=[today])
+
+    # 최근 days 일치만
+    pnl_df = pnl_df.tail(days).copy()
+    pnl_df["cumulative_pnl"] = pnl_df["pnl"].cumsum()
+    pnl_df["자산"] = base_value + pnl_df["cumulative_pnl"] - pnl_df["cumulative_pnl"].iloc[-1]
+    pnl_df.index = pnl_df["date"]
+    return pnl_df[["자산"]]

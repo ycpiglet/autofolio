@@ -61,7 +61,15 @@ def render() -> None:
     pnl = int(k["평가손익"])
     st.markdown("평가손익  " + theme.pnl_md(pnl, theme.fmt_won(pnl), kr))
 
-    st.line_chart(data.asset_curve(), y="자산", height=260)
+    if st.session_state.get("data_source") == "backend":
+        try:
+            from app.ui import backend
+            curve = backend.asset_curve()
+            st.line_chart(curve["자산"], height=260)
+        except Exception:  # noqa: BLE001
+            st.line_chart(data.asset_curve(), y="자산", height=260)
+    else:
+        st.line_chart(data.asset_curve(), y="자산", height=260)
 
     left, right = st.columns([3, 2])
     with left:
