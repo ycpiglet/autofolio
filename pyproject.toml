@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "autofolio"
+version = "0.1.0"
+description = "Agentic Quant Portfolio OS — KIS-based personal auto-trading system"
+requires-python = ">=3.10"
+dependencies = [
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.0",
+    "streamlit>=1.36.0",
+    "pandas>=2.2.0",
+    "cryptography>=42.0.0",
+    "Authlib>=1.3.0",
+    "anthropic>=0.40.0",
+    "openai>=1.40.0",
+    "PyYAML>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-cov>=4.0.0",
+]
+notifications = [
+    "discord-webhook>=1.3.0",
+    "gspread>=6.0.0",
+    "notion-client>=2.2.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/ui/streamlit_app.py", "*/mock/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 60

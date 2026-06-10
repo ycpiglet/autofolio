@@ -16,8 +16,8 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run tests
-        run: python -m pytest -q
+        run: pip install -r requirements.txt pytest-cov
+      - name: Run tests with coverage
+        run: python -m pytest -q --cov=app --cov-report=term-missing --cov-fail-under=50
       - name: Check agent docs
         run: python scripts/check_agent_docs.py
