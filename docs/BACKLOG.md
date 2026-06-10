@@ -1,7 +1,7 @@
 # Autofolio 할 일 목록 · 백로그
 
 > 현황 스냅샷 + 우선순위 백로그. 로드맵 근거: [PRODUCT_BLUEPRINT.md](PRODUCT_BLUEPRINT.md) §8(P0–P4) · [ORG_PLAN.md](ORG_PLAN.md) §6–7 · [UI_SPEC.md](UI_SPEC.md) §7.
-> 갱신: 2026-06-10T07:52 · main=23218a1 · pytest 87 passed · PR #1–#10 완료
+> 갱신: 2026-06-10T09:28 · main=54e9eef · pytest 131 passed · PR #1–#20 완료
 
 ---
 
@@ -72,12 +72,18 @@
 
 ## 📋 백로그 (그룹별)
 
-### 기술부채 · 정리
-- [ ] MVP_SPEC §5 구조도 업데이트 (신규 셸·agents_runtime·IC 반영).
-- [ ] `streamlit_app.py`(구 MVP) vs `autofolio_app.py`(신 셸) 역할 정리 또는 통합.
-- [ ] 테스트 커버리지 확대 — 리스크·backend 어댑터 AppTest, 엔진 E2E.
-- [ ] `agent_orchestrator` import 오류 해소 — orchestrator_safety_gate v0.1.8에 이식됨, 재확인 필요.
+### Wave 1~6 완료 (2026-06-10 오전, PR #15~#20)
+- [x] T-27/38/39/41: 서킷브레이커 UI, MVP_SPEC §5, README, Telegram 설정 스크립트
+- [x] T-18/01/03/05/07/10: BaseNotifier/Bus, /quote, /ask, /mode, account_summary, watchlist
+- [x] T-15/17/02/13/28: Discord, Email SMTP, /alert+price_alerts, /retro, L0-L4 게이트
+- [x] T-12/35/29: 거래 저널 DB+UI, data_loader(PIT), backtest(SMA 크로스오버)
+- [x] T-30/21/22: 백테스트 실행 UI, PnL 캘린더, 장전 체크리스트
+- [x] T-43/45/42: pyproject.toml, CI 커버리지 게이트, review_pr.py
 
+### 기술부채 · 정리 (잔여)
+- [ ] `streamlit_app.py` vs `autofolio_app.py` 통합 정리.
+- [ ] 테스트 커버리지 60%+ (현재 50% 게이트).
+- [ ] `agent_orchestrator` import 재확인 (v0.1.8 이식됨).
 ### 개발팀 활용
 - [ ] PR/코드리뷰 워크플로 — independent-auditor·qa·lead-engineer 연결.
 - [ ] 요구→스펙 흐름 — requirements-interviewer·research-agent 활용.
