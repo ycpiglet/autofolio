@@ -32,10 +32,13 @@ HELP_TEXT = (
     "/status — 운영 상태(환경·자동매매·킬스위치·화이트리스트)\n"
     "/pnl — 평가손익 요약\n"
     "/positions — 보유 종목\n"
+    "/quote <심볼> — 현재가 조회 (예: /quote 005930)\n"
     "/conditions — 활성 거래 조건 목록\n"
-    "/engine — 엔진 1회 실행(읽기 전용, 트리거 시뮬레이션)\n"
-    "/propose <심볼> [BUY|SELL] — IC 에이전트 조건 제안\n"
-    "/kill — 킬스위치 즉시 활성화(주문 중단)\n"
+    "/engine — 엔진 1회 실행(읽기 전용)\n"
+    "/propose <심볼> [BUY|SELL] — IC 조건 제안\n"
+    "/ask <에이전트> <질문> — 에이전트에게 질문 (예: /ask cio 환율 전망)\n"
+    "/mode <심볼> <L0..L4> — 종목 자율성 레벨 설정\n"
+    "/kill — 킬스위치 즉시 활성화\n"
     "/kill off — 킬스위치 해제\n"
     "/approve confirm — 자동매매 활성화(confirm 필수)\n"
     "/pause — 자동매매 비활성화\n"
@@ -52,6 +55,9 @@ class PortfolioProvider(Protocol):
     def propose(self, symbol: str, side: str) -> str: ...
     def set_auto_enabled(self, value: bool) -> None: ...
     def set_kill_switch(self, value: bool) -> None: ...
+    def quote(self, symbol: str) -> float: ...
+    def ask_agent(self, agent: str, question: str) -> str: ...
+    def set_symbol_mode(self, symbol: str, mode: str) -> None: ...
 
 
 class TelegramCommandBot:
@@ -84,12 +90,18 @@ class TelegramCommandBot:
             return self._pnl()
         if cmd == "/positions":
             return self._positions()
+        if cmd == "/quote":
+            return self._quote(args)
         if cmd == "/conditions":
             return self._conditions()
         if cmd == "/engine":
             return self._engine()
         if cmd == "/propose":
             return self._propose(args)
+        if cmd == "/ask":
+            return self._ask(args)
+        if cmd == "/mode":
+            return self._mode(args)
         if cmd == "/kill":
             return self._kill(args)
         if cmd == "/approve":
@@ -179,6 +191,39 @@ class TelegramCommandBot:
         if side not in ("BUY", "SELL"):
             return f"방향 오류: '{side}' — BUY 또는 SELL 을 입력하세요."
         return self.provider.propose(symbol, side)
+
+    def _quote(self, args: list[str]) -> str:
+        if not args:
+            return "사용법: /quote <심볼>\n예: /quote 005930"
+        symbol = args[0].upper()
+        try:
+            price = self.provider.quote(symbol)
+            return f"📈 {symbol} 현재가: {price:,.0f}원"
+        except Exception as exc:  # noqa: BLE001
+            return f"조회 실패: {exc}"
+
+    def _ask(self, args: list[str]) -> str:
+        if len(args) < 2:
+            return "사용법: /ask <에이전트> <질문>\n예: /ask cio 반도체 ETF 전망"
+        agent = args[0].lower()
+        question = " ".join(args[1:])
+        try:
+            return self.provider.ask_agent(agent, question)
+        except Exception as exc:  # noqa: BLE001
+            return f"에이전트 오류: {exc}"
+
+    def _mode(self, args: list[str]) -> str:
+        if len(args) < 2:
+            return "사용법: /mode <심볼> <L0..L4>\n예: /mode 005930 L2"
+        symbol = args[0].upper()
+        mode = args[1].upper()
+        if mode not in ("L0", "L1", "L2", "L3", "L4"):
+            return f"레벨 오류: '{mode}' — L0~L4 중 하나를 입력하세요."
+        try:
+            self.provider.set_symbol_mode(symbol, mode)
+            return f"✅ {symbol} 자율성 레벨 → {mode}"
+        except Exception as exc:  # noqa: BLE001
+            return f"모드 설정 실패: {exc}"
 
     # ----- state-changing handlers -----
     def _kill(self, args: list[str]) -> str:
@@ -286,8 +331,20 @@ class BackendProvider:
 
     def set_kill_switch(self, value: bool) -> None:
         from app.ui import backend
-
         backend.set_flag("kill_switch_active", value)
+
+    def quote(self, symbol: str) -> float:
+        from app.ui import backend
+        return backend.price(symbol)
+
+    def ask_agent(self, agent: str, question: str) -> str:
+        from app.ui import agents_runtime as ar
+        return ar.ask(agent, question)
+
+    def set_symbol_mode(self, symbol: str, mode: str) -> None:
+        # 현재 session_state 기반이라 Telegram에서는 DB에 저장
+        from app.ui import backend
+        backend.set_flag(f"symbol_mode_{symbol}", mode)
 
 
 def make_telegram_sender(bot_token: str) -> Callable[[object, str], None]:
