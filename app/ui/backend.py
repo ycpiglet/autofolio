@@ -386,3 +386,9 @@ def watchlist() -> pd.DataFrame:
         except Exception:  # noqa: BLE001
             rows.append({"symbol": item["symbol"], "name": item.get("name", ""), "price": None})
     return pd.DataFrame(rows)
+
+
+def add_price_alert(symbol: str, target_price: float, direction: str = "ABOVE") -> int:
+    """가격 알림 조건을 DB에 저장. LiveTradingEngine 실행 시 체크·발송."""
+    repo, *_ = _ctx()
+    return repo.add_price_alert(symbol, target_price, direction)

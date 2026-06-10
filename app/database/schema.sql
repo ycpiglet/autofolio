@@ -72,3 +72,13 @@ CREATE TABLE IF NOT EXISTS risk_limits (
 
 CREATE INDEX IF NOT EXISTS idx_trade_conditions_symbol ON trade_conditions(symbol);
 CREATE INDEX IF NOT EXISTS idx_order_logs_symbol_created ON order_logs(symbol, created_at);
+
+CREATE TABLE IF NOT EXISTS price_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    symbol TEXT NOT NULL,
+    target_price REAL NOT NULL,
+    direction TEXT NOT NULL CHECK(direction IN ('ABOVE', 'BELOW')),
+    active INTEGER NOT NULL DEFAULT 1,
+    triggered_at TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
