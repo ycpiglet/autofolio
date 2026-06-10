@@ -34,6 +34,19 @@ class SafetyChecker:
         if self.repo.get_system_state("auto_trading_enabled", "false") != "true":
             return SafetyResult(False, "Auto trading is disabled.")
 
+        # --- L0-L4 종목별 모드 체크 ---
+        # L0(관찰)/L1(자문)은 자동 실행 금지. L2+ 만 엔진이 실행한다.
+        symbol = condition.get("symbol", "")
+        symbol_mode = self.repo.get_system_state(f"symbol_mode_{symbol}", None)
+        if symbol_mode is None:
+            # 전역 모드 폴백 — 기본 L2(반자동)로 엔진 실행 허용
+            symbol_mode = self.repo.get_system_state("global_mode", "L2")
+        if symbol_mode in ("L0", "L1"):
+            return SafetyResult(
+                False,
+                f"Autonomy level {symbol_mode} — manual approval required for {symbol}.",
+            )
+
         # --- Circuit breaker: consecutive order failures ---
         consecutive_failures_str = self.repo.get_system_state("consecutive_order_failures", "0")
         try:

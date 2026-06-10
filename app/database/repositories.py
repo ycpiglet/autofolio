@@ -328,3 +328,24 @@ class Repository:
     def reset_consecutive_failures(self) -> None:
         """연속 주문 실패 카운터를 0으로 초기화한다."""
         self.set_system_state("consecutive_order_failures", "0")
+    # ---- price alerts ----
+    def add_price_alert(self, symbol: str, target_price: float, direction: str) -> int:
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                'INSERT INTO price_alerts(symbol, target_price, direction) VALUES(?,?,?)',
+                (symbol, target_price, direction.upper()),
+            )
+            return cur.lastrowid
+
+    def list_active_alerts(self) -> list:
+        with get_connection(self.db_path) as conn:
+            return [dict(r) for r in conn.execute(
+                'SELECT * FROM price_alerts WHERE active=1 ORDER BY id'
+            ).fetchall()]
+
+    def trigger_alert(self, alert_id: int) -> None:
+        with get_connection(self.db_path) as conn:
+            conn.execute(
+                "UPDATE price_alerts SET active=0, triggered_at=CURRENT_TIMESTAMP WHERE id=?",
+                (alert_id,),
+            )

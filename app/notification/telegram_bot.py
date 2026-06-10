@@ -33,6 +33,7 @@ HELP_TEXT = (
     "/pnl — 평가손익 요약\n"
     "/positions — 보유 종목\n"
     "/quote <심볼> — 현재가 조회 (예: /quote 005930)\n"
+    "/alert <심볼> <가격> [above|below] — 가격 알림 설정\n"
     "/conditions — 활성 거래 조건 목록\n"
     "/engine — 엔진 1회 실행(읽기 전용)\n"
     "/propose <심볼> [BUY|SELL] — IC 조건 제안\n"
@@ -42,6 +43,7 @@ HELP_TEXT = (
     "/kill off — 킬스위치 해제\n"
     "/approve confirm — 자동매매 활성화(confirm 필수)\n"
     "/pause — 자동매매 비활성화\n"
+    "/retro — 최근 30일 회고 요약\n"
     "/help — 도움말"
 )
 
@@ -58,6 +60,7 @@ class PortfolioProvider(Protocol):
     def quote(self, symbol: str) -> float: ...
     def ask_agent(self, agent: str, question: str) -> str: ...
     def set_symbol_mode(self, symbol: str, mode: str) -> None: ...
+    def add_alert(self, symbol: str, price: float, direction: str) -> int: ...
 
 
 class TelegramCommandBot:
@@ -92,6 +95,8 @@ class TelegramCommandBot:
             return self._positions()
         if cmd == "/quote":
             return self._quote(args)
+        if cmd == "/alert":
+            return self._alert(args)
         if cmd == "/conditions":
             return self._conditions()
         if cmd == "/engine":
@@ -102,6 +107,8 @@ class TelegramCommandBot:
             return self._ask(args)
         if cmd == "/mode":
             return self._mode(args)
+        if cmd == "/retro":
+            return self._retro()
         if cmd == "/kill":
             return self._kill(args)
         if cmd == "/approve":
@@ -202,6 +209,24 @@ class TelegramCommandBot:
         except Exception as exc:  # noqa: BLE001
             return f"조회 실패: {exc}"
 
+    def _alert(self, args: list[str]) -> str:
+        """가격 알림 설정: /alert <심볼> <가격> [above|below]"""
+        if len(args) < 2:
+            return "사용법: /alert <심볼> <가격> [above|below]\n예: /alert 005930 70000 above"
+        symbol = args[0].upper()
+        try:
+            target = float(args[1].replace(",", ""))
+        except ValueError:
+            return f"가격 형식 오류: '{args[1]}'"
+        direction = (args[2].upper() if len(args) > 2 else "ABOVE")
+        if direction not in ("ABOVE", "BELOW"):
+            direction = "ABOVE"
+        try:
+            alert_id = self.provider.add_alert(symbol, target, direction)
+            return f"🔔 알림 설정 완료 (id={alert_id})\n{symbol} {target:,.0f}원 {'이상' if direction=='ABOVE' else '이하'} 도달 시 알림"
+        except Exception as exc:  # noqa: BLE001
+            return f"알림 설정 실패: {exc}"
+
     def _ask(self, args: list[str]) -> str:
         if len(args) < 2:
             return "사용법: /ask <에이전트> <질문>\n예: /ask cio 반도체 ETF 전망"
@@ -224,6 +249,19 @@ class TelegramCommandBot:
             return f"✅ {symbol} 자율성 레벨 → {mode}"
         except Exception as exc:  # noqa: BLE001
             return f"모드 설정 실패: {exc}"
+
+    def _retro(self) -> str:
+        """회고 요약 — run_retro.py를 dry-run으로 실행 후 Forward Actions만 발췌."""
+        try:
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+            from scripts.run_retro import run_retro
+            result = run_retro(days=30, dry_run=True)
+            forward = result.get("forward_actions", "(분석 없음)")
+            return f"📋 회고 (최근 30일)\n\n{forward[:600]}"
+        except Exception as exc:  # noqa: BLE001
+            return f"회고 실행 실패: {exc}"
 
     # ----- state-changing handlers -----
     def _kill(self, args: list[str]) -> str:
@@ -342,9 +380,12 @@ class BackendProvider:
         return ar.ask(agent, question)
 
     def set_symbol_mode(self, symbol: str, mode: str) -> None:
-        # 현재 session_state 기반이라 Telegram에서는 DB에 저장
         from app.ui import backend
         backend.set_flag(f"symbol_mode_{symbol}", mode)
+
+    def add_alert(self, symbol: str, price: float, direction: str) -> int:
+        from app.ui import backend
+        return backend.add_price_alert(symbol, price, direction)
 
 
 def make_telegram_sender(bot_token: str) -> Callable[[object, str], None]:
