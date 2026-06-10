@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  autofolio:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./.env:/app/.env:ro          # 시크릿은 bind-mount (이미지에 포함 금지)
+      - autofolio_data:/app/data     # DB 영속성
+      - autofolio_logs:/app/logs     # 이벤트 로그
+      - autofolio_autofolio:/app/.autofolio  # IC 결정·회고 로그
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  paper-scheduler:
+    build: .
+    command: python scripts/run_paper_engine.py --interval 30
+    volumes:
+      - ./.env:/app/.env:ro
+      - autofolio_data:/app/data
+      - autofolio_logs:/app/logs
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    depends_on:
+      - autofolio
+    profiles:
+      - scheduler  # docker compose --profile scheduler up
+
+volumes:
+  autofolio_data:
+  autofolio_logs:
+  autofolio_autofolio:
