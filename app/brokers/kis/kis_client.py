@@ -25,10 +25,12 @@ _PATH_RVSECNCL = "/uapi/domestic-stock/v1/trading/order-rvsecncl"
 _PATH_DAILY_CCLD = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"
 _PATH_PSBL_RVSECNCL = "/uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl"
 _PATH_CHART = "/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice"
+_PATH_INTRADAY = "/uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice"
 _PATH_PSBL_ORDER = "/uapi/domestic-stock/v1/trading/inquire-psbl-order"
 
 _TR_PRICE = "FHKST01010100"
 _TR_CHART = "FHKST03010100"  # 일봉, paper/prod 동일 (F* TR — no V prefix needed)
+_TR_INTRADAY = "FHKST03010200"  # 분봉, paper/prod 동일 (F* TR)
 _TR_BALANCE = "TTTC8434R"
 _TR_BUY = "TTTC0012U"
 _TR_SELL = "TTTC0011U"
@@ -338,6 +340,38 @@ class KisClient(BrokerClient):
             ]
         except BrokerError as exc:
             logging.getLogger(__name__).warning("get_price_history %s failed: %s", symbol, exc)
+            return []
+
+    def get_intraday_chart(self, symbol: str, time_unit: str = "1", count: int = 100) -> list[dict]:
+        """분봉 OHLCV. time_unit: '1'=1분봉, '3', '5', '10', '15', '30', '60'.
+
+        반환 항목: {datetime: 'YYYYMMDD HHMMSS', open, high, low, close: float, volume: int}.
+        BrokerError 시 [] 반환.
+        """
+        params = {
+            "FID_ETC_CLS_CODE": "",
+            "FID_COND_MRKT_DIV_CODE": "J",
+            "FID_INPUT_ISCD": symbol,
+            "FID_INPUT_HOUR_1": "",
+            "FID_PW_DATA_INCU_YN": "N",
+        }
+        try:
+            data, _ = self._request("GET", _PATH_INTRADAY, _TR_INTRADAY, params=params)
+            rows = data.get("output2") or []
+            return [
+                {
+                    "datetime": f"{r['stck_bsop_date']} {r['stck_cntg_hour']}",
+                    "open": float(r.get("stck_oprc") or 0),
+                    "high": float(r.get("stck_hgpr") or 0),
+                    "low": float(r.get("stck_lwpr") or 0),
+                    "close": float(r.get("stck_prpr") or 0),
+                    "volume": int(r.get("cntg_vol") or 0),
+                }
+                for r in rows[:count]
+                if r.get("stck_bsop_date") and r.get("stck_cntg_hour")
+            ]
+        except BrokerError as exc:
+            logging.getLogger(__name__).warning("get_intraday_chart %s failed: %s", symbol, exc)
             return []
 
     # ----- 주문 -------------------------------------------------------------
