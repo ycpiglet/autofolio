@@ -24,7 +24,7 @@
 - **KIS (P1.1b 코어 완료)**: paper·prod 키 `.env` 입력 + 토큰 발급 검증 완료. `kis_client.py` **5메서드 실구현**(현행 TR ID·rt_cd envelope·레이트리밋 재시도, 근거 `docs/KIS_API_SPEC.md`) — 단위테스트 17, **라이브 paper 읽기검증(현재가·잔고) 통과**. 환경별 자격증명/URL 해석은 `settings.resolve_settings()`로 중앙화(라이브 인증 실패 버그 동시 수정).
 
 ## 활성 작업 (다음 세션 시작점)
-- **P1.1b + 거버넌스 + UI 라이브화 대부분 완료** (2026-06-10). pytest **87 passed**. PR #5–#9 AUTO-MERGE 완료.
+- **Wave 1~6 완료** (2026-06-10 09:28). pytest **131 passed**. PR #15~#20. 45개 T-항목 중 24개 완료.
   주요 완료: engine _fallback_to_market PENDING 보정, home/trade/analysis/portfolio/alerts/settings 라이브 분기, Notifier(Telegram+로그), run_paper_engine.py, run_retro.py, IC→조건 자동 연결, 구조화 로깅(events.jsonl), GitHub Actions CI.
 - **P1.1b 잔여**: (a) **1주 수동 실주문** — 사람 승인 게이트(에이전트 자동발주는 안전분류기도 차단). 정규장에 `! python scripts/kis_paper_order_smoke.py`로 paper 검증 후 실전. (b) 홈 KPI/자산곡선·분석(백테스트·기여도) 라이브화는 이력DB·에이전트·백테스트 엔진 의존 → 후속. (c) 엔진 market-fallback 의미 보정(KIS 주문=접수/PENDING).
 - **커밋 상태**: `01eb310`(kis_client+settings 코어) 커밋됨. step2/3 산출물(`backend.holdings_df`·`portfolio.py`·`kis_paper_order_smoke.py`·`test_backend_holdings.py`)은 이어서 커밋.
