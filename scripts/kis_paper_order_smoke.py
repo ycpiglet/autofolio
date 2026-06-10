@@ -45,28 +45,13 @@ from app.common.enums import OrderType, Side  # noqa: E402
 from app.common.errors import BrokerError  # noqa: E402
 
 
-def _tick(price: float) -> int:
-    """KRX 호가단위 (2023 기준)."""
-    if price < 2_000:
-        return 1
-    if price < 5_000:
-        return 5
-    if price < 20_000:
-        return 10
-    if price < 50_000:
-        return 50
-    if price < 200_000:
-        return 100
-    if price < 500_000:
-        return 500
-    return 1_000
-
-
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="KIS 모의(paper) 전용 주문 생애주기 스모크")
     ap.add_argument("--symbol", default="005930")
     ap.add_argument("--qty", type=int, default=1)
     ap.add_argument("--no-cancel", action="store_true", help="취소 생략")
+    ap.add_argument("--market-test", action="store_true",
+                    help="시장가 매수 3종목 — 체결 확인용. 취소 없음.")
     args = ap.parse_args(argv)
 
     settings = resolve_settings("paper")
@@ -84,12 +69,30 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[paper] base={settings.kis_base_url} account={settings.kis_account_no}-{settings.kis_account_product_code}")
     client = KisClient(settings)
 
+    if args.market_test:
+        symbols = [("005930", "삼성전자"), ("069500", "KODEX 200"), ("000660", "SK하이닉스")]
+        for sym, name in symbols:
+            try:
+                cur2 = client.get_current_price(sym).price
+                print(f"\n[{name}] 현재가 {cur2:,.0f}원 — 시장가 매수 1주")
+                res2 = client.place_order(
+                    OrderRequest(symbol=sym, side=Side.BUY,
+                                 order_type=OrderType.MARKET, quantity=1, price=None)
+                )
+                print(f"  PLACE -> {res2.status.value} | odno={res2.broker_order_id} | {res2.message}")
+                import time as _time; _time.sleep(1.5)
+                st2 = client.get_order_status(res2.broker_order_id)
+                print(f"  STATUS -> {st2.status.value} | filled={st2.filled_quantity} | {st2.message}")
+            except BrokerError as exc:
+                print(f"  FAIL: {exc}")
+        print("\n--- 잔고 확인 ---")
+        for pos in client.get_positions():
+            print(f"  {pos.symbol}: {pos.quantity}주 @ {pos.avg_price}")
+        return 0
+
     cur = client.get_current_price(args.symbol).price
-    # 상/하한가(±30%) 이내, 미체결 의도. 모의서버 내부 기준가와 차이를 줄이기 위해 95% 사용
-    raw = cur * 0.95
-    tick = _tick(raw)
-    target = int(raw // tick * tick)  # 호가단위 정합
-    print(f"현재가 {args.symbol} = {cur:,.0f} → 지정가 매수 {args.qty}주 @ {target:,} (미체결 예상, 호가단위 {tick:,.0f}원)")
+    target = int(cur * 0.5)  # 시장가 한참 아래 → 미체결 의도
+    print(f"현재가 {args.symbol} = {cur:,.0f} → 지정가 매수 {args.qty}주 @ {target:,} (미체결 예상)")
     time.sleep(0.7)
 
     try:
