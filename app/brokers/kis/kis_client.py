@@ -222,6 +222,28 @@ class KisClient(BrokerClient):
             raise BrokerError(f"KIS price response missing stck_prpr for {symbol}: {data}")
         return PriceQuote(symbol=symbol, price=price)
 
+    def get_prices_batch(self, symbols: list[str], max_workers: int = 5) -> dict[str, float]:
+        """복수 종목 현재가 병렬 조회. 실패 종목은 결과에서 제외.
+
+        반환: {symbol: price} dict.
+        """
+        if not symbols:
+            return {}
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        result: dict[str, float] = {}
+        with ThreadPoolExecutor(max_workers=min(max_workers, len(symbols))) as pool:
+            futures = {pool.submit(self.get_current_price, sym): sym for sym in symbols}
+            for future in as_completed(futures):
+                sym = futures[future]
+                try:
+                    result[sym] = future.result().price
+                except Exception as exc:
+                    logging.getLogger(__name__).warning(
+                        "get_prices_batch: %s failed: %s", sym, exc
+                    )
+        return result
+
     # ----- 잔고 -------------------------------------------------------------
     def get_positions(self) -> list[Position]:
         cano, acnt = self._account()

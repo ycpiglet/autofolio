@@ -133,11 +133,16 @@ def holdings_df() -> pd.DataFrame:
     """
     repo, broker, _, _ = _ctx()
     wl = {r["symbol"]: r for r in repo.list_whitelist_symbols()}
-    return _build_holdings_df(
-        broker.get_positions(),
-        lambda s: broker.get_current_price(s).price,
-        lambda s: wl.get(s, {}),
-    )
+    positions = broker.get_positions()
+    if not positions:
+        return pd.DataFrame(columns=HOLDINGS_COLUMNS)
+    symbols = [p.symbol for p in positions]
+    if hasattr(broker, "get_prices_batch"):
+        price_cache = broker.get_prices_batch(symbols)
+        price_of = lambda s: price_cache.get(s) or broker.get_current_price(s).price
+    else:
+        price_of = lambda s: broker.get_current_price(s).price
+    return _build_holdings_df(positions, price_of, lambda s: wl.get(s, {}))
 
 
 def kpis() -> dict:
