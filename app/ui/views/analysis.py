@@ -43,6 +43,52 @@ def _alloc_gap():
     return mock_data.allocation_gap()
 
 
+def _backtest_section() -> None:
+    """백테스트 UI — SMA 크로스오버 실행 섹션."""
+    import datetime as dt
+    from app.ui import backend
+
+    wl = backend.list_whitelist()
+    if wl.empty:
+        st.caption("화이트리스트가 비어있습니다.")
+        return
+
+    symbols = wl["symbol"].tolist()
+    c1, c2, c3, c4 = st.columns(4)
+    sym = c1.selectbox("종목", symbols, key="bt_sym")
+    fast = c2.number_input("빠른 SMA", min_value=2, max_value=50, value=5, key="bt_fast")
+    slow = c3.number_input("느린 SMA", min_value=5, max_value=200, value=20, key="bt_slow")
+    days = c4.number_input("기간(일)", min_value=30, max_value=365, value=90, key="bt_days")
+
+    if st.button("▶ 백테스트 실행", key="bt_run"):
+        end = dt.date.today()
+        start = end - dt.timedelta(days=int(days))
+        with st.spinner("데이터 로딩 및 백테스트 실행 중…"):
+            try:
+                from app.quant.data_loader import fetch_and_cache
+                fetched = fetch_and_cache(sym, start, end)
+                from app.quant.backtest import run_sma_crossover
+                result = run_sma_crossover(sym, start, end, fast=int(fast), slow=int(slow))
+                st.session_state["bt_result"] = result
+                if fetched:
+                    st.caption(f"📥 {fetched}일치 시세 캐시 갱신")
+            except Exception as exc:  # noqa: BLE001
+                st.warning(f"백테스트 실패: {exc}")
+
+    r = st.session_state.get("bt_result")
+    if r and r.symbol == sym:
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("총 수익률", f"{r.total_return_pct:+.1f}%")
+        c2.metric("거래 횟수", f"{r.trade_count}회")
+        c3.metric("승률", f"{r.win_rate_pct:.1f}%")
+        c4.metric("최대낙폭", f"-{r.max_drawdown_pct:.1f}%")
+        if r.equity_curve:
+            import pandas as pd
+            df = pd.DataFrame(r.equity_curve).set_index("date")
+            st.line_chart(df["equity"], height=200)
+        st.caption("⚠️ 이 백테스트는 참고용입니다. 과거 성과가 미래를 보장하지 않습니다.")
+
+
 def render() -> None:
     st.header("📊 분석")
 
@@ -54,9 +100,9 @@ def render() -> None:
         else:
             st.caption("🧪 데모 (mock 데이터)")
 
-        st.subheader("백테스트 (예시 전략 vs KOSPI)")
+        st.subheader("백테스트")
         if _live():
-            st.info("📐 백테스트 엔진은 퀀트팀(③) 구현 예정. 실거래 이력이 쌓이면 자동 활성화됩니다.")
+            _backtest_section()
         else:
             st.line_chart(mock_data.backtest_curve(), height=240)
 
@@ -66,6 +112,22 @@ def render() -> None:
             st.bar_chart(attr.set_index("구분")["기여(만원)"], height=240)
         else:
             st.caption("체결 내역이 없습니다.")
+
+        # PnL 캘린더 히트맵
+        st.subheader("일별 손익 캘린더")
+        if _live():
+            try:
+                from app.ui import backend
+                pnl_df = backend.daily_pnl_series()
+                if not pnl_df.empty:
+                    pnl_df["pnl_만원"] = (pnl_df["pnl"] / 10_000).round(1)
+                    st.bar_chart(pnl_df.set_index("date")["pnl_만원"], height=180)
+                else:
+                    st.caption("체결 내역이 없습니다.")
+            except Exception:  # noqa: BLE001
+                st.bar_chart(mock_data.pnl_daily().set_index("날짜")["손익"], height=180)
+        else:
+            st.bar_chart(mock_data.pnl_daily().set_index("날짜")["손익"], height=180)
 
         st.subheader("회고 요약")
         m = _retro()

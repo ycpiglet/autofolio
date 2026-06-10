@@ -20,7 +20,7 @@ def render() -> None:
 def _live() -> None:
     from app.ui import backend
 
-    cond_tab, run_tab, log_tab = st.tabs(["목표가 조건", "엔진 실행 / 결과", "주문로그"])
+    cond_tab, run_tab, log_tab, check_tab = st.tabs(["목표가 조건", "엔진 실행 / 결과", "주문로그", "📋 장전 체크리스트"])
 
     with cond_tab:
         opts = backend.symbol_options()
@@ -67,6 +67,47 @@ def _live() -> None:
                 st.dataframe(df, hide_index=True, width="stretch")
         except Exception as exc:  # noqa: BLE001 — UI 폴백
             st.warning(f"주문로그 조회 실패: {exc}")
+
+    with check_tab:
+        _pre_trade_checklist(backend)
+
+
+def _pre_trade_checklist(backend) -> None:
+    """장전 체크리스트 — 매매 전 통과 관문."""
+    st.subheader("📋 장전 체크리스트")
+    st.caption("매매 실행 전 아래 항목을 확인하세요.")
+
+    try:
+        cb = backend.circuit_breaker_status()
+        auto = backend.get_flag("auto_trading_enabled")
+        kill = backend.get_flag("kill_switch_active")
+        wl = backend.list_whitelist()
+        wl_count = 0 if wl is None or wl.empty else len(wl)
+        conds = backend.list_conditions()
+        active_conds = 0
+        if not conds.empty and "status" in conds.columns:
+            active_conds = int((conds["status"] == "ACTIVE").sum())
+    except Exception as exc:  # noqa: BLE001
+        st.warning(f"상태 조회 실패: {exc}")
+        return
+
+    def row(label: str, ok: bool, detail: str = "") -> None:
+        icon = "✅" if ok else "❌"
+        st.markdown(f"{icon} **{label}**" + (f" — {detail}" if detail else ""))
+
+    row("킬스위치 해제", not kill, "활성 중" if kill else "")
+    row("자동매매 활성", auto, "OFF" if not auto else "ON")
+    row("서킷브레이커 미발동", not cb.get("triggered", False),
+        f"발동: {cb.get('consecutive_failures', 0)}연속실패" if cb.get("triggered") else "")
+    row("화이트리스트 종목", wl_count > 0, f"{wl_count}종목")
+    row("활성 조건", active_conds > 0, f"{active_conds}개 조건")
+
+    st.divider()
+    all_ok = (not kill) and auto and (not cb.get("triggered")) and wl_count > 0
+    if all_ok:
+        st.success("✅ 모든 게이트 통과 — 매매 준비 완료")
+    else:
+        st.error("❌ 일부 게이트 미통과 — 위 항목을 확인하세요")
 
 
 def _demo() -> None:
