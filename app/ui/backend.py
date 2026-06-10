@@ -392,3 +392,29 @@ def add_price_alert(symbol: str, target_price: float, direction: str = "ABOVE") 
     """가격 알림 조건을 DB에 저장. LiveTradingEngine 실행 시 체크·발송."""
     repo, *_ = _ctx()
     return repo.add_price_alert(symbol, target_price, direction)
+
+
+def list_journal_entries(limit: int = 100):
+    """거래 저널 항목 목록."""
+    repo, *_ = _ctx()
+    rows = repo.list_journal_entries(limit=limit)
+    return pd.DataFrame(rows) if rows else pd.DataFrame(columns=[
+        "id", "order_log_id", "symbol", "side", "entry_reason",
+        "exit_reason", "grade", "lesson", "plan_followed", "emotion_flag", "created_at"
+    ])
+
+
+def add_journal_entry(
+    symbol: str, side: str, *,
+    order_log_id=None, entry_reason: str = "", exit_reason: str = "",
+    grade: str | None = None, lesson: str = "",
+    plan_followed: bool = True, emotion_flag: bool = False,
+) -> int:
+    """거래 저널 항목 추가."""
+    repo, *_ = _ctx()
+    return repo.add_journal_entry(
+        symbol=symbol, side=side, order_log_id=order_log_id,
+        entry_reason=entry_reason, exit_reason=exit_reason,
+        grade=grade, lesson=lesson,
+        plan_followed=plan_followed, emotion_flag=emotion_flag,
+    )
