@@ -36,7 +36,32 @@ def _live() -> None:
             tp = c2.number_input("목표가", min_value=0.0, value=float(round(cur * 0.99)), step=100.0, key="lv_tp")
             qty = c3.number_input("수량", min_value=1, value=1, key="lv_qty")
             auto = c3.checkbox("자동주문 ON", value=False, key="lv_auto")
+            compliance_check = st.toggle("Compliance 검토 후 저장", value=True, key="lv_compliance")
             if st.button("조건 저장", type="primary", key="lv_save"):
+                if compliance_check:
+                    # T-26: compliance-officer 사전 검토
+                    with st.spinner("Compliance Officer 검토 중…"):
+                        from app.ui import agents_runtime as ar
+                        verdict_text = ar.ask(
+                            "compliance-officer",
+                            f"다음 매매 조건을 법규·세금·거래소 규정 관점에서 검토해주세요: "
+                            f"{sym} {side} {int(qty)}주 @ {int(tp):,}원 (지정가)",
+                        )
+                    # 간단 판정: REJECT 포함 시 차단, CAUTION 시 경고
+                    verdict_lower = verdict_text.lower()
+                    if "reject" in verdict_lower or "거부" in verdict_lower:
+                        st.error(f"❌ Compliance Officer 거부\n{verdict_text[:400]}")
+                        st.stop()
+                    elif "caution" in verdict_lower or "주의" in verdict_lower:
+                        st.warning(f"⚠️ Compliance 주의사항\n{verdict_text[:300]}")
+                        with st.expander("전체 의견"):
+                            st.markdown(verdict_text)
+                        if not st.checkbox("위 주의사항을 확인했으며 계속 진행합니다", key="lv_comply_ack"):
+                            st.info("체크박스를 선택해야 조건이 저장됩니다.")
+                            st.stop()
+                    else:
+                        st.success("✅ Compliance 검토 통과")
+
                 cid = backend.add_condition(
                     symbol=sym, side=side, target_price=float(tp), quantity=int(qty),
                     order_type="LIMIT", auto_enabled=auto,

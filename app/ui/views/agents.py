@@ -94,6 +94,32 @@ def _ic() -> None:
             else:
                 st.caption("ℹ️ 결정문에서 종목코드/목표가/방향 자동 파싱 불가 — 매매 화면에서 수동 등록.")
 
+        # T-25: execution-trader 실행 계획 요청
+        if st.session_state.get("data_source") == "backend":
+            with st.expander("⚡ Execution Trader에 실행 계획 요청"):
+                st.caption("IC 결정을 바탕으로 Execution Trader 에이전트가 최적 실행 방법을 제안합니다.")
+                exec_symbol = st.text_input("종목코드", placeholder="005930", key="exec_sym")
+                exec_qty = st.number_input("목표 수량", min_value=1, value=1, key="exec_qty")
+                exec_side = st.radio("방향", ["BUY", "SELL"], horizontal=True, key="exec_side")
+                if st.button("📋 실행 계획 요청", key="exec_plan") and exec_symbol:
+                    with st.spinner("Execution Trader 분석 중…"):
+                        context = (
+                            f"IC 결정: {result['decision'][:500]}\n"
+                            f"종목: {exec_symbol}, 방향: {exec_side}, 수량: {exec_qty}주\n"
+                            f"현재 환경: {st.session_state.get('data_source','demo')}"
+                        )
+                        plan = ar.ask(
+                            "execution-trader",
+                            f"위 IC 결정에 따라 {exec_symbol} {exec_side} {exec_qty}주의 최적 실행 계획을 수립해주세요.",
+                            context,
+                        )
+                        st.session_state["exec_plan_result"] = plan
+                plan_result = st.session_state.get("exec_plan_result")
+                if plan_result:
+                    st.markdown("**Execution Trader 실행 계획:**")
+                    st.markdown(plan_result)
+                    st.caption("⚠️ 이 계획은 참고용입니다. 실제 주문은 매매 화면에서 직접 진행하세요.")
+
         with st.expander("전체 회의록"):
             for t in result["transcript"]:
                 st.markdown(f"**{t['role']}** (`{t['agent']}`)")
