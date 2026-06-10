@@ -611,7 +611,7 @@ class KisClient(BrokerClient):
         반환: get_today_orders() 와 동일 dict 리스트.
         BrokerError 시 [] 반환.
         """
-        if len(start_date) != 8 or len(end_date) != 8 or not start_date.isdigit():
+        if len(start_date) != 8 or len(end_date) != 8 or not start_date.isdigit() or not end_date.isdigit():
             raise ValueError("start_date/end_date must be 'YYYYMMDD' format.")
         cano, acnt = self._account()
         params = {

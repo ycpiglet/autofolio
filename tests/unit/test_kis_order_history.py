@@ -54,3 +54,9 @@ def test_get_order_history_validates_date_format():
     c = _make_client()
     with pytest.raises(ValueError, match="YYYYMMDD"):
         c.get_order_history("2026-06-01", "2026-06-10")
+
+
+def test_get_order_history_validates_end_date_format():
+    c = _make_client()
+    with pytest.raises(ValueError, match="YYYYMMDD"):
+        c.get_order_history("20260601", "2026-06-10")
