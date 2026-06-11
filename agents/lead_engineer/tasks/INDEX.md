@@ -30,3 +30,8 @@
 | [TASK-021](TASK-021-kis-margin-short.md) | 대기 | KIS API Engineer | 신용·공매도 주문 (SLL_TYPE) |
 | [TASK-022](TASK-022-kis-overseas-order.md) | 대기 | KIS API Engineer | 해외주식 주문 (미국·홍콩 등) |
 | [TASK-023](TASK-023-kis-engine-e2e-validation.md) | 대기 | KIS API Engineer | UI 엔진 → KIS 실주문 E2E 검증 |
+| [TASK-025](TASK-025-ui-design-system-foundation.md) | 완료 | Lead Engineer | UI Control Desk 디자인 방향·토큰 기반 |
+| [TASK-026](TASK-026-ui-safety-rail-components.md) | 완료 | UI/UX Designer | Safety Rail 및 공용 상태 컴포넌트 |
+| [TASK-027](TASK-027-ui-dashboard-portfolio-refresh.md) | 완료 | UI/UX Designer | Home/Portfolio control desk 개편 |
+| [TASK-028](TASK-028-ui-trade-guarded-workflow.md) | 완료 | UI/UX Designer | Trade guard-first 주문 흐름 |
+| [TASK-029](TASK-029-ui-console-accessibility-regression.md) | 완료 | QA | Agents/Alerts/Settings console·접근성 회귀 |

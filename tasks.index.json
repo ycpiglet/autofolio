@@ -1,6 +1,458 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 0,
-  "tasks": []
+  "count": 19,
+  "tasks": [
+    {
+      "type": "task",
+      "id": "TASK-010",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "상",
+      "est_hours": "8",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "websocket",
+        "realtime"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-010-kis-websocket-realtime.md",
+      "_title": "kis websocket realtime"
+    },
+    {
+      "type": "task",
+      "id": "TASK-011",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "chart",
+        "intraday"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-011-kis-intraday-chart.md",
+      "_title": "kis intraday chart"
+    },
+    {
+      "type": "task",
+      "id": "TASK-012",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "history"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-012-kis-long-term-order-history.md",
+      "_title": "kis long term order history"
+    },
+    {
+      "type": "task",
+      "id": "TASK-013",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "price",
+        "performance"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-013-kis-batch-price.md",
+      "_title": "kis batch price"
+    },
+    {
+      "type": "task",
+      "id": "TASK-014",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "order",
+        "after-hours"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-014-kis-after-hours-order.md",
+      "_title": "kis after hours order"
+    },
+    {
+      "type": "task",
+      "id": "TASK-015",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "하",
+      "est_hours": "1",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "index"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-015-kis-index-price.md",
+      "_title": "kis index price"
+    },
+    {
+      "type": "task",
+      "id": "TASK-016",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "fundamental",
+        "research"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-016-kis-fundamental-data.md",
+      "_title": "kis fundamental data"
+    },
+    {
+      "type": "task",
+      "id": "TASK-017",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "dividend"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-017-kis-dividend-info.md",
+      "_title": "kis dividend info"
+    },
+    {
+      "type": "task",
+      "id": "TASK-018",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "orderbook",
+        "realtime"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-018-kis-order-book.md",
+      "_title": "kis order book"
+    },
+    {
+      "type": "task",
+      "id": "TASK-019",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "sector"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-019-kis-sector-price.md",
+      "_title": "kis sector price"
+    },
+    {
+      "type": "task",
+      "id": "TASK-020",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "disclosure",
+        "compliance"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-020-kis-disclosure.md",
+      "_title": "kis disclosure"
+    },
+    {
+      "type": "task",
+      "id": "TASK-021",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "상",
+      "est_hours": "6",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "margin",
+        "short"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-021-kis-margin-short.md",
+      "_title": "kis margin short"
+    },
+    {
+      "type": "task",
+      "id": "TASK-022",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "상",
+      "est_hours": "8",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "overseas",
+        "us-stocks"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-022-kis-overseas-order.md",
+      "_title": "kis overseas order"
+    },
+    {
+      "type": "task",
+      "id": "TASK-023",
+      "status": "대기",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "engine",
+        "e2e",
+        "validation"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-023-kis-engine-e2e-validation.md",
+      "_title": "kis engine e2e validation"
+    },
+    {
+      "type": "task",
+      "id": "TASK-025",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "UI/UX Designer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "35000",
+      "tags": [
+        "ui",
+        "design-system",
+        "streamlit",
+        "safety"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-11-006",
+      "created": "2026-06-11",
+      "created_at": "2026-06-11T12:50:32+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-025-ui-design-system-foundation.md",
+      "_title": "ui design system foundation"
+    },
+    {
+      "type": "task",
+      "id": "TASK-026",
+      "status": "완료",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "35000",
+      "tags": [
+        "ui",
+        "components",
+        "safety",
+        "streamlit"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-11-006",
+      "created": "2026-06-11",
+      "created_at": "2026-06-11T12:50:32+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-026-ui-safety-rail-components.md",
+      "_title": "ui safety rail components"
+    },
+    {
+      "type": "task",
+      "id": "TASK-027",
+      "status": "완료",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "35000",
+      "tags": [
+        "ui",
+        "dashboard",
+        "portfolio",
+        "streamlit"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-11-006",
+      "created": "2026-06-11",
+      "created_at": "2026-06-11T12:50:32+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-027-ui-dashboard-portfolio-refresh.md",
+      "_title": "ui dashboard portfolio refresh"
+    },
+    {
+      "type": "task",
+      "id": "TASK-028",
+      "status": "완료",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "상",
+      "est_hours": "4",
+      "est_tokens": "45000",
+      "tags": [
+        "ui",
+        "trade",
+        "safety",
+        "guardrail",
+        "streamlit"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-11-006",
+      "created": "2026-06-11",
+      "created_at": "2026-06-11T12:50:32+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-028-ui-trade-guarded-workflow.md",
+      "_title": "ui trade guarded workflow"
+    },
+    {
+      "type": "task",
+      "id": "TASK-029",
+      "status": "완료",
+      "owner": "QA",
+      "assignees": [
+        "UI/UX Designer",
+        "QA",
+        "Doc Steward"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "30000",
+      "tags": [
+        "ui",
+        "qa",
+        "accessibility",
+        "alerts",
+        "agents"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-11-006",
+      "created": "2026-06-11",
+      "created_at": "2026-06-11T12:50:32+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-029-ui-console-accessibility-regression.md",
+      "_title": "ui console accessibility regression"
+    }
+  ]
 }

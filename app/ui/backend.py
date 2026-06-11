@@ -11,6 +11,7 @@ import pandas as pd
 
 from app.agents.research_agent import ConditionProposal, ResearchAgent
 from app.brokers.factory import create_broker_client
+from app.brokers.kis.constants import DEFAULT_KIS_INDEX_CODES
 from app.config.settings import settings
 from app.database.repositories import Repository, WhitelistSymbol
 from app.database.sqlite_db import initialize_database
@@ -215,6 +216,30 @@ def list_order_logs(limit: int = 200) -> pd.DataFrame:
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
+def market_indices() -> list[dict]:
+    """라이브 모드 KOSPI/KOSDAQ/KRX 지수 조회.
+
+    KIS 브로커만 지원한다. mock 환경은 빈 목록을 반환한다.
+    """
+    _, broker, _, _ = _ctx()
+    if not hasattr(broker, "get_index_price"):
+        return []
+    result = []
+    for code in DEFAULT_KIS_INDEX_CODES:
+        try:
+            result.append(broker.get_index_price(code))
+        except Exception:  # noqa: BLE001
+            result.append({
+                "index_code": code,
+                "price": 0.0,
+                "change": 0.0,
+                "change_pct": 0.0,
+                "volume": 0,
+                "trading_value": 0.0,
+            })
+    return result
+
+
 def run_engine_once() -> list[str]:
     _, _, engine, _ = _ctx()
     return engine.run_once()
@@ -237,6 +262,16 @@ def set_risk_limits(
         max_order_amount=max_order_amount,
         max_daily_amount=max_daily_amount,
     )
+
+
+def get_global_risk_limit() -> dict:
+    repo, *_ = _ctx()
+    return repo.get_global_risk_limit()
+
+
+def today_order_amount() -> float:
+    repo, *_ = _ctx()
+    return repo.today_order_amount()
 
 
 def attribution_df() -> pd.DataFrame:

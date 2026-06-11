@@ -5,6 +5,7 @@ import streamlit as st
 
 from app.ui import agents_runtime as ar
 from app.ui import ic as ic_mod
+from app.ui.components import ui
 from app.ui.mock import data
 
 
@@ -17,11 +18,39 @@ def render() -> None:
     else:
         st.caption(f"🟡 데모 모드 — {info}. `.env`에 ANTHROPIC_API_KEY 설정 시 실연결. · {agent_count}개 에이전트 등록")
 
-    chat_tab, ic_tab = st.tabs(["에이전트 채팅", "투자위원회 (IC)"])
+    console_tab, chat_tab, ic_tab = st.tabs(["관찰 콘솔", "에이전트 채팅", "투자위원회 (IC)"])
+    with console_tab:
+        _console(ok, info, agent_count)
     with chat_tab:
         _chat()
     with ic_tab:
         _ic()
+
+
+def _console(ok: bool, info: str, agent_count: int) -> None:
+    status = "연결" if ok else "대기"
+    source = "agent-runtime" if ok else "demo-runtime"
+    rows = [
+        ui.console_row("now", source, f"{ui.status_badge(status)} · {info}"),
+        ui.console_row("now", "registry", f"{agent_count} agents loaded"),
+        ui.console_row("now", "data-source", st.session_state.get("data_source", "demo")),
+    ]
+
+    st.subheader("결정/관찰 로그")
+    st.code("\n".join(row.replace("**", "") for row in rows), language="text")
+
+    recent = ic_mod.list_decisions()
+    with st.container(border=True):
+        st.markdown("**최근 IC 결정**")
+        if recent:
+            for d in recent[:8]:
+                st.caption(ui.console_row("decision", "ic", d["file"]))
+        else:
+            st.caption(ui.console_row("decision", "ic", "no decision log"))
+
+    st.subheader("역할 맵")
+    for team, members in data.agents_tree().items():
+        st.caption(f"{team}: {len(members)} agents")
 
 
 def _chat() -> None:
@@ -130,4 +159,4 @@ def _ic() -> None:
     if recent:
         st.subheader("최근 결정")
         for d in recent:
-            st.caption(f"`{d['file']}`")
+            st.caption(ui.console_row("decision", "ic", d["file"]))

@@ -6,6 +6,52 @@ import streamlit as st
 from app.ui import state, theme
 
 
+STATUS_TONES = {
+    "연결": "success",
+    "연동": "success",
+    "활성": "success",
+    "정상": "success",
+    "ON": "success",
+    "ON ": "success",
+    "CLEAR": "success",
+    "주의": "warning",
+    "대기": "warning",
+    "경고": "warning",
+    "OFF": "neutral",
+    "미연결": "neutral",
+    "미연동": "neutral",
+    "BLOCK": "danger",
+    "위험": "danger",
+    "킬스위치": "danger",
+    "kill": "danger",
+    "ACTIVE": "danger",
+    "TRIGGERED": "danger",
+}
+
+TONE_MARKERS = {
+    "success": "[OK]",
+    "warning": "[CHECK]",
+    "danger": "[BLOCK]",
+    "neutral": "[OFF]",
+}
+
+TONE_COLORS = {
+    "success": "green",
+    "warning": "orange",
+    "danger": "red",
+    "neutral": "gray",
+}
+
+
+def _normalize_env_for_summary(env: str | None) -> str:
+    key = (env or "").strip().lower()
+    if key == "demo":
+        return "mock"
+    if key == "backend":
+        return "paper"
+    return key
+
+
 def _circuit_breaker_info() -> dict | None:
     """서킷브레이커 상태를 조회한다. 백엔드 연결 실패 시 None 반환."""
     try:
@@ -27,20 +73,28 @@ def _confirm_kill() -> None:
 
 
 def top_bar() -> None:
-    """상단 상태바: 모드 배지 · 자동 ON/OFF · 새로고침 · 킬스위치."""
+    """상단 상태바: Safety Rail 형태 운영 상태 배지 · 새로고침 · 킬스위치."""
+    env = _normalize_env_for_summary(st.session_state.get("data_source"))
     mode = st.session_state.mode
     auto = st.session_state.auto_enabled
     kill = st.session_state.kill_switch
+    cb = _circuit_breaker_info()
+    summary = build_safety_summary(
+        env=env,
+        mode=mode,
+        auto=auto,
+        kill=kill,
+        circuit_breaker=bool(cb.get("triggered")) if cb else False,
+    )
 
     c1, c2, c3, c4, c5 = st.columns([4, 2, 2, 1, 2])
     with c1:
         st.markdown(f"### {theme.APP_ICON} {theme.APP_NAME}")
-        if st.session_state.get("demo"):
-            st.caption("🧪 데모 모드 — mock 데이터")
+        st.caption(f"환경: {summary['env']}")
     with c2:
-        st.markdown(f"**모드** :blue[{mode}] · {theme.MODE_LABELS[mode]}")
+        st.markdown(f"**모드** {mode} · {theme.MODE_LABELS.get(mode, '미지정')}")
     with c3:
-        st.markdown("**자동매매** " + (":red[ON]" if auto else ":gray[OFF]"))
+        st.markdown(f"**자동매매** {status_badge('ON' if auto else 'OFF')}")
     with c4:
         if st.button("🔄", help="데이터 새로고침", width="stretch"):
             st.cache_data.clear()
@@ -58,21 +112,25 @@ def top_bar() -> None:
     if kill:
         st.error("🔴 킬스위치 활성 — 자동매매 강제 OFF")
 
-    # Circuit breaker warning (only shown in backend/live mode)
-    if not st.session_state.get("demo"):
-        cb = _circuit_breaker_info()
-        if cb and cb.get("triggered"):
-            parts = []
-            if cb["consecutive_failures"] >= 3:
-                parts.append(f"연속 실패 {cb['consecutive_failures']}회")
-            if cb["today_pnl"] < 0:
-                parts.append(f"당일손실 {cb['today_pnl']:,.0f}원")
-            detail = " · ".join(parts) if parts else ""
-            st.warning(
-                f"⚠️ 서킷브레이커 발동 — 자동매매 일시 중단"
-                + (f" ({detail})" if detail else ""),
-                icon="🟠",
-            )
+    st.caption(
+        f"✅ 환경 {summary['env']} / "
+        f"자동매매 {summary['auto']} / "
+        f"킬스위치 {summary['kill']} / "
+        f"서킷브레이커 {summary['circuit_breaker']}"
+    )
+
+    if not st.session_state.get("demo") and summary["circuit_breaker"] == "TRIGGERED":
+        parts = []
+        if cb and cb.get("consecutive_failures") is not None:
+            parts.append(f"연속 실패 {cb['consecutive_failures']}회")
+        if cb and cb.get("today_pnl", 0) < 0:
+            parts.append(f"당일손실 {cb['today_pnl']:,.0f}원")
+        detail = " · ".join(parts) if parts else ""
+        st.warning(
+            f"⚠️ 서킷브레이커 발동 — 자동매매 일시 중단"
+            + (f" ({detail})" if detail else ""),
+            icon="🟠",
+        )
 
     st.divider()
 
@@ -87,12 +145,44 @@ def kpi_cards(items) -> None:
 
 
 def badge(status: str) -> str:
-    colors = {
-        "연결": "green", "연동": "green", "활성": "green",
-        "미연결": "gray", "미연동": "gray", "OFF": "gray",
-        "주의": "orange", "경고": "red", "위험": "red",
+    return status_badge(status)
+
+
+def status_tone(status: str) -> str:
+    """텍스트 상태를 상태 톤(success/warning/danger/neutral)으로 정규화한다."""
+    return STATUS_TONES.get(status, "neutral")
+
+
+def status_badge(status: str) -> str:
+    """색상뿐 아니라 마커 텍스트를 함께 출력하는 status badge."""
+    tone = status_tone(status)
+    marker = TONE_MARKERS[tone]
+    color = TONE_COLORS[tone]
+    return f":{color}[{marker}] {status}"
+
+
+def build_safety_summary(
+    env: str | None,
+    mode: str | None,
+    auto: bool,
+    kill: bool,
+    circuit_breaker: bool,
+) -> dict[str, str]:
+    """안전 rail 표시를 위한 요약 딕셔너리를 생성한다."""
+    norm_env = _normalize_env_for_summary(env)
+    mode_text = mode or "L1"
+    return {
+        "env": theme.env_label(norm_env),
+        "mode": mode_text,
+        "auto": "ON" if auto else "OFF",
+        "kill": "ACTIVE" if kill else "CLEAR",
+        "circuit_breaker": "TRIGGERED" if circuit_breaker else "CLEAR",
     }
-    return f":{colors.get(status, 'gray')}[●] {status}"
+
+
+def console_row(timestamp: str, source: str, message: str) -> str:
+    """콘솔형 표면에서 시간, 출처, 메시지를 색상 의존 없이 표시한다."""
+    return f"`{timestamp}` **{source}** - {message}"
 
 
 def page_header(title: str, subtitle: str | None = None) -> None:

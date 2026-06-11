@@ -4,6 +4,24 @@
 
 ## 기록
 
+### AUDIT-2026-06-11-006
+시각: 2026-06-11T12:50:32+09:00
+기록 시각: 2026-06-11T12:50:32+09:00
+요청자: Owner ("대화 기록 후 진행해주고, UI 개발 기획한 다음 taskset 등록해줘")
+수행자: Lead Engineer (Codex)
+의도: `docs/design` 재첨부 자료와 직전 디자인 리서치 대화를 durable record로 남기고 UI 개발 taskset을 등록
+대상: `docs/design/`, `docs/superpowers/plans/2026-06-11-autofolio-ui-control-desk.md`, `agents/lead_engineer/tasks/TASKSET-AF-UI-CONTROL-DESK.md`, `TASK-025`~`TASK-029`, `agents/research_agent/notes/EVIDENCE-2026-06-11-006-ui-design-research-and-direction.md`
+작업: `docs/design` 복구/이력 확인 → 디자인 후보(Coinbase/IBM/Binance/Linear/Raycast 등) 정리 → UI Control Desk 실행 계획 작성 → taskset 및 하위 TASK 등록 → INDEX/AUDIT 기록 갱신
+방법: AGENTS start protocol, writing-plans skill, read-only git/stash 확인, task frontmatter 등록
+결과: `TASKSET-AF-UI-CONTROL-DESK`와 TASK-025~029가 등록됐다. 계획은 안전 우선 UI/문서 변경으로 제한하며 KIS 주문 경로, `app/risk/**`, DB schema, secret, CI workflow는 제외했다.
+검증: `python scripts/generate_views.py`, `python scripts/generate_views.py --check`, `python scripts/check_agent_docs.py`.
+관련 기록: `EVIDENCE-2026-06-11-006`, `PLAN-2026-06-11-001`
+남은 리스크: `docs/design/`은 현재 untracked 자료라 커밋 전까지 다시 사라질 수 있다. 실제 UI 구현은 TASK-025부터 별도 실행해야 한다.
+
+후속 진행(2026-06-11T18:23:32+09:00): TASK-027 완료. Home은 주문 action을 제거하고 운영 상태/KPI/자산곡선/보유요약/알림 중심으로 재배치했으며, Portfolio는 holdings-first 구조로 재배치했다. 검증은 focused pytest 29 passed 및 `py_compile` 통과.
+
+후속 진행(2026-06-11T18:33:41+09:00): TASK-029 완료 및 TASKSET-AF-UI-CONTROL-DESK 완료 처리. Agents는 관찰 콘솔을 우선 표시하고, Alerts는 severity/source/time/next action을 텍스트로 표시하며, Settings는 secret 입력과 danger action을 분리했다. Clean branch 검증은 focused UI pytest 30 passed, full `pytest tests -v` 322 passed, `generate_views.py --check` OK, `check_agent_docs.py` 0 error. Streamlit foreground smoke는 `Local URL: http://localhost:8502`까지 부팅 확인했으나 detached background 서버는 현재 shell 환경에서 유지되지 않았다.
+
 ### AUDIT-2026-06-09-001
 시각: 2026-06-09T07:31:39+09:00
 기록 시각: 2026-06-09T07:31:39+09:00

@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
+from app.brokers.kis.constants import DEFAULT_KIS_INDEX_CODES
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -173,3 +174,42 @@ class TestRecentFills:
             result = backend.recent_fills()
         assert result.empty
         assert list(result.columns) == ["시각", "종목", "방향", "수량", "체결가"]
+
+
+def test_market_indices_collects_kospi_kosdaq_krx(monkeypatch):
+    calls = []
+
+    class FakeKisBroker:
+        def get_index_price(self, index_code: str) -> dict:
+            calls.append(index_code)
+            return {
+                "index_code": index_code,
+                "price": 1000.0 + len(calls),
+                "change": 1.0,
+                "change_pct": 0.01,
+                "volume": 100,
+                "trading_value": 10000.0,
+            }
+
+    class FakeRepo:
+        pass
+
+    with patch("app.ui.backend._ctx", return_value=(FakeRepo(), FakeKisBroker(), None, None)):
+        from app.ui import backend
+        backend._ctx.cache_clear()
+        result = backend.market_indices()
+
+    assert [r["index_code"] for r in result] == list(DEFAULT_KIS_INDEX_CODES)
+    assert calls == list(DEFAULT_KIS_INDEX_CODES)
+
+
+def test_market_indices_returns_empty_if_not_kis_backend():
+    class OtherBroker:
+        pass
+
+    with patch("app.ui.backend._ctx", return_value=(None, OtherBroker(), None, None)):
+        from app.ui import backend
+        backend._ctx.cache_clear()
+        result = backend.market_indices()
+
+    assert result == []

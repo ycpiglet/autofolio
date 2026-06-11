@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-11T08:04:33+09:00`
+> 생성 시각: `2026-06-11T19:38:32+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -26,4 +26,24 @@
 | [TASK-021](TASK-021-kis-margin-short.md) | 대기 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
 | [TASK-022](TASK-022-kis-overseas-order.md) | 대기 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
 | [TASK-023](TASK-023-kis-engine-e2e-validation.md) | 대기 | High | 중 | 2 ph / ~50000 tok | KIS API Engineer | kis,engine,e2e,validation |
+
+## Lead Engineer
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-025](TASK-025-ui-design-system-foundation.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Lead Engineer | ui,design-system,streamlit,safety |
+
+## QA
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-029](TASK-029-ui-console-accessibility-regression.md) | 완료 | Medium | 중 | 3 ph / ~30000 tok | QA | ui,qa,accessibility,alerts,agents |
+
+## UI/UX Designer
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-026](TASK-026-ui-safety-rail-components.md) | 완료 | High | 중 | 3 ph / ~35000 tok | UI/UX Designer | ui,components,safety,streamlit |
+| [TASK-027](TASK-027-ui-dashboard-portfolio-refresh.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | UI/UX Designer | ui,dashboard,portfolio,streamlit |
+| [TASK-028](TASK-028-ui-trade-guarded-workflow.md) | 완료 | High | 상 | 4 ph / ~45000 tok | UI/UX Designer | ui,trade,safety,guardrail,streamlit |
 

@@ -10,20 +10,20 @@ from app.ui.services import connectors
 
 
 def render() -> None:
-    ui.page_header("⚙️ 설정 · 연동", "로그인 한 번으로 SNS·채널·증권 다계좌를 한곳에서 관리")
-    sso_tab, ch_tab, broker_tab, mode_tab, risk_tab = st.tabs(
-        ["계정(SSO)", "알림채널", "증권계좌", "운영모드", "리스크"]
+    ui.page_header("⚙️ 설정 · 연동", "운영 모드, 리스크, 연동 상태를 분리해 관리")
+    mode_tab, risk_tab, broker_tab, ch_tab, sso_tab = st.tabs(
+        ["운영모드", "리스크", "증권계좌", "알림채널", "계정(SSO)"]
     )
-    with sso_tab:
-        _sso()
-    with ch_tab:
-        _channels()
-    with broker_tab:
-        _brokers()
     with mode_tab:
         _modes()
     with risk_tab:
         _risk()
+    with broker_tab:
+        _brokers()
+    with ch_tab:
+        _channels()
+    with sso_tab:
+        _sso()
 
 
 def _sso() -> None:
@@ -71,30 +71,35 @@ def _channel_form(name: str) -> None:
 
 
 def _brokers() -> None:
-    st.caption("⚠️ 소셜 로그인 아님 — 자격증명(암호화 보관). 1원인증 불필요(토큰/잔고 테스트로 검증).")
+    st.subheader("연동 계좌")
+    st.caption("Secret 값은 입력 시에만 사용하고 목록에는 표시하지 않습니다.")
     brokers = store.brokers_public()
     if not brokers:
         ui.empty_state("연동된 증권계좌가 없습니다", "아래 '계좌 추가'로 첫 계좌를 연결하세요.")
     else:
         for i, b in enumerate(brokers):
-            c1, c2, c3, c4 = st.columns([3, 2, 2, 2])
-            star = "⭐ " if b.get("기본") else ""
-            c1.write(f"{star}**{b['별칭']}** · {b['증권사']}")
-            c2.markdown(ui.badge(b["상태"]) + f" · {b['환경']}")
-            if not b.get("기본"):
-                if c3.button("기본 설정", key=f"bd_{i}", width="stretch"):
-                    store.set_default_broker(i)
-                    st.rerun()
-            if c4.button("삭제", key=f"brm_{i}", width="stretch"):
-                store.remove_broker(i)
-                st.rerun()
+            with st.container(border=True):
+                c1, c2, c3 = st.columns([3, 2, 2])
+                star = "기본 · " if b.get("기본") else ""
+                c1.write(f"**{star}{b['별칭']}** · {b['증권사']}")
+                c2.markdown(ui.badge(b["상태"]) + f" · {b['환경']}")
+                if not b.get("기본"):
+                    if c3.button("기본 설정", key=f"bd_{i}", width="stretch"):
+                        store.set_default_broker(i)
+                        st.rerun()
+                with st.expander("위험 작업"):
+                    st.caption("계좌 연결 삭제는 되돌릴 수 없습니다.")
+                    if st.button("계좌 연결 삭제", key=f"brm_{i}", width="stretch"):
+                        store.remove_broker(i)
+                        st.rerun()
 
-    with st.expander("➕ 계좌 추가 (연동 마법사)"):
+    st.subheader("Secret 입력")
+    with st.expander("계좌 추가"):
         alias = st.text_input("별칭", placeholder="내 KIS(실전)", key="b_alias")
         sec = st.selectbox("증권사", ["한국투자증권 (KIS)"], key="b_sec")
-        app_key = st.text_input("App Key", key="b_key")
+        app_key = st.text_input("App Key", type="password", key="b_key")
         app_secret = st.text_input("App Secret", type="password", key="b_secret")
-        account = st.text_input("계좌번호", placeholder="00000000-00", key="b_acct")
+        account = st.text_input("계좌번호", placeholder="00000000-00", type="password", key="b_acct")
         env = st.radio("환경", ["mock", "모의", "실전"], horizontal=True, key="b_env")
         if st.button("🔗 연동하기 (토큰 테스트)", type="primary", key="b_go"):
             if env == "mock":
@@ -110,6 +115,20 @@ def _brokers() -> None:
 
 def _modes() -> None:
     live = st.session_state.get("data_source") == "backend"
+
+    st.subheader("자동화 수준")
+    with st.container(border=True):
+        summary = ui.build_safety_summary(
+            env=st.session_state.get("data_source", "demo"),
+            mode=st.session_state.get("mode", "L1"),
+            auto=bool(st.session_state.get("auto_enabled", False)),
+            kill=bool(st.session_state.get("kill_switch", False)),
+            circuit_breaker=False,
+        )
+        st.caption(
+            f"환경 {summary['env']} · 모드 {summary['mode']} · "
+            f"자동매매 {summary['auto']} · 킬스위치 {summary['kill']}"
+        )
 
     st.select_slider(
         "전역 기본 자율성",
@@ -188,6 +207,7 @@ def _modes() -> None:
 def _risk() -> None:
     live = st.session_state.get("data_source") == "backend"
 
+    st.subheader("리스크 한도")
     c1, c2 = st.columns(2)
     daily = c1.number_input("일일 예산 (₩)", min_value=0, value=300_000, step=50_000, key="risk_daily")
     order_limit = c1.number_input("건당 주문 한도 (₩)", min_value=0, value=100_000, step=10_000, key="risk_order")
