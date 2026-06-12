@@ -14,3 +14,12 @@ from app.ui.backend import (  # noqa: F401
     disclosure_gate_state,
     refresh_disclosure_gate,
 )
+
+__all__ = [
+    "_DISCLOSURE_BLOCK_PREFIX",
+    "_DISCLOSURE_REASON_PREFIX",
+    "_send_disclosure_notification",
+    "add_price_alert",
+    "disclosure_gate_state",
+    "refresh_disclosure_gate",
+]

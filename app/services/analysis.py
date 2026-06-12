@@ -14,3 +14,13 @@ from app.ui.backend import (  # noqa: F401
     scenario_analysis,
     whatif_weight_change,
 )
+
+__all__ = [
+    "_DEFAULT_SCENARIOS",
+    "add_journal_entry",
+    "attribution_df",
+    "list_journal_entries",
+    "retro_metrics",
+    "scenario_analysis",
+    "whatif_weight_change",
+]
