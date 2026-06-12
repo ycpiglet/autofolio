@@ -973,7 +973,7 @@
         "portfolio",
         "phase2"
       ],
-      "gate": "blocked by TASK-037; no live orders",
+      "gate": "선행 TASK-037 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요; no live orders",
       "trigger_meeting": "TASK-037 완료 후 자동 개시",
       "audit_log": "AUDIT-2026-06-13-001",
       "created": "2026-06-13",
@@ -1035,7 +1035,7 @@
         "notifications",
         "phase4"
       ],
-      "gate": "blocked by TASK-039",
+      "gate": "선행 TASK-039 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요",
       "trigger_meeting": "TASK-039 완료 후 자동 개시",
       "audit_log": "AUDIT-2026-06-13-001",
       "created": "2026-06-13",
@@ -1065,7 +1065,7 @@
         "streamlit-retire",
         "phase5"
       ],
-      "gate": "blocked by TASK-040",
+      "gate": "선행 TASK-040 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요",
       "trigger_meeting": "TASK-040 완료 후 자동 개시",
       "audit_log": "AUDIT-2026-06-13-001",
       "created": "2026-06-13",
