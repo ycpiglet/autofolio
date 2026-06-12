@@ -772,7 +772,7 @@
     {
       "type": "task",
       "id": "TASK-032",
-      "status": "진행 중",
+      "status": "보류",
       "owner": "Data Engineer",
       "assignees": [
         "Data Engineer",
@@ -791,10 +791,10 @@
       ],
       "gate": "no live orders; risk integration requires review",
       "trigger_meeting": "Owner direct request",
-      "audit_log": "AUDIT-2026-06-12-009",
+      "audit_log": "AUDIT-2026-06-13-002",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T23:32:49+09:00",
+      "updated_at": "2026-06-13T00:14:24+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-032-data-quality-corporate-action-tests.md",
       "_title": "data quality corporate action tests"
     },

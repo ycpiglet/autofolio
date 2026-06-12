@@ -316,3 +316,17 @@
 검증: `pytest tests/integration/test_scheduled_strategy_patterns.py -q` 7 passed; `pytest tests/integration/test_quant_trading_scenario_catalog.py tests/integration/test_paper_scenario_matrix.py -q` 119 passed; py_compile OK; diff check OK
 관련 기록: TASK-034, EVIDENCE-2026-06-13-001, BRIEF-2026-06-13-001
 남은 리스크: production scheduler persistence, live order execution, risk-policy integration require explicit R3 Owner review before code changes. Daily-limit stabilization is test-fixture only; production safety policy unchanged.
+
+### AUDIT-2026-06-13-002
+시각: 2026-06-13T00:14:24+09:00
+기록 시각: 2026-06-13T00:14:24+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Data Engineer + QA (Codex)
+의도: TASK-032의 non-R3 산출물과 남은 R3 boundary를 분리해 active WIP를 정리
+대상: TASK-032, `app/data/quality.py`, `tests/unit/test_data_quality.py`, TASK/BRIEF/EVIDENCE records
+작업: validator/fixture 구현 완료 상태를 보존하고, 남은 engine no-order integration을 R3 Owner approval hold로 명시. TASK-032 상태를 `진행 중`에서 `보류`로 변경.
+방법: 기존 검증 결과와 AGENTS.md Autofolio R3 surface를 대조해 production order/safety path 변경 없이 기록 정리
+결과: TASK-032 non-R3 범위는 완료 기록됨. Active WIP에서 제거하고 Owner-approved no-order integration follow-up으로 보류.
+검증: `pytest tests/unit/test_data_quality.py tests/unit/test_quant_data_loader.py -q` 19 passed; py_compile OK
+관련 기록: TASK-032, EVIDENCE-2026-06-13-002, BRIEF-2026-06-13-002
+남은 리스크: invalid market data no-order hook remains unimplemented until Owner approves the order/safety integration point.
