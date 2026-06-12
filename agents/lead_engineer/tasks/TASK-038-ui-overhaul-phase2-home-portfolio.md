@@ -2,7 +2,6 @@
 type: task
 id: TASK-038
 status: 대기
-blocked_by: TASK-037
 owner: UI/UX Designer
 assignees: [UI/UX Designer, Backend Engineer]
 priority: Medium

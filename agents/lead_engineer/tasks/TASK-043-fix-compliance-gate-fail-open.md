@@ -32,32 +32,32 @@ Owner: Backend Engineer
 
 `app/services/trading.py`의 `save_condition_with_gates()` verdict 결정 휴리스틱이 agent 호출 오류 문자열("호출 오류", "오류" 등)을 통과 케이스로 분류한다.
 
-**문제**: agent 호출이 실패(타임아웃, 연결 오류, 예외)하면 반환값이 오류 문자열인데, 이 문자열이 "passed"/"caution"/"blocked" 키워드를 포함하지 않으므로 기본값 통과로 처리됨. 결과적으로 **fail-open** 동작 + `compliance="passed"` 오기록.
+**문제**: agent 호출이 실패(타임아웃, 연결 오류, 예외)하면 반환값이 오류 문자열인데, 이 문자열이 "reject"/"거부"/"caution"/"주의" 키워드를 포함하지 않으므로 기본값 통과로 처리됨. 결과적으로 **fail-open** 동작 + `compliance="passed"` 오기록.
 
 ## 수정 방향
 
-`GateResult` 에 `error` 상태 추가:
+`GateResult` 에 `error` status 추가:
 
 ```python
 class GateResult:
-    verdict: Literal["passed", "caution", "blocked", "error"]
+    status: Literal["saved", "blocked_disclosure", "rejected", "needs_acknowledgement", "error"]
     message: str
-    ...
+    compliance: Literal["passed", "caution_acked", "skipped", "error"] | None = None
 ```
 
-verdict 결정 로직 수정:
-- agent 호출이 예외/타임아웃이면 → `verdict="error"`
-- 반환값이 오류 문자열 패턴이면 → `verdict="error"`
-- `verdict="error"` 시 **fail-closed** 권장: 조건 저장 차단 또는 caution 처리
+status/compliance 결정 로직 수정:
+- agent 호출이 예외/타임아웃이면 → `status="error"`, `compliance="error"`
+- 반환값이 오류 문자열 패턴("오류", "호출 오류" 등)이면 → `status="error"`, `compliance="error"`
+- `status="error"` 시 **fail-closed** 권장: 조건 저장 차단 또는 caution 처리
 
 Phase 3 HTTP 매핑 예고:
-- `verdict="blocked"` → HTTP 422
-- `verdict="caution"` → HTTP 409 + `ack_token`
-- `verdict="error"` → HTTP 503 (게이트 오류) 또는 HTTP 422 (안전 차단)
+- `status="rejected"` → HTTP 422
+- `status="needs_acknowledgement"` → HTTP 409 + `ack_token`
+- `status="error"` → HTTP 503 (게이트 오류) 또는 HTTP 422 (안전 차단)
 
 ## 완료 기준
 
-- `GateResult.verdict` 에 `"error"` 상태 추가
+- `GateResult.status` 에 `"error"` 상태 추가, `compliance` 에 `"error"` 값 추가
 - agent 호출 오류 시 fail-closed 동작 확인 (통과 차단)
 - `compliance="passed"` 오기록 방지 테스트 추가
 - `python -m pytest tests/ -q` green
@@ -69,6 +69,6 @@ Phase 3 HTTP 매핑 예고:
 
 ## Done When
 
-- `GateResult` error 상태 추가
+- `GateResult.status` `"error"` + `compliance` `"error"` 추가
 - fail-open → fail-closed 변경 확인 테스트 통과
 - 전체 pytest green

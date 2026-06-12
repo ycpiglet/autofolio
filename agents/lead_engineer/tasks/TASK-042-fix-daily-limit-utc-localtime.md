@@ -33,8 +33,10 @@ Owner: Backend Engineer
 `Repository.today_order_amount()` (`app/database/repositories.py` ~line 288)가 다음과 같이 구현됨:
 
 ```sql
-SELECT SUM(amount) FROM order_logs
+SELECT COALESCE(SUM(COALESCE(order_price, current_price, 0) * quantity), 0) AS amount
+FROM order_logs
 WHERE DATE(created_at) = DATE('now', 'localtime')
+  AND order_status IN ('REQUESTED', 'FILLED', 'PENDING')
 ```
 
 **문제**: `created_at`은 SQLite `CURRENT_TIMESTAMP`로 저장되며 **UTC** 기준. 반면 비교 대상 `DATE('now', 'localtime')`는 **로컬 시간(KST)** 기준.
