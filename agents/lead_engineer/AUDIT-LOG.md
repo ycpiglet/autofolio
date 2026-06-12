@@ -344,3 +344,17 @@
 검증: generated view/report checks, task schema, check_agent_docs, doc_health_report, upstream warning, diff check OK. Recent closed backlog compact regression 34 passed.
 관련 기록: EVIDENCE-2026-06-13-003, BRIEF-2026-06-13-003, PR #36
 남은 리스크: Owner approval 없이는 KIS order path, OrderFlow, app/risk, schema/migration, prod safety policy 관련 남은 backlog 구현 불가.
+
+### AUDIT-2026-06-13-004
+시각: 2026-06-13T00:53:23+09:00
+기록 시각: 2026-06-13T00:53:23+09:00
+요청자: Owner ("기능적으로 더 구현할 게 없는지 리서치해줘..."; "Implement the plan.")
+수행자: Research Agent + Lead Engineer + QA (Codex)
+의도: 실제 증권앱/브로커/거래소/퀀트 플랫폼 기능 지형을 조사하고 Autofolio에 반영할 후보와 잠재/R3 후보를 중복 없이 백로그에 고정
+대상: TASK-037~041, FEATURE-LANDSCAPE-CATALOG, EVIDENCE-2026-06-13-004, BRIEF-2026-06-13-004
+작업: IBKR/Alpaca/Fidelity/KRX/Nasdaq/NYSE/TradingView/Robinhood/Schwab/QuantConnect/FIX/Toss 공개 문서 기준 feature family를 정리. 즉시 반영 가능한 read-only/UI/mock/docs 후보를 TASK-038~041로 등록하고, advanced order/after-hours/margin/overseas/derivatives/block-basket/halt-VI/data no-order hook은 기존 R3 보류 TASK에 매핑.
+방법: 공식/1차 문서 우선 조사, 현재 TASK/QA catalog와 중복 대조, product code mutation 없이 record-only patch
+결과: TASK-037 완료. FEATURE-LANDSCAPE-CATALOG active 등록. 신규 대기 ACT 후보 4건(TASK-038~041) 생성. 신규 R3 중복 task는 만들지 않음.
+검증: `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `python scripts/backlog_sweep.py` shows ACT 4 / ASK 9; `git diff --check` OK
+관련 기록: TASK-037, TASK-038, TASK-039, TASK-040, TASK-041, EVIDENCE-2026-06-13-004, BRIEF-2026-06-13-004, FEATURE-LANDSCAPE-CATALOG
+남은 리스크: Toss Securities 공개 HTML에서 심층 기능 목록은 확인 제한. 실제 KIS 고급 주문 지원은 각 R3 task 승인 후 공식 KIS endpoint 검증 필요. Prod/live real-money order untouched.
