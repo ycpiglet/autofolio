@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-13T02:14:04+09:00` · 열린 작업 20건
+> 생성 시각: `2026-06-13T02:38:01+09:00` · 열린 작업 20건
 
 ---
 
@@ -26,7 +26,7 @@
 | 진행 중 WIP | 1건 | WIP 적정 |
 | 대기 | 10건 | 최상위 자율 후보: TASK-042 (fix daily limit utc localtime) |
 | 보류 | 9건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 8 / REVIEW 3 / ASK 9 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 5 / REVIEW 6 / ASK 9 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
 **빠른 판단:** 새로 하나를 고른다면 **TASK-042**. 다만 현재 WIP가 1건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
 
@@ -41,9 +41,6 @@
 | 3 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) portfolio reality model tests | ACT | 대기 | Medium / score 27 | L · 5 ph | 회귀 리스크 감소 | 바로 착수 후보 |
 | 4 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) data quality corporate action tests | ACT | 진행 중 | Medium / score 25 | L · 5 ph | 회귀 리스크 감소 | 마무리/진행 유지 |
 | 5 | [TASK-044](TASK-044-fix-trade-ack-checkbox-loop.md) fix trade ack checkbox loop | ACT | 대기 | Low / score 20 | S · 2 ph | 낮은/위생 | 바로 착수 후보 |
-| 6 | [TASK-038](TASK-038-ui-overhaul-phase2-home-portfolio.md) ui overhaul phase2 home portfolio | ACT | 대기 | Medium / score 20 | XL · 12 ph | 중간 가치 | 바로 착수 후보 |
-| 7 | [TASK-040](TASK-040-ui-overhaul-phase4-agents-sse.md) ui overhaul phase4 agents sse | ACT | 대기 | Medium / score 20 | XL · 12 ph | 중간 가치 | 바로 착수 후보 |
-| 8 | [TASK-041](TASK-041-ui-overhaul-phase5-analysis-parity-retire.md) ui overhaul phase5 analysis parity retire | ACT | 대기 | Medium / score 20 | XL · 16 ph | 중간 가치 | 바로 착수 후보 |
 
 ### REVIEW — 자율 가능 + 경계 확인
 
@@ -52,6 +49,9 @@
 | 1 | [TASK-029](TASK-029-fix-style-order-lifecycle-tests.md) fix style order lifecycle tests | REVIEW | 대기 | High / score 32 | M · 4 ph | 회귀 리스크 감소; gate: mock/test harness first; live order_flow behavior changes require Owner ... | R2 범위 진행, R3 전 확인 |
 | 2 | [TASK-037](TASK-037-ui-overhaul-phase1-api-foundation-login.md) ui overhaul phase1 api foundation login | REVIEW | 대기 | High / score 24 | XL · 16 ph | 높은 가치; gate: no live orders; paper-safe; Owner 승인 전 prod 전환 금지 | R2 범위 진행, R3 전 확인 |
 | 3 | [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) scheduled strategy pattern tests | REVIEW | 대기 | Medium / score 20 | L · 6 ph | 운영 자동화; gate: mock/backtest first; live scheduler or order execution requires Owner re... | R2 범위 진행, R3 전 확인 |
+| 4 | [TASK-038](TASK-038-ui-overhaul-phase2-home-portfolio.md) ui overhaul phase2 home portfolio | REVIEW | 대기 | Medium / score 14 | XL · 12 ph | 중간 가치; gate: 선행 TASK-037 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요; no live orders | R2 범위 진행, R3 전 확인 |
+| 5 | [TASK-040](TASK-040-ui-overhaul-phase4-agents-sse.md) ui overhaul phase4 agents sse | REVIEW | 대기 | Medium / score 14 | XL · 12 ph | 중간 가치; gate: 선행 TASK-039 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 | R2 범위 진행, R3 전 확인 |
+| 6 | [TASK-041](TASK-041-ui-overhaul-phase5-analysis-parity-retire.md) ui overhaul phase5 analysis parity retire | REVIEW | 대기 | Medium / score 14 | XL · 16 ph | 중간 가치; gate: 선행 TASK-040 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 | R2 범위 진행, R3 전 확인 |
 
 ### ASK — Owner/외부 게이트
 
@@ -85,9 +85,9 @@
 | [TASK-043](TASK-043-fix-compliance-gate-fail-open.md) | High | Backend Engineer | 4 ph / ~30000 tok | safety bug — Phase 3 전 필수 수정 |
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | Medium | Performance Analyst | 5 ph / ~45000 tok | no live orders; broker/risk integration requires review |
 | [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | Medium | Quant Researcher | 6 ph / ~55000 tok | mock/backtest first; live scheduler or order execution requires Owner review |
-| [TASK-038](TASK-038-ui-overhaul-phase2-home-portfolio.md) | Medium | UI/UX Designer | 12 ph / ~90000 tok | blocked by TASK-037; no live orders |
-| [TASK-040](TASK-040-ui-overhaul-phase4-agents-sse.md) | Medium | Backend Engineer | 12 ph / ~90000 tok | blocked by TASK-039 |
-| [TASK-041](TASK-041-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | blocked by TASK-040 |
+| [TASK-038](TASK-038-ui-overhaul-phase2-home-portfolio.md) | Medium | UI/UX Designer | 12 ph / ~90000 tok | 선행 TASK-037 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요; no live orders |
+| [TASK-040](TASK-040-ui-overhaul-phase4-agents-sse.md) | Medium | Backend Engineer | 12 ph / ~90000 tok | 선행 TASK-039 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
+| [TASK-041](TASK-041-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | 선행 TASK-040 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-044](TASK-044-fix-trade-ack-checkbox-loop.md) | Low | UI/UX Designer | 2 ph / ~15000 tok | view-only fix; no backend change |
 
 ### 보류 (게이트 — 외부/결정 대기)

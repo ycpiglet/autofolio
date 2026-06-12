@@ -285,6 +285,6 @@
 작업: Phase 0 커밋(d43ff26..a102a33) 확인 후 디자인 스펙(docs/superpowers/specs/2026-06-13-ui-overhaul-design.md) 기반 TASK-037(Phase 1 FastAPI+Next.js+로그인), TASK-038(Phase 2 홈+포트폴리오), TASK-039(Phase 3 매매+설정+안전게이트 ⚠ R3 인접), TASK-040(Phase 4 에이전트+SSE), TASK-041(Phase 5 분석 패리티+Streamlit 은퇴) 등록. 안전 버그 TASK-042(일일한도 UTC/KST 불일치), TASK-043(compliance 게이트 fail-open), TASK-044(거래 확인 체크박스 루프) 즉시 등록. tasks.index.json 재생성(43 tasks), generate_views 실행.
 방법: Write(TASK 파일) + build_task_index.py + generate_views.py
 결과: TASK-037~044 8건 등록 완료. tasks.index.json 43 tasks. VIEW-by-* 갱신. TASK-039·042·043 High priority 즉시 처리 대상 명시.
-검증: python scripts/build_task_index.py → OK 43 tasks; python scripts/check_agent_docs.py 0 error (실행 예정)
-관련 기록: TASK-037, TASK-038, TASK-039, TASK-040, TASK-041, TASK-042, TASK-043, TASK-044, docs/superpowers/specs/2026-06-13-ui-overhaul-design.md, .claude/plans/glimmering-waddling-spring.md
+검증: python scripts/build_task_index.py → OK 43 tasks; python scripts/check_agent_docs.py → OK 0 error(s), 74 warning(s) (실행 완료)
+관련 기록: TASK-037, TASK-038, TASK-039, TASK-040, TASK-041, TASK-042, TASK-043, TASK-044, docs/superpowers/specs/2026-06-13-ui-overhaul-design.md (레포 내 권위 문서; 원 플랜 .claude/plans/glimmering-waddling-spring.md은 세션 로컬)
 남은 리스크: TASK-039(Phase 3)는 Owner 명시 승인 전 구현 불가(R3 인접). TASK-042/043 버그 수정 전 Phase 3 개시 금지. Prod/live real-money order untouched.

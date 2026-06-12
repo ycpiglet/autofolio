@@ -35,7 +35,7 @@ Phase 0(services 추출)이 완료된 상태에서 진행. `app/services/*`가 F
 ### 백엔드 (`app/api/`)
 
 - `app/api/` 디렉토리 신설: `main.py`, `deps.py`, `security.py`, `serializers.py`, `schemas/`, `routers/`
-- 세션 인증: local ID/PW(기존 vault PBKDF2 재사용) + guest(`role=guest`, `data_source=demo`) 고정. OIDC는 1b.
+- 세션 인증: local ID/PW(기존 vault PBKDF2 재사용) + guest(`role=guest`, `data_source=demo`) 고정. Google CTA 비노출(죽은 버튼 금지 원칙). OIDC는 Phase 1b(스펙 §Phase 1 정의 참조 — Authlib OIDC + Google CTA 활성화, Phase 1 머지 후 즉시 후속).
 - httpOnly 서명 쿠키 세션 (`itsdangerous`, 키: `.autofolio/api_session.key`)
 - 읽기 엔드포인트:
   - `auth/*` (login, logout, me)
@@ -71,8 +71,8 @@ Phase 0(services 추출)이 완료된 상태에서 진행. `app/services/*`가 F
 
 ## 근거 경로
 
-- 마스터 플랜: `.claude/plans/glimmering-waddling-spring.md` §Phase 1
-- 디자인 스펙: `docs/superpowers/specs/2026-06-13-ui-overhaul-design.md`
+- 디자인 스펙(레포 내 권위 문서): `docs/superpowers/specs/2026-06-13-ui-overhaul-design.md` §Phase 1 (원 플랜은 세션 로컬)
+- 서비스 레이어: `app/services/` (Phase 0 산출)
 - 서비스 레이어: `app/services/` (Phase 0 산출)
 - 안전 불변식: 스펙 §3
 

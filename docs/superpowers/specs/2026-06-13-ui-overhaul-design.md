@@ -1,6 +1,6 @@
 # Autofolio UI/UX 대개편 — 디자인 스펙 (Phase 0 산출)
 
-> 권위 문서: `.claude/plans/glimmering-waddling-spring.md` (마스터 플랜)
+> **권위 문서: 본 파일이 레포 내 권위 문서** (로컬 비공유 — `.claude/plans/glimmering-waddling-spring.md`은 세션 로컬)
 > 작성: 2026-06-13T01:33:29+09:00
 > 상태: Phase 0 완료 — Phase 1 대기
 
@@ -29,7 +29,7 @@ Autofolio 현 Streamlit UI(8화면+로그인)는 기능적으로 완성됐으나
 autofolio/
   app/services/   # 공유 서비스 레이어 — Streamlit과 FastAPI API가 공동 소비
   app/api/        # FastAPI (routers/schemas/serializers, 세션 쿠키 인증, SSE)
-  app/ui/         # 기존 Streamlit — backend.py는 재수출 shim으로 유지, Phase 5에 은퇴
+  app/ui/         # 기존 Streamlit — backend.py는 재수출 shim으로 유지, Phase 5에 은퇴 (Phase 0 현재는 역방향 파사드 — §5 참조)
   web/            # Next.js 16 + TS + Tailwind v4 + shadcn/ui + TanStack Query/Table
                   #   + lightweight-charts(시계열) + Recharts(구성비/Sankey) + Pretendard self-host
 ```
@@ -89,7 +89,7 @@ autofolio/
 | KPI 수치 | 26px · 700 · `tabular-nums` |
 | 한글 제목 | `word-break: keep-all` |
 
-### 4.3 코어 컴포넌트 목록 (~20개)
+### 4.3 코어 컴포넌트 목록 (23개)
 
 **안전 계열 (우선)**:
 - `KillSwitchButton` — 라벨 "자동매매 중단"
@@ -187,6 +187,9 @@ autofolio/
 
 **완료 기준**: 게스트/ID·PW 로그인 → `/home`(빈 셸) 도달, Playwright `login.spec.ts` 통과, API pytest(contract+gate guest 403) green, CI coverage ≥50%
 
+> **주의**: Phase 1은 로컬 ID/PW + 게스트 데모만 제공하며 Google CTA는 비노출(죽은 버튼 금지 원칙).
+> **Phase 1b 정의**: Authlib 백엔드 OIDC (`/api/auth/oidc/login`, `/api/auth/oidc/callback`) + 로그인 Google CTA 활성화 — Phase 1 머지 후 즉시 후속, 완료 기준: Google 로그인 → 세션 쿠키 → `/home` + Playwright OIDC 모킹 테스트 통과.
+
 ---
 
 ### Phase 2 — 홈 + 포트폴리오 (읽기 화면)
@@ -260,7 +263,7 @@ autofolio/
 
 | 파일 | 역할 |
 |------|------|
-| `app/ui/backend.py` | 계약 원본 (Phase 5까지 shim 유지) |
+| `app/ui/backend.py` | 계약 원본 (Phase 5까지 shim 유지; Phase 0 현재는 역방향 파사드 — §5 참조) |
 | `app/services/trading.py` | trade 게이트 로직 이동 대상 (Phase 0 완료) |
 | `app/risk/safety_checker.py` | 안전 계약 |
 | `app/ui/views/trade.py` | lift 대상 뷰 로직 |
