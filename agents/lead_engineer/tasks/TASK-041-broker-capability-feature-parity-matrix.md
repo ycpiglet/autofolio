@@ -38,6 +38,7 @@ Owner: Lead Engineer
   - KIS/mock/paper/current Autofolio vs reference platforms 비교.
   - asset class, session, order type, lifecycle, fees/slippage/fill model, data source, alert/backtest feature flags.
   - `ASSET-UNIVERSE-DECISION-RECORD`의 승인/조건부 승인/보류/R3/기각 상태를 capability vocabulary로 흡수.
+  - `EXTERNAL-APP-API-DECISION-RECORD`의 connector/API permission class를 external capability vocabulary로 흡수.
   - "supported / mock-only / paper-only / r3-hold / unsupported" 상태 정의.
   - tests that fail if unsupported feature labels are marked as supported without evidence.
 - 제외:
@@ -50,5 +51,5 @@ Owner: Lead Engineer
 1. capability matrix가 KIS/mock/paper/current Autofolio와 reference feature families를 비교한다.
 2. asset universe decision record를 반영해 asset class별 `approved / conditional / r3-hold / rejected` 상태를 표시한다.
 3. unsupported/r3-hold/rejected 기능이 UI에서 supported로 표시되지 않도록 테스트가 있다.
-4. 기존 TASK-014/021/022/026/027/028/030/031/032/042와 연결된다.
+4. 기존 TASK-014/021/022/026/027/028/030/031/032/042/043과 연결된다.
 5. docs/schema gates가 통과한다.

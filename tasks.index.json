@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 41,
+  "count": 42,
   "tasks": [
     {
       "type": "task",
@@ -1099,9 +1099,40 @@
       "audit_log": "AUDIT-2026-06-13-005",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:24:07+09:00",
-      "updated_at": "2026-06-13T01:24:07+09:00",
+      "updated_at": "2026-06-13T01:30:47+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-042-asset-universe-decision-record.md",
       "_title": "asset universe decision record"
+    },
+    {
+      "type": "task",
+      "id": "TASK-043",
+      "status": "완료",
+      "owner": "Research Agent",
+      "assignees": [
+        "Research Agent",
+        "Lead Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "30000",
+      "tags": [
+        "research",
+        "external-api",
+        "integrations",
+        "approval-record",
+        "capability",
+        "backlog"
+      ],
+      "gate": "record-only; no credentials, live API calls, token storage changes, product code, public webhook, OAuth app, external publication, order path, risk policy, schema, secret, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-006",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T02:06:53+09:00",
+      "updated_at": "2026-06-13T02:06:53+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-043-external-app-api-decision-record.md",
+      "_title": "external app api decision record"
     }
   ]
 }
