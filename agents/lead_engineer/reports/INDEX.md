@@ -16,3 +16,4 @@
 | [BRIEF-2026-06-13-004](BRIEF-2026-06-13-004.md) | BRIEF | 2026-06-13 | Owner | standard | Feature Landscape Research And Backlog Split | TASK-037 |
 | [BRIEF-2026-06-13-005](BRIEF-2026-06-13-005.md) | BRIEF | 2026-06-13 | Owner | standard | Asset Universe Approval And Rejection Record | TASK-042 |
 | [BRIEF-2026-06-13-006](BRIEF-2026-06-13-006.md) | BRIEF | 2026-06-13 | Owner | standard | External App And API Approval Record | TASK-043 |
+| [BRIEF-2026-06-13-007](BRIEF-2026-06-13-007.md) | BRIEF | 2026-06-13 | Owner | standard | External API Owner Setup Manual | TASK-044 |

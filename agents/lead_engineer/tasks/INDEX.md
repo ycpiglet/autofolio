@@ -46,6 +46,7 @@
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 대기 | Lead Engineer | Broker capability feature parity matrix |
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | Research Agent | Asset universe approval and rejection record |
 | [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | Research Agent | External app and API approval and rejection record |
+| [TASK-044](TASK-044-external-api-owner-setup-manual.md) | 완료 | Doc Steward | External app/API Owner setup manual |
 | [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | 대기 | Backend Engineer | UI 대개편 Phase 1 — FastAPI 기초 + 인증 + 읽기 API / Next.js 스캐폴드 + 로그인 |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 대기 | UI/UX Designer | UI 대개편 Phase 2 — 홈 + 포트폴리오 (읽기 화면) |
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | Backend Engineer | UI 대개편 Phase 3 — 매매 + 내역 + 설정 (state-changing + 안전 게이트) ⚠ Owner 승인 필수 |

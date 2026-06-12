@@ -57,6 +57,7 @@ scope boundary, secret-storage plan, rate-limit behavior, audit path, and revoca
 | Decision Surface | Task |
 |------------------|------|
 | This external app/API record | TASK-043 |
+| Owner setup manual | TASK-044; `docs/EXTERNAL_APP_API_OWNER_MANUAL.md` |
 | Capability vocabulary and supported labels | TASK-041 |
 | Watchlist/screener alert preview | TASK-038 |
 | Portfolio/report export candidates | TASK-040 |
@@ -72,3 +73,4 @@ scope boundary, secret-storage plan, rate-limit behavior, audit path, and revoca
 5. `/approve`, auto-mode, prod-mode, order, cancel, credential, and withdrawal commands are blocked unless an explicit R3 task authorizes them.
 6. OAuth connectors must use least-privilege scopes and must not persist tokens in plain text.
 7. Inbound webhook support must have signature/replay tests before any public endpoint is enabled.
+8. Future connector implementation TASKs must link the Owner setup manual and name the prepared account, scope, destination, secret storage path, quota/cost decision, and revocation path without recording the real secret.
