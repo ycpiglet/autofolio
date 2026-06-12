@@ -12,3 +12,4 @@
 | [BRIEF-2026-06-12-008](BRIEF-2026-06-12-008.md) | BRIEF | 2026-06-12 | Owner | standard | FIX-Style Order Lifecycle Tests | TASK-029 |
 | [BRIEF-2026-06-13-001](BRIEF-2026-06-13-001.md) | BRIEF | 2026-06-13 | Owner | standard | Scheduled Strategy Pattern Tests | TASK-034 |
 | [BRIEF-2026-06-13-002](BRIEF-2026-06-13-002.md) | BRIEF | 2026-06-13 | Owner | standard | Data Quality R3 Hold | TASK-032 |
+| [BRIEF-2026-06-13-003](BRIEF-2026-06-13-003.md) | BRIEF | 2026-06-13 | Owner | standard | R3 Backlog Decision Packet | CYCLE-001 |

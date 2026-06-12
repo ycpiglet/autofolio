@@ -330,3 +330,17 @@
 검증: `pytest tests/unit/test_data_quality.py tests/unit/test_quant_data_loader.py -q` 19 passed; py_compile OK
 관련 기록: TASK-032, EVIDENCE-2026-06-13-002, BRIEF-2026-06-13-002
 남은 리스크: invalid market data no-order hook remains unimplemented until Owner approves the order/safety integration point.
+
+### AUDIT-2026-06-13-003
+시각: 2026-06-13T00:35:51+09:00
+기록 시각: 2026-06-13T00:35:51+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Lead Engineer + QA (Codex)
+의도: PR #36 이후 남은 backlog가 모두 R3/Owner gate인지 재검증하고 Owner decision surface로 고정
+대상: BACKLOG.md, TASK-014/021/022/026/027/028/030/031/032, BRIEF/EVIDENCE records
+작업: main clean worktree에서 backlog sweep, task status/gate 확인, 독립 read-only explorer audit 수행, 남은 9개 task의 승인 필요 결정을 BRIEF로 정리
+방법: `python scripts/backlog_sweep.py`, `python scripts/query_tasks.py --status "보류"`, targeted gate scan, record-only patch
+결과: ACT 0 / REVIEW 0 / ASK 9 / DEFER 0. 구현 가능한 자율 task는 없음. 다음 단계는 Owner가 R3 lane을 승인하거나 mock-only ACT subtask를 명시적으로 분리하는 것.
+검증: generated view/report checks, task schema, check_agent_docs, doc_health_report, upstream warning, diff check OK. Recent closed backlog compact regression 34 passed.
+관련 기록: EVIDENCE-2026-06-13-003, BRIEF-2026-06-13-003, PR #36
+남은 리스크: Owner approval 없이는 KIS order path, OrderFlow, app/risk, schema/migration, prod safety policy 관련 남은 backlog 구현 불가.
