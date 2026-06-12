@@ -14,7 +14,7 @@
 
 이행 방식: Owner 결정 — Next.js 16 + FastAPI 분리, 토스류 미니멀 라이트, 스트랭글러(Streamlit 병행), 5단계 페이즈드.
 
-**Phase 0 (services 추출) 완료** (2026-06-13): `app/services/` 레이어 신설, trade 게이트 로직 `services/trading.py`로 이동, shim 경로 유지(기존 테스트 무변경). TASK-037~044 등록됨.
+**Phase 0 (services 추출) 완료** (2026-06-13): `app/services/` 레이어 신설, trade 게이트 로직 `services/trading.py`로 이동, shim 경로 유지(기존 테스트 무변경). TASK-045~052 등록됨.
 
 ---
 

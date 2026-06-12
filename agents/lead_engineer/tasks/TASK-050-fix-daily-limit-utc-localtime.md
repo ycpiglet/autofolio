@@ -1,28 +1,35 @@
 ---
 type: task
-id: TASK-042
+id: TASK-050
 status: 대기
 owner: Backend Engineer
 assignees: [Backend Engineer, QA]
 priority: High
-difficulty: 하
+difficulty: 중
 est_hours: 3
 est_tokens: 25000
 tags: [bug, safety, daily-limit, utc, localtime, database]
 gate: safety bug — no live orders during fix
 trigger_meeting: 즉시 처리 권고
-audit_log: AUDIT-2026-06-13-001
+audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
 updated_at: 2026-06-13T01:33:29+09:00
 ---
 
-# TASK-042 fix: 일일 주문한도 UTC/KST 불일치 버그
+# TASK-050 fix: 일일 주문한도 UTC/KST 불일치 버그
 
-작업 ID: TASK-042
+작업 ID: TASK-050
 상태: 대기
 Owner: Backend Engineer
+요청 시각: 2026-06-13
 기록 시각: 2026-06-13T01:33:29+09:00
+요청자: Owner
+수행자: Lead Engineer
+의도: KST 새벽 시간대(00:00~08:59) 일일 주문한도 미적용 UTC/KST 불일치 버그 수정
+대상: app/database/repositories.py ~line 288 today_order_amount(), tests/integration/test_paper_scenario_matrix.py
+방법: created_at 저장을 KST datetime으로 통일하거나 비교 기준을 UTC로 일원화하여 날짜 불일치 해소
+감사 로그: AUDIT-2026-06-13-007
 
 ## ⚠ 안전 버그 (High Priority)
 

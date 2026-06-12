@@ -1,6 +1,6 @@
 ---
 type: task
-id: TASK-040
+id: TASK-048
 status: 대기
 owner: Backend Engineer
 assignees: [Backend Engineer, UI/UX Designer]
@@ -9,20 +9,27 @@ difficulty: 중
 est_hours: 12
 est_tokens: 90000
 tags: [ui-overhaul, sse, agents, ic, notifications, phase4]
-gate: 선행 TASK-039 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요
-trigger_meeting: TASK-039 완료 후 자동 개시
-audit_log: AUDIT-2026-06-13-001
+gate: 선행 TASK-047 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요
+trigger_meeting: TASK-047 완료 후 자동 개시
+audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
 updated_at: 2026-06-13T01:33:29+09:00
 ---
 
-# TASK-040 UI 대개편 Phase 4 — 에이전트/IC + 알림 + SSE
+# TASK-048 UI 대개편 Phase 4 — 에이전트/IC + 알림 + SSE
 
-작업 ID: TASK-040
+작업 ID: TASK-048
 상태: 대기
 Owner: Backend Engineer
+요청 시각: 2026-06-13
 기록 시각: 2026-06-13T01:33:29+09:00
+요청자: Owner
+수행자: Lead Engineer
+의도: UI 대개편 Phase 4 — 에이전트·IC 실시간 통합과 SSE 스트리밍 구현 범위 정의
+대상: app/brokers/kis/kis_ws_client.py, app/common/logger.py, FastAPI SSE 엔드포인트 신규 파일 (Phase 4 범위)
+방법: 단일 SSE 허브(/api/stream/events) 구현, IC 백그라운드 잡 + SSE 진행 스트림, 에이전트 ask API 추가
+감사 로그: AUDIT-2026-06-13-007
 
 ## 배경 및 목적
 

@@ -1,28 +1,35 @@
 ---
 type: task
-id: TASK-044
+id: TASK-052
 status: 대기
 owner: UI/UX Designer
 assignees: [UI/UX Designer, QA]
 priority: Low
-difficulty: 하
+difficulty: 중
 est_hours: 2
 est_tokens: 15000
 tags: [bug, ui, streamlit, trade, acknowledgement, checkbox]
 gate: view-only fix; no backend change
 trigger_meeting: 없음
-audit_log: AUDIT-2026-06-13-001
+audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
 updated_at: 2026-06-13T01:33:29+09:00
 ---
 
-# TASK-044 fix: trade 뷰 ack 체크박스 영구 루프
+# TASK-052 fix: trade 뷰 ack 체크박스 영구 루프
 
-작업 ID: TASK-044
+작업 ID: TASK-052
 상태: 대기
 Owner: UI/UX Designer
+요청 시각: 2026-06-13
 기록 시각: 2026-06-13T01:33:29+09:00
+요청자: Owner
+수행자: Lead Engineer
+의도: trade 뷰 ack 체크박스 위젯 클린업으로 인한 영구 루프 UX 버그 수정
+대상: app/ui/views/trade.py lv_comply_ack 체크박스 렌더 로직
+방법: lv_comply_ack를 st.session_state["trade_ack_checked"]로 분리하여 위젯 클린업 방지 및 재제출 시 ack 상태 정상 전달
+감사 로그: AUDIT-2026-06-13-007
 
 ## 배경
 

@@ -1,28 +1,35 @@
 ---
 type: task
-id: TASK-043
+id: TASK-051
 status: 대기
 owner: Backend Engineer
 assignees: [Backend Engineer, Compliance Officer, QA]
 priority: High
-difficulty: 하
+difficulty: 중
 est_hours: 4
 est_tokens: 30000
 tags: [bug, safety, compliance, gate, fail-open, trading]
 gate: safety bug — Phase 3 전 필수 수정
-trigger_meeting: TASK-039 시작 전 완료 필수
-audit_log: AUDIT-2026-06-13-001
+trigger_meeting: TASK-047 시작 전 완료 필수
+audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
 updated_at: 2026-06-13T01:33:29+09:00
 ---
 
-# TASK-043 fix: compliance 게이트 fail-open 버그
+# TASK-051 fix: compliance 게이트 fail-open 버그
 
-작업 ID: TASK-043
+작업 ID: TASK-051
 상태: 대기
 Owner: Backend Engineer
+요청 시각: 2026-06-13
 기록 시각: 2026-06-13T01:33:29+09:00
+요청자: Owner
+수행자: Lead Engineer
+의도: compliance 게이트 fail-open 버그 수정 — agent 호출 오류 시 통과 오분류 및 compliance="passed" 오기록 방지
+대상: app/services/trading.py save_condition_with_gates(), GateResult 클래스
+방법: GateResult에 error 상태 추가, agent 오류 반환값 패턴 감지 후 fail-closed 처리로 변경
+감사 로그: AUDIT-2026-06-13-007
 
 ## ⚠ 안전 버그 (High Priority — Phase 3 전 필수 수정)
 

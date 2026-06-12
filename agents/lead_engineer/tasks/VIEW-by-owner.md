@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-13T02:38:01+09:00`
+> 생성 시각: `2026-06-13T07:58:56+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -13,13 +13,13 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
-| [TASK-029](TASK-029-fix-style-order-lifecycle-tests.md) | 대기 | High | 중 | 4 ph / ~45000 tok | Backend Engineer | qa,order-lifecycle,partial-fill,fix,mock |
+| [TASK-029](TASK-029-fix-style-order-lifecycle-tests.md) | 완료 | High | 중 | 4 ph / ~45000 tok | Backend Engineer | qa,order-lifecycle,partial-fill,fix,mock |
 | [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
-| [TASK-037](TASK-037-ui-overhaul-phase1-api-foundation-login.md) | 대기 | High | 상 | 16 ph / ~120000 tok | Backend Engineer | ui-overhaul,fastapi,next-js,authentication,login,phase1 |
-| [TASK-039](TASK-039-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
-| [TASK-040](TASK-040-ui-overhaul-phase4-agents-sse.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
-| [TASK-042](TASK-042-fix-daily-limit-utc-localtime.md) | 대기 | High | 하 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
-| [TASK-043](TASK-043-fix-compliance-gate-fail-open.md) | 대기 | High | 하 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
+| [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | 대기 | High | 상 | 16 ph / ~120000 tok | Backend Engineer | ui-overhaul,fastapi,next-js,authentication,login,phase1 |
+| [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
+| [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
+| [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
+| [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 대기 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
 
 ## Compliance Officer
 
@@ -31,7 +31,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 진행 중 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
+| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 
 ## KIS API Engineer
 
@@ -66,12 +66,14 @@
 | [TASK-007](TASK-007-roles-due-alignment.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | roles,governance |
 | [TASK-008](TASK-008-streamlit-legacy-wrapper.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | streamlit,compatibility |
 | [TASK-009](TASK-009-orchestrator-import-check.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | agent-runtime,import |
+| [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 대기 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
 
 ## Performance Analyst
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 대기 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
+| [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
+| [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 대기 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
 
 ## QA
 
@@ -86,13 +88,23 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-039](TASK-039-backtest-research-report-hardening.md) | 대기 | Medium | 중 | 4 ph / ~45000 tok | Quant Researcher | feature-landscape,backtest,research,reports,qa |
+
+## Research Agent
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-037](TASK-037-feature-landscape-research.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,feature-landscape,backlog,planning |
+| [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
+| [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
 
 ## UI/UX Designer
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-038](TASK-038-ui-overhaul-phase2-home-portfolio.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
-| [TASK-041](TASK-041-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
-| [TASK-044](TASK-044-fix-trade-ack-checkbox-loop.md) | 대기 | Low | 하 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 대기 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
 

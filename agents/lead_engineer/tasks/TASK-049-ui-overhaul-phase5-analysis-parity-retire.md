@@ -1,6 +1,6 @@
 ---
 type: task
-id: TASK-041
+id: TASK-049
 status: 대기
 owner: UI/UX Designer
 assignees: [UI/UX Designer, Backend Engineer, QA]
@@ -9,20 +9,27 @@ difficulty: 상
 est_hours: 16
 est_tokens: 120000
 tags: [ui-overhaul, analysis, parity, streamlit-retire, phase5]
-gate: 선행 TASK-040 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요
-trigger_meeting: TASK-040 완료 후 자동 개시
-audit_log: AUDIT-2026-06-13-001
+gate: 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요
+trigger_meeting: TASK-048 완료 후 자동 개시
+audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
 updated_at: 2026-06-13T01:33:29+09:00
 ---
 
-# TASK-041 UI 대개편 Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴
+# TASK-049 UI 대개편 Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴
 
-작업 ID: TASK-041
+작업 ID: TASK-049
 상태: 대기
 Owner: UI/UX Designer
+요청 시각: 2026-06-13
 기록 시각: 2026-06-13T01:33:29+09:00
+요청자: Owner
+수행자: Lead Engineer
+의도: UI 대개편 Phase 5 — 분석 화면 완성, Streamlit 8화면 패리티 감사 통과 후 Streamlit 은퇴
+대상: app/ui/views/, docs/superpowers/specs/2026-06-13-ui-overhaul-design.md §Phase 5, docker-compose Streamlit 서비스 (Phase 5 범위)
+방법: CandleChart·Sankey·백테스트 폼 구현, 패리티 체크리스트 작성 및 통과, AppTest·Streamlit shim 제거
+감사 로그: AUDIT-2026-06-13-007
 
 ## 배경 및 목적
 

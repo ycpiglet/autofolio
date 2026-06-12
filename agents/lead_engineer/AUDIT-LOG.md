@@ -275,16 +275,128 @@
 관련 기록: TASK-035, TASK-036, EVIDENCE-2026-06-12-005, EVIDENCE-2026-06-12-006, BRIEF-2026-06-12-005, BRIEF-2026-06-12-006, PAPER-TRANSACTION-UI-SYNC-SOAK, MARKET-HOURS-KIS-UI-VERIFICATION
 남은 리스크: 브라우저 첫 시도에서 KIS `RemoteDisconnected` 1회가 있었으나 재시도 성공, 분석 스크립트는 KIS warnings 0. Prod/live real-money order untouched.
 
+### AUDIT-2026-06-12-014
+시각: 2026-06-12T23:44:23+09:00
+기록 시각: 2026-06-12T23:44:23+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Performance Analyst + Backend Engineer + QA (Codex)
+의도: TASK-033 portfolio reality model gap을 mock-safe 범위에서 완료하고 UI 체결 표시와 execution log 정합성을 고정
+대상: `app/brokers/mock/mock_client.py`, `app/database/repositories.py`, `app/ui/backend.py`, `tests/unit/test_mock_portfolio_ledger.py`, `tests/integration/test_portfolio_reality_model.py`, TASK/BRIEF/EVIDENCE records
+작업: MockBroker optional cash ledger/fee/slippage/concentration controls 추가, insufficient cash/concentration rejection no-execution regression 추가, order log read path에 execution aggregate join 추가, UI recent fills가 execution filled price/quantity를 우선 표시하도록 수정
+방법: isolated SQLite + MockBrokerClient + focused pytest + generated scenario regression
+결과: TASK-033 완료. Mock 기본 동작은 유지하면서 cash/fee/slippage/concentration 케이스가 실행 가능해졌고, MARKET 체결의 UI 최근 체결가가 execution log와 일치한다.
+검증: portfolio focused 9 passed; UI/backend focused 19 passed; generated scenarios 119 passed; engine/mock regression 7 passed; py_compile OK; diff check OK
+관련 기록: TASK-033, EVIDENCE-2026-06-12-007, BRIEF-2026-06-12-007
+남은 리스크: tax placeholder와 real broker buying-power/risk-budget enforcement는 별도 정책/R3 review 필요. KIS live order, prod, risk policy, DB schema/migration untouched.
+
+### AUDIT-2026-06-12-015
+시각: 2026-06-12T23:51:57+09:00
+기록 시각: 2026-06-12T23:51:57+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Backend Engineer + QA (Codex)
+의도: TASK-029 FIX-style order lifecycle gap을 mock/test-harness first 범위에서 완료
+대상: `tests/integration/test_order_lifecycle.py`, TASK/BRIEF/EVIDENCE records
+작업: scripted pending broker, partial fill ledger harness, cumulative fill/remaining/weighted average verification, pending-limit fill-before-cancel, cancel reject, too-late-to-cancel tests 추가
+방법: isolated SQLite + MockBrokerClient subclass + focused pytest
+결과: TASK-029 완료. Order lifecycle harness 8 passed and paper scenario matrix 16 passed. Production order-flow behavior unchanged.
+검증: `pytest tests/integration -k order_lifecycle -q` 8 passed; `pytest tests/integration/test_paper_scenario_matrix.py -q` 16 passed; py_compile OK; diff check OK
+관련 기록: TASK-029, EVIDENCE-2026-06-12-008, BRIEF-2026-06-12-008
+남은 리스크: production partial-fill/cancel-replace semantics require explicit R3 Owner review before `OrderFlow` changes.
+
 ### AUDIT-2026-06-13-001
+시각: 2026-06-13T00:05:22+09:00
+기록 시각: 2026-06-13T00:05:22+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Quant Researcher + QA (Codex)
+의도: TASK-034 scheduled strategy pattern gap을 mock/backtest first 범위에서 완료
+대상: `tests/integration/test_scheduled_strategy_patterns.py`, `tests/integration/test_paper_scenario_matrix.py`, TASK/BRIEF/EVIDENCE records
+작업: deterministic clock, persistent scheduler harness, DCA/rebalance/pairs/volatility breakout/EOD liquidation strategy intent fixtures, prod-target refusal test 추가. Closure gate 중 기존 daily-limit scenario fixture가 midnight KST에서 SQLite UTC timestamp와 localtime comparison 불일치로 실패해 test-only local-day helper로 안정화.
+방법: test-local scheduler/clock harness + isolated SQLite trade condition repository + focused pytest
+결과: TASK-034 완료. Scheduled strategy harness 7 passed and generated quant/paper scenario regression 119 passed. Live scheduler and production order execution unchanged.
+검증: `pytest tests/integration/test_scheduled_strategy_patterns.py -q` 7 passed; `pytest tests/integration/test_quant_trading_scenario_catalog.py tests/integration/test_paper_scenario_matrix.py -q` 119 passed; py_compile OK; diff check OK
+관련 기록: TASK-034, EVIDENCE-2026-06-13-001, BRIEF-2026-06-13-001
+남은 리스크: production scheduler persistence, live order execution, risk-policy integration require explicit R3 Owner review before code changes. Daily-limit stabilization is test-fixture only; production safety policy unchanged.
+
+### AUDIT-2026-06-13-002
+시각: 2026-06-13T00:14:24+09:00
+기록 시각: 2026-06-13T00:14:24+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Data Engineer + QA (Codex)
+의도: TASK-032의 non-R3 산출물과 남은 R3 boundary를 분리해 active WIP를 정리
+대상: TASK-032, `app/data/quality.py`, `tests/unit/test_data_quality.py`, TASK/BRIEF/EVIDENCE records
+작업: validator/fixture 구현 완료 상태를 보존하고, 남은 engine no-order integration을 R3 Owner approval hold로 명시. TASK-032 상태를 `진행 중`에서 `보류`로 변경.
+방법: 기존 검증 결과와 AGENTS.md Autofolio R3 surface를 대조해 production order/safety path 변경 없이 기록 정리
+결과: TASK-032 non-R3 범위는 완료 기록됨. Active WIP에서 제거하고 Owner-approved no-order integration follow-up으로 보류.
+검증: `pytest tests/unit/test_data_quality.py tests/unit/test_quant_data_loader.py -q` 19 passed; py_compile OK
+관련 기록: TASK-032, EVIDENCE-2026-06-13-002, BRIEF-2026-06-13-002
+남은 리스크: invalid market data no-order hook remains unimplemented until Owner approves the order/safety integration point.
+
+### AUDIT-2026-06-13-003
+시각: 2026-06-13T00:35:51+09:00
+기록 시각: 2026-06-13T00:35:51+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Lead Engineer + QA (Codex)
+의도: PR #36 이후 남은 backlog가 모두 R3/Owner gate인지 재검증하고 Owner decision surface로 고정
+대상: BACKLOG.md, TASK-014/021/022/026/027/028/030/031/032, BRIEF/EVIDENCE records
+작업: main clean worktree에서 backlog sweep, task status/gate 확인, 독립 read-only explorer audit 수행, 남은 9개 task의 승인 필요 결정을 BRIEF로 정리
+방법: `python scripts/backlog_sweep.py`, `python scripts/query_tasks.py --status "보류"`, targeted gate scan, record-only patch
+결과: ACT 0 / REVIEW 0 / ASK 9 / DEFER 0. 구현 가능한 자율 task는 없음. 다음 단계는 Owner가 R3 lane을 승인하거나 mock-only ACT subtask를 명시적으로 분리하는 것.
+검증: generated view/report checks, task schema, check_agent_docs, doc_health_report, upstream warning, diff check OK. Recent closed backlog compact regression 34 passed.
+관련 기록: EVIDENCE-2026-06-13-003, BRIEF-2026-06-13-003, PR #36
+남은 리스크: Owner approval 없이는 KIS order path, OrderFlow, app/risk, schema/migration, prod safety policy 관련 남은 backlog 구현 불가.
+
+### AUDIT-2026-06-13-004
+시각: 2026-06-13T00:53:23+09:00
+기록 시각: 2026-06-13T00:53:23+09:00
+요청자: Owner ("기능적으로 더 구현할 게 없는지 리서치해줘..."; "Implement the plan.")
+수행자: Research Agent + Lead Engineer + QA (Codex)
+의도: 실제 증권앱/브로커/거래소/퀀트 플랫폼 기능 지형을 조사하고 Autofolio에 반영할 후보와 잠재/R3 후보를 중복 없이 백로그에 고정
+대상: TASK-037~041, FEATURE-LANDSCAPE-CATALOG, EVIDENCE-2026-06-13-004, BRIEF-2026-06-13-004
+작업: IBKR/Alpaca/Fidelity/KRX/Nasdaq/NYSE/TradingView/Robinhood/Schwab/QuantConnect/FIX/Toss 공개 문서 기준 feature family를 정리. 즉시 반영 가능한 read-only/UI/mock/docs 후보를 TASK-038~041로 등록하고, advanced order/after-hours/margin/overseas/derivatives/block-basket/halt-VI/data no-order hook은 기존 R3 보류 TASK에 매핑.
+방법: 공식/1차 문서 우선 조사, 현재 TASK/QA catalog와 중복 대조, product code mutation 없이 record-only patch
+결과: TASK-037 완료. FEATURE-LANDSCAPE-CATALOG active 등록. 신규 대기 ACT 후보 4건(TASK-038~041) 생성. 신규 R3 중복 task는 만들지 않음.
+검증: `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `python scripts/backlog_sweep.py` shows ACT 4 / ASK 9; `git diff --check` OK
+관련 기록: TASK-037, TASK-038, TASK-039, TASK-040, TASK-041, EVIDENCE-2026-06-13-004, BRIEF-2026-06-13-004, FEATURE-LANDSCAPE-CATALOG
+남은 리스크: Toss Securities 공개 HTML에서 심층 기능 목록은 확인 제한. 실제 KIS 고급 주문 지원은 각 R3 task 승인 후 공식 KIS endpoint 검증 필요. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-13-005
+시각: 2026-06-13T01:24:07+09:00
+기록 시각: 2026-06-13T01:24:07+09:00
+요청자: Owner ("개인 트레이더, 코인, 금, 은, 오일, 달러 환매, 부동산, 저작권 등등...")
+수행자: Research Agent + Lead Engineer + QA (Codex)
+의도: 여러 금융 자산/상품 옵션을 Autofolio에 녹일 수 있는지 조사하고 승인/기각 기록으로 고정
+대상: TASK-042, TASK-041, ASSET-UNIVERSE-DECISION-RECORD, EVIDENCE-2026-06-13-005, BRIEF-2026-06-13-005
+작업: FSC/KRX/BOK/CFTC/FINRA/CME/SEC 공식·1차 출처를 기준으로 개인 트레이더 profile, crypto, gold/silver/oil, USD/FX, real estate, copyright/fractional rights, options/derivatives를 분류. 승인 범위는 read-only/manual/mock/reporting/capability로 제한하고 live execution/custody/withdrawal/환전/송금/derivatives/private platform execution은 R3 또는 기각으로 기록.
+방법: 공식/1차 문서 우선 조사, 기존 TASK-041 capability matrix와 중복 대조, product code mutation 없는 record-only patch
+결과: TASK-042 완료. ASSET-UNIVERSE-DECISION-RECORD active 등록. TASK-041에 asset universe decision record를 capability matrix 입력으로 연결. 신규 live execution task는 만들지 않음.
+검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
+관련 기록: TASK-041, TASK-042, EVIDENCE-2026-06-13-005, BRIEF-2026-06-13-005, ASSET-UNIVERSE-DECISION-RECORD
+남은 리스크: KIS/KRX/crypto/FX/fractional platform별 endpoint·license·custody 세부는 실행 승인 전 별도 검증 필요. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-13-006
+시각: 2026-06-13T02:06:53+09:00
+기록 시각: 2026-06-13T02:06:53+09:00
+요청자: Owner ("telegram, kakao, google, x, naver, discord 등등 외부 어플리케이션과 연동하고 API를")
+수행자: Research Agent + Lead Engineer + QA (Codex)
+의도: 외부 앱/API 연동 가능성과 권한 경계를 조사하고 승인/기각 기록으로 고정
+대상: TASK-043, TASK-038, TASK-041, EXTERNAL-APP-API-DECISION-RECORD, EVIDENCE-2026-06-13-006, BRIEF-2026-06-13-006
+작업: Telegram/Kakao/Google/Discord/X/Naver/Notion/Slack 공식·1차 출처를 기준으로 outbound notification, read-only command, report export, OAuth login/write scopes, public posting, inbound webhook, remote state changes를 분류. 현재 Telegram/Discord/Email/Notion/Sheets adapter와 UI placeholder를 대조하고 TASK-038/TASK-041 입력으로 연결.
+방법: 공식/1차 문서 우선 조사, 기존 product docs/code와 중복 대조, credentials/live API call/product code mutation 없는 record-only patch
+결과: TASK-043 완료. EXTERNAL-APP-API-DECISION-RECORD active 등록. 승인 범위는 outbound alert/report/read-only command/selected-destination write로 제한하고, public posting/private-data scopes/inbound public webhook/remote automation/order-like commands는 R3 또는 기각으로 기록.
+검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
+관련 기록: TASK-038, TASK-041, TASK-043, EVIDENCE-2026-06-13-006, BRIEF-2026-06-13-006, EXTERNAL-APP-API-DECISION-RECORD
+남은 리스크: 실제 OAuth app, webhook endpoint, token vault, provider quota/cost, and platform review requirements are unverified until one connector implementation lane is explicitly opened. Prod/live order surfaces untouched.
+
+### AUDIT-2026-06-13-007
 시각: 2026-06-13T02:07:31+09:00
 기록 시각: 2026-06-13T02:07:31+09:00
 요청자: Owner (Phase 0 완료 후 Phase 1~5 태스크 등록 + 버그 3건 즉시 처리 지시)
 수행자: Lead Engineer (Claude)
-의도: UI 대개편 Phase 1~5 신규 태스크(TASK-037~041) 등록 + 안전 버그 3건(TASK-042~044) 등록 — 총 8개 태스크
-대상: agents/lead_engineer/tasks/TASK-037~044, tasks.index.json, VIEW-by-* 파일 일체
-작업: Phase 0 커밋(d43ff26..a102a33) 확인 후 디자인 스펙(docs/superpowers/specs/2026-06-13-ui-overhaul-design.md) 기반 TASK-037(Phase 1 FastAPI+Next.js+로그인), TASK-038(Phase 2 홈+포트폴리오), TASK-039(Phase 3 매매+설정+안전게이트 ⚠ R3 인접), TASK-040(Phase 4 에이전트+SSE), TASK-041(Phase 5 분석 패리티+Streamlit 은퇴) 등록. 안전 버그 TASK-042(일일한도 UTC/KST 불일치), TASK-043(compliance 게이트 fail-open), TASK-044(거래 확인 체크박스 루프) 즉시 등록. tasks.index.json 재생성(43 tasks), generate_views 실행.
-방법: Write(TASK 파일) + build_task_index.py + generate_views.py
-결과: TASK-037~044 8건 등록 완료. tasks.index.json 43 tasks. VIEW-by-* 갱신. TASK-039·042·043 High priority 즉시 처리 대상 명시.
-검증: python scripts/build_task_index.py → OK 43 tasks; python scripts/check_agent_docs.py → OK 0 error(s), 74 warning(s) (실행 완료)
-관련 기록: TASK-037, TASK-038, TASK-039, TASK-040, TASK-041, TASK-042, TASK-043, TASK-044, docs/superpowers/specs/2026-06-13-ui-overhaul-design.md (레포 내 권위 문서; 원 플랜 .claude/plans/glimmering-waddling-spring.md은 세션 로컬)
-남은 리스크: TASK-039(Phase 3)는 Owner 명시 승인 전 구현 불가(R3 인접). TASK-042/043 버그 수정 전 Phase 3 개시 금지. Prod/live real-money order untouched.
+의도: UI 대개편 Phase 1~5 신규 태스크 등록 + 안전 버그 3건 등록 — 총 8개 태스크 (main의 TASK-037~043과 충돌로 TASK-045~052로 재번호)
+대상: agents/lead_engineer/tasks/TASK-045~052, tasks.index.json, VIEW-by-* 파일 일체
+작업: Phase 0 커밋(d43ff26..a102a33) 확인 후 디자인 스펙(docs/superpowers/specs/2026-06-13-ui-overhaul-design.md) 기반 TASK-045(Phase 1 FastAPI+Next.js+로그인), TASK-046(Phase 2 홈+포트폴리오), TASK-047(Phase 3 매매+설정+안전게이트 ⚠ R3 인접), TASK-048(Phase 4 에이전트+SSE), TASK-049(Phase 5 분석 패리티+Streamlit 은퇴) 등록. 안전 버그 TASK-050(일일한도 UTC/KST 불일치), TASK-051(compliance 게이트 fail-open), TASK-052(거래 확인 체크박스 루프) 즉시 등록. main 병합 시 TASK-037~043은 main의 feature landscape research 트랙이 선점하므로 UI 대개편 배치를 045~052로 재번호. tasks.index.json 재생성, generate_views 실행.
+방법: git mv + 파일 내 ID 갱신 + INDEX.md union merge + build_task_index.py + generate_views.py
+결과: TASK-045~052 8건 등록 완료. TASK-047·050·051 High priority 즉시 처리 대상 명시.
+검증: python scripts/build_task_index.py; python scripts/check_agent_docs.py; python scripts/generate_views.py --check (merge commit 완료 후 재실행)
+관련 기록: TASK-045, TASK-046, TASK-047, TASK-048, TASK-049, TASK-050, TASK-051, TASK-052, docs/superpowers/specs/2026-06-13-ui-overhaul-design.md (레포 내 권위 문서)
+남은 리스크: TASK-047(Phase 3)는 Owner 명시 승인 전 구현 불가(R3 인접). TASK-050/051 버그 수정 전 Phase 3 개시 금지. Prod/live real-money order untouched.

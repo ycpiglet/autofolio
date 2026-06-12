@@ -222,7 +222,29 @@ class Repository:
             return [
                 dict(row)
                 for row in conn.execute(
-                    "SELECT * FROM order_logs ORDER BY id DESC LIMIT ?",
+                    '''
+                    SELECT
+                        ol.*,
+                        ex.filled_price,
+                        ex.filled_quantity,
+                        ex.filled_at
+                    FROM order_logs ol
+                    LEFT JOIN (
+                        SELECT
+                            order_log_id,
+                            CASE
+                                WHEN SUM(COALESCE(filled_quantity, 0)) > 0
+                                THEN SUM(COALESCE(filled_price, 0) * COALESCE(filled_quantity, 0))
+                                     / SUM(COALESCE(filled_quantity, 0))
+                                ELSE MAX(filled_price)
+                            END AS filled_price,
+                            SUM(COALESCE(filled_quantity, 0)) AS filled_quantity,
+                            MAX(filled_at) AS filled_at
+                        FROM execution_logs
+                        GROUP BY order_log_id
+                    ) ex ON ex.order_log_id = ol.id
+                    ORDER BY ol.id DESC LIMIT ?
+                    ''',
                     (limit,),
                 ).fetchall()
             ]

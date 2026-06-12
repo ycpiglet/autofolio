@@ -1,6 +1,6 @@
 ---
 type: task
-id: TASK-037
+id: TASK-045
 status: 대기
 owner: Backend Engineer
 assignees: [Backend Engineer, UI/UX Designer]
@@ -11,15 +11,15 @@ est_tokens: 120000
 tags: [ui-overhaul, fastapi, next-js, authentication, login, phase1]
 gate: no live orders; paper-safe; Owner 승인 전 prod 전환 금지
 trigger_meeting: Phase 0 완료 후 자동 개시
-audit_log: AUDIT-2026-06-13-001
+audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
 updated_at: 2026-06-13T01:33:29+09:00
 ---
 
-# TASK-037 UI 대개편 Phase 1 — FastAPI 기초 + 인증 + 읽기 API / Next.js 스캐폴드 + 로그인
+# TASK-045 UI 대개편 Phase 1 — FastAPI 기초 + 인증 + 읽기 API / Next.js 스캐폴드 + 로그인
 
-작업 ID: TASK-037
+작업 ID: TASK-045
 상태: 대기
 Owner: Backend Engineer
 기록 시각: 2026-06-13T01:33:29+09:00

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 43,
+  "count": 50,
   "tasks": [
     {
       "type": "task",
@@ -682,7 +682,7 @@
     {
       "type": "task",
       "id": "TASK-029",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -701,10 +701,10 @@
       ],
       "gate": "mock/test harness first; live order_flow behavior changes require Owner review",
       "trigger_meeting": "Owner direct request",
-      "audit_log": "AUDIT-2026-06-12-009",
+      "audit_log": "AUDIT-2026-06-12-015",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T23:51:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-029-fix-style-order-lifecycle-tests.md",
       "_title": "fix style order lifecycle tests"
     },
@@ -772,7 +772,7 @@
     {
       "type": "task",
       "id": "TASK-032",
-      "status": "진행 중",
+      "status": "보류",
       "owner": "Data Engineer",
       "assignees": [
         "Data Engineer",
@@ -791,17 +791,17 @@
       ],
       "gate": "no live orders; risk integration requires review",
       "trigger_meeting": "Owner direct request",
-      "audit_log": "AUDIT-2026-06-12-009",
+      "audit_log": "AUDIT-2026-06-13-002",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T23:32:49+09:00",
+      "updated_at": "2026-06-13T00:14:24+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-032-data-quality-corporate-action-tests.md",
       "_title": "data quality corporate action tests"
     },
     {
       "type": "task",
       "id": "TASK-033",
-      "status": "대기",
+      "status": "완료",
       "owner": "Performance Analyst",
       "assignees": [
         "Performance Analyst",
@@ -822,17 +822,17 @@
       ],
       "gate": "no live orders; broker/risk integration requires review",
       "trigger_meeting": "Owner direct request",
-      "audit_log": "AUDIT-2026-06-12-009",
+      "audit_log": "AUDIT-2026-06-12-014",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T23:44:23+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-033-portfolio-reality-model-tests.md",
       "_title": "portfolio reality model tests"
     },
     {
       "type": "task",
       "id": "TASK-034",
-      "status": "대기",
+      "status": "완료",
       "owner": "Quant Researcher",
       "assignees": [
         "Quant Researcher",
@@ -854,10 +854,10 @@
       ],
       "gate": "mock/backtest first; live scheduler or order execution requires Owner review",
       "trigger_meeting": "Owner direct request",
-      "audit_log": "AUDIT-2026-06-12-009",
+      "audit_log": "AUDIT-2026-06-13-001",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-13T00:05:22+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-034-scheduled-strategy-pattern-tests.md",
       "_title": "scheduled strategy pattern tests"
     },
@@ -926,6 +926,217 @@
     {
       "type": "task",
       "id": "TASK-037",
+      "status": "완료",
+      "owner": "Research Agent",
+      "assignees": [
+        "Research Agent",
+        "Lead Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "30000",
+      "tags": [
+        "research",
+        "feature-landscape",
+        "backlog",
+        "planning"
+      ],
+      "gate": "record-only; no product code, live broker, order path, risk policy, schema, secret, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-004",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T00:53:23+09:00",
+      "updated_at": "2026-06-13T00:53:23+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-037-feature-landscape-research.md",
+      "_title": "feature landscape research"
+    },
+    {
+      "type": "task",
+      "id": "TASK-038",
+      "status": "대기",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer",
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "45000",
+      "tags": [
+        "feature-landscape",
+        "watchlist",
+        "screener",
+        "alerts",
+        "ui",
+        "read-only"
+      ],
+      "gate": "read-only UI/backend only; no order submission, order modification, broker order path, risk policy, schema migration, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-004",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T00:53:23+09:00",
+      "updated_at": "2026-06-13T00:53:23+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-038-watchlist-screener-alert-expansion.md",
+      "_title": "watchlist screener alert expansion"
+    },
+    {
+      "type": "task",
+      "id": "TASK-039",
+      "status": "대기",
+      "owner": "Quant Researcher",
+      "assignees": [
+        "Quant Researcher",
+        "QA",
+        "UI/UX Designer"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "45000",
+      "tags": [
+        "feature-landscape",
+        "backtest",
+        "research",
+        "reports",
+        "qa"
+      ],
+      "gate": "backtest/report/mock-only; no live scheduler, broker order path, risk policy, schema migration, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-004",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T00:53:23+09:00",
+      "updated_at": "2026-06-13T00:53:23+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-039-backtest-research-report-hardening.md",
+      "_title": "backtest research report hardening"
+    },
+    {
+      "type": "task",
+      "id": "TASK-040",
+      "status": "대기",
+      "owner": "Performance Analyst",
+      "assignees": [
+        "Performance Analyst",
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "45000",
+      "tags": [
+        "feature-landscape",
+        "portfolio",
+        "performance",
+        "reporting",
+        "read-only"
+      ],
+      "gate": "read-only reporting only; no tax advice, order submission, broker order path, risk policy, schema migration, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-004",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T00:53:23+09:00",
+      "updated_at": "2026-06-13T00:53:23+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-040-portfolio-performance-tax-lot-reporting.md",
+      "_title": "portfolio performance tax lot reporting"
+    },
+    {
+      "type": "task",
+      "id": "TASK-041",
+      "status": "대기",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "KIS API Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "35000",
+      "tags": [
+        "feature-landscape",
+        "broker-capability",
+        "parity",
+        "docs",
+        "qa"
+      ],
+      "gate": "docs/config/test-only; no broker order implementation, order path, risk policy, schema migration, secret, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-004",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T00:53:23+09:00",
+      "updated_at": "2026-06-13T00:53:23+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-041-broker-capability-feature-parity-matrix.md",
+      "_title": "broker capability feature parity matrix"
+    },
+    {
+      "type": "task",
+      "id": "TASK-042",
+      "status": "완료",
+      "owner": "Research Agent",
+      "assignees": [
+        "Research Agent",
+        "Lead Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "30000",
+      "tags": [
+        "research",
+        "asset-universe",
+        "approval-record",
+        "capability",
+        "backlog"
+      ],
+      "gate": "record-only; no product code, custody, withdrawal, money movement, broker order path, risk policy, schema, secret, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-005",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T01:24:07+09:00",
+      "updated_at": "2026-06-13T01:30:47+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-042-asset-universe-decision-record.md",
+      "_title": "asset universe decision record"
+    },
+    {
+      "type": "task",
+      "id": "TASK-043",
+      "status": "완료",
+      "owner": "Research Agent",
+      "assignees": [
+        "Research Agent",
+        "Lead Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "30000",
+      "tags": [
+        "research",
+        "external-api",
+        "integrations",
+        "approval-record",
+        "capability",
+        "backlog"
+      ],
+      "gate": "record-only; no credentials, live API calls, token storage changes, product code, public webhook, OAuth app, external publication, order path, risk policy, schema, secret, or prod mutation",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-13-006",
+      "created": "2026-06-13",
+      "created_at": "2026-06-13T02:06:53+09:00",
+      "updated_at": "2026-06-13T02:15:08+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-043-external-app-api-decision-record.md",
+      "_title": "external app api decision record"
+    },
+    {
+      "type": "task",
+      "id": "TASK-045",
       "status": "대기",
       "owner": "Backend Engineer",
       "assignees": [
@@ -946,16 +1157,16 @@
       ],
       "gate": "no live orders; paper-safe; Owner 승인 전 prod 전환 금지",
       "trigger_meeting": "Phase 0 완료 후 자동 개시",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-037-ui-overhaul-phase1-api-foundation-login.md",
+      "_path": "agents/lead_engineer/tasks/TASK-045-ui-overhaul-phase1-api-foundation-login.md",
       "_title": "ui overhaul phase1 api foundation login"
     },
     {
       "type": "task",
-      "id": "TASK-038",
+      "id": "TASK-046",
       "status": "대기",
       "owner": "UI/UX Designer",
       "assignees": [
@@ -973,18 +1184,18 @@
         "portfolio",
         "phase2"
       ],
-      "gate": "선행 TASK-037 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요; no live orders",
-      "trigger_meeting": "TASK-037 완료 후 자동 개시",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "gate": "선행 TASK-045 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요; no live orders",
+      "trigger_meeting": "TASK-045 완료 후 자동 개시",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-038-ui-overhaul-phase2-home-portfolio.md",
+      "_path": "agents/lead_engineer/tasks/TASK-046-ui-overhaul-phase2-home-portfolio.md",
       "_title": "ui overhaul phase2 home portfolio"
     },
     {
       "type": "task",
-      "id": "TASK-039",
+      "id": "TASK-047",
       "status": "보류",
       "owner": "Backend Engineer",
       "assignees": [
@@ -1005,18 +1216,18 @@
         "phase3",
         "r3-adjacent"
       ],
-      "gate": "Owner 명시 승인 필수 — state-changing 엔드포인트, R3 인접; blocked by TASK-038",
+      "gate": "Owner 명시 승인 필수 — state-changing 엔드포인트, R3 인접; blocked by TASK-046",
       "trigger_meeting": "Owner 명시 승인 후 개시",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-039-ui-overhaul-phase3-trade-settings-gates.md",
+      "_path": "agents/lead_engineer/tasks/TASK-047-ui-overhaul-phase3-trade-settings-gates.md",
       "_title": "ui overhaul phase3 trade settings gates"
     },
     {
       "type": "task",
-      "id": "TASK-040",
+      "id": "TASK-048",
       "status": "대기",
       "owner": "Backend Engineer",
       "assignees": [
@@ -1035,18 +1246,18 @@
         "notifications",
         "phase4"
       ],
-      "gate": "선행 TASK-039 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요",
-      "trigger_meeting": "TASK-039 완료 후 자동 개시",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "gate": "선행 TASK-047 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요",
+      "trigger_meeting": "TASK-047 완료 후 자동 개시",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-040-ui-overhaul-phase4-agents-sse.md",
+      "_path": "agents/lead_engineer/tasks/TASK-048-ui-overhaul-phase4-agents-sse.md",
       "_title": "ui overhaul phase4 agents sse"
     },
     {
       "type": "task",
-      "id": "TASK-041",
+      "id": "TASK-049",
       "status": "대기",
       "owner": "UI/UX Designer",
       "assignees": [
@@ -1065,18 +1276,18 @@
         "streamlit-retire",
         "phase5"
       ],
-      "gate": "선행 TASK-040 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요",
-      "trigger_meeting": "TASK-040 완료 후 자동 개시",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "gate": "선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요",
+      "trigger_meeting": "TASK-048 완료 후 자동 개시",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-041-ui-overhaul-phase5-analysis-parity-retire.md",
+      "_path": "agents/lead_engineer/tasks/TASK-049-ui-overhaul-phase5-analysis-parity-retire.md",
       "_title": "ui overhaul phase5 analysis parity retire"
     },
     {
       "type": "task",
-      "id": "TASK-042",
+      "id": "TASK-050",
       "status": "대기",
       "owner": "Backend Engineer",
       "assignees": [
@@ -1084,7 +1295,7 @@
         "QA"
       ],
       "priority": "High",
-      "difficulty": "하",
+      "difficulty": "중",
       "est_hours": "3",
       "est_tokens": "25000",
       "tags": [
@@ -1097,16 +1308,16 @@
       ],
       "gate": "safety bug — no live orders during fix",
       "trigger_meeting": "즉시 처리 권고",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-042-fix-daily-limit-utc-localtime.md",
+      "_path": "agents/lead_engineer/tasks/TASK-050-fix-daily-limit-utc-localtime.md",
       "_title": "fix daily limit utc localtime"
     },
     {
       "type": "task",
-      "id": "TASK-043",
+      "id": "TASK-051",
       "status": "대기",
       "owner": "Backend Engineer",
       "assignees": [
@@ -1115,7 +1326,7 @@
         "QA"
       ],
       "priority": "High",
-      "difficulty": "하",
+      "difficulty": "중",
       "est_hours": "4",
       "est_tokens": "30000",
       "tags": [
@@ -1127,17 +1338,17 @@
         "trading"
       ],
       "gate": "safety bug — Phase 3 전 필수 수정",
-      "trigger_meeting": "TASK-039 시작 전 완료 필수",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "trigger_meeting": "TASK-047 시작 전 완료 필수",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-043-fix-compliance-gate-fail-open.md",
+      "_path": "agents/lead_engineer/tasks/TASK-051-fix-compliance-gate-fail-open.md",
       "_title": "fix compliance gate fail open"
     },
     {
       "type": "task",
-      "id": "TASK-044",
+      "id": "TASK-052",
       "status": "대기",
       "owner": "UI/UX Designer",
       "assignees": [
@@ -1145,7 +1356,7 @@
         "QA"
       ],
       "priority": "Low",
-      "difficulty": "하",
+      "difficulty": "중",
       "est_hours": "2",
       "est_tokens": "15000",
       "tags": [
@@ -1158,11 +1369,11 @@
       ],
       "gate": "view-only fix; no backend change",
       "trigger_meeting": "없음",
-      "audit_log": "AUDIT-2026-06-13-001",
+      "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
       "updated_at": "2026-06-13T01:33:29+09:00",
-      "_path": "agents/lead_engineer/tasks/TASK-044-fix-trade-ack-checkbox-loop.md",
+      "_path": "agents/lead_engineer/tasks/TASK-052-fix-trade-ack-checkbox-loop.md",
       "_title": "fix trade ack checkbox loop"
     }
   ]
