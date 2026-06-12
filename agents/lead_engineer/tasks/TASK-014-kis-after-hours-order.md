@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-014
-status: 대기
+status: 보류
 owner: KIS API Engineer
 assignees: [KIS API Engineer]
 priority: Medium
@@ -12,12 +12,14 @@ tags: [kis, order, after-hours]
 trigger_meeting: 자가발생
 created: 2026-06-10
 created_at: 2026-06-10T23:39:38+09:00
+updated_at: 2026-06-12T02:10:22+09:00
+gate: Owner approval required: changes app/brokers/kis place_order order path, app/risk safety gates, and after-hours order policy.
 ---
 
 # TASK-014 KIS 시간외 주문 (장전·장후 단일가)
 
 작업 ID: TASK-014
-상태: 대기
+상태: 보류
 Owner: KIS API Engineer
 요청 시각: 2026-06-10T23:39:38+09:00
 기록 시각: 2026-06-10T23:39:38+09:00
@@ -40,3 +42,26 @@ Owner: KIS API Engineer
 - [ ] 거래시간 가드 시간외 창 허용 확인 (단위 테스트)
 - [ ] 리스크 게이트 연동 테스트
 - [ ] `examples/kis/` 에 시간외 주문 payload 예제 추가
+
+## 보류 기록
+
+보류 시각: 2026-06-12T02:10:22+09:00
+
+## 보류 사유
+
+Autofolio `AGENTS.md §16`의 R3 surface에 해당한다.
+
+- `app/brokers/kis/` 실주문 경로의 `place_order` 주문 파라미터를 바꿔야 한다.
+- `app/risk/**` 안전 게이트와 거래시간 정책을 바꿔야 한다.
+- 시간외 주문 정책은 실거래 안전 정책 변경에 해당한다.
+
+Owner 승인 없이 코드 변경하지 않는다.
+
+## 다음 조건
+
+Owner가 TASK-014 진행을 명시 승인하면 다음 범위로 재개한다.
+
+- `OrderType` 또는 주문 옵션 설계
+- ORD_DVSN 05/06 payload 예제
+- 거래시간/리스크 게이트 단위 테스트
+- paper 시간외 smoke는 해당 시간대에 별도 수행

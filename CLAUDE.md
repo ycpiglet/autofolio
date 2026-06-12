@@ -39,6 +39,35 @@ generalist.
 
 For substantial work, record which roles or perspectives contributed.
 
+### Role Directory
+
+Authoritative shared role definitions live under `agents/`:
+
+- [Owner](agents/owner/SKILL.md)
+- [CEO](agents/ceo/SKILL.md)
+- [Managing Partner](agents/managing_partner/SKILL.md)
+- [Lead Engineer](agents/lead_engineer/SKILL.md)
+- [Independent Auditor](agents/independent_auditor/SKILL.md)
+- [Doc Steward](agents/doc_steward/SKILL.md)
+- [Scribe](agents/scribe/SKILL.md)
+- [Research Agent](agents/research_agent/SKILL.md)
+- [Timeline Agent](agents/timeline_agent/SKILL.md)
+- [Requirements Interviewer](agents/requirements_interviewer/SKILL.md)
+- [Secretary](agents/secretary/SKILL.md)
+- [Backend Engineer](agents/backend_engineer/SKILL.md)
+- [UI/UX Designer](agents/uiux_designer/SKILL.md)
+- [CI/CD Engineer](agents/cicd_engineer/SKILL.md)
+- [QA](agents/qa/SKILL.md)
+- [Beta Tester](agents/beta_tester/SKILL.md)
+- [KIS API Engineer](agents/kis_api_engineer/SKILL.md)
+- [Execution Trader](agents/execution_trader/SKILL.md)
+- [Compliance Officer](agents/compliance_officer/SKILL.md)
+- [Performance Analyst](agents/performance_analyst/SKILL.md)
+- [Quant Researcher](agents/quant_researcher/SKILL.md)
+- [Backtest Engineer](agents/backtest_engineer/SKILL.md)
+- [Data Engineer](agents/data_engineer/SKILL.md)
+- [Optimization Quant](agents/optimization_quant/SKILL.md)
+
 ## Multi-Agent Execution (MANDATORY)
 
 **모든 실질적 작업은 반드시 멀티에이전트로 수행한다. 이 규칙은 예외 없이 강제된다.**

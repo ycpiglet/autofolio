@@ -1,6 +1,927 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 0,
-  "tasks": []
+  "count": 35,
+  "tasks": [
+    {
+      "type": "task",
+      "id": "TASK-002",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "kis",
+        "docs"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-001",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-002-kis-reference-pack.md",
+      "_title": "kis reference pack"
+    },
+    {
+      "type": "task",
+      "id": "TASK-003",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "docs",
+        "readme"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-001",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-003-bilingual-readme.md",
+      "_title": "bilingual readme"
+    },
+    {
+      "type": "task",
+      "id": "TASK-004",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "agent-runtime",
+        "sync"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-003",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-004-runtime-update-gate.md",
+      "_title": "runtime update gate"
+    },
+    {
+      "type": "task",
+      "id": "TASK-005",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "docs",
+        "backlog"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-002",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-005-doc-and-backlog-link-hygiene.md",
+      "_title": "doc and backlog link hygiene"
+    },
+    {
+      "type": "task",
+      "id": "TASK-006",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "cycle",
+        "review"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-002",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-006-cycle-review-sequencing.md",
+      "_title": "cycle review sequencing"
+    },
+    {
+      "type": "task",
+      "id": "TASK-007",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "roles",
+        "governance"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-002",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-007-roles-due-alignment.md",
+      "_title": "roles due alignment"
+    },
+    {
+      "type": "task",
+      "id": "TASK-008",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "streamlit",
+        "compatibility"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-002",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-008-streamlit-legacy-wrapper.md",
+      "_title": "streamlit legacy wrapper"
+    },
+    {
+      "type": "task",
+      "id": "TASK-009",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "agent-runtime",
+        "import"
+      ],
+      "trigger_meeting": "자가발생",
+      "audit_log": "AUDIT-2026-06-09-002",
+      "created": "2026-06-09",
+      "created_at": "2026-06-09T07:31:39+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-009-orchestrator-import-check.md",
+      "_title": "orchestrator import check"
+    },
+    {
+      "type": "task",
+      "id": "TASK-010",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "상",
+      "est_hours": "8",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "websocket",
+        "realtime"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T01:49:50+09:00",
+      "completed_at": "2026-06-12T01:49:50+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-010-kis-websocket-realtime.md",
+      "_title": "kis websocket realtime"
+    },
+    {
+      "type": "task",
+      "id": "TASK-011",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "chart",
+        "intraday"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T01:31:38+09:00",
+      "completed_at": "2026-06-12T01:31:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-011-kis-intraday-chart.md",
+      "_title": "kis intraday chart"
+    },
+    {
+      "type": "task",
+      "id": "TASK-012",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "history"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T01:59:16+09:00",
+      "completed_at": "2026-06-12T01:59:16+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-012-kis-long-term-order-history.md",
+      "_title": "kis long term order history"
+    },
+    {
+      "type": "task",
+      "id": "TASK-013",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "price",
+        "performance"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T02:07:19+09:00",
+      "completed_at": "2026-06-12T02:07:19+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-013-kis-batch-price.md",
+      "_title": "kis batch price"
+    },
+    {
+      "type": "task",
+      "id": "TASK-014",
+      "status": "보류",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "order",
+        "after-hours"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T02:10:22+09:00",
+      "gate": "Owner approval required: changes app/brokers/kis place_order order path, app/risk safety gates, and after-hours order policy.",
+      "_path": "agents/lead_engineer/tasks/TASK-014-kis-after-hours-order.md",
+      "_title": "kis after hours order"
+    },
+    {
+      "type": "task",
+      "id": "TASK-015",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "하",
+      "est_hours": "1",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "index"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T02:25:16+09:00",
+      "completed_at": "2026-06-12T02:15:30+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-015-kis-index-price.md",
+      "_title": "kis index price"
+    },
+    {
+      "type": "task",
+      "id": "TASK-016",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "fundamental",
+        "research"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-016-kis-fundamental-data.md",
+      "_title": "kis fundamental data"
+    },
+    {
+      "type": "task",
+      "id": "TASK-017",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "dividend"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T02:36:54+09:00",
+      "completed_at": "2026-06-12T02:36:54+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-017-kis-dividend-info.md",
+      "_title": "kis dividend info"
+    },
+    {
+      "type": "task",
+      "id": "TASK-018",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "orderbook",
+        "realtime"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-018-kis-order-book.md",
+      "_title": "kis order book"
+    },
+    {
+      "type": "task",
+      "id": "TASK-019",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "하",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "sector"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T08:01:50+09:00",
+      "completed_at": "2026-06-12T08:01:50+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-019-kis-sector-price.md",
+      "_title": "kis sector price"
+    },
+    {
+      "type": "task",
+      "id": "TASK-020",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "disclosure",
+        "compliance"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-020-kis-disclosure.md",
+      "_title": "kis disclosure"
+    },
+    {
+      "type": "task",
+      "id": "TASK-021",
+      "status": "보류",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "상",
+      "est_hours": "6",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "margin",
+        "short"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-021-kis-margin-short.md",
+      "_title": "kis margin short"
+    },
+    {
+      "type": "task",
+      "id": "TASK-022",
+      "status": "보류",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "Low",
+      "difficulty": "상",
+      "est_hours": "8",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "overseas",
+        "us-stocks"
+      ],
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-022-kis-overseas-order.md",
+      "_title": "kis overseas order"
+    },
+    {
+      "type": "task",
+      "id": "TASK-023",
+      "status": "완료",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "engine",
+        "e2e",
+        "validation"
+      ],
+      "gate": "정규장(09:00~15:30 KST) + 사람이 paper 주문 실행·HTS/앱 교차확인 필요",
+      "trigger_meeting": "자가발생",
+      "created": "2026-06-10",
+      "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-12T11:53:44+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-023-kis-engine-e2e-validation.md",
+      "_title": "kis engine e2e validation"
+    },
+    {
+      "type": "task",
+      "id": "TASK-024",
+      "status": "완료",
+      "owner": "QA",
+      "assignees": [
+        "QA",
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "20000",
+      "tags": [
+        "paper",
+        "qa",
+        "scenario-matrix",
+        "engine",
+        "risk",
+        "ui"
+      ],
+      "gate": "paper-only; prod 실전 주문 전환 금지",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-007",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:07:12+09:00",
+      "updated_at": "2026-06-12T12:12:42+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-024-paper-scenario-matrix-validation.md",
+      "_title": "paper scenario matrix validation"
+    },
+    {
+      "type": "task",
+      "id": "TASK-025",
+      "status": "완료",
+      "owner": "QA",
+      "assignees": [
+        "QA",
+        "Research Agent",
+        "KIS API Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "25000",
+      "tags": [
+        "qa",
+        "quant",
+        "paper",
+        "scenario-catalog",
+        "engine"
+      ],
+      "gate": "paper/mock only; prod 실전 주문 전환 금지",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-008",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:24:42+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-025-quant-trading-scenario-catalog.md",
+      "_title": "quant trading scenario catalog"
+    },
+    {
+      "type": "task",
+      "id": "TASK-026",
+      "status": "보류",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "상",
+      "est_hours": "5",
+      "est_tokens": "50000",
+      "tags": [
+        "kis",
+        "qa",
+        "asset-class",
+        "bond",
+        "reit",
+        "elw",
+        "etn"
+      ],
+      "gate": "Owner approval required before any live broker/order-path support; mock catalog tests may be drafted first",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-026-krx-alternative-products-test-support.md",
+      "_title": "krx alternative products test support"
+    },
+    {
+      "type": "task",
+      "id": "TASK-027",
+      "status": "보류",
+      "owner": "KIS API Engineer",
+      "assignees": [
+        "KIS API Engineer",
+        "QA",
+        "Compliance Officer"
+      ],
+      "priority": "Low",
+      "difficulty": "상",
+      "est_hours": "10",
+      "est_tokens": "80000",
+      "tags": [
+        "kis",
+        "qa",
+        "derivatives",
+        "futures",
+        "options",
+        "fx-futures"
+      ],
+      "gate": "Owner approval required; derivatives order routing and risk policy are R3 surfaces",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-027-krx-derivatives-test-support.md",
+      "_title": "krx derivatives test support"
+    },
+    {
+      "type": "task",
+      "id": "TASK-028",
+      "status": "보류",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "KIS API Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "상",
+      "est_hours": "8",
+      "est_tokens": "70000",
+      "tags": [
+        "qa",
+        "order-types",
+        "stop",
+        "trailing",
+        "ioc",
+        "fok",
+        "moo",
+        "moc"
+      ],
+      "gate": "Owner approval required before broker/order_flow changes that can affect live order behavior",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-028-advanced-order-types-test-support.md",
+      "_title": "advanced order types test support"
+    },
+    {
+      "type": "task",
+      "id": "TASK-029",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "45000",
+      "tags": [
+        "qa",
+        "order-lifecycle",
+        "partial-fill",
+        "fix",
+        "mock"
+      ],
+      "gate": "mock/test harness first; live order_flow behavior changes require Owner review",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-029-fix-style-order-lifecycle-tests.md",
+      "_title": "fix style order lifecycle tests"
+    },
+    {
+      "type": "task",
+      "id": "TASK-030",
+      "status": "보류",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "KIS API Engineer",
+        "QA"
+      ],
+      "priority": "Low",
+      "difficulty": "상",
+      "est_hours": "8",
+      "est_tokens": "70000",
+      "tags": [
+        "qa",
+        "basket",
+        "block-trade",
+        "multi-leg",
+        "execution"
+      ],
+      "gate": "Owner approval required before actual block/basket venue or broker submission support",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-030-block-basket-execution-tests.md",
+      "_title": "block basket execution tests"
+    },
+    {
+      "type": "task",
+      "id": "TASK-031",
+      "status": "보류",
+      "owner": "Compliance Officer",
+      "assignees": [
+        "Compliance Officer",
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "5",
+      "est_tokens": "50000",
+      "tags": [
+        "qa",
+        "risk",
+        "compliance",
+        "halt",
+        "vi",
+        "disclosure"
+      ],
+      "gate": "Owner approval required before app/risk or live order-blocking policy changes",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-031-market-halt-vi-risk-gates.md",
+      "_title": "market halt vi risk gates"
+    },
+    {
+      "type": "task",
+      "id": "TASK-032",
+      "status": "대기",
+      "owner": "Data Engineer",
+      "assignees": [
+        "Data Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "5",
+      "est_tokens": "45000",
+      "tags": [
+        "qa",
+        "data-quality",
+        "corporate-actions",
+        "holiday",
+        "stale-data"
+      ],
+      "gate": "no live orders; risk integration requires review",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-032-data-quality-corporate-action-tests.md",
+      "_title": "data quality corporate action tests"
+    },
+    {
+      "type": "task",
+      "id": "TASK-033",
+      "status": "대기",
+      "owner": "Performance Analyst",
+      "assignees": [
+        "Performance Analyst",
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "5",
+      "est_tokens": "45000",
+      "tags": [
+        "qa",
+        "portfolio",
+        "cash",
+        "fees",
+        "slippage",
+        "concentration"
+      ],
+      "gate": "no live orders; broker/risk integration requires review",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-033-portfolio-reality-model-tests.md",
+      "_title": "portfolio reality model tests"
+    },
+    {
+      "type": "task",
+      "id": "TASK-034",
+      "status": "대기",
+      "owner": "Quant Researcher",
+      "assignees": [
+        "Quant Researcher",
+        "Backtest Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "6",
+      "est_tokens": "55000",
+      "tags": [
+        "qa",
+        "strategy",
+        "scheduler",
+        "dca",
+        "pairs",
+        "volatility",
+        "rebalance"
+      ],
+      "gate": "mock/backtest first; live scheduler or order execution requires Owner review",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-009",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T12:27:28+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-034-scheduled-strategy-pattern-tests.md",
+      "_title": "scheduled strategy pattern tests"
+    },
+    {
+      "type": "task",
+      "id": "TASK-035",
+      "status": "완료",
+      "owner": "QA",
+      "assignees": [
+        "QA",
+        "KIS API Engineer",
+        "UI/UX Designer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "30000",
+      "tags": [
+        "qa",
+        "kis",
+        "ui",
+        "paper",
+        "market-hours",
+        "verification"
+      ],
+      "gate": "paper-only; prod 실전 주문 전환 금지",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-010",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T12:44:22+09:00",
+      "updated_at": "2026-06-12T21:34:23+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-035-market-hours-kis-ui-verification.md",
+      "_title": "market hours kis ui verification"
+    },
+    {
+      "type": "task",
+      "id": "TASK-036",
+      "status": "완료",
+      "owner": "QA",
+      "assignees": [
+        "QA",
+        "KIS API Engineer",
+        "UI/UX Designer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "35000",
+      "tags": [
+        "qa",
+        "kis",
+        "paper",
+        "transaction",
+        "ui-sync",
+        "soak"
+      ],
+      "gate": "paper-only; prod 실전 주문 전환 금지",
+      "trigger_meeting": "Owner direct request",
+      "audit_log": "AUDIT-2026-06-12-011",
+      "created": "2026-06-12",
+      "created_at": "2026-06-12T13:20:04+09:00",
+      "updated_at": "2026-06-12T21:34:23+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-036-paper-transaction-ui-sync-soak.md",
+      "_title": "paper transaction ui sync soak"
+    }
+  ]
 }
