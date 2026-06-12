@@ -400,3 +400,17 @@
 검증: python scripts/build_task_index.py; python scripts/check_agent_docs.py; python scripts/generate_views.py --check (merge commit 완료 후 재실행)
 관련 기록: TASK-045, TASK-046, TASK-047, TASK-048, TASK-049, TASK-050, TASK-051, TASK-052, docs/superpowers/specs/2026-06-13-ui-overhaul-design.md (레포 내 권위 문서)
 남은 리스크: TASK-047(Phase 3)는 Owner 명시 승인 전 구현 불가(R3 인접). TASK-050/051 버그 수정 전 Phase 3 개시 금지. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-13-008
+시각: 2026-06-13T07:58:00+09:00
+기록 시각: 2026-06-13T07:58:00+09:00
+요청자: Owner ("telegram, kakao, google, x, naver, discord 등등 외부 어플리케이션과 연동하고 API를 사용하려면 owner가 뭘 준비해야 하는지...")
+수행자: Doc Steward + Research Agent + Lead Engineer + QA (Codex)
+의도: 외부 앱/API 연동 전 Owner가 직접 준비해야 할 계정·API key·OAuth·검수·요금제·secret 경계를 매뉴얼로 고정
+대상: TASK-044, docs/EXTERNAL_APP_API_OWNER_MANUAL.md, EVIDENCE-2026-06-13-007, BRIEF-2026-06-13-007, EXTERNAL-APP-API-DECISION-RECORD
+작업: Telegram/Kakao/Google/Discord/X/Naver/Notion/Slack/Email 공식 문서를 기준으로 Owner-only work와 Agent-safe work를 분리. 서비스별 회원가입, 개발자 앱 생성, API key/token/webhook/OAuth client, redirect URI, scope, 검수/요금제, revocation, 금지/R3 명령을 매뉴얼화.
+방법: 공식/1차 문서 재확인, TASK-043 decision record와 현재 product docs/code 대조, credentials/live API call/product code mutation 없는 docs-only patch
+결과: TASK-044 완료. Owner가 future connector 구현 전 채울 preflight manual 생성. `docs/README.md`와 `EXTERNAL-APP-API-DECISION-RECORD`에 연결.
+검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
+관련 기록: TASK-043, TASK-044, EVIDENCE-2026-06-13-007, BRIEF-2026-06-13-007, EXTERNAL-APP-API-DECISION-RECORD
+남은 리스크: provider pricing/quota/review flow can change; before implementing a specific connector, re-check the current official console/docs. No real secrets or live API calls were touched.
