@@ -42,8 +42,8 @@ def _ctx():
     lru_cache + _ctx_lock 으로 멀티스레드 환경(FastAPI 등)에서도 단일 초기화를 보장한다.
     """
     with _ctx_lock:
-        # lru_cache가 이미 캐시를 채웠으면 lock 안에서 아무것도 하지 않는다.
-        # (lru_cache 는 lock 바깥에서 캐시 히트를 처리하므로 이중 초기화가 없다)
+        # 락은 초기화를 직렬화해 시딩 경쟁을 방지한다
+        # (동시 첫 호출 시 본문이 두 번 실행될 수 있으나 멱등)
         initialize_database(settings.db_path)
         repo = Repository(settings.db_path)
         if not repo.list_whitelist_symbols():

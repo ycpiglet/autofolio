@@ -7,13 +7,14 @@ Streamlit UI(app/ui/backend.py)와 미래의 FastAPI 레이어가 공유하는 �
 도메인 모듈:
   context   — _ctx() 싱글턴 + _ctx_lock
   system    — env, get_flag, set_flag, circuit_breaker_status, set_risk_limits
-  portfolio — holdings_df, kpis, positions, allocation_gap, asset_curve, account_summary
+  portfolio — holdings_df, kpis, positions, allocation_gap, asset_curve, account_summary,
+              daily_pnl_series
   market    — price, watchlist, market_indices_df, sector_performance_df, fundamental,
               intraday_chart_df, order_book_snapshot/levels_df/df, disclosures_df
   trading   — add_condition, list_conditions, run_engine_once, list_order_logs,
               recent_fills, kis_today_orders, kis_order_history, propose,
               list_whitelist, add_whitelist, symbol_options
   analysis  — attribution_df, retro_metrics, scenario_analysis, whatif_weight_change,
-              daily_pnl_series, list_journal_entries, add_journal_entry
+              list_journal_entries, add_journal_entry
   alerts    — add_price_alert, disclosure_gate_state, refresh_disclosure_gate
 """
