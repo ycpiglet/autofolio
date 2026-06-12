@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-13T01:29:46+09:00`
+> 생성 시각: `2026-06-13T02:13:21+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -32,6 +32,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
+| [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
 
 ## #asset-class
 
@@ -52,6 +53,7 @@
 | [TASK-005](TASK-005-doc-and-backlog-link-hygiene.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | docs,backlog |
 | [TASK-037](TASK-037-feature-landscape-research.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,feature-landscape,backlog,planning |
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
+| [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
 
 ## #backtest
 
@@ -88,6 +90,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
+| [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
 
 ## #cash
 
@@ -204,6 +207,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
 
+## #external-api
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
+
 ## #feature-landscape
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -285,6 +294,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-015](TASK-015-kis-index-price.md) | 완료 | Low | 하 | 1 ph / ~50000 tok | KIS API Engineer | kis,index |
+
+## #integrations
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
 
 ## #intraday
 
@@ -525,6 +540,7 @@
 | [TASK-037](TASK-037-feature-landscape-research.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,feature-landscape,backlog,planning |
 | [TASK-039](TASK-039-backtest-research-report-hardening.md) | 대기 | Medium | 중 | 4 ph / ~45000 tok | Quant Researcher | feature-landscape,backtest,research,reports,qa |
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
+| [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
 
 ## #review
 

@@ -372,3 +372,17 @@
 검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
 관련 기록: TASK-041, TASK-042, EVIDENCE-2026-06-13-005, BRIEF-2026-06-13-005, ASSET-UNIVERSE-DECISION-RECORD
 남은 리스크: KIS/KRX/crypto/FX/fractional platform별 endpoint·license·custody 세부는 실행 승인 전 별도 검증 필요. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-13-006
+시각: 2026-06-13T02:06:53+09:00
+기록 시각: 2026-06-13T02:06:53+09:00
+요청자: Owner ("telegram, kakao, google, x, naver, discord 등등 외부 어플리케이션과 연동하고 API를")
+수행자: Research Agent + Lead Engineer + QA (Codex)
+의도: 외부 앱/API 연동 가능성과 권한 경계를 조사하고 승인/기각 기록으로 고정
+대상: TASK-043, TASK-038, TASK-041, EXTERNAL-APP-API-DECISION-RECORD, EVIDENCE-2026-06-13-006, BRIEF-2026-06-13-006
+작업: Telegram/Kakao/Google/Discord/X/Naver/Notion/Slack 공식·1차 출처를 기준으로 outbound notification, read-only command, report export, OAuth login/write scopes, public posting, inbound webhook, remote state changes를 분류. 현재 Telegram/Discord/Email/Notion/Sheets adapter와 UI placeholder를 대조하고 TASK-038/TASK-041 입력으로 연결.
+방법: 공식/1차 문서 우선 조사, 기존 product docs/code와 중복 대조, credentials/live API call/product code mutation 없는 record-only patch
+결과: TASK-043 완료. EXTERNAL-APP-API-DECISION-RECORD active 등록. 승인 범위는 outbound alert/report/read-only command/selected-destination write로 제한하고, public posting/private-data scopes/inbound public webhook/remote automation/order-like commands는 R3 또는 기각으로 기록.
+검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
+관련 기록: TASK-038, TASK-041, TASK-043, EVIDENCE-2026-06-13-006, BRIEF-2026-06-13-006, EXTERNAL-APP-API-DECISION-RECORD
+남은 리스크: 실제 OAuth app, webhook endpoint, token vault, provider quota/cost, and platform review requirements are unverified until one connector implementation lane is explicitly opened. Prod/live order surfaces untouched.

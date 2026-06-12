@@ -5,5 +5,6 @@
 | [QUANT-TRADING-SCENARIO-CATALOG](QUANT-TRADING-SCENARIO-CATALOG.md) | active | paper/mock quant trading scenario coverage | `tests/integration/test_quant_trading_scenario_catalog.py` |
 | [FEATURE-LANDSCAPE-CATALOG](FEATURE-LANDSCAPE-CATALOG.md) | active | external brokerage/exchange/quant-platform feature landscape to backlog mapping | catalog-only |
 | [ASSET-UNIVERSE-DECISION-RECORD](ASSET-UNIVERSE-DECISION-RECORD.md) | active | multi-asset approval/rejection decisions for Autofolio integration | catalog-only |
+| [EXTERNAL-APP-API-DECISION-RECORD](EXTERNAL-APP-API-DECISION-RECORD.md) | active | external app/API integration approval and rejection decisions | catalog-only |
 | [MARKET-HOURS-KIS-UI-VERIFICATION](MARKET-HOURS-KIS-UI-VERIFICATION.md) | active | market-hours UI and KIS paper verification | `scripts/kis_paper_order_smoke.py`; `scripts/run_paper_engine.py --dry-run --once` |
 | [PAPER-TRANSACTION-UI-SYNC-SOAK](PAPER-TRANSACTION-UI-SYNC-SOAK.md) | active | KIS paper transaction and UI backend sync soak | `scripts/kis_paper_transaction_soak.py` |
