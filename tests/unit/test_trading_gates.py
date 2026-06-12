@@ -10,17 +10,23 @@ from app.services.trading import GateResult, save_condition_with_gates
 
 def test_blocked_disclosure():
     """공시 게이트가 차단 상태이면 blocked_disclosure 를 반환한다."""
-    with patch(
-        "app.ui.backend.disclosure_gate_state",
-        return_value={"blocked": True, "reason": "거래정지"},
+    mock_add = Mock()
+    with (
+        patch(
+            "app.ui.backend.disclosure_gate_state",
+            return_value={"blocked": True, "reason": "거래정지"},
+        ),
+        patch("app.ui.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates("005930", "BUY", 70000.0, 1, False)
     assert result.status == "blocked_disclosure"
     assert "거래정지" in result.message
+    mock_add.assert_not_called()
 
 
 def test_compliance_reject():
     """compliance-officer 가 REJECT 를 반환하면 rejected 를 반환한다."""
+    mock_add = Mock()
     with (
         patch(
             "app.ui.backend.disclosure_gate_state",
@@ -30,14 +36,17 @@ def test_compliance_reject():
             "app.ui.agents_runtime.ask",
             return_value="REJECT: 위험",
         ),
+        patch("app.ui.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates("005930", "BUY", 70000.0, 1, False)
     assert result.status == "rejected"
     assert "REJECT" in result.message
+    mock_add.assert_not_called()
 
 
 def test_compliance_caution_without_ack():
     """CAUTION 반환 + caution_acknowledged=False → needs_acknowledgement 반환."""
+    mock_add = Mock()
     with (
         patch(
             "app.ui.backend.disclosure_gate_state",
@@ -47,12 +56,14 @@ def test_compliance_caution_without_ack():
             "app.ui.agents_runtime.ask",
             return_value="CAUTION: 주의",
         ),
+        patch("app.ui.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates(
             "005930", "BUY", 70000.0, 1, False, caution_acknowledged=False
         )
     assert result.status == "needs_acknowledgement"
     assert "CAUTION" in result.message
+    mock_add.assert_not_called()
 
 
 def test_compliance_caution_with_ack():

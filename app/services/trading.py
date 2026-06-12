@@ -5,7 +5,9 @@ propose() 는 app.agents.research_agent.ConditionProposal 을 반환한다.
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import Literal
 
 from app.ui.backend import (  # noqa: F401
     add_condition,
@@ -41,10 +43,10 @@ __all__ = [
 
 @dataclass
 class GateResult:
-    status: str  # "saved" | "blocked_disclosure" | "rejected" | "needs_acknowledgement"
+    status: Literal["saved", "blocked_disclosure", "rejected", "needs_acknowledgement"]
     message: str  # human-readable reason or verdict text
-    condition_id: int | None = field(default=None)
-    compliance: str | None = field(default=None)  # "passed" | "caution_acked" | "skipped" | None
+    condition_id: int | None = None
+    compliance: Literal["passed", "caution_acked", "skipped"] | None = None
 
 
 def save_condition_with_gates(
@@ -56,7 +58,7 @@ def save_condition_with_gates(
     *,
     compliance_check: bool = True,
     caution_acknowledged: bool = False,
-    progress=None,
+    progress: Callable[[str], None] | None = None,
 ) -> GateResult:
     """공시 게이트 + Compliance 검토 후 조건 저장. (Phase 0 → Phase 3 HTTP 게이트 기반)
 

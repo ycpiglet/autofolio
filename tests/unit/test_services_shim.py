@@ -113,3 +113,44 @@ def test_services_completeness_no_duplicates() -> None:
         "The following names appear in multiple service modules' __all__:\n  "
         + "\n  ".join(f"{k}: {v}" for k, v in sorted(duplicates.items()))
     )
+
+
+# ---------------------------------------------------------------------------
+# Shim drift guard — each UI shim must re-export the *same object* as the
+# corresponding services module.  If a shim file is edited in isolation the
+# identity breaks and this test catches it immediately.
+#
+# Pairs: (shim_module, services_module)
+# For auth only the single re-exported function is checked.
+# ---------------------------------------------------------------------------
+
+_SHIM_PAIRS = [
+    ("app.ui.store", "app.services.connections"),
+    ("app.ui.ic", "app.services.agents"),
+    ("app.ui.agents_runtime", "app.services.agents"),
+]
+
+
+@pytest.mark.parametrize("shim_name,svc_name", _SHIM_PAIRS)
+def test_shim_identity(shim_name: str, svc_name: str) -> None:
+    """Every public name in the shim's __all__ must be the same object as in the services module."""
+    shim = importlib.import_module(shim_name)
+    svc = importlib.import_module(svc_name)
+    assert hasattr(shim, "__all__"), f"{shim_name} is missing __all__"
+    for name in shim.__all__:
+        assert hasattr(shim, name), f"{shim_name} missing attribute '{name}' listed in __all__"
+        assert hasattr(svc, name), f"{svc_name} missing attribute '{name}' (shim drift?)"
+        assert getattr(shim, name) is getattr(svc, name), (
+            f"{shim_name}.{name} is not the same object as {svc_name}.{name} — shim has drifted"
+        )
+
+
+def test_auth_shim_identity() -> None:
+    """app.ui.auth.login_or_register must be the same object as app.services.auth_service.login_or_register."""
+    import app.services.auth_service as auth_svc
+    import app.ui.auth as auth_shim
+
+    assert auth_shim.login_or_register is auth_svc.login_or_register, (
+        "app.ui.auth.login_or_register is not the same object as "
+        "app.services.auth_service.login_or_register — shim has drifted"
+    )

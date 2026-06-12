@@ -87,7 +87,7 @@ def _live() -> None:
                     st.checkbox("위 주의사항을 확인했으며 계속 진행합니다", key="lv_comply_ack")
                     st.info("체크박스를 선택해야 조건이 저장됩니다.")
                     st.stop()
-                else:  # "saved"
+                elif result.status == "saved":
                     if result.compliance == "passed":
                         st.success("✅ Compliance 검토 통과")
                     elif result.compliance == "caution_acked":
@@ -95,6 +95,8 @@ def _live() -> None:
                         with st.expander("전체 의견"):
                             st.markdown(result.message)
                     st.success(f"조건 저장 완료 (id={result.condition_id})")
+                else:
+                    st.error(f"알 수 없는 상태: {result.status}")
 
             _order_book_panel(backend, sym, side, int(qty))
 
