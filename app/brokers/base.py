@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
 
 from app.common.enums import OrderStatus, OrderType, Side
@@ -10,6 +11,8 @@ from app.common.enums import OrderStatus, OrderType, Side
 class PriceQuote:
     symbol: str
     price: float
+    as_of: datetime | None = None
+    source: str | None = None
 
 
 @dataclass(frozen=True)

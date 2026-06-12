@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-032
-status: 대기
+status: 진행 중
 owner: Data Engineer
 assignees: [Data Engineer, QA]
 priority: Medium
@@ -14,13 +14,13 @@ trigger_meeting: Owner direct request
 audit_log: AUDIT-2026-06-12-009
 created: 2026-06-12
 created_at: 2026-06-12T12:27:28+09:00
-updated_at: 2026-06-12T12:27:28+09:00
+updated_at: 2026-06-12T23:32:49+09:00
 ---
 
 # TASK-032 Data Quality and Corporate Action Tests
 
 작업 ID: TASK-032
-상태: 대기
+상태: 진행 중
 Owner: Data Engineer
 기록 시각: 2026-06-12T12:27:28+09:00
 
@@ -32,6 +32,25 @@ Owner: Data Engineer
 
 - 데이터 freshness/quality contract가 엔진 입력으로 명시되어 있지 않다.
 - corporate action adjustment와 holiday calendar가 표준화되어 있지 않다.
+
+## 진행 기록
+
+### 2026-06-12T23:32:49+09:00
+
+- 추가:
+  - `app/data/quality.py`
+    - `validate_price_quote()`로 zero/negative/NaN/stale/future quote를 판정.
+    - `validate_ohlcv_bars()`로 missing business bar, holiday calendar, invalid OHLCV range를 판정.
+    - `CorporateAction`, `validate_corporate_actions()`, `apply_split_adjustment()`로 split/dividend mock fixture contract를 추가.
+  - `PriceQuote.as_of`/`PriceQuote.source` optional metadata.
+  - `tests/unit/test_data_quality.py` data-quality/corporate-action fixture tests.
+- 검증:
+  - `python -m py_compile app/brokers/base.py app/data/quality.py tests/unit/test_data_quality.py` -> OK.
+  - `pytest tests/unit/test_data_quality.py` -> 10 passed.
+  - `pytest tests/unit/test_data_quality.py tests/unit/test_quant_data_loader.py -q` -> 19 passed.
+- 남은 항목:
+  - engine no-order behavior는 아직 미완료. `app/engine/order_flow.py` 변경은 Autofolio R3 surface라 무승인 production hook을 남기지 않았다.
+  - 다음 단계는 Owner/Lead review 하에 invalid market data가 주문 제출 전에 skip되는 경로를 `OrderFlow` 또는 `LiveTradingEngine`에 연결하고, 해당 no-order regression을 추가하는 것이다.
 
 ## Done When
 
