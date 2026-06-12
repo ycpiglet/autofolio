@@ -62,11 +62,12 @@ def _live() -> None:
                 from app.services.trading import save_condition_with_gates
 
                 if compliance_check:
-                    result = save_condition_with_gates(
-                        sym, side, tp, qty, auto,
-                        compliance_check=True,
-                        caution_acknowledged=st.session_state.get("lv_comply_ack", False),
-                    )
+                    with st.spinner("Compliance Officer 검토 중…"):
+                        result = save_condition_with_gates(
+                            sym, side, tp, qty, auto,
+                            compliance_check=True,
+                            caution_acknowledged=st.session_state.get("lv_comply_ack", False),
+                        )
                 else:
                     result = save_condition_with_gates(
                         sym, side, tp, qty, auto,
@@ -87,6 +88,12 @@ def _live() -> None:
                     st.info("체크박스를 선택해야 조건이 저장됩니다.")
                     st.stop()
                 else:  # "saved"
+                    if result.compliance == "passed":
+                        st.success("✅ Compliance 검토 통과")
+                    elif result.compliance == "caution_acked":
+                        st.warning(f"⚠️ Compliance 주의사항\n{result.message[:300]}")
+                        with st.expander("전체 의견"):
+                            st.markdown(result.message)
                     st.success(f"조건 저장 완료 (id={result.condition_id})")
 
             _order_book_panel(backend, sym, side, int(qty))

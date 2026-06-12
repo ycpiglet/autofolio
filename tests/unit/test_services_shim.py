@@ -48,6 +48,7 @@ def test_services_all_identity(module_name: str) -> None:
     for name in module.__all__:
         if not hasattr(backend, name):
             # Service-native symbol — not a backend re-export; identity check not applicable.
+            assert hasattr(module, name), f"{name} missing from {module_name}"
             continue
         assert getattr(module, name) is getattr(backend, name), (
             f"{module_name}.{name} is not the same object as backend.{name}"

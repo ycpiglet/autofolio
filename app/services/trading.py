@@ -44,6 +44,7 @@ class GateResult:
     status: str  # "saved" | "blocked_disclosure" | "rejected" | "needs_acknowledgement"
     message: str  # human-readable reason or verdict text
     condition_id: int | None = field(default=None)
+    compliance: str | None = field(default=None)  # "passed" | "caution_acked" | "skipped" | None
 
 
 def save_condition_with_gates(
@@ -106,6 +107,14 @@ def save_condition_with_gates(
                     message=verdict_text,
                 )
             # caution_acknowledged=True → 저장 진행
+            _compliance_tag = "caution_acked"
+            _verdict_for_result = verdict_text
+        else:
+            _compliance_tag = "passed"
+            _verdict_for_result = verdict_text
+    else:
+        _compliance_tag = "skipped"
+        _verdict_for_result = ""
 
     # 3. 조건 저장
     cid = _add_condition(
@@ -118,6 +127,7 @@ def save_condition_with_gates(
     )
     return GateResult(
         status="saved",
-        message="조건이 저장되었습니다.",
+        message=_verdict_for_result if _compliance_tag == "caution_acked" else "조건이 저장되었습니다.",
         condition_id=cid,
+        compliance=_compliance_tag,
     )
