@@ -217,10 +217,18 @@ def recent_fills(limit: int = 10) -> pd.DataFrame:
     if filled.empty:
         return pd.DataFrame(columns=["시각", "종목", "방향", "수량", "체결가"])
     filled = filled.head(limit)
-    # created_at 은 'YYYY-MM-DD HH:MM:SS' 형식(SQLite CURRENT_TIMESTAMP)
-    filled["시각"] = filled["created_at"].str[11:16]
-    result = filled[["시각", "symbol", "side", "quantity", "order_price"]].rename(
-        columns={"symbol": "종목", "side": "방향", "quantity": "수량", "order_price": "체결가"}
+    timestamp = filled["filled_at"] if "filled_at" in filled.columns else filled["created_at"]
+    filled["시각"] = timestamp.fillna(filled["created_at"]).astype(str).str[11:16]
+    quantity = filled["filled_quantity"] if "filled_quantity" in filled.columns else filled["quantity"]
+    price = filled["filled_price"] if "filled_price" in filled.columns else filled.get("order_price")
+    filled["수량"] = quantity.fillna(filled["quantity"]).astype(int)
+    if "order_price" in filled.columns:
+        price = price.fillna(filled["order_price"])
+    if "current_price" in filled.columns:
+        price = price.fillna(filled["current_price"])
+    filled["체결가"] = price
+    result = filled[["시각", "symbol", "side", "수량", "체결가"]].rename(
+        columns={"symbol": "종목", "side": "방향"}
     )
     return result.reset_index(drop=True)
 

@@ -274,3 +274,59 @@
 검증: `pytest tests/unit/test_top_bar_data_source.py -q` 2 passed; `python scripts/analyze_paper_transactions.py --kis-retries 5 --kis-retry-sleep 3` OK; `python scripts/verify_paper_ui_sync.py` OK; `Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8502/` HTTP 200; Playwright browser verification OK; `git diff --check` whitespace error fixed
 관련 기록: TASK-035, TASK-036, EVIDENCE-2026-06-12-005, EVIDENCE-2026-06-12-006, BRIEF-2026-06-12-005, BRIEF-2026-06-12-006, PAPER-TRANSACTION-UI-SYNC-SOAK, MARKET-HOURS-KIS-UI-VERIFICATION
 남은 리스크: 브라우저 첫 시도에서 KIS `RemoteDisconnected` 1회가 있었으나 재시도 성공, 분석 스크립트는 KIS warnings 0. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-12-014
+시각: 2026-06-12T23:44:23+09:00
+기록 시각: 2026-06-12T23:44:23+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Performance Analyst + Backend Engineer + QA (Codex)
+의도: TASK-033 portfolio reality model gap을 mock-safe 범위에서 완료하고 UI 체결 표시와 execution log 정합성을 고정
+대상: `app/brokers/mock/mock_client.py`, `app/database/repositories.py`, `app/ui/backend.py`, `tests/unit/test_mock_portfolio_ledger.py`, `tests/integration/test_portfolio_reality_model.py`, TASK/BRIEF/EVIDENCE records
+작업: MockBroker optional cash ledger/fee/slippage/concentration controls 추가, insufficient cash/concentration rejection no-execution regression 추가, order log read path에 execution aggregate join 추가, UI recent fills가 execution filled price/quantity를 우선 표시하도록 수정
+방법: isolated SQLite + MockBrokerClient + focused pytest + generated scenario regression
+결과: TASK-033 완료. Mock 기본 동작은 유지하면서 cash/fee/slippage/concentration 케이스가 실행 가능해졌고, MARKET 체결의 UI 최근 체결가가 execution log와 일치한다.
+검증: portfolio focused 9 passed; UI/backend focused 19 passed; generated scenarios 119 passed; engine/mock regression 7 passed; py_compile OK; diff check OK
+관련 기록: TASK-033, EVIDENCE-2026-06-12-007, BRIEF-2026-06-12-007
+남은 리스크: tax placeholder와 real broker buying-power/risk-budget enforcement는 별도 정책/R3 review 필요. KIS live order, prod, risk policy, DB schema/migration untouched.
+
+### AUDIT-2026-06-12-015
+시각: 2026-06-12T23:51:57+09:00
+기록 시각: 2026-06-12T23:51:57+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Backend Engineer + QA (Codex)
+의도: TASK-029 FIX-style order lifecycle gap을 mock/test-harness first 범위에서 완료
+대상: `tests/integration/test_order_lifecycle.py`, TASK/BRIEF/EVIDENCE records
+작업: scripted pending broker, partial fill ledger harness, cumulative fill/remaining/weighted average verification, pending-limit fill-before-cancel, cancel reject, too-late-to-cancel tests 추가
+방법: isolated SQLite + MockBrokerClient subclass + focused pytest
+결과: TASK-029 완료. Order lifecycle harness 8 passed and paper scenario matrix 16 passed. Production order-flow behavior unchanged.
+검증: `pytest tests/integration -k order_lifecycle -q` 8 passed; `pytest tests/integration/test_paper_scenario_matrix.py -q` 16 passed; py_compile OK; diff check OK
+관련 기록: TASK-029, EVIDENCE-2026-06-12-008, BRIEF-2026-06-12-008
+남은 리스크: production partial-fill/cancel-replace semantics require explicit R3 Owner review before `OrderFlow` changes.
+
+### AUDIT-2026-06-13-001
+시각: 2026-06-13T00:05:22+09:00
+기록 시각: 2026-06-13T00:05:22+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Quant Researcher + QA (Codex)
+의도: TASK-034 scheduled strategy pattern gap을 mock/backtest first 범위에서 완료
+대상: `tests/integration/test_scheduled_strategy_patterns.py`, `tests/integration/test_paper_scenario_matrix.py`, TASK/BRIEF/EVIDENCE records
+작업: deterministic clock, persistent scheduler harness, DCA/rebalance/pairs/volatility breakout/EOD liquidation strategy intent fixtures, prod-target refusal test 추가. Closure gate 중 기존 daily-limit scenario fixture가 midnight KST에서 SQLite UTC timestamp와 localtime comparison 불일치로 실패해 test-only local-day helper로 안정화.
+방법: test-local scheduler/clock harness + isolated SQLite trade condition repository + focused pytest
+결과: TASK-034 완료. Scheduled strategy harness 7 passed and generated quant/paper scenario regression 119 passed. Live scheduler and production order execution unchanged.
+검증: `pytest tests/integration/test_scheduled_strategy_patterns.py -q` 7 passed; `pytest tests/integration/test_quant_trading_scenario_catalog.py tests/integration/test_paper_scenario_matrix.py -q` 119 passed; py_compile OK; diff check OK
+관련 기록: TASK-034, EVIDENCE-2026-06-13-001, BRIEF-2026-06-13-001
+남은 리스크: production scheduler persistence, live order execution, risk-policy integration require explicit R3 Owner review before code changes. Daily-limit stabilization is test-fixture only; production safety policy unchanged.
+
+### AUDIT-2026-06-13-002
+시각: 2026-06-13T00:14:24+09:00
+기록 시각: 2026-06-13T00:14:24+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Data Engineer + QA (Codex)
+의도: TASK-032의 non-R3 산출물과 남은 R3 boundary를 분리해 active WIP를 정리
+대상: TASK-032, `app/data/quality.py`, `tests/unit/test_data_quality.py`, TASK/BRIEF/EVIDENCE records
+작업: validator/fixture 구현 완료 상태를 보존하고, 남은 engine no-order integration을 R3 Owner approval hold로 명시. TASK-032 상태를 `진행 중`에서 `보류`로 변경.
+방법: 기존 검증 결과와 AGENTS.md Autofolio R3 surface를 대조해 production order/safety path 변경 없이 기록 정리
+결과: TASK-032 non-R3 범위는 완료 기록됨. Active WIP에서 제거하고 Owner-approved no-order integration follow-up으로 보류.
+검증: `pytest tests/unit/test_data_quality.py tests/unit/test_quant_data_loader.py -q` 19 passed; py_compile OK
+관련 기록: TASK-032, EVIDENCE-2026-06-13-002, BRIEF-2026-06-13-002
+남은 리스크: invalid market data no-order hook remains unimplemented until Owner approves the order/safety integration point.
