@@ -37,6 +37,15 @@ def test_get_cash_balance_returns_float(monkeypatch):
     assert cash == 5_000_000.0
 
 
+def test_get_cash_balance_accepts_list_output2(monkeypatch):
+    c = _make_client()
+    body = {"rt_cd": "0", "msg_cd": "MAAP0", "msg1": "ok",
+            "output1": [], "output2": [{"dnca_tot_amt": "5000000"}]}
+    monkeypatch.setattr(kc.requests, "request", lambda *a, **kw: _resp(body))
+    cash = c.get_cash_balance()
+    assert cash == 5_000_000.0
+
+
 def test_get_cash_balance_missing_output2_returns_zero(monkeypatch):
     c = _make_client()
     body = {"rt_cd": "0", "msg_cd": "MAAP0", "msg1": "ok",
@@ -44,6 +53,30 @@ def test_get_cash_balance_missing_output2_returns_zero(monkeypatch):
     monkeypatch.setattr(kc.requests, "request", lambda *a, **kw: _resp(body))
     cash = c.get_cash_balance()
     assert cash == 0.0
+
+
+def test_get_account_summary_accepts_list_output2(monkeypatch):
+    c = _make_client()
+    body = {
+        "rt_cd": "0",
+        "msg_cd": "MAAP0",
+        "msg1": "ok",
+        "output1": [],
+        "output2": [{
+            "scts_evlu_amt": "1000000",
+            "dnca_tot_amt": "5000000",
+            "tot_evlu_amt": "6000000",
+            "nass_amt": "6000000",
+            "pchs_amt_smtl_amt": "900000",
+            "evlu_pfls_smtl_amt": "100000",
+        }],
+    }
+    monkeypatch.setattr(kc.requests, "request", lambda *a, **kw: _resp(body))
+    summary = c.get_account_summary()
+    assert summary["source"] == "kis"
+    assert summary["dnca_tot_amt"] == 5_000_000.0
+    assert summary["tot_evlu_amt"] == 6_000_000.0
+    assert summary["evlu_pfls_smtl_amt"] == 100_000.0
 
 
 def test_get_cash_balance_broker_error_returns_zero(monkeypatch):

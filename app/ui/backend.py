@@ -74,6 +74,16 @@ def price(symbol: str) -> float:
     return float(broker.get_current_price(symbol).price)
 
 
+def fundamental(symbol: str) -> dict:
+    """KIS 기본 재무 지표. mock 환경이면 빈 dict."""
+    from app.brokers.kis.kis_client import KisClient
+
+    _, broker, _, _ = _ctx()
+    if not isinstance(broker, KisClient):
+        return {}
+    return broker.get_fundamental(symbol)
+
+
 def positions() -> pd.DataFrame:
     """현재 보유 포지션 (mock 또는 실 KIS 잔고). symbol/quantity/avg_price 컬럼.
 
@@ -89,18 +99,22 @@ def positions() -> pd.DataFrame:
 
 
 # 포트폴리오 뷰가 기대하는 컬럼(=mock.data.holdings_df 와 동일 스키마).
-HOLDINGS_COLUMNS = ["종목", "티커", "자산군", "지역", "수량", "평단", "현재가",
-                    "평가금액", "평가손익", "손익률", "비중"]
+HOLDINGS_COLUMNS = [
+    "종목", "티커", "자산군", "지역", "수량", "평단", "현재가",
+    "평가금액", "평가손익", "손익률", "예상연배당", "배당수익률", "비중",
+]
 _ROLE_TO_ASSET_CLASS = {"ETF_TEST": "ETF", "LARGE_CAP_TEST": "주식", "LONG_TERM_CANDIDATE": "기타"}
 
 
-def _build_holdings_df(positions_list, price_of, meta_of) -> pd.DataFrame:
+def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> pd.DataFrame:
     """포지션 + 현재가 + 화이트리스트 메타로 포트폴리오 표를 구성(순수 함수, 테스트 용이).
 
     price_of(symbol)->float, meta_of(symbol)->dict(name/role 등). KRX 보유라 지역=KR.
+    dividend_of(symbol)->dict(annual_cash_dividend/latest_dividend_rate) 는 선택.
     """
     if not positions_list:
         return pd.DataFrame(columns=HOLDINGS_COLUMNS)
+    dividend_lookup = dividend_of or (lambda symbol: {})
     rows = []
     for p in positions_list:
         meta = meta_of(p.symbol) or {}
@@ -108,6 +122,14 @@ def _build_holdings_df(positions_list, price_of, meta_of) -> pd.DataFrame:
         avg = float(p.avg_price) if p.avg_price else 0.0
         market = p.quantity * cur
         cost = p.quantity * avg
+        dividend = dividend_lookup(p.symbol) or {}
+        annual_per_share = float(dividend.get("annual_cash_dividend") or 0.0)
+        annual_income = annual_per_share * p.quantity
+        dividend_yield = (
+            annual_per_share / cur * 100
+            if cur
+            else float(dividend.get("latest_dividend_rate") or 0.0)
+        )
         rows.append({
             "종목": meta.get("name") or p.symbol,
             "티커": p.symbol,
@@ -119,6 +141,8 @@ def _build_holdings_df(positions_list, price_of, meta_of) -> pd.DataFrame:
             "평가금액": round(market),
             "평가손익": round(market - cost),
             "손익률": round((cur / avg - 1) * 100, 1) if avg else 0.0,
+            "예상연배당": round(annual_income),
+            "배당수익률": round(dividend_yield, 2),
         })
     df = pd.DataFrame(rows, columns=HOLDINGS_COLUMNS[:-1])
     total = df["평가금액"].sum()
@@ -126,10 +150,11 @@ def _build_holdings_df(positions_list, price_of, meta_of) -> pd.DataFrame:
     return df
 
 
-def holdings_df() -> pd.DataFrame:
+def holdings_df(*, include_dividends: bool = True) -> pd.DataFrame:
     """라이브 보유 종목 표 (실 KIS 잔고 + 현재가). 포트폴리오 화면 라이브 소스.
 
     빈 잔고면 빈 DataFrame(HOLDINGS_COLUMNS). 라이브에선 보유종목 수만큼 현재가를 조회한다.
+    include_dividends=False 는 빠른 보유/손익 표시 경로에서 종목별 배당 API 호출을 건너뛴다.
     """
     repo, broker, _, _ = _ctx()
     wl = {r["symbol"]: r for r in repo.list_whitelist_symbols()}
@@ -142,16 +167,25 @@ def holdings_df() -> pd.DataFrame:
         price_of = lambda s: price_cache.get(s) or broker.get_current_price(s).price
     else:
         price_of = lambda s: broker.get_current_price(s).price
-    return _build_holdings_df(positions, price_of, lambda s: wl.get(s, {}))
+    if include_dividends and hasattr(broker, "get_dividend_info"):
+        def dividend_of(symbol: str) -> dict:
+            try:
+                return broker.get_dividend_info(symbol) or {}
+            except Exception:  # noqa: BLE001
+                return {}
+    else:
+        dividend_of = lambda symbol: {}
+    return _build_holdings_df(positions, price_of, lambda s: wl.get(s, {}), dividend_of)
 
 
 def kpis() -> dict:
     """라이브 KPI — 총자산·평가손익·현금비중. holdings_df 기반.
 
-    현금 잔고는 현재 DB/API에서 직접 조회하지 못하므로 0.0 placeholder.
+    KIS paper/prod 에서는 예수금 조회를 포함한다. 실패 시 화면 안정성을 위해 0.0으로
+    폴백하되, 정상 경로에서는 총자산과 현금비중에 반영한다.
     반환 키: 총자산, 일손익률, 누적손익률, 현금비중, 평가손익.
     """
-    df = holdings_df()
+    df = holdings_df(include_dividends=False)
     total_market = float(df["평가금액"].sum()) if not df.empty else 0.0
     total_pnl = float(df["평가손익"].sum()) if not df.empty else 0.0
     try:
@@ -223,7 +257,18 @@ def run_engine_once() -> list[str]:
 def propose(symbol: str, side: str = "BUY") -> ConditionProposal:
     _, broker, _, agent = _ctx()
     cur = broker.get_current_price(symbol).price
-    return agent.propose_price_condition(symbol=symbol, current_price=cur, side=side)
+    fundamental_data = {}
+    if hasattr(broker, "get_fundamental"):
+        try:
+            fundamental_data = broker.get_fundamental(symbol) or {}
+        except Exception:  # noqa: BLE001
+            fundamental_data = {}
+    return agent.propose_price_condition(
+        symbol=symbol,
+        current_price=cur,
+        side=side,
+        fundamental=fundamental_data,
+    )
 
 
 def set_risk_limits(
@@ -245,7 +290,7 @@ def attribution_df() -> pd.DataFrame:
     체결 내역이 없으면 빈 DataFrame 반환.
     holdings_df의 자산군 매핑을 재사용해 미실현 평가손익을 자산군별로 집계.
     """
-    df = holdings_df()
+    df = holdings_df(include_dividends=False)
     if df.empty:
         return pd.DataFrame(columns=["구분", "기여(만원)"])
     grouped = df.groupby("자산군")["평가손익"].sum().reset_index()
@@ -332,7 +377,7 @@ def allocation_gap(target: dict | None = None) -> pd.DataFrame:
     target: {"주식": 35, "ETF": 30, ...} — None이면 기본값 사용.
     """
     _target = target or {"주식": 35, "ETF": 30, "채권": 15, "원자재": 5, "현금": 15}
-    df = holdings_df()
+    df = holdings_df(include_dividends=False)
     if df.empty:
         return pd.DataFrame([
             {"자산군": k, "목표%": v, "현재%": 0.0, "갭%": -v}
@@ -349,20 +394,21 @@ def allocation_gap(target: dict | None = None) -> pd.DataFrame:
 def account_summary() -> dict:
     """KIS 잔고 output2(계좌 요약) — 총평가금액·예수금·순자산.
 
-    KIS_ENV=paper/prod: KisClient.get_positions() 시 output2가 있으면 backend._ctx()의
-    broker를 통해 KisClient._account_summary()를 호출. mock이면 holdings_df 기반 추정.
+    KIS_ENV=paper/prod: KisClient.get_account_summary()를 사용. mock/실패 시
+    holdings_df 기반 추정.
     """
     env_name = env()
     if env_name in ("paper", "prod"):
         try:
             _, broker, _, _ = _ctx()
-            # KisClient에 account_summary() 메서드가 있으면 사용
             if hasattr(broker, "get_account_summary"):
-                return broker.get_account_summary()
+                summary = broker.get_account_summary()
+                if summary:
+                    return summary
         except Exception:  # noqa: BLE001
             pass
     # mock/폴백: holdings_df 기반 추정
-    df = holdings_df()
+    df = holdings_df(include_dividends=False)
     market_val = float(df["평가금액"].sum()) if not df.empty else 0.0
     return {
         "scts_evlu_amt": market_val,    # 유가증권 평가금액
@@ -384,16 +430,197 @@ def watchlist() -> pd.DataFrame:
     wl = repo.list_whitelist_symbols(enabled_only=True)
     if not wl:
         return pd.DataFrame(columns=["symbol", "name", "price"])
+    price_cache = {}
+    if hasattr(broker, "get_prices_batch"):
+        try:
+            price_cache = broker.get_prices_batch([item["symbol"] for item in wl])
+        except Exception:  # noqa: BLE001
+            price_cache = {}
     rows = []
     for item in wl:
         try:
             import time
-            price = broker.get_current_price(item["symbol"]).price
+            price = price_cache.get(item["symbol"])
+            if price is None:
+                price = broker.get_current_price(item["symbol"]).price
             rows.append({"symbol": item["symbol"], "name": item.get("name", ""), "price": price})
-            time.sleep(0.15)  # 레이트리밋 방지
+            if not price_cache:
+                time.sleep(0.15)  # 레이트리밋 방지
         except Exception:  # noqa: BLE001
             rows.append({"symbol": item["symbol"], "name": item.get("name", ""), "price": None})
     return pd.DataFrame(rows)
+
+
+def market_indices_df() -> pd.DataFrame:
+    """KIS 국내 지수 현재가. mock 환경이면 빈 DataFrame."""
+    from app.brokers.kis.constants import KIS_INDEX_CODES
+    from app.brokers.kis.kis_client import KisClient
+
+    _, broker, _, _ = _ctx()
+    columns = ["name", "code", "price", "change", "change_rate"]
+    if not isinstance(broker, KisClient):
+        return pd.DataFrame(columns=columns)
+    rows = []
+    for name, code in KIS_INDEX_CODES.items():
+        data = broker.get_index_price(code)
+        if not data:
+            continue
+        rows.append(
+            {
+                "name": name,
+                "code": code,
+                "price": data.get("price"),
+                "change": data.get("change"),
+                "change_rate": data.get("change_rate"),
+            }
+        )
+    return pd.DataFrame(rows, columns=columns)
+
+
+def sector_performance_df() -> pd.DataFrame:
+    """KIS 주요 업종 현재지수. mock 환경이면 빈 DataFrame."""
+    from app.brokers.kis.constants import KIS_SECTOR_CODES
+    from app.brokers.kis.kis_client import KisClient
+
+    _, broker, _, _ = _ctx()
+    columns = ["name", "code", "price", "change", "change_rate", "trading_value"]
+    if not isinstance(broker, KisClient):
+        return pd.DataFrame(columns=columns)
+    rows = []
+    for alias in KIS_SECTOR_CODES:
+        data = broker.get_sector_price(alias)
+        if not data:
+            continue
+        rows.append(
+            {
+                "name": data.get("name"),
+                "code": data.get("sector_code"),
+                "price": data.get("price"),
+                "change": data.get("change"),
+                "change_rate": data.get("change_rate"),
+                "trading_value": data.get("trading_value"),
+            }
+        )
+    return pd.DataFrame(rows, columns=columns)
+
+
+ORDER_BOOK_COLUMNS = ["level", "ask_price", "ask_quantity", "bid_price", "bid_quantity"]
+
+
+def order_book_snapshot(symbol: str, market: str = "J") -> dict:
+    """KIS 10단계 호가 snapshot. mock 환경이면 빈 dict."""
+    from app.brokers.kis.kis_client import KisClient
+
+    _, broker, _, _ = _ctx()
+    if not isinstance(broker, KisClient):
+        return {}
+    return broker.get_order_book(symbol, market=market)
+
+
+def order_book_levels_df(snapshot: dict) -> pd.DataFrame:
+    rows = (snapshot or {}).get("levels") or []
+    if not rows:
+        return pd.DataFrame(columns=ORDER_BOOK_COLUMNS)
+    return pd.DataFrame(rows, columns=ORDER_BOOK_COLUMNS)
+
+
+def order_book_df(symbol: str, market: str = "J") -> pd.DataFrame:
+    """KIS 10단계 호가 테이블. mock 환경이면 빈 DataFrame."""
+    return order_book_levels_df(order_book_snapshot(symbol, market=market))
+
+
+DISCLOSURE_COLUMNS = [
+    "date",
+    "time",
+    "symbol",
+    "title",
+    "category",
+    "severity",
+    "block_order",
+    "source",
+    "serial",
+]
+_DISCLOSURE_BLOCK_PREFIX = "compliance_disclosure_block:"
+_DISCLOSURE_REASON_PREFIX = "compliance_disclosure_reason:"
+
+
+def disclosures_df(symbol: str, days: int = 1) -> pd.DataFrame:
+    """KIS 종합 시황/공시 제목 조회. mock 환경이면 빈 DataFrame."""
+    from app.brokers.kis.kis_client import KisClient
+
+    _, broker, _, _ = _ctx()
+    if not isinstance(broker, KisClient):
+        return pd.DataFrame(columns=DISCLOSURE_COLUMNS)
+    rows = broker.get_disclosures(symbol, days=days)
+    if not rows:
+        return pd.DataFrame(columns=DISCLOSURE_COLUMNS)
+    return pd.DataFrame(rows, columns=DISCLOSURE_COLUMNS)
+
+
+def disclosure_gate_state(symbol: str) -> dict:
+    repo, *_ = _ctx()
+    code = str(symbol or "").strip()
+    blocked = repo.get_system_state(_DISCLOSURE_BLOCK_PREFIX + code, "false") == "true"
+    reason = repo.get_system_state(_DISCLOSURE_REASON_PREFIX + code, "") or ""
+    return {"symbol": code, "blocked": blocked, "reason": reason}
+
+
+def _send_disclosure_notification(notifier, symbol: str, blocked_rows: list[dict]) -> None:
+    if notifier is None or not hasattr(notifier, "send") or not blocked_rows:
+        return
+    first = blocked_rows[0]
+    title = first.get("title") or "중대 공시"
+    severity = first.get("severity") or "HIGH"
+    notifier.send(f"[공시 경고] {symbol} {severity}: {title}")
+
+
+def refresh_disclosure_gate(
+    symbol: str,
+    days: int = 1,
+    *,
+    notify: bool = False,
+    notifier=None,
+) -> dict:
+    """공시 조회 결과로 Compliance 차단 플래그를 갱신한다.
+
+    실제 주문 경로는 수정하지 않고, UI/운영자가 읽을 수 있는 system_state 플래그만 쓴다.
+    """
+    repo, *_ = _ctx()
+    code = str(symbol or "").strip()
+    df = disclosures_df(code, days=days)
+    if df.empty:
+        repo.set_system_state(_DISCLOSURE_BLOCK_PREFIX + code, "false")
+        repo.set_system_state(_DISCLOSURE_REASON_PREFIX + code, "")
+        return {"symbol": code, "blocked": False, "reason": "", "disclosures": df}
+
+    blocked_df = df[df["block_order"] == True]  # noqa: E712 - pandas boolean mask
+    blocked = not blocked_df.empty
+    reason = ""
+    if blocked:
+        first = blocked_df.iloc[0]
+        reason = f"{first.get('severity', 'HIGH')} {first.get('category', '')}: {first.get('title', '')}"
+    repo.set_system_state(_DISCLOSURE_BLOCK_PREFIX + code, "true" if blocked else "false")
+    repo.set_system_state(_DISCLOSURE_REASON_PREFIX + code, reason)
+
+    if blocked and notify:
+        if notifier is None:
+            from app.notification.notifier import make_notifier_from_env
+
+            notifier = make_notifier_from_env()
+        _send_disclosure_notification(notifier, code, blocked_df.to_dict("records"))
+
+    return {"symbol": code, "blocked": blocked, "reason": reason, "disclosures": df}
+
+
+def intraday_chart_df(
+    symbol: str,
+    time_unit: str = "1",
+    count: int = 120,
+) -> pd.DataFrame:
+    """KIS 당일 분봉 차트 데이터. mock 환경이면 빈 DataFrame."""
+    from app.data.data_loader import load_intraday_chart
+
+    return load_intraday_chart(symbol, time_unit=time_unit, count=count)
 
 
 def add_price_alert(symbol: str, target_price: float, direction: str = "ABOVE") -> int:
@@ -445,7 +672,7 @@ def scenario_analysis(scenarios: dict | None = None) -> pd.DataFrame:
     포트폴리오 전체 합계 행(자산군="합계")도 포함.
     """
     _scenarios = scenarios or _DEFAULT_SCENARIOS
-    df = holdings_df()
+    df = holdings_df(include_dividends=False)
     if df.empty:
         return pd.DataFrame(columns=["시나리오", "자산군", "현재금액(원)", "변동률(%)", "변동액(원)", "시나리오후금액(원)"])
 
@@ -490,7 +717,7 @@ def whatif_weight_change(symbol: str, new_weight_pct: float) -> dict:
            new_total_assets_estimated, risk_note}
     delta_shares > 0 이면 추가매수, < 0 이면 일부매도.
     """
-    df = holdings_df()
+    df = holdings_df(include_dividends=False)
     if df.empty:
         return {
             "symbol": symbol,
@@ -619,7 +846,7 @@ def asset_curve(days: int = 90) -> pd.DataFrame:
     체결 내역이 없으면 현재 보유 평가금액 단일 값으로 반환.
     """
     pnl_df = daily_pnl_series()
-    holdings = holdings_df()
+    holdings = holdings_df(include_dividends=False)
     base_value = float(holdings["평가금액"].sum()) if not holdings.empty else 0.0
 
     if pnl_df.empty:

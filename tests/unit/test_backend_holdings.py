@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from app.brokers.base import Position
+from app.ui import backend
 from app.ui.backend import HOLDINGS_COLUMNS, _build_holdings_df
 
 
@@ -37,4 +38,48 @@ def test_build_holdings_handles_missing_avg_and_name_fallback():
     row = df.iloc[0]
     assert row["평단"] == 0
     assert row["손익률"] == 0.0
+    assert row["예상연배당"] == 0
+    assert row["배당수익률"] == 0.0
     assert row["종목"] == "005930"  # 화이트리스트 메타 없으면 티커로 폴백
+
+
+def test_build_holdings_adds_dividend_income_and_yield():
+    positions = [Position("005930", 10, 70000.0)]
+    df = _build_holdings_df(
+        positions,
+        lambda s: 80000.0,
+        lambda s: {"name": "삼성전자", "role": "LARGE_CAP_TEST"},
+        lambda s: {"annual_cash_dividend": 400.0, "latest_dividend_rate": 0.5},
+    )
+
+    row = df.iloc[0]
+    assert row["예상연배당"] == 4000
+    assert row["배당수익률"] == 0.5
+
+
+def test_holdings_df_can_skip_dividend_calls(monkeypatch):
+    class Repo:
+        def list_whitelist_symbols(self):
+            return [{"symbol": "005930", "name": "삼성전자", "role": "LARGE_CAP_TEST"}]
+
+    class Broker:
+        def get_positions(self):
+            return [Position("005930", 1, 70000.0)]
+
+        def get_prices_batch(self, symbols):
+            return {"005930": 71000.0}
+
+        def get_current_price(self, symbol):
+            raise AssertionError("batch price should be used")
+
+        def get_dividend_info(self, symbol):
+            raise AssertionError("dividend lookup should be skipped")
+
+    monkeypatch.setattr(backend, "_ctx", lambda: (Repo(), Broker(), None, None))
+
+    df = backend.holdings_df(include_dividends=False)
+
+    row = df.iloc[0]
+    assert row["종목"] == "삼성전자"
+    assert row["평가금액"] == 71000
+    assert row["예상연배당"] == 0

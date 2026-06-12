@@ -38,10 +38,16 @@ class TestKpis:
         )
         return df
 
+    def _no_cash_ctx(self):
+        return (None, SimpleNamespace(), None, None)
+
     def test_kpis_keys_present(self):
         """All five KPI keys are present in the returned dict."""
         df = self._make_holdings_df(1_000_000.0, 100_000.0)
-        with patch("app.ui.backend.holdings_df", return_value=df):
+        with (
+            patch("app.ui.backend.holdings_df", return_value=df),
+            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+        ):
             from app.ui import backend
             result = backend.kpis()
         assert set(result.keys()) == {"총자산", "일손익률", "누적손익률", "현금비중", "평가손익"}
@@ -50,7 +56,10 @@ class TestKpis:
         """총자산 == 평가금액 합계 when cash placeholder is 0."""
         market = 5_000_000.0
         df = self._make_holdings_df(market, 500_000.0)
-        with patch("app.ui.backend.holdings_df", return_value=df):
+        with (
+            patch("app.ui.backend.holdings_df", return_value=df),
+            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+        ):
             from app.ui import backend
             result = backend.kpis()
         assert result["총자산"] == market
@@ -59,7 +68,10 @@ class TestKpis:
         """평가손익 == holdings_df 평가손익 합계."""
         pnl = 250_000.0
         df = self._make_holdings_df(3_000_000.0, pnl)
-        with patch("app.ui.backend.holdings_df", return_value=df):
+        with (
+            patch("app.ui.backend.holdings_df", return_value=df),
+            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+        ):
             from app.ui import backend
             result = backend.kpis()
         assert result["평가손익"] == pnl
@@ -67,17 +79,36 @@ class TestKpis:
     def test_kpis_cash_ratio_zero_when_no_cash(self):
         """현금비중 == 0.0 because the cash placeholder is 0."""
         df = self._make_holdings_df(2_000_000.0, 0.0)
-        with patch("app.ui.backend.holdings_df", return_value=df):
+        with (
+            patch("app.ui.backend.holdings_df", return_value=df),
+            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+        ):
             from app.ui import backend
             result = backend.kpis()
         assert result["현금비중"] == 0.0
+
+    def test_kpis_includes_cash_when_broker_supports_cash_balance(self):
+        """KIS cash balance is included in total assets and cash ratio."""
+        df = self._make_holdings_df(5_000_000.0, 500_000.0)
+        fake_broker = SimpleNamespace(get_cash_balance=lambda: 2_000_000.0)
+        with (
+            patch("app.ui.backend.holdings_df", return_value=df),
+            patch("app.ui.backend._ctx", return_value=(None, fake_broker, None, None)),
+        ):
+            from app.ui import backend
+            result = backend.kpis()
+        assert result["총자산"] == 7_000_000.0
+        assert round(result["현금비중"], 2) == 28.57
 
     def test_kpis_empty_holdings_returns_zero_totals(self):
         """When holdings are empty all numeric KPIs default to 0 / 0.0."""
         from app.ui.backend import HOLDINGS_COLUMNS
 
         empty_df = pd.DataFrame(columns=HOLDINGS_COLUMNS)
-        with patch("app.ui.backend.holdings_df", return_value=empty_df):
+        with (
+            patch("app.ui.backend.holdings_df", return_value=empty_df),
+            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+        ):
             from app.ui import backend
             result = backend.kpis()
         assert result["총자산"] == 0.0
@@ -86,7 +117,10 @@ class TestKpis:
     def test_daily_and_cumulative_pnl_rates_are_placeholder(self):
         """일손익률 and 누적손익률 are 0.0 placeholders (not yet live)."""
         df = self._make_holdings_df(1_000_000.0, 50_000.0)
-        with patch("app.ui.backend.holdings_df", return_value=df):
+        with (
+            patch("app.ui.backend.holdings_df", return_value=df),
+            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+        ):
             from app.ui import backend
             result = backend.kpis()
         assert result["일손익률"] == 0.0

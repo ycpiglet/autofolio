@@ -1,6 +1,6 @@
-# KIS Open API — Domestic Stock REST 스펙 (kis_client 구현 근거)
+# KIS Open API — Domestic Stock REST/WebSocket 스펙 (kis_client 구현 근거)
 
-> 본 문서는 5개 병렬 리서치 결과를 종합한 단일 정본(canonical) 구현 스펙이다. 구현 대상 파일: `app/brokers/kis/kis_client.py`.
+> 본 문서는 5개 병렬 리서치 결과를 종합한 단일 정본(canonical) 구현 스펙이다. 구현 대상 파일: `app/brokers/kis/kis_client.py`, `app/brokers/kis/kis_ws_client.py`.
 > TR ID는 공식 KIS GitHub `koreainvestment/open-trading-api`의 **현행(2025) 샘플**을 1차 근거로 한다. 레거시 TR ID는 `## 불일치/저신뢰 경고`에 별도 명시.
 
 ## 공통 기반 (Base / Auth / Envelope)
@@ -10,10 +10,38 @@
 | Base URL (실전 prod) | `https://openapi.koreainvestment.com:9443` |
 | Base URL (모의 paper) | `https://openapivts.koreainvestment.com:29443` |
 | OAuth 토큰 발급 | `POST /oauth2/tokenP` (body: `grant_type=client_credentials`, `appkey`, `appsecret`) → `access_token`, `expires_in`(~86400s) |
+| WebSocket URL (실전 prod) | `ws://ops.koreainvestment.com:21000` |
+| WebSocket URL (모의 paper) | `ws://ops.koreainvestment.com:31000` |
+| WebSocket approval key | `POST /oauth2/Approval` (body: `grant_type=client_credentials`, `appkey`, `secretkey`) → `approval_key` |
 | Hashkey | `POST /uapi/hashkey` (주문 JSON body 그대로 POST → 응답의 `HASH` 필드를 `hashkey` 헤더로 사용). **선택 사항** |
 | 토큰 재사용 | 6시간 내 재요청 시 동일 토큰 반환 |
 
 토큰 발급은 `tr_id`를 사용하지 않는다. 모의/실전 모두 동일 경로 `/oauth2/tokenP`를 쓰며, base URL과 endpoint별 TR ID로만 환경을 구분한다.
+
+### WebSocket 공통
+
+1. REST base URL에 `POST /oauth2/Approval`을 호출해 `approval_key`를 받는다. 이때 앱 시크릿 필드명은 REST 토큰의 `appsecret`이 아니라 `secretkey`다.
+2. 접속 URL은 환경별 WebSocket URL + `/tryitout`이다.
+3. 구독 메시지는 JSON으로 전송한다.
+
+```json
+{
+  "header": {
+    "approval_key": "{approval_key}",
+    "custtype": "P",
+    "tr_type": "1",
+    "content-type": "utf-8"
+  },
+  "body": {
+    "input": {
+      "tr_id": "H0STCNT0",
+      "tr_key": "005930"
+    }
+  }
+}
+```
+
+`tr_type=1`은 구독, `tr_type=2`는 해제다. 실시간 데이터는 `0|TR_ID|count|field^field...` 또는 암호화 알림의 `1|TR_ID|count|ciphertext` 형태로 수신된다. 시스템 메시지는 JSON이며 `PINGPONG`은 `pong(raw)`로 응답한다. 체결통보는 구독 성공 응답의 `body.output.key`/`iv`로 AES-CBC 복호화한다.
 
 ---
 
@@ -72,6 +100,427 @@
 | w52_lwpr | output | 52주 최저가 |
 
 > 응답은 단일 객체 `output` 컨테이너. (output1/output2 아님)
+
+---
+
+## 1-a. 주식당일분봉조회 (Intraday Minute Chart) [v1_국내주식-022]
+
+**HTTP**: `GET /uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice`
+
+### tr_id
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `FHKST03010200` |
+| 실전 (prod) | `FHKST03010200` |
+
+> 시세(`FH…`) TR은 paper/prod가 동일하다. 공식 샘플 기준 한 번의 호출에 최대 30건까지 확인 가능하며, 당일 분봉 데이터만 제공된다.
+
+### 필수 헤더
+
+현재가 시세와 동일하게 `authorization`, `appkey`, `appsecret`, `tr_id=FHKST03010200`, `custtype=P`, `tr_cont=""`를 사용한다.
+
+### 요청 필드
+
+| name | 위치 | 의미 | 예시 |
+|------|------|------|------|
+| FID_COND_MRKT_DIV_CODE | query | 조건 시장 분류 코드. J=KRX, NX=NXT, UN=통합 | `J` |
+| FID_INPUT_ISCD | query | 입력 종목코드(6자리) | `005930` |
+| FID_INPUT_HOUR_1 | query | 입력 시간(HHMMSS). 미래 시간을 넣으면 현재가 기준 조회 | `093000` |
+| FID_PW_DATA_INCU_YN | query | 과거 데이터 포함 여부 | `Y` |
+| FID_ETC_CLS_CODE | query | 기타 구분 코드 | `""` |
+
+### 응답 필드
+
+| name | container | 의미 |
+|------|-----------|------|
+| stck_bsop_date | output2 | 주식 영업일자 |
+| stck_cntg_hour | output2 | 주식 체결시간 |
+| stck_prpr | output2 | 주식 현재가(분봉 종가로 사용) |
+| stck_oprc | output2 | 주식 시가 |
+| stck_hgpr | output2 | 주식 최고가 |
+| stck_lwpr | output2 | 주식 최저가 |
+| cntg_vol | output2 | 체결 거래량 |
+
+> KIS 공식 샘플에는 분 단위 선택 파라미터가 없다. Autofolio의 `time_unit`(`1`, `3`, `5`, `10`, `30`, `60`)은 1분 원천 `output2`를 클라이언트에서 OHLCV로 집계하는 옵션이다.
+
+---
+
+## 1-b. 국내주식 WebSocket 실시간 (체결가·호가·체결통보)
+
+**WebSocket**: `{KIS_WS_URL}/tryitout`
+
+### tr_id
+
+| 용도 | prod | paper | tr_key |
+|------|------|-------|--------|
+| 국내주식 실시간체결가(KRX) | `H0STCNT0` | `H0STCNT0` | 종목코드 |
+| 국내주식 실시간호가(KRX) | `H0STASP0` | `H0STASP0` | 종목코드 |
+| 국내주식 체결통보 | `H0STCNI0` | `H0STCNI9` | HTS ID |
+
+> 체결가/호가는 paper/prod TR이 동일하다. 체결통보는 공식 샘플에서 실전 `H0STCNI0`, 모의 `H0STCNI9`로 분기한다. TASK-010 원문은 `H0STCNI0`만 적었으나, 구현은 paper 안전성을 위해 `KIS_ENV=paper`에서 `H0STCNI9`를 사용한다.
+
+### 주요 필드
+
+`H0STCNT0` 실시간체결가:
+
+| index | name | 의미 |
+|-------|------|------|
+| 0 | MKSC_SHRN_ISCD | 단축 종목코드 |
+| 1 | STCK_CNTG_HOUR | 체결시간 |
+| 2 | STCK_PRPR | 현재가 |
+| 3 | PRDY_VRSS_SIGN | 전일대비부호 |
+| 4 | PRDY_VRSS | 전일대비 |
+| 5 | PRDY_CTRT | 전일대비율 |
+| 7 | STCK_OPRC | 시가 |
+| 8 | STCK_HGPR | 고가 |
+| 9 | STCK_LWPR | 저가 |
+| 10 | ASKP1 | 매도호가1 |
+| 11 | BIDP1 | 매수호가1 |
+| 12 | CNTG_VOL | 체결거래량 |
+| 13 | ACML_VOL | 누적거래량 |
+
+`H0STASP0` 실시간호가:
+
+| index range | 의미 |
+|-------------|------|
+| 0 | 단축 종목코드 |
+| 1 | 영업시간 |
+| 3-12 | 매도호가 1-10 |
+| 13-22 | 매수호가 1-10 |
+| 23-32 | 매도호가 잔량 1-10 |
+| 33-42 | 매수호가 잔량 1-10 |
+| 43 | 총매도호가 잔량 |
+| 44 | 총매수호가 잔량 |
+
+`H0STCNI0`/`H0STCNI9` 체결통보:
+
+| index | name | 의미 |
+|-------|------|------|
+| 0 | CUST_ID | 고객 ID |
+| 1 | ACNT_NO | 계좌번호 |
+| 2 | ODER_NO | 주문번호 |
+| 3 | OODER_NO | 원주문번호 |
+| 4 | SELN_BYOV_CLS | 매도매수구분 |
+| 8 | STCK_SHRN_ISCD | 종목코드 |
+| 9 | CNTG_QTY | 체결수량 또는 주문수량 |
+| 10 | CNTG_UNPR | 체결단가 또는 주문가격 |
+| 11 | STCK_CNTG_HOUR | 체결시간 |
+| 12 | RFUS_YN | 거부여부 |
+| 13 | CNTG_YN | 체결여부. `2`=체결통보, `1`=주문·정정·취소·거부 접수 |
+| 14 | ACPT_YN | 접수여부 |
+| 16 | ODER_QTY | 주문수량 |
+| 24 | CNTG_ISNM40 | 종목명 |
+| 25 | ODER_PRC | 주문가격 |
+
+---
+
+## 1-c. 관심종목(멀티종목) 시세조회 (Batch Current Price) [국내주식-205]
+
+**HTTP**: `GET /uapi/domestic-stock/v1/quotations/intstock-multprice`
+
+### tr_id
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `FHKST11300006` |
+| 실전 (prod) | `FHKST11300006` |
+
+> TASK-013 원문은 `inquire-price-2`를 배치 API로 적었지만, 공식 샘플 기준 `inquire-price-2`는 단일 종목 API다. 실제 복수 종목 시세조회는 `intstock-multprice`이며 한 번에 최대 30종목을 받는다.
+
+### 요청 필드
+
+종목별로 suffix `1..30`을 붙여 전달한다.
+
+| name | 위치 | 의미 | 예시 |
+|------|------|------|------|
+| FID_COND_MRKT_DIV_CODE_1 | query | 조건 시장 분류 코드1. J=KRX, NX=NXT | `J` |
+| FID_INPUT_ISCD_1 | query | 입력 종목코드1 | `005930` |
+| FID_COND_MRKT_DIV_CODE_N | query | 조건 시장 분류 코드N | `J` |
+| FID_INPUT_ISCD_N | query | 입력 종목코드N | `000660` |
+
+### 응답 필드
+
+| name | container | 의미 |
+|------|-----------|------|
+| inter_shrn_iscd | output | 관심 단축 종목코드 |
+| inter_kor_isnm | output | 관심 한글 종목명 |
+| inter2_prpr | output | 현재가 |
+| prdy_vrss | output | 전일 대비 |
+| prdy_vrss_sign | output | 전일 대비 부호 |
+| prdy_ctrt | output | 전일 대비율 |
+| acml_vol | output | 누적 거래량 |
+
+Autofolio 구현:
+- `KisClient.get_prices_batch(symbols)`는 중복/공백 종목을 제거한 뒤 최대 30종목씩 청크를 나눠 `intstock-multprice`를 호출한다.
+- 응답 누락 또는 chunk 실패 종목만 기존 `get_current_price()` 단건 fallback을 호출한다.
+- `_last_batch_price_stats`에 `symbols`, `batch_calls`, `single_fallback_calls`, `saved_calls`를 남겨 레이트리밋 절감 효과를 확인할 수 있게 했다.
+
+---
+
+## 1-d. 국내업종 현재지수 (Index Current Price) [v1_국내주식-063]
+
+**HTTP**: `GET /uapi/domestic-stock/v1/quotations/inquire-index-price`
+
+### tr_id
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `FHPUP02100000` |
+| 실전 (prod) | `FHPUP02100000` |
+
+### 요청 필드
+
+| name | 위치 | 의미 | 예시 |
+|------|------|------|------|
+| FID_COND_MRKT_DIV_CODE | query | 조건 시장 분류 코드. 업종=`U` | `U` |
+| FID_INPUT_ISCD | query | 지수 코드 | `0001` |
+
+공식 샘플에서 확인된 주요 코드:
+
+| code | name |
+|------|------|
+| `0001` | KOSPI |
+| `1001` | KOSDAQ |
+| `2001` | KOSPI200 |
+
+> TASK-015 원문은 `2001`을 KRX300으로 적었지만, 공식 샘플은 `2001`을 KOSPI200으로 설명한다. KRX300 코드는 포털 종목정보 다운로드 대조 전까지 상수에 넣지 않는다.
+
+### 응답 필드
+
+| name | container | 의미 |
+|------|-----------|------|
+| bstp_nmix_prpr | output | 업종 지수 현재가 |
+| bstp_nmix_prdy_vrss | output | 업종 지수 전일 대비 |
+| prdy_vrss_sign | output | 전일 대비 부호 |
+| bstp_nmix_prdy_ctrt | output | 업종 지수 전일 대비율 |
+| acml_vol | output | 누적 거래량 |
+| acml_tr_pbmn | output | 누적 거래 대금 |
+
+Autofolio 업종 구현:
+- `KisClient.get_sector_price(sector_code)`는 이 endpoint를 재사용한다.
+- `sector_code`는 공식 업종 master `idxcode.mst`의 5자리 문자열 중 첫 시장구분값을 제외한 4자리 코드다.
+- 주요 코드 상수(`app/brokers/kis/constants.py`):
+
+| alias | code | name | 비고 |
+|-------|------|------|------|
+| `KOSPI_ELECTRONICS` | `0013` | KOSPI 전기·전자 | 반도체/전자 proxy |
+| `KOSPI_TRANSPORT_EQUIPMENT` | `0015` | KOSPI 운송장비·부품 | 자동차 proxy |
+| `KOSPI_FINANCE` | `0021` | KOSPI 금융 | 금융 |
+| `KOSPI_CHEMICALS` | `0008` | KOSPI 화학 | 소재/화학 |
+| `KOSPI_PHARMA` | `0009` | KOSPI 제약 | 헬스케어 일부 |
+| `KOSPI_CONSTRUCTION` | `0018` | KOSPI 건설 | 건설 |
+| `KOSDAQ_IT_SERVICE` | `1033` | KOSDAQ IT 서비스 | KOSDAQ IT |
+| `KOSPI200_INFORMATION_TECHNOLOGY` | `2013` | KOSPI200 정보기술 | K200 섹터 |
+| `KOSPI200_FINANCE` | `2014` | KOSPI200 금융 | K200 섹터 |
+
+---
+
+## 1-e. 예탁원정보(배당일정) (Dividend Schedule) [국내주식-145]
+
+**HTTP**: `GET /uapi/domestic-stock/v1/ksdinfo/dividend`
+
+### tr_id
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `HHKDB669102C0` |
+| 실전 (prod) | `HHKDB669102C0` |
+
+> TASK-017 원문은 `inquire-dividend`를 후보로 적었지만, 공식 GitHub 현행 샘플의 종목별 배당 일정 정본은 `ksdinfo_dividend`다. `dividend_rate`는 배당률 상위 랭킹 API라 포트폴리오 종목별 배당 이력에는 보조 근거로만 사용한다.
+
+### 요청 필드
+
+| name | 위치 | 의미 | 예시 |
+|------|------|------|------|
+| CTS | query | 연속조회 커서. 첫 호출 공란 | `""` |
+| GB1 | query | 조회구분. 0=배당전체, 1=결산배당, 2=중간배당 | `0` |
+| F_DT | query | 조회일자 From (YYYYMMDD) | `20260101` |
+| T_DT | query | 조회일자 To (YYYYMMDD) | `20261231` |
+| SHT_CD | query | 종목코드. 공란=전체, 특정종목=6자리 코드 | `005930` |
+| HIGH_GB | query | 고배당여부. 기본 공란 | `""` |
+
+### 응답 필드
+
+| name | container | 의미 |
+|------|-----------|------|
+| record_date | output1 | 기준일 |
+| sht_cd | output1 | 종목코드 |
+| divi_kind | output1 | 배당종류 |
+| face_val | output1 | 액면가 |
+| per_sto_divi_amt | output1 | 현금배당금(주당) |
+| divi_rate | output1 | 현금배당률(%) |
+| stk_divi_rate | output1 | 주식배당률(%) |
+| divi_pay_dt | output1 | 배당금지급일 |
+| stk_div_pay_dt | output1 | 주식배당지급일 |
+| odd_pay_dt | output1 | 단주대금지급일 |
+| stk_kind | output1 | 주식종류 |
+| high_divi_gb | output1 | 고배당종목여부 |
+
+Autofolio 구현:
+- `KisClient.get_dividend_info(symbol, start_date=None, end_date=None)`는 기본으로 현재 KST 연도 전체를 조회한다.
+- `output1`을 `records`로 정규화하고 `annual_cash_dividend`(주당 현금배당 합계), `latest_dividend_rate`를 계산한다.
+- `backend.holdings_df()`는 보유수량과 현재가를 결합해 `예상연배당`, `배당수익률` 컬럼을 만든다.
+
+---
+
+## 1-f. 주식현재가 호가/예상체결 (Order Book / Expected Execution) [v1_국내주식-011]
+
+**HTTP**: `GET /uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn`
+
+### tr_id
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `FHKST01010200` |
+| 실전 (prod) | `FHKST01010200` |
+
+### 요청 필드
+
+| name | 위치 | 의미 | 예시 |
+|------|------|------|------|
+| FID_COND_MRKT_DIV_CODE | query | 조건 시장 분류 코드. J=KRX, NX=NXT, UN=통합 | `J` |
+| FID_INPUT_ISCD | query | 입력 종목코드(6자리) | `005930` |
+
+### 응답 필드
+
+| name | container | 의미 |
+|------|-----------|------|
+| aspr_acpt_hour | output1 | 호가 접수 시간 |
+| askp1..askp10 | output1 | 매도호가 1-10 |
+| bidp1..bidp10 | output1 | 매수호가 1-10 |
+| askp_rsqn1..askp_rsqn10 | output1 | 매도호가 잔량 1-10 |
+| bidp_rsqn1..bidp_rsqn10 | output1 | 매수호가 잔량 1-10 |
+| total_askp_rsqn | output1 | 총 매도호가 잔량 |
+| total_bidp_rsqn | output1 | 총 매수호가 잔량 |
+| stck_prpr | output1 | 주식 현재가 |
+| antc_cnpr | output1/output2 | 예상 체결가 |
+| antc_vol | output1/output2 | 예상 거래량 |
+
+Autofolio 구현:
+- `KisClient.get_order_book(symbol, market="J")`는 REST snapshot으로 10단계 호가와 예상체결 정보를 반환한다.
+- `estimate_order_book_slippage(levels, side, quantity, reference_price)`는 BUY는 매도호가를, SELL은 매수호가를 순서대로 소비해 예상평균가·미충족수량·현재가 대비 슬리피지를 계산한다.
+- `app/ui/backend.py::order_book_snapshot/order_book_df`는 KIS 환경에서만 데이터를 노출하고 mock 환경은 빈 결과를 반환한다.
+- `app/ui/views/trade.py`는 매매 화면 조건 입력의 종목·방향·수량을 이용해 호가창과 슬리피지 metric을 표시한다.
+- 실시간 연동 옵션은 TASK-010의 `KisWebSocketClient.subscribe_order_book()`(`H0STASP0`)으로 이미 분리 구현되어 있다.
+
+---
+
+## 1-g. 종합 시황/공시(제목) (News / Disclosure Title) [국내주식-141]
+
+**HTTP**: `GET /uapi/domestic-stock/v1/quotations/news-title`
+
+### tr_id
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `FHKST01011800` |
+| 실전 (prod) | `FHKST01011800` |
+
+> TASK-020 원문은 `inquire-disclosure` 후보를 적었지만, 공식 GitHub 현행 샘플에서 확인되는 공시성 조회 API는 `news_title`이며 설명은 "종합 시황/공시(제목) [국내주식-141]"이다.
+
+### 요청 필드
+
+| name | 위치 | 의미 | 예시 |
+|------|------|------|------|
+| FID_NEWS_OFER_ENTP_CODE | query | 뉴스 제공 업체 코드. 기본 공란 | `""` |
+| FID_COND_MRKT_CLS_CODE | query | 조건 시장 구분 코드. 기본 공란 | `""` |
+| FID_INPUT_ISCD | query | 입력 종목코드. 공란=전체, 종목코드=해당 뉴스/공시 | `005930` |
+| FID_TITL_CNTT | query | 제목 검색어. 기본 공란 | `""` |
+| FID_INPUT_DATE_1 | query | 입력 날짜(YYYYMMDD) | `20260612` |
+| FID_INPUT_HOUR_1 | query | 입력 시간. 기본 공란 | `""` |
+| FID_RANK_SORT_CLS_CODE | query | 순위 정렬 구분 코드 | `01` |
+| FID_INPUT_SRNO | query | 입력 일련번호. 기본 공란 | `""` |
+
+### 응답 필드
+
+| name | container | 의미 |
+|------|-----------|------|
+| cntt_usiq_srno | output | 내용 조회용 일련번호 |
+| news_ofer_entp_code | output | 뉴스 제공 업체 코드 |
+| data_dt | output | 작성일자 |
+| data_tm | output | 작성시간 |
+| hts_pbnt_titl_cntt | output | HTS 공시 제목 내용 |
+| news_lrdv_code | output | 뉴스 대구분 |
+| dorg | output | 자료원 |
+| iscd1..iscd5 | output | 관련 종목 코드 |
+
+Autofolio 구현:
+- `KisClient.get_disclosures(symbol, days=1)`는 최근 N일(상한 30일)을 일자별로 조회해 `date/time/title/source/category/severity/block_order`로 정규화한다.
+- `classify_disclosure_title()`은 제목 키워드로 `정기공시`, `수시공시`, `주요사항보고서`, `뉴스/기타`를 분류한다.
+- `유상증자`, `감자`, `합병`, `거래정지`, `상장폐지`, `감사의견`, `횡령`, `배임` 등 중대 키워드는 `severity=HIGH`, `block_order=True`로 표시한다.
+- `app/ui/backend.py::refresh_disclosure_gate()`는 DB schema 변경 없이 `system_state`에 `compliance_disclosure_block:{symbol}` 플래그와 차단 사유를 저장한다.
+- 매매 화면은 해당 플래그가 켜진 종목의 조건 저장 버튼을 비활성화한다. 실제 주문 실행 경로(`order_flow.py`, `app/risk/**`)는 R3 surface라 이번 작업에서 변경하지 않았다.
+- 알림 탭은 사용자가 선택한 종목의 공시를 조회하고, 중대 공시 감지 시 `Notifier.send()`로 공시 경고를 보낼 수 있다.
+
+---
+
+## 1-h. 기업 기본 재무 지표 (PER/PBR/EPS/시가총액 + Finance Ratio Rank)
+
+### 종목 현재가 응답 내 valuation 필드
+
+**HTTP**: `GET /uapi/domestic-stock/v1/quotations/inquire-price`
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `FHKST01010100` |
+| 실전 (prod) | `FHKST01010100` |
+
+`inquire-price` 응답에는 현재가뿐 아니라 Research Agent에 바로 필요한 valuation 필드가 포함된다.
+
+| name | container | 의미 |
+|------|-----------|------|
+| stck_prpr | output | 주식 현재가 |
+| lstn_stcn | output | 상장 주수 |
+| hts_avls | output | HTS 시가총액 |
+| per | output | PER |
+| pbr | output | PBR |
+| eps | output | EPS |
+
+Autofolio 구현:
+- `KisClient.get_fundamental(symbol)`는 `inquire-price`를 호출해 `price`, `per`, `pbr`, `eps`, `market_cap`, `listed_shares`를 정규화한다.
+- `backend.fundamental(symbol)`은 KIS 환경에서만 이 메서드를 노출한다.
+- `ResearchAgent.propose_price_condition(..., fundamental=...)`는 PER/PBR/EPS/시가총액을 rationale context에 포함한다.
+- 분석 화면에는 화이트리스트 종목별 재무 지표 metric 패널을 추가했다.
+
+### 국내주식 재무비율 순위 [v1_국내주식-092]
+
+**HTTP**: `GET /uapi/domestic-stock/v1/ranking/finance-ratio`
+
+| 환경 | TR ID |
+|------|-------|
+| 모의 (paper) | `FHPST01750000` |
+| 실전 (prod) | `FHPST01750000` |
+
+공식 샘플의 `finance_ratio`는 특정 종목 단건 조회가 아니라 시장/분류별 ranking API다. Autofolio는 이를 `get_finance_ratio_rank()`로 분리하고, `get_fundamental()`에서 해당 종목이 결과에 있으면 `finance_ratio` 보조 지표로 붙인다.
+
+| name | 위치 | 의미 | 예시 |
+|------|------|------|------|
+| fid_trgt_cls_code | query | 대상 구분 코드. 0=전체 | `0` |
+| fid_cond_mrkt_div_code | query | 조건 시장 분류 코드 | `J` |
+| fid_cond_scr_div_code | query | 화면 분류 코드 | `20175` |
+| fid_input_iscd | query | 시장 코드. 0000=전체, 0001=거래소, 1001=코스닥, 2001=KOSPI200 | `0000` |
+| fid_div_cls_code | query | 분류 구분 코드 | `0` |
+| fid_input_option_1 | query | 회계연도 | `2025` |
+| fid_input_option_2 | query | 분기. 0=1Q, 1=반기, 2=3Q, 3=결산 | `3` |
+| fid_rank_sort_cls_code | query | 정렬. 7=수익성, 11=안정성, 15=성장성, 20=활동성 | `7` |
+| fid_blng_cls_code | query | 소속 구분 코드 | `0` |
+| fid_trgt_exls_cls_code | query | 대상 제외 구분 코드 | `0` |
+
+주요 응답 필드:
+
+| name | container | 의미 |
+|------|-----------|------|
+| data_rank | output | 데이터 순위 |
+| hts_kor_isnm | output | HTS 한글 종목명 |
+| mksc_shrn_iscd | output | 유가증권 단축 종목코드 |
+| sale_totl_rate | output | 매출액 총이익율 |
+| sale_ntin_rate | output | 매출액 순이익율 |
+| bis | output | 자기자본비율 |
+| lblt_rate | output | 부채 비율 |
+| grs | output | 매출액 증가율 |
+| bsop_prfi_inrt | output | 영업 이익 증가율 |
+| ntin_inrt | output | 순이익 증가율 |
 
 ---
 
@@ -424,6 +873,12 @@
 
 > **체결 판정**: 명시적 `ccld_yn` boolean 없음. (a) `rmn_qty`(잔여수량)==0 → 완전체결, 또는 (b) `tot_ccld_qty` == `ord_qty`, (c) `cncl_yn`==Y → 취소로 판정한다.
 
+Autofolio 구현:
+- `KisClient.get_order_history(start_date, end_date)`는 현재 KST 기준 3개월 경계일을 계산한다.
+- 전체 범위가 3개월 이내이면 `TTTC0081R`/`VTTC0081R`만 호출한다.
+- 전체 범위가 3개월 이전이면 `CTSC9215R`/`VTSC9215R`만 호출한다.
+- 범위가 경계를 걸치면 long 구간과 recent 구간으로 나눠 두 TR을 순서대로 호출한 뒤 동일 컬럼 스키마로 정규화한다.
+
 ---
 
 ## 구현 주의사항
@@ -462,7 +917,34 @@
 - https://github.com/koreainvestment/open-trading-api/blob/main/examples_user/kis_auth.py — hashkey OPTIONAL(`set_order_hash_key` 존재하나 호출 주석), base 도메인
 - https://github.com/koreainvestment/open-trading-api/blob/main/examples_user/domestic_stock/domestic_stock_functions.py — 통합 TR ID 교차검증 (inquire_price FHKST01010100; order_cash TTTC0012U/TTTC0011U + VTTC0012U/VTTC0011U; order_rvsecncl TTTC0013U/VTTC0013U; inquire_balance TTTC8434R/VTTC8434R; inquire_daily_ccld TTTC0081R/VTTC0081R + CTSC9215R/VTSC9215R)
 - https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_price/inquire_price.py — inquire-price API_URL, FHKST01010100(real=demo), FID_COND_MRKT_DIV_CODE/FID_INPUT_ISCD, output 컨테이너
-- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_price/chk_inquire_price.py — COLUMN_MAPPING (stck_prpr=주식 현재가 등 전체 필드)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_price/chk_inquire_price.py — COLUMN_MAPPING (stck_prpr=주식 현재가, lstn_stcn=상장 주수, hts_avls=HTS 시가총액, per/pbr/eps 등 전체 필드)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_price_2/inquire_price_2.py — inquire-price-2 API_URL, FHPST01010000, 단일 FID_INPUT_ISCD
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/intstock_multprice/intstock_multprice.py — intstock-multprice API_URL, FHKST11300006, 최대 30종목 suffix 파라미터
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/intstock_multprice/chk_intstock_multprice.py — 멀티종목 응답 필드(inter_shrn_iscd, inter2_prpr 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_index_price/inquire_index_price.py — inquire-index-price API_URL, FHPUP02100000, FID_COND_MRKT_DIV_CODE=U, 지수 코드 예시
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_index_price/chk_inquire_index_price.py — 지수 응답 필드(bstp_nmix_prpr, bstp_nmix_prdy_vrss 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/stocks_info/sector_code.py — 공식 업종 master(`idxcode.mst.zip`) 다운로드/파싱 샘플
+- https://github.com/koreainvestment/open-trading-api/blob/main/stocks_info/%EC%97%85%EC%A2%85%EC%BD%94%EB%93%9C%EC%A0%95%EB%B3%B4.h — 업종 master 고정폭 필드 정의(idx_div, idx_code, idx_name)
+- https://new.real.download.dws.co.kr/common/master/idxcode.mst.zip — KIS 업종 master 파일(코드/업종명 확인)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/ksdinfo_dividend/ksdinfo_dividend.py — ksdinfo-dividend API_URL, HHKDB669102C0, CTS/GB1/F_DT/T_DT/SHT_CD/HIGH_GB
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/ksdinfo_dividend/chk_ksdinfo_dividend.py — 배당 일정 응답 필드(record_date, per_sto_divi_amt, divi_rate, divi_pay_dt 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/dividend_rate/dividend_rate.py — 배당률 상위 랭킹 API_URL, HHKDB13470100 (TASK-017 보조 근거)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/dividend_rate/chk_dividend_rate.py — 배당률 랭킹 응답 필드(rank, sht_cd, per_sto_divi_amt, divi_rate 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_asking_price_exp_ccn/inquire_asking_price_exp_ccn.py — 호가/예상체결 API_URL, FHKST01010200, J/NX/UN 시장코드, FID_INPUT_ISCD
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_asking_price_exp_ccn/chk_inquire_asking_price_exp_ccn.py — 호가/예상체결 응답 필드(askp/bidp 1-10, 잔량, 예상체결가/수량 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/news_title/news_title.py — 종합 시황/공시(제목) API_URL, FHKST01011800, FID_INPUT_ISCD/FID_INPUT_DATE_1 등
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/news_title/chk_news_title.py — 공시 제목 응답 필드(cntt_usiq_srno, data_dt, data_tm, hts_pbnt_titl_cntt, iscd1..5 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/finance_ratio/finance_ratio.py — finance-ratio ranking API_URL, FHPST01750000, fiscal year/quarter/sort params
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/finance_ratio/chk_finance_ratio.py — 재무비율 ranking 응답 필드(mksc_shrn_iscd, sale_totl_rate, lblt_rate, bsop_prfi_inrt 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/market_cap/market_cap.py — 시가총액 ranking API_URL, FHPST01740000 (TASK-016 보조 교차근거)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/market_cap/chk_market_cap.py — 시가총액 ranking 응답 필드(stck_avls 등)
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_time_itemchartprice/inquire_time_itemchartprice.py — inquire-time-itemchartprice API_URL, FHKST03010200, FID_INPUT_HOUR_1/FID_PW_DATA_INCU_YN, output1/output2
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_time_itemchartprice/chk_inquire_time_itemchartprice.py — 분봉 응답 필드(stck_bsop_date, stck_cntg_hour, stck_prpr, stck_oprc, stck_hgpr, stck_lwpr, cntg_vol)
+- https://github.com/koreainvestment/open-trading-api/blob/main/kis_devlp.yaml — prod/vps REST 도메인과 ops/vops WebSocket 도메인
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_user/kis_auth.py — WebSocket `auth_ws`, `data_fetch`, `system_resp`, `KISWebSocket(api_url="/tryitout")`, PINGPONG/AES-CBC 처리
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_user/domestic_stock/domestic_stock_functions_ws.py — H0STCNT0/H0STASP0/H0STCNI0/H0STCNI9 TR과 컬럼 정의
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_user/domestic_stock/domestic_stock_examples_ws.py — WebSocket 구독 예제, 체결통보 `trenv.my_htsid` 구독
+- https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/auth/auth_ws_token/auth_ws_token.py — `/oauth2/Approval`, `secretkey`, `approval_key`
 - https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_balance/inquire_balance.py — inquire-balance API_URL, TTTC8434R(real)/VTTC8434R(demo)
 - https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/inquire_balance/chk_inquire_balance.py — 잔고 응답 필드(output1/output2) COLUMN_MAPPING
 - https://github.com/koreainvestment/open-trading-api/blob/main/examples_llm/domestic_stock/order_cash/order_cash.py — order-cash 현행 정본: real buy=TTTC0012U/sell=TTTC0011U, demo buy=VTTC0012U/sell=VTTC0011U, POST postFlag=True, output 반환
@@ -505,8 +987,13 @@
 - `chk_inquire_daily_ccld.py` COLUMN_MAPPING에 **중복 키**가 있어 두 번째 블록이 `tot_ccld_amt`/`pchs_avg_pric` 라벨을 재매핑함. **첫 번째(primary) 정의를 신뢰**할 것.
 - 명시적 체결 boolean(`ccld_yn`) 없음 → `rmn_qty`/`tot_ccld_qty`/`cncl_yn` 조합으로 판정(위 6-b 참조).
 
-### F. 시세 inquire-price 변형 endpoint
-- 동일 시세에 신규 변형 `inquire-price-2`(`/uapi/domestic-stock/v1/quotations/inquire-price-2`)가 존재하나, 정본 현재가 endpoint는 `inquire-price`/`FHKST01010100`. 추가 필드가 필요할 때만 변형 검토.
+### F. 시세 inquire-price-2 vs 실제 복수 종목 endpoint
+- `inquire-price-2`(`/uapi/domestic-stock/v1/quotations/inquire-price-2`, `FHPST01010000`)는 공식 샘플 기준 단일 `FID_INPUT_ISCD`만 받는 확장 현재가 API다.
+- 복수 종목 현재가 조회는 `intstock-multprice`(`/uapi/domestic-stock/v1/quotations/intstock-multprice`, `FHKST11300006`)가 정본이며 최대 30종목을 suffix 파라미터로 전달한다.
 
 ### G. 포털 문서 직접 스크래핑 불가
 - `apiportal.koreainvestment.com` 페이지는 JS 렌더링이라 필드 표를 기계적으로 읽지 못함. 본 스펙의 필드 정의는 공식 GitHub `examples_llm/*/chk_*.py`의 COLUMN_MAPPING을 권위 근거로 삼았다. 운영 투입 전 포털 문서와 1회 대조 권장.
+
+### H. WebSocket 체결통보 TR — paper/prod 분기
+- `H0STCNI0`는 실전 체결통보, `H0STCNI9`는 모의 체결통보다. 체결가 `H0STCNT0`과 호가 `H0STASP0`은 paper/prod 동일하다.
+- 체결통보 `tr_key`는 종목코드가 아니라 HTS ID다. Autofolio는 `KIS_HTS_ID` 또는 `KIS_<ENV>_HTS_ID`를 사용한다.

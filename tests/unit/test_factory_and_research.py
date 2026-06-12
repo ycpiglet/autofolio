@@ -67,6 +67,22 @@ def test_research_agent_propose_lowercase_side():
     assert proposal.side == "BUY"
 
 
+def test_research_agent_includes_fundamental_context():
+    from app.agents.research_agent import ResearchAgent
+
+    agent = ResearchAgent()
+    proposal = agent.propose_price_condition(
+        symbol="005930",
+        current_price=70000.0,
+        side="BUY",
+        fundamental={"per": 12.3, "pbr": 1.4, "eps": 5000.0, "market_cap": 400000000.0},
+    )
+
+    assert "PER 12.3" in proposal.rationale
+    assert "PBR 1.4" in proposal.rationale
+    assert "EPS 5000.0" in proposal.rationale
+
+
 def test_research_agent_invalid_side_raises():
     from app.agents.research_agent import ResearchAgent
     agent = ResearchAgent()

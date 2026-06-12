@@ -45,7 +45,7 @@
 ## 🎯 다음 (우선순위)
 
 ### 1. 실주문 검증 (paper → prod) ★장 시간 중 사람 직접 실행
-- [ ] **paper 1주 수동 실주문** — `! python scripts/kis_paper_order_smoke.py` (정규장 09:00~15:30). 체결조회·취소 생애주기 확인 후 기록.
+- [x] **paper 1주 수동 실주문** — 완료(2026-06-12, TASK-023): `kis_paper_order_smoke.py` 주문→조회→취소 성공, `run_paper_engine.py --once` 1주 체결(069500). HTS/앱 화면 대신 KIS API 잔고·체결로 broker-side 교차확인.
 - [ ] **실전(prod) 1주 실주문** — paper 검증 후, Owner 명시 승인 후. `KIS_ENV=prod`로 전환.
 
 ### 2. 거버넌스 완성
@@ -96,20 +96,20 @@
 - [x] T-20 Attribution Sankey 다이어그램 (plotly, bar chart 폴백)
 
 ### KIS API 확장 (P1.2)
-- [ ] **TASK-010** KIS WebSocket 실시간 (체결통보·현재가·호가) — `kis_ws_client.py` 신규, H0STCNT0/H0STASP0/H0STCNI0
-- [ ] **TASK-011** KIS 분봉 데이터 조회 — `inquire-time-itemchartprice`, TR `FHKST03010200`, `get_intraday_chart()`
-- [ ] **TASK-012** KIS 장기 거래내역 조회 (3개월+) — TR `CTSC9215R`/`VTSC9215R`, `get_order_history()`
-- [ ] **TASK-013** KIS 복수 종목 현재가 배치 조회 — `inquire-price-2`, `get_prices_batch()`
-- [ ] **TASK-014** KIS 시간외 주문 (장전·장후 단일가) — ORD_DVSN 05/06, `after_hours` 파라미터
-- [ ] **TASK-015** KIS 지수 조회 (KOSPI·KOSDAQ·KRX) — `inquire-index-price`, `get_index_price()`
-- [ ] **TASK-016** KIS 기업 재무정보 (PER·PBR·EPS·시가총액) — `inquire-finance-ratio`, `get_fundamental()`
-- [ ] **TASK-017** KIS 배당 정보 조회 — `inquire-dividend`, `get_dividend_info()`, 포트폴리오 배당 수익률 표시
-- [ ] **TASK-018** KIS 호가창 10단계 조회 — `inquire-asking-price-exp-ccn`, `get_order_book()`
-- [ ] **TASK-019** KIS 업종별 시세 조회 — `inquire-upjong-price`, `get_sector_price()`, 분석 탭 히트맵
-- [ ] **TASK-020** KIS 공시 정보 조회 — `get_disclosures()`, Compliance Agent 공시 차단 게이트
-- [ ] **TASK-021** KIS 신용·공매도 주문 — `SLL_TYPE` 02/05 확장, 리스크 게이트 연동 (Owner 승인 필요)
-- [ ] **TASK-022** KIS 해외주식 주문 (미국·홍콩 등) — TR `TTTT1002U`, 환율 처리, US 화이트리스트
-- [ ] **TASK-023** UI 엔진 → KIS 실주문 E2E 검증 — `--market-test`, 체결·로그·UI 전 흐름 확인
+- [x] **TASK-010** KIS WebSocket 실시간 (체결통보·현재가·호가) — `kis_ws_client.py` 신규, H0STCNT0/H0STASP0/H0STCNI0·paper H0STCNI9
+- [x] **TASK-011** KIS 분봉 데이터 조회 — `inquire-time-itemchartprice`, TR `FHKST03010200`, `get_intraday_chart()`, data_loader, 분석 화면 분봉 차트
+- [x] **TASK-012** KIS 장기 거래내역 조회 (3개월+) — TR `CTSC9215R`/`VTSC9215R`, 3개월 경계 분할, 내역 화면 날짜 조회 연결
+- [x] **TASK-013** KIS 복수 종목 현재가 배치 조회 — 공식 batch 정본 `intstock-multprice`, 최대 30종목 청크, watchlist 연결
+- [~] **TASK-014** KIS 시간외 주문 (장전·장후 단일가) — 보류: `place_order`/리스크 게이트 R3 surface, Owner 승인 필요
+- [x] **TASK-015** KIS 지수 조회 (KOSPI·KOSDAQ·KOSPI200) — `inquire-index-price`, `get_index_price()`, 홈 지수 위젯
+- [x] **TASK-016** KIS 기업 재무정보 (PER·PBR·EPS·시가총액) — `inquire-price` valuation 필드 + `finance-ratio`, `get_fundamental()`, ResearchAgent/분석 탭 연결
+- [x] **TASK-017** KIS 배당 정보 조회 — 공식 정본 `ksdinfo/dividend`, `get_dividend_info()`, 포트폴리오 예상연배당/배당수익률 표시
+- [x] **TASK-018** KIS 호가창 10단계 조회 — `inquire-asking-price-exp-ccn`, `get_order_book()`, 매매 화면 호가/슬리피지 표시
+- [x] **TASK-019** KIS 업종별 시세 조회 — 공식 `inquire-index-price` + 업종 master, `get_sector_price()`, 분석 탭 업종 퍼포먼스 표
+- [x] **TASK-020** KIS 공시 정보 조회 — 공식 `news-title`, `get_disclosures()`, Compliance 공시 차단 플래그/알림 패널
+- [~] **TASK-021** KIS 신용·공매도 주문 — 보류: `place_order`/`SLL_TYPE`/리스크 게이트 R3 surface, Owner 승인 필요
+- [~] **TASK-022** KIS 해외주식 주문 (미국·홍콩 등) — 보류: 해외주식 주문/환율/화이트리스트/포트폴리오 통합 R3 surface, Owner 승인 필요
+- [x] **TASK-023** UI 엔진 → KIS 실주문 E2E 검증 — 완료(2026-06-12, STATUS.md): paper 주문 smoke + `run_paper_engine.py --once` 1주 체결, SQLite 로그·UI 반영 확인. prod 실전 주문은 별도 R3 승인 필요
 
 ### 기술부채 · 정리 (잔여)
 - [ ] `streamlit_app.py` vs `autofolio_app.py` 통합 정리.

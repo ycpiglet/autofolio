@@ -15,7 +15,9 @@ Usage
 -----
     python scripts/run_paper_engine.py
     python scripts/run_paper_engine.py --interval 60
+    python scripts/run_paper_engine.py --once
     python scripts/run_paper_engine.py --dry-run
+    python scripts/run_paper_engine.py --dry-run --once
     python scripts/run_paper_engine.py --dry-run --interval 5
 
 Prerequisites
@@ -78,6 +80,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help=(
             "Log what would run but use MockBrokerClient — "
             "no real orders are sent. Trading-window check is bypassed."
+        ),
+    )
+    ap.add_argument(
+        "--once",
+        action="store_true",
+        help=(
+            "Run one engine tick and exit. In non-dry-run mode, exits without "
+            "sending orders if outside the configured trading window."
         ),
     )
     return ap
@@ -153,6 +163,13 @@ def main(argv: list[str] | None = None) -> int:
             )
 
             if not in_window and not args.dry_run:
+                if args.once:
+                    logger.info(
+                        "Outside trading window (%s-%s KST). One-shot run skipped.",
+                        cfg.default_trading_start,
+                        cfg.default_trading_end,
+                    )
+                    return 3
                 logger.info(
                     "Outside trading window (%s-%s KST). Sleeping %ds.",
                     cfg.default_trading_start,
@@ -186,6 +203,10 @@ def main(argv: list[str] | None = None) -> int:
 
             if not results:
                 logger.info("  (no active conditions processed)")
+
+            if args.once:
+                logger.info("One-shot run complete.")
+                return 0
 
             time.sleep(args.interval)
 

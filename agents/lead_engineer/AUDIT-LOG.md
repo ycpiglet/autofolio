@@ -92,3 +92,185 @@
 검증: pytest 39 passed, check_agent_docs 0 error, precedence exit 0
 관련 기록: EVIDENCE-2026-06-09-001, Autofolio PR #4 예정, upstream agent_runtime Issue 예정
 남은 리스크: BUG-001/002는 upstream 패치 필요(Autofolio는 우회로만 사용 가능)
+
+### AUDIT-2026-06-12-001
+시각: 2026-06-12T09:09:39+09:00
+기록 시각: 2026-06-12T09:09:39+09:00
+요청자: Owner ("backlog에 등록된 task들 순차적으로 작업 및 마무리")
+수행자: Lead Engineer (Codex)
+의도: backlog 순차 처리 작업을 운영 사이클로 기록하고 문서 위생 ERROR(missing-cycle)를 해소
+대상: agents/lead_engineer/CYCLE-001.md, agents/lead_engineer/reviews/README.md, agents/lead_engineer/STATUS.md, agents/lead_engineer/AUDIT-LOG.md
+작업: CYCLE-001 진행 중 기록 생성, reviews 디렉터리 anchor 생성, STATUS 최신 사이클 포인터 갱신, 감사 로그 추가
+방법: TASK frontmatter/BACKLOG/doc_health_report/check_agent_docs 현재 상태 확인 후 비파괴 문서 패치
+결과: CYCLE-001이 backlog 처리 사이클의 정본 기록이 되었고, REVIEW는 사이클 미완료 상태라 아직 요구되지 않음. 추가로 role directory 링크, retros/rubric/evidence anchor, TASK-002~009 historical stubs를 통해 doc_health_report Status G/findings 0 달성.
+검증: python scripts/doc_health_report.py -> Status G/findings 0; python scripts/check_agent_docs.py -> 0 errors; python scripts/backlog_sweep.py; python scripts/generate_views.py --check; python scripts/validate_task_schema.py; pytest scripts/test_doc_steward_due.py -> 3 passed
+관련 기록: CYCLE-001, agents/lead_engineer/tasks/BACKLOG.md, TASK-002~023, CLAUDE.md, agents/lead_engineer/retros/README.md, agents/managing_partner/INDEPENDENCE-RUBRIC.md
+남은 리스크: 남은 TASK는 Owner/외부 조건 대기. TASK-023은 정규장 사람 실행 필요, TASK-014/021/022는 주문 경로 R3 승인 필요. beta_tester_due는 CYCLE-001 베타 라운드 기록 없음으로 overdue.
+
+### AUDIT-2026-06-12-002
+시각: 2026-06-12T09:29:59+09:00
+기록 시각: 2026-06-12T09:29:59+09:00
+요청자: Owner ("backlog에 등록된 task들 순차적으로 작업 및 마무리")
+수행자: Lead Engineer (Codex) + Beta Tester perspective
+의도: CYCLE-001 종료 전 Beta Tester due 신호 해소 및 demo UI smoke evidence 고정
+대상: tests/unit/test_beta_cycle001_ui_smoke.py, agents/beta_tester/test_cases/ROUNDS.md, agents/beta_tester/test_cases/INDEX.md, agents/lead_engineer/CYCLE-001.md, agents/lead_engineer/STATUS.md
+작업: guest login 및 8개 demo UI view AppTest smoke 추가, clean beta round 기록, due-check 확인
+방법: Streamlit AppTest 기반 mock/demo 렌더 검증. 백그라운드 Streamlit 서버는 이 환경에서 유지되지 않아 브라우저 스크린샷 대신 repo 표준 AppTest 경로 사용.
+결과: Beta Tester due 해소. 발견 BTC 없음.
+검증: pytest tests/unit/test_beta_cycle001_ui_smoke.py -> 2 passed; python scripts/beta_tester_due.py -> ok
+관련 기록: CYCLE-001, agents/beta_tester/test_cases/ROUNDS.md
+남은 리스크: 실제 브라우저 스크린샷 라운드는 환경상 미수행. 남은 backlog TASK는 Owner/외부 조건 대기.
+
+### AUDIT-2026-06-12-003
+시각: 2026-06-12T09:32:38+09:00
+기록 시각: 2026-06-12T09:32:38+09:00
+요청자: Owner ("backlog에 등록된 task들 순차적으로 작업 및 마무리")
+수행자: Lead Engineer (Codex)
+의도: CYCLE-001의 안전 처리 범위를 REVIEW로 닫고 남은 ASK 게이트를 명시
+대상: agents/lead_engineer/CYCLE-001.md, agents/lead_engineer/reviews/REVIEW-001.md, agents/lead_engineer/STATUS.md, agents/lead_engineer/AUDIT-LOG.md
+작업: CYCLE-001 상태를 부분 완료로 전환, REVIEW-001 작성, STATUS 최신 포인터 갱신
+방법: backlog_sweep/doc gates/full pytest 결과를 근거로 완료·이월·리스크·결정 필요 항목 정리
+결과: CYCLE-001 부분 완료. 남은 4개 open TASK는 모두 보류/ASK로 유지.
+검증: pytest tests -> 376 passed; python scripts/check_agent_docs.py -> 0 errors; python scripts/doc_health_report.py -> Status G/findings 0; python scripts/backlog_sweep.py
+관련 기록: CYCLE-001, REVIEW-001, TASK-014, TASK-021, TASK-022, TASK-023
+남은 리스크: TASK-023은 정규장 사람 실행 필요. TASK-014/021/022는 주문 경로 R3 Owner 승인 필요.
+
+### AUDIT-2026-06-12-004
+시각: 2026-06-12T11:13:15+09:00
+기록 시각: 2026-06-12T11:13:15+09:00
+요청자: Owner ("지금 정규장시간이니까 UI 띄우고 지금까지 구현된 기능들(UI + KIS) 이것저것 다 테스트해보고 결과 기록")
+수행자: QA + KIS API Engineer (Codex)
+의도: 정규장 중 Autofolio UI와 KIS paper 구현 표면을 비파괴 범위에서 검증하고 TASK-023 진행 증거를 보강
+대상: Streamlit UI, KIS paper token/read-only API, UI backend read-only 함수, paper engine dry-run, TASK-023, evidence/brief records
+작업: Streamlit UI 127.0.0.1:8501 기동 및 기본 브라우저 오픈, HTTP health, UI AppTest, KIS unit/contract, KIS paper token, KIS paper read-only API, UI backend 조회 함수, dry-run engine one-shot 실행. paper 주문 발주와 HTS/앱 교차확인은 수행하지 않음.
+방법: `run_ui` equivalent Streamlit process + pytest + KIS paper read-only calls + `run_paper_engine.py --dry-run --once`
+결과: UI/KIS 조회성 경로 대부분 통과. `KisClient.get_cash_balance()` live paper direct call 실패, QA E2E reference 문서 누락, AGENTS가 참조하는 upstream warning script 누락 발견. TASK-023은 보류 유지.
+검증: HTTP 200; UI AppTest 8 passed; KIS unit/contract 75 passed; KIS paper token ok; KIS read-only 14/15 passed; UI backend read-only 13/13 returned; engine dry-run processed 2/executed 0/kill switch blocked; check_agent_docs 0 errors; doc_health_report Status G/findings 0
+관련 기록: TASK-023, EVIDENCE-2026-06-12-001, BRIEF-2026-06-12-001
+남은 리스크: paper order lifecycle, SQLite filled order log, UI portfolio post-fill reflection, and HTS/app cross-check remain unverified until Owner executes/approves TASK-023 order test.
+
+### AUDIT-2026-06-12-005
+시각: 2026-06-12T11:30:06+09:00
+기록 시각: 2026-06-12T11:30:06+09:00
+요청자: Owner ("agent_runtime 관련한 문제는 원본 문제인지 잘 파악한다음 agent_runtim repo에 issue 올려줘. 우리는 autofolio 문제만 해결하자. KIS/UI 관련 이슈들 전부 해결해줘.")
+수행자: Lead Engineer + KIS API Engineer + QA (Codex)
+의도: UI+KIS 검증에서 발견한 이슈를 upstream 원본 결함과 Autofolio 로컬 결함으로 분류하고, Autofolio 범위 결함을 해결
+대상: KIS cash/account summary parser, UI KPI/account summary path, QA E2E reference, upstream warning script, agent_runtime Issue #19
+작업: KIS balance `output2` dict/list 정규화, `get_account_summary()` 추가, UI KPI/account summary 연결, QA E2E reference 작성, `scripts/check_upstream_issues.py` 작성, upstream Issue #19에 Autofolio 재현 코멘트 추가
+방법: GitHub upstream template 확인 + focused patch + unit tests + live KIS paper read-only smoke
+결과: KIS/UI 조회성 follow-up 이슈 해결. `agents/qa/references/e2e.md` 누락은 upstream template 결함으로 기존 Issue #19에 코멘트했고, `check_upstream_issues.py`는 Autofolio overlay 결함으로 로컬 구현.
+검증: focused pytest 21 passed; KIS selector 116 passed; UI/backend selector 37 passed; py_compile passed; `python scripts/check_upstream_issues.py --warn` OK; live KIS paper cash/account summary smoke OK; check_agent_docs 0 errors; doc_health_report Status G; generate_views --check OK; validate_task_schema OK; git diff --check no whitespace errors
+관련 기록: TASK-023, EVIDENCE-2026-06-12-001, BRIEF-2026-06-12-001, agent_runtime Issue #19 comment id 4686771665
+남은 리스크: TASK-023 paper order lifecycle, SQLite filled order log, UI portfolio post-fill reflection, and HTS/app cross-check remain unverified until Owner executes/approves the order test.
+
+### AUDIT-2026-06-12-006
+시각: 2026-06-12T11:53:44+09:00
+기록 시각: 2026-06-12T11:53:44+09:00
+요청자: Owner ("전부 진행 승인")
+수행자: KIS API Engineer + QA (Codex)
+의도: TASK-023의 paper 주문 생애주기와 UI 엔진→KIS paper→SQLite→UI 반영 E2E를 Owner 승인 하에 완료
+대상: `scripts/kis_paper_order_smoke.py`, `scripts/run_paper_engine.py --once`, KIS paper account, SQLite `order_logs`/`execution_logs`, UI backend holdings/recent fills
+작업: paper smoke 유효 지정가 계산 결함 수정, 005930 paper 지정가 주문→조회→취소 검증, 기존 ACTIVE 조건 임시 hold, 전용 069500 1주 MARKET 조건 실행, DB safety state 원복, KIS/UI/SQLite 반영 확인
+방법: KIS paper API + local DB state control + one-shot engine run + backend verification
+결과: paper smoke 주문 생애주기 OK. Engine one-shot processed 1/executed 1/errors 0. SQLite order/execution log and UI backend portfolio/recent fill reflection confirmed. TASK-023 paper E2E software path complete.
+검증: `python scripts/kis_paper_order_smoke.py --symbol 005930 --qty 1` OK; `python scripts/run_paper_engine.py --once` OK; order_logs.id=2 FILLED; execution_logs.id=2 filled_quantity=1; KIS positions include 069500; UI backend holdings/recent fills include 069500; Streamlit HTTP 200; final safety state auto=false/kill=true/global_mode=L1; focused pytest 25 passed; KIS selector 118 passed; UI/backend selector 37 passed; py_compile passed; check_agent_docs 0 errors; doc_health_report Status G
+관련 기록: TASK-023, EVIDENCE-2026-06-12-001, BRIEF-2026-06-12-001
+남은 리스크: HTS/앱 화면은 agent 환경에서 직접 볼 수 없어 KIS paper API로 broker-side 교차확인. prod 실전 주문은 별도 R3 승인 없이는 여전히 금지.
+
+### AUDIT-2026-06-12-007
+시각: 2026-06-12T12:07:12+09:00
+기록 시각: 2026-06-12T12:07:12+09:00
+요청자: Owner ("여러가지 옵션과 상황들을 생성한다음에, 그게 제대로 동작하는지 확인해줘... 계속해서 모의투자로 진행")
+수행자: QA + KIS API Engineer (Codex)
+의도: 실전 전환 전 paper-safe 옵션/상황 매트릭스를 생성해 엔진·리스크·UI 동작을 검증
+대상: `tests/integration/test_paper_scenario_matrix.py`, `app/engine/order_flow.py`, KIS paper read-only state
+작업: 16개 scenario matrix 추가, direct MARKET PENDING 처리 버그 수정, focused engine/KIS/UI 회귀 실행, KIS paper read-only 확인
+방법: isolated temporary DB + MockBrokerClient + pytest + KIS paper read-only API
+결과: matrix 16 passed. Direct MARKET PENDING now polls fill status instead of entering limit cancel path. Prod remained untouched.
+검증: scenario matrix 16 passed; engine focused 31 passed; KIS selector 118 passed; UI/backend selector 37 passed; py_compile passed; KIS paper read-only env/state/orders/positions/account summary OK; upstream warning check OK; task views/schema/docs/report gates OK; git diff whitespace check OK
+관련 기록: TASK-024, EVIDENCE-2026-06-12-002, BRIEF-2026-06-12-002
+남은 리스크: 실전 전환은 별도 Owner 명시 승인 전 금지. HTS/app visual confirmation and prod 1-share test remain future readiness gates.
+
+### AUDIT-2026-06-12-008
+시각: 2026-06-12T12:24:42+09:00
+기록 시각: 2026-06-12T12:24:42+09:00
+요청자: Owner ("최대한 많은 테스트 케이스를 만들어줘... 퀀트 트레이딩에서 동작하는 모든 동작들을 리서치해서 테스트 케이스로 제작해서 보관")
+수행자: QA + Research Agent + KIS API Engineer (Codex)
+의도: 실전 전환 없이 paper/mock 범위에서 대규모 퀀트 트레이딩 케이스 카탈로그와 자동화 테스트를 보관
+대상: `agents/qa/test_cases/QUANT-TRADING-SCENARIO-CATALOG.md`, `tests/integration/test_quant_trading_scenario_catalog.py`
+작업: KRX/FIX/QuantConnect 기반 케이스 축 정리, QA catalog 작성, 103개 executable mock/paper-safe pytest 케이스 추가, 미구현/R3 주문 surface는 catalog-only로 분리
+방법: 공식/표준 문서 리서치 + isolated temporary DB + MockBrokerClient + pytest
+결과: 새 테스트 103 passed. 기존 paper scenario/engine/timer 회귀 포함 129 passed. Prod/KIS live order untouched.
+검증: `pytest tests/integration/test_quant_trading_scenario_catalog.py -q` 103 passed; combined paper/engine regression 129 passed; safety/timer focused selector 14 passed; py_compile passed; upstream warning check OK; generated views/schema/docs/report gates OK; git diff whitespace check OK
+관련 기록: TASK-025, EVIDENCE-2026-06-12-003, BRIEF-2026-06-12-003
+남은 리스크: 선물/옵션/해외/신용/공매도/after-hours/partial-fill/stop-order는 구현 전 catalog-only. 실행 가능 승격에는 별도 broker/risk 설계와 R3 승인 필요.
+
+### AUDIT-2026-06-12-009
+시각: 2026-06-12T12:27:28+09:00
+기록 시각: 2026-06-12T12:27:28+09:00
+요청자: Owner ("지금 구현된 기능들만 따졌을 때... 아직 테스트 케이스를 실행 못하는 기능들은 task로 전부 등록")
+수행자: QA + Lead Engineer (Codex)
+의도: generated executable tests를 현재 구현 범위에서 검증하고, catalog-only gap을 TASK로 전부 등록
+대상: `tests/integration/test_quant_trading_scenario_catalog.py`, `tests/integration/test_paper_scenario_matrix.py`, TASK-026~034, QA catalog gap mapping
+작업: generated tests 실행, 기존 gap TASK 중복 확인, 신규 gap TASK 9건 등록, catalog mapping/evidence/brief/status 갱신
+방법: pytest + rg duplicate scan + TASK frontmatter registration + generate_views
+결과: generated executable tests 119 passed. After-hours/margin-short/overseas는 기존 TASK-014/021/022에 매핑. 나머지 unexecutable gaps는 TASK-026~034로 등록.
+검증: `pytest tests/integration/test_quant_trading_scenario_catalog.py tests/integration/test_paper_scenario_matrix.py -q` 119 passed; generate_views --check OK; validate_task_schema OK; check_upstream_issues OK; check_agent_docs 0 errors; doc_health_report Status G; query_reports indexed BRIEF-004; git diff whitespace check OK
+관련 기록: EVIDENCE-2026-06-12-004, BRIEF-2026-06-12-004, TASK-014, TASK-021, TASK-022, TASK-026~034
+남은 리스크: 일부 신규 TASK는 주문 경로 또는 risk policy R3 surface라 Owner 승인 전 구현/실행 불가. Prod/live KIS order untouched.
+
+### AUDIT-2026-06-12-010
+시각: 2026-06-12T12:56:47+09:00
+기록 시각: 2026-06-12T12:56:47+09:00
+요청자: Owner ("이 과정 전부 진행해줘")
+수행자: QA + KIS API Engineer + UI/UX Designer (Codex)
+의도: 장중 가능한 UI + KIS paper 검증을 TASK/test-case/evidence로 등록하고 실행
+대상: TASK-035, QA market-hours catalog, Streamlit UI, KIS paper read-only API, KIS paper WebSocket, KIS paper order smoke, paper engine dry-run
+작업: TASK-035 및 `MARKET-HOURS-KIS-UI-VERIFICATION` catalog 작성, UI HTTP/browser open 확인, KIS paper 조회성 API와 UI backend 함수 검증, WebSocket smoke, paper limit order place/status/cancel, engine dry-run one-shot, focused regression 실행
+방법: paper endpoint(`openapivts`) 고정, 민감값 미기록, below-market limit order + cancel, mock broker dry-run, pytest
+결과: 즉시 실행 가능한 장중 검증 통과. KIS read-only 12/12, UI backend 10/10, WebSocket initial 3 events + longer smoke 25 events, paper order lifecycle `005930`/`069500`/`000660` OK, engine dry-run processed 2/executed 0/errors 0 + repeated clean one-shot 3/3, read-only/UI soak 3/3, UI/KIS regression 84 passed, generated scenarios 119 passed.
+검증: HTTP 200; KIS paper read-only 12/12; UI backend 10/10; WebSocket 3 + 25 events; `kis_paper_order_smoke.py --symbol 005930 --qty 1` OK; `--symbol 069500 --qty 1` OK; `--symbol 000660 --qty 1` OK; `run_paper_engine.py --dry-run --once` OK and repeated 3/3; focused pytest 84 passed; generated scenario pytest 119 passed; post-order open-like count 0
+관련 기록: TASK-035, EVIDENCE-2026-06-12-005, BRIEF-2026-06-12-005, MARKET-HOURS-KIS-UI-VERIFICATION
+남은 리스크: 15:15-15:20 close-window와 after 15:30 after-close verification은 시간 미도래로 TASK-035에 잔류. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-12-011
+시각: 2026-06-12T13:29:42+09:00
+기록 시각: 2026-06-12T13:29:42+09:00
+요청자: Owner ("전부 진행해줘. 계속해서 거래하고, 체결/미체결 반복하고, 트랜잭션하고, UI 만져보면서 실시간 동기화되는지 확인하고...")
+수행자: QA + KIS API Engineer + UI/UX Designer (Codex)
+의도: KIS paper 체결/미체결/취소 트랜잭션을 반복 가능한 runner로 만들고 UI backend 동기화까지 검증
+대상: `scripts/kis_paper_transaction_soak.py`, TASK-036, PAPER-TRANSACTION-UI-SYNC-SOAK, KIS paper account, SQLite `order_logs`/`execution_logs`, Streamlit home/portfolio/trade backend views
+작업: paper-only transaction runner 추가, home backend holdings sync gap 수정, trade dataframe deprecation warning 수정, paper market BUY/SELL + limit cancel 실행, DB/UI sync 확인, regression 실행
+방법: paper endpoint(`openapivts`) guard, 1주 단위, market round-trip + below-market limit cancel, order/execution log recording, AppTest backend render, pytest
+결과: 069500 BUY/SELL FILLED, 005930 BUY/SELL FILLED, 000660 BUY/SELL FILLED, 069500 반복 BUY/SELL FILLED, bounded loop 1-cycle BUY/SELL FILLED 2회. LIMIT cancel paths also passed for 005930/000660/069500 combinations. Owner 지적 후 buy-and-hold basket으로 `035420`, `035720`, `005380`, `068270`, `105560`, `055550`, `102110`, `114260` paper BUY 1주씩 보유 유지. holdings rows 3->11, post-run open-like count 0, recent fills 2->20, order logs 2->34, KIS today orders 53, home/portfolio/trade backend render OK. `105560`/`055550` polling timeout local log gap은 KIS today-orders reconciliation으로 보강. `get_today_orders()` pagination/strict mode fixed. reusable analysis/UI sync/transaction/basket/reconcile scripts added.
+검증: py_compile OK; focused unit 36 passed + reconcile 4 passed; transaction runner OK across 4 symbol combinations; bounded loop dry-run and two 1-cycle paper executions OK; buy-and-hold basket OK; AppTest backend render OK with 300s timeout; HTTP 200; focused regression 24 passed; generated scenarios 119 passed; pagination focused 13 passed; live KIS paper today-orders direct/backend 53 rows; analyze_paper_transactions OK with KIS retry hardening; verify_paper_ui_sync OK
+관련 기록: TASK-036, EVIDENCE-2026-06-12-006, BRIEF-2026-06-12-006, PAPER-TRANSACTION-UI-SYNC-SOAK
+남은 리스크: active goal은 계속 진행 중. 반복 transaction soak와 15:15/15:30 경계 검증은 후속 실행 가능. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-12-012
+시각: 2026-06-12T15:17:46+09:00
+기록 시각: 2026-06-12T15:17:46+09:00
+요청자: Owner ("autofolio UI에는 포트폴리오가 안 보여서 지금 뭘 가지고 있느지...")
+수행자: UI/UX Designer + QA + KIS API Engineer (Codex)
+의도: paper buy-and-hold 이후 포트폴리오 UI에서 보유종목/수량/손익/총합이 즉시 보이도록 수정하고 close-window 검증을 진행
+대상: `app/ui/views/portfolio.py`, `app/ui/backend.py`, `app/ui/views/home.py`, `scripts/verify_paper_ui_sync.py`, TASK-035/036 records
+작업: 포트폴리오 첫 화면에 보유 현황 표와 핵심 metric 배치, fast holdings path(`include_dividends=False`) 추가, verifier holdings 감지 업데이트, 15:16 close-window dry-run 실행
+방법: Streamlit AppTest + KIS paper read-only analysis + engine dry-run one-shot
+결과: portfolio AppTest에서 `contains_holdings=true`, metrics `평가금액 합`/`총 매입금액`/`총수익률`/`보유 종목` 확인. close-window dry-run은 in_window true, processed 2/executed 0/errors 0, kill switch blocked.
+검증: focused UI/backend tests 22 passed; `verify_paper_ui_sync.py` OK; `analyze_paper_transactions.py --kis-retries 5 --kis-retry-sleep 3` OK; `run_paper_engine.py --dry-run --once` OK at 15:16; py_compile OK
+관련 기록: TASK-035, TASK-036, EVIDENCE-2026-06-12-006, BRIEF-2026-06-12-006
+남은 리스크: after 15:30 after-close verification remains. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-12-013
+시각: 2026-06-12T21:34:23+09:00
+기록 시각: 2026-06-12T21:34:23+09:00
+요청자: Owner ("autofolio UI에는 포트폴리오가 안 보여서 지금 뭘 가지고 있느지...")
+수행자: UI/UX Designer + QA + KIS API Engineer (Codex)
+의도: 포트폴리오 UI 표시 문제를 실제 브라우저에서 재확인하고 TASK-035/036 시간 경계 검증을 완료
+대상: `app/ui/components/ui.py`, `tests/unit/test_top_bar_data_source.py`, TASK-035/036 records, QA catalogs, evidence/brief/status
+작업: after-close dry-run/analysis/UI sync 실행, 최신 Streamlit 서버 8502 기동, guest→live→portfolio 브라우저 검증, top bar live data source caption 수정, Streamlit first-run prompt blank-stdin 통과, TASK-035/036 완료 기록
+방법: KIS paper read-only analysis + Streamlit AppTest + Playwright browser verification + local Streamlit server health check
+결과: 15:53 KST after-close dry-run은 `in_window=False`, processed 2/executed 0/errors 0. KIS/DB/UI 분석은 paper_only/KIS available/no_open_like true, UI holdings 11. 최신 브라우저 화면은 live caption, 보유 현황, 평가금액/총매입/손익/총수익률/보유종목 11개를 표시. 기존 8501은 이전 모듈을 물고 있어 최신 검증용 8502를 별도 사용.
+검증: `pytest tests/unit/test_top_bar_data_source.py -q` 2 passed; `python scripts/analyze_paper_transactions.py --kis-retries 5 --kis-retry-sleep 3` OK; `python scripts/verify_paper_ui_sync.py` OK; `Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8502/` HTTP 200; Playwright browser verification OK; `git diff --check` whitespace error fixed
+관련 기록: TASK-035, TASK-036, EVIDENCE-2026-06-12-005, EVIDENCE-2026-06-12-006, BRIEF-2026-06-12-005, BRIEF-2026-06-12-006, PAPER-TRANSACTION-UI-SYNC-SOAK, MARKET-HOURS-KIS-UI-VERIFICATION
+남은 리스크: 브라우저 첫 시도에서 KIS `RemoteDisconnected` 1회가 있었으나 재시도 성공, 분석 스크립트는 KIS warnings 0. Prod/live real-money order untouched.

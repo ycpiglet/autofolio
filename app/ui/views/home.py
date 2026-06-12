@@ -38,12 +38,52 @@ def _recent_fills() -> "pd.DataFrame":  # type: ignore[name-defined]
     return data.recent_fills()
 
 
+def _holdings_df() -> "pd.DataFrame":  # type: ignore[name-defined]
+    """Holdings table for the home view.
+
+    Backend mode should use the same live holdings source as the portfolio page,
+    otherwise post-trade sync can be hidden by demo data.
+    """
+    if st.session_state.get("data_source") == "backend":
+        try:
+            from app.ui import backend
+
+            return backend.holdings_df(include_dividends=False)
+        except Exception as exc:  # noqa: BLE001
+            st.warning(f"라이브 보유 종목 조회 실패 — 데모 데이터로 대체합니다: {exc}")
+    return data.holdings_df()
+
+
+def _market_indices() -> "pd.DataFrame":  # type: ignore[name-defined]
+    if st.session_state.get("data_source") == "backend":
+        try:
+            from app.ui import backend
+
+            return backend.market_indices_df()
+        except Exception as exc:  # noqa: BLE001
+            st.warning(f"시장 지수 조회 실패: {exc}")
+    import pandas as pd
+    return pd.DataFrame(columns=["name", "code", "price", "change", "change_rate"])
+
+
 def render() -> None:
     ui.page_header("🏠 홈", "포트폴리오 한눈에 보기")
 
+    indices = _market_indices()
+    if not indices.empty:
+        cols = st.columns(min(len(indices), 4))
+        for col, (_, row) in zip(cols, indices.iterrows()):
+            price = row.get("price")
+            change = row.get("change")
+            rate = row.get("change_rate")
+            delta = None
+            if change is not None and rate is not None:
+                delta = f"{change:,.2f} ({rate:.2f}%)"
+            col.metric(str(row.get("name")), f"{price:,.2f}" if price is not None else "-", delta)
+
     with st.spinner("불러오는 중…"):
         k = _kpis()
-        holdings = data.holdings_df()
+        holdings = _holdings_df()
 
     if holdings.empty:
         ui.empty_state("아직 보유 종목이 없습니다", "설정에서 증권계좌를 연동하고 매매를 시작하세요.")

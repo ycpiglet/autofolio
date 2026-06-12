@@ -43,6 +43,98 @@ def _alloc_gap():
     return mock_data.allocation_gap()
 
 
+def _sector_performance() -> None:
+    """KIS 업종 퍼포먼스 표."""
+    if not _live():
+        st.caption("라이브 모드에서 사용할 수 있습니다.")
+        return
+    try:
+        from app.ui import backend
+
+        df = backend.sector_performance_df()
+    except Exception as exc:  # noqa: BLE001
+        st.warning(f"업종 데이터 조회 실패: {exc}")
+        return
+    if df.empty:
+        st.caption("업종 데이터가 없습니다.")
+        return
+    display = df.rename(
+        columns={
+            "name": "업종",
+            "code": "코드",
+            "price": "지수",
+            "change": "전일대비",
+            "change_rate": "등락률",
+            "trading_value": "거래대금",
+        }
+    )
+    st.dataframe(
+        display,
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "지수": st.column_config.NumberColumn(format="%.2f"),
+            "전일대비": st.column_config.NumberColumn(format="%.2f"),
+            "등락률": st.column_config.NumberColumn(format="%.2f%%"),
+            "거래대금": st.column_config.NumberColumn(format="₩%d"),
+        },
+    )
+    chart = display.set_index("업종")["등락률"].sort_values()
+    st.bar_chart(chart, height=220)
+
+
+def _fundamental_text(value, *, decimals: int = 2) -> str:
+    if value is None:
+        return "-"
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return "-"
+    if decimals == 0:
+        return f"{numeric:,.0f}"
+    return f"{numeric:,.{decimals}f}"
+
+
+def _fundamental_section() -> None:
+    """KIS 종목 기본 재무 지표."""
+    from app.ui import backend
+
+    wl = backend.list_whitelist()
+    if wl.empty:
+        st.caption("화이트리스트가 비어있습니다.")
+        return
+
+    options = {f"{r['symbol']} · {r['name']}": r["symbol"] for _, r in wl.iterrows()}
+    label = st.selectbox("종목", list(options), key="fundamental_symbol")
+    data = backend.fundamental(options[label])
+    if not data:
+        st.caption("재무 지표가 없습니다.")
+        return
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("PER", _fundamental_text(data.get("per")))
+    c2.metric("PBR", _fundamental_text(data.get("pbr")))
+    c3.metric("EPS", _fundamental_text(data.get("eps"), decimals=0))
+    c4.metric("시가총액", _fundamental_text(data.get("market_cap"), decimals=0))
+
+    ratio = data.get("finance_ratio") or {}
+    if ratio:
+        st.dataframe(
+            {
+                "항목": ["매출총이익률", "매출순이익률", "부채비율", "매출증가율", "영업이익증가율"],
+                "값": [
+                    ratio.get("sale_totl_rate"),
+                    ratio.get("sale_ntin_rate"),
+                    ratio.get("lblt_rate"),
+                    ratio.get("grs"),
+                    ratio.get("bsop_prfi_inrt"),
+                ],
+            },
+            hide_index=True,
+            width="stretch",
+        )
+
+
 def _backtest_section() -> None:
     """백테스트 UI — SMA 크로스오버 실행 섹션."""
     import datetime as dt
@@ -89,6 +181,47 @@ def _backtest_section() -> None:
         st.caption("⚠️ 이 백테스트는 참고용입니다. 과거 성과가 미래를 보장하지 않습니다.")
 
 
+def _intraday_section() -> None:
+    """KIS 당일 분봉 차트."""
+    from app.ui import backend
+
+    wl = backend.list_whitelist()
+    if wl.empty:
+        st.caption("화이트리스트가 비어있습니다.")
+        return
+
+    options = {f"{r['symbol']} · {r['name']}": r["symbol"] for _, r in wl.iterrows()}
+    c1, c2, c3 = st.columns([2, 1, 1])
+    label = c1.selectbox("종목", list(options), key="intraday_symbol")
+    unit = c2.selectbox(
+        "분봉",
+        ["1", "3", "5", "10", "30", "60"],
+        format_func=lambda value: f"{value}분",
+        key="intraday_unit",
+    )
+    count = c3.number_input(
+        "개수",
+        min_value=30,
+        max_value=240,
+        value=120,
+        step=30,
+        key="intraday_count",
+    )
+
+    df = backend.intraday_chart_df(options[label], time_unit=unit, count=int(count))
+    if df.empty:
+        st.caption("분봉 데이터가 없습니다.")
+        return
+
+    chart = df.set_index("datetime")[["close"]].rename(columns={"close": "종가"})
+    st.line_chart(chart, height=240)
+    st.dataframe(
+        df.tail(10).sort_values("datetime", ascending=False),
+        hide_index=True,
+        use_container_width=True,
+    )
+
+
 def render() -> None:
     st.header("📊 분석")
 
@@ -105,6 +238,21 @@ def render() -> None:
             _backtest_section()
         else:
             st.line_chart(mock_data.backtest_curve(), height=240)
+
+        st.subheader("재무 지표")
+        if _live():
+            _fundamental_section()
+        else:
+            st.caption("라이브 모드에서 사용할 수 있습니다.")
+
+        st.subheader("분봉 차트")
+        if _live():
+            _intraday_section()
+        else:
+            st.caption("라이브 모드에서 사용할 수 있습니다.")
+
+        st.subheader("업종 퍼포먼스")
+        _sector_performance()
 
         st.subheader("손익 기여 (Attribution)")
         attr = _attribution()

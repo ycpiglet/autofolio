@@ -64,3 +64,47 @@ def test_get_intraday_chart_respects_count(monkeypatch):
     monkeypatch.setattr("requests.request", lambda *a, **kw: _resp(body))
     rows = c.get_intraday_chart("005930", count=3)
     assert len(rows) == 3
+
+
+def test_get_intraday_chart_sends_required_params_and_aggregates(monkeypatch):
+    c = _make_client()
+    calls = []
+    fake_output2 = [
+        {"stck_bsop_date": "20260611", "stck_cntg_hour": "090100",
+         "stck_prpr": "303000", "stck_oprc": "302000",
+         "stck_hgpr": "304000", "stck_lwpr": "301000", "cntg_vol": "5000"},
+        {"stck_bsop_date": "20260611", "stck_cntg_hour": "090200",
+         "stck_prpr": "304000", "stck_oprc": "303000",
+         "stck_hgpr": "306000", "stck_lwpr": "302000", "cntg_vol": "3000"},
+        {"stck_bsop_date": "20260611", "stck_cntg_hour": "090500",
+         "stck_prpr": "305000", "stck_oprc": "305000",
+         "stck_hgpr": "307000", "stck_lwpr": "304000", "cntg_vol": "7000"},
+    ]
+    body = {"rt_cd": "0", "msg_cd": "MAAP0", "msg1": "ok", "output2": fake_output2}
+
+    def fake_request(*args, **kwargs):
+        calls.append(kwargs)
+        return _resp(body)
+
+    monkeypatch.setattr("requests.request", fake_request)
+    rows = c.get_intraday_chart("005930", time_unit="5", input_time="093000")
+
+    assert calls[0]["headers"]["tr_id"] == "FHKST03010200"
+    assert calls[0]["params"]["FID_INPUT_ISCD"] == "005930"
+    assert calls[0]["params"]["FID_INPUT_HOUR_1"] == "093000"
+    assert calls[0]["params"]["FID_PW_DATA_INCU_YN"] == "Y"
+    assert len(rows) == 2
+    assert rows[0] == {
+        "datetime": "20260611 090000",
+        "open": 302000.0,
+        "high": 306000.0,
+        "low": 301000.0,
+        "close": 304000.0,
+        "volume": 8000,
+    }
+
+
+def test_get_intraday_chart_rejects_unknown_time_unit():
+    c = _make_client()
+    with pytest.raises(ValueError, match="time_unit"):
+        c.get_intraday_chart("005930", time_unit="15")

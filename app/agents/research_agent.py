@@ -31,6 +31,7 @@ class ResearchAgent:
         current_price: float,
         side: str = "BUY",
         quantity: int = 1,
+        fundamental: dict | None = None,
     ) -> ConditionProposal:
         side = side.upper()
         if side == "BUY":
@@ -44,6 +45,10 @@ class ResearchAgent:
         else:
             raise ValueError("side must be BUY or SELL")
 
+        fundamental_note = self.fundamental_context(fundamental or {})
+        if fundamental_note:
+            rationale = f"{rationale} {fundamental_note}"
+
         return ConditionProposal(
             symbol=symbol,
             side=side,
@@ -54,3 +59,21 @@ class ResearchAgent:
             rationale=rationale,
             risk_note=risk_note,
         )
+
+    def fundamental_context(self, fundamental: dict) -> str:
+        parts = []
+        per = fundamental.get("per")
+        pbr = fundamental.get("pbr")
+        eps = fundamental.get("eps")
+        market_cap = fundamental.get("market_cap")
+        if per is not None:
+            parts.append(f"PER {per}")
+        if pbr is not None:
+            parts.append(f"PBR {pbr}")
+        if eps is not None:
+            parts.append(f"EPS {eps}")
+        if market_cap is not None:
+            parts.append(f"시가총액 {market_cap}")
+        if not parts:
+            return ""
+        return "재무 지표: " + ", ".join(parts) + "."

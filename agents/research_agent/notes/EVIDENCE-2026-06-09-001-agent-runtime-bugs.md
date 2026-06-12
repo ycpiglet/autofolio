@@ -127,3 +127,9 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 - upstream 코드: `agent_runtime/sync.py:42,90,187,215` (pip installed v0.1.8)
 - Autofolio 코드: `scripts/check_merge_policy_precedence.py`
 - 관련 PR: [Autofolio #3](https://github.com/ycpiglet/autofolio/pull/3) (v0.1.8 upgrade)
+
+### Upstream report status
+
+- BUG-001: https://github.com/ycpiglet/agent_runtime/issues/20
+- BUG-002: https://github.com/ycpiglet/agent_runtime/issues/21
+- BUG-004 template missing-link follow-up: https://github.com/ycpiglet/agent_runtime/issues/19
