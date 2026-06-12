@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-13T02:13:21+09:00`
+> 생성 시각: `2026-06-13T07:58:56+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -25,6 +25,10 @@
 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
 | [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
+| [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | 대기 | High | 상 | 16 ph / ~120000 tok | Backend Engineer | ui-overhaul,fastapi,next-js,authentication,login,phase1 |
+| [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
+| [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
+| [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 대기 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
 
 ## Medium
 
@@ -43,6 +47,9 @@
 | [TASK-039](TASK-039-backtest-research-report-hardening.md) | 대기 | Medium | 중 | 4 ph / ~45000 tok | Quant Researcher | feature-landscape,backtest,research,reports,qa |
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 대기 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 대기 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
+| [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
+| [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## Low
 
@@ -64,4 +71,5 @@
 | [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
 | [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
 | [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 대기 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
 

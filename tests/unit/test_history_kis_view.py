@@ -1,41 +1,52 @@
 from __future__ import annotations
 
+import pandas as pd
 
-def test_history_view_queries_kis_order_history_from_date_controls(tmp_path):
+
+def test_history_view_queries_kis_order_history_from_date_controls(
+    monkeypatch, tmp_path
+):
+    import streamlit as st
     from streamlit.testing.v1 import AppTest
 
+    from app.ui import backend
+
+    # --- fakes defined in test scope (st.session_state resolved at call-time) ---
+
+    monkeypatch.setattr(backend, "list_order_logs", lambda: pd.DataFrame())
+
+    def fake_order_history(start_date, end_date):
+        st.session_state["hist_calls"].append((start_date, end_date))
+        return pd.DataFrame(
+            [
+                {
+                    "날짜": start_date,
+                    "주문번호": "0000117057",
+                    "종목": "005930",
+                    "구분": "매수",
+                    "주문수량": 1,
+                    "체결수량": 1,
+                    "주문가": 70500,
+                    "체결평균가": 70500,
+                    "상태": "체결",
+                }
+            ]
+        )
+
+    monkeypatch.setattr(backend, "kis_order_history", fake_order_history)
+
+    # --- embedded app script (no direct backend assignments) ---
     script = tmp_path / "history_kis_app.py"
     script.write_text(
         """
-import pandas as pd
 import streamlit as st
 
 st.session_state["data_source"] = "backend"
 if "hist_calls" not in st.session_state:
     st.session_state["hist_calls"] = []
 
-from app.ui import backend
 from app.ui.views import history
 
-backend.list_order_logs = lambda: pd.DataFrame()
-
-def fake_order_history(start_date, end_date):
-    st.session_state["hist_calls"].append((start_date, end_date))
-    return pd.DataFrame([
-        {
-            "날짜": start_date,
-            "주문번호": "0000117057",
-            "종목": "005930",
-            "구분": "매수",
-            "주문수량": 1,
-            "체결수량": 1,
-            "주문가": 70500,
-            "체결평균가": 70500,
-            "상태": "체결",
-        }
-    ])
-
-backend.kis_order_history = fake_order_history
 history.render()
 """,
         encoding="utf-8",

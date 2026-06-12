@@ -2,9 +2,16 @@
 
 KIS_ENV=mock(기본)이면 MockBrokerClient를 쓰므로 증권계좌/API 키 없이 동작한다.
 UI의 '라이브' 모드에서 이 어댑터로 화이트리스트/시세/조건/주문로그/엔진/리서치를 실연결한다.
+
+Strangler Migration — Phase 0:
+  모든 구현은 이 모듈에 유지된다. app/services/ 도메인 모듈은 이 모듈을 재-익스포트해
+  Streamlit UI와 미래의 FastAPI 레이어가 동일한 코어를 공유한다.
+  Phase 0.2 이후 뷰가 app/services 를 직접 임포트하면 이 모듈이 thin shim으로 전환된다.
+  기존 테스트·뷰·호출부는 from app.ui import backend 경로를 그대로 사용할 수 있다.
 """
 from __future__ import annotations
 
+import threading
 from functools import lru_cache
 
 import pandas as pd
@@ -22,19 +29,30 @@ _SEED = [
     ("360750", "TIGER 미국S&P500", "LONG_TERM_CANDIDATE"),
 ]
 
+# FastAPI 스레드풀에서 동시에 초기화되는 이중-init 레이스를 방지한다.
+# lru_cache 자체는 GIL로 보호되지만 초기화 함수 본체의 재진입은 막지 못한다.
+_ctx_lock = threading.Lock()
+
 
 @lru_cache(maxsize=1)
 def _ctx():
-    """DB 초기화 + (비어있으면) 샘플 화이트리스트 시드 후 핵심 객체 반환."""
-    initialize_database(settings.db_path)
-    repo = Repository(settings.db_path)
-    if not repo.list_whitelist_symbols():
-        for sym, name, role in _SEED:
-            repo.add_whitelist_symbol(WhitelistSymbol(symbol=sym, name=name, market="KRX", role=role))
-    broker = create_broker_client()
-    engine = LiveTradingEngine(broker=broker, repo=repo)
-    agent = ResearchAgent()
-    return repo, broker, engine, agent
+    """DB 초기화 + (비어있으면) 샘플 화이트리스트 시드 후 핵심 객체 반환.
+
+    참고: 이 함수는 app/services/ 모든 도메인 모듈에서 재-익스포트된다.
+    초기화를 직렬화해 DB 시딩 경쟁을 방지한다 (단일 초기화 보장 아님).
+    """
+    with _ctx_lock:
+        # 락은 초기화를 직렬화해 시딩 경쟁을 방지한다
+        # (동시 첫 호출 시 본문이 두 번 실행될 수 있으나 멱등)
+        initialize_database(settings.db_path)
+        repo = Repository(settings.db_path)
+        if not repo.list_whitelist_symbols():
+            for sym, name, role in _SEED:
+                repo.add_whitelist_symbol(WhitelistSymbol(symbol=sym, name=name, market="KRX", role=role))
+        broker = create_broker_client()
+        engine = LiveTradingEngine(broker=broker, repo=repo)
+        agent = ResearchAgent()
+        return repo, broker, engine, agent
 
 
 def env() -> str:

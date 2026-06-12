@@ -1,0 +1,73 @@
+---
+type: task
+id: TASK-052
+status: 대기
+owner: UI/UX Designer
+assignees: [UI/UX Designer, QA]
+priority: Low
+difficulty: 중
+est_hours: 2
+est_tokens: 15000
+tags: [bug, ui, streamlit, trade, acknowledgement, checkbox]
+gate: view-only fix; no backend change
+trigger_meeting: 없음
+audit_log: AUDIT-2026-06-13-007
+created: 2026-06-13
+created_at: 2026-06-13T01:33:29+09:00
+updated_at: 2026-06-13T01:33:29+09:00
+---
+
+# TASK-052 fix: trade 뷰 ack 체크박스 영구 루프
+
+작업 ID: TASK-052
+상태: 대기
+Owner: UI/UX Designer
+요청 시각: 2026-06-13
+기록 시각: 2026-06-13T01:33:29+09:00
+요청자: Owner
+수행자: Lead Engineer
+의도: trade 뷰 ack 체크박스 위젯 클린업으로 인한 영구 루프 UX 버그 수정
+대상: app/ui/views/trade.py lv_comply_ack 체크박스 렌더 로직
+방법: lv_comply_ack를 st.session_state["trade_ack_checked"]로 분리하여 위젯 클린업 방지 및 재제출 시 ack 상태 정상 전달
+감사 로그: AUDIT-2026-06-13-007
+
+## 배경
+
+Streamlit trade 화면에서 컴플라이언스 CAUTION 조건 저장 시 `needs_acknowledgement` 상태가 영구 루프에 빠지는 UX 버그.
+
+## 버그 내용
+
+`app/ui/views/trade.py`의 `lv_comply_ack` 체크박스가 버튼 블록(`st.form` 또는 조건부 블록) 안에서만 렌더된다. Streamlit은 재렌더 사이클에서 해당 블록이 사라지면 위젯을 클린업한다.
+
+**증상**:
+1. 조건 저장 → CAUTION → `needs_acknowledgement=True` → ack 체크박스 렌더
+2. 체크박스 체크 → 버튼 블록 구조 변경 → Streamlit 위젯 클린업
+3. 체크박스 상태 소실 → `caution_acknowledged=False` 유지
+4. 재제출 → 다시 CAUTION → 무한 루프
+
+**서비스 레이어**: `app/services/trading.py`의 `save_condition_with_gates()`는 이미 `caution_acknowledged` 파라미터를 지원하므로 **뷰 수정만 필요**.
+
+## 수정 방향
+
+`lv_comply_ack` 체크박스를 버튼 블록 밖(`st.session_state`)으로 꺼내거나, Streamlit `key=`를 안정화하여 위젯 클린업을 방지한다.
+
+구체적으로:
+- `st.session_state["trade_ack_checked"]` 변수로 ack 상태 관리
+- 체크박스를 조건부 블록 밖에 독립 위젯으로 렌더
+- 재제출 시 `caution_acknowledged=st.session_state.get("trade_ack_checked", False)` 전달
+
+## 완료 기준
+
+- `needs_acknowledgement=True` 상태에서 체크박스 체크 → 재제출 → 통과 (루프 없음)
+- `python -m pytest tests/ -q` green (기존 trade 화면 테스트 유지)
+- `python scripts/check_agent_docs.py` 0 error
+
+## 근거 경로
+
+- `app/ui/views/trade.py` — `lv_comply_ack` 체크박스 렌더 로직
+- `app/services/trading.py` — `save_condition_with_gates(caution_acknowledged=...)` 서명
+
+## Done When
+
+- ack 체크박스 체크 → 재제출 → 루프 없이 정상 저장
+- 기존 pytest green

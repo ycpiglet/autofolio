@@ -386,3 +386,17 @@
 검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
 관련 기록: TASK-038, TASK-041, TASK-043, EVIDENCE-2026-06-13-006, BRIEF-2026-06-13-006, EXTERNAL-APP-API-DECISION-RECORD
 남은 리스크: 실제 OAuth app, webhook endpoint, token vault, provider quota/cost, and platform review requirements are unverified until one connector implementation lane is explicitly opened. Prod/live order surfaces untouched.
+
+### AUDIT-2026-06-13-007
+시각: 2026-06-13T02:07:31+09:00
+기록 시각: 2026-06-13T02:07:31+09:00
+요청자: Owner (Phase 0 완료 후 Phase 1~5 태스크 등록 + 버그 3건 즉시 처리 지시)
+수행자: Lead Engineer (Claude)
+의도: UI 대개편 Phase 1~5 신규 태스크 등록 + 안전 버그 3건 등록 — 총 8개 태스크 (main의 TASK-037~043과 충돌로 TASK-045~052로 재번호)
+대상: agents/lead_engineer/tasks/TASK-045~052, tasks.index.json, VIEW-by-* 파일 일체
+작업: Phase 0 커밋(d43ff26..a102a33) 확인 후 디자인 스펙(docs/superpowers/specs/2026-06-13-ui-overhaul-design.md) 기반 TASK-045(Phase 1 FastAPI+Next.js+로그인), TASK-046(Phase 2 홈+포트폴리오), TASK-047(Phase 3 매매+설정+안전게이트 ⚠ R3 인접), TASK-048(Phase 4 에이전트+SSE), TASK-049(Phase 5 분석 패리티+Streamlit 은퇴) 등록. 안전 버그 TASK-050(일일한도 UTC/KST 불일치), TASK-051(compliance 게이트 fail-open), TASK-052(거래 확인 체크박스 루프) 즉시 등록. main 병합 시 TASK-037~043은 main의 feature landscape research 트랙이 선점하므로 UI 대개편 배치를 045~052로 재번호. tasks.index.json 재생성, generate_views 실행.
+방법: git mv + 파일 내 ID 갱신 + INDEX.md union merge + build_task_index.py + generate_views.py
+결과: TASK-045~052 8건 등록 완료. TASK-047·050·051 High priority 즉시 처리 대상 명시.
+검증: python scripts/build_task_index.py; python scripts/check_agent_docs.py; python scripts/generate_views.py --check (merge commit 완료 후 재실행)
+관련 기록: TASK-045, TASK-046, TASK-047, TASK-048, TASK-049, TASK-050, TASK-051, TASK-052, docs/superpowers/specs/2026-06-13-ui-overhaul-design.md (레포 내 권위 문서)
+남은 리스크: TASK-047(Phase 3)는 Owner 명시 승인 전 구현 불가(R3 인접). TASK-050/051 버그 수정 전 Phase 3 개시 금지. Prod/live real-money order untouched.
