@@ -3,6 +3,21 @@
 > 상태: **기획 확정 · UI 최우선 구현 대상**
 > 연계: [PRODUCT_BLUEPRINT.md](PRODUCT_BLUEPRINT.md)(모드·기능·연동·아키텍처) · [ORG_PLAN.md](ORG_PLAN.md)(에이전트) · [README.md](README.md). 본 문서는 *화면·UX·구현 순서*를 정의한다.
 
+---
+
+## UI 차세대 이행 안내 (2026-06-13 추가)
+
+현 Streamlit 8화면은 **유지·운영 중**(스트랭글러 패턴). 이 문서의 아래 내용(Streamlit 설계)은 계속 유효하다.
+
+**차세대 Next.js 이행 설계**는 별도 스펙 문서를 참조:
+[`docs/superpowers/specs/2026-06-13-ui-overhaul-design.md`](superpowers/specs/2026-06-13-ui-overhaul-design.md)
+
+이행 방식: Owner 결정 — Next.js 16 + FastAPI 분리, 토스류 미니멀 라이트, 스트랭글러(Streamlit 병행), 5단계 페이즈드.
+
+**Phase 0 (services 추출) 완료** (2026-06-13): `app/services/` 레이어 신설, trade 게이트 로직 `services/trading.py`로 이동, shim 경로 유지(기존 테스트 무변경). TASK-037~044 등록됨.
+
+---
+
 ## 1. 원칙 — UI-First, Mock-First
 - UI를 **백엔드와 분리**해 **mock 데이터**로 먼저 완성한다. 실제 배포 앱처럼 동작·탐색 가능 → 이후 어댑터로 실데이터를 끼운다.
 - 사용자친화 최우선: 적은 클릭, 명확한 상태 배지, 한국어 카피, 모바일 친화, 실수 방지(확인 모달·빈 상태·로딩).
