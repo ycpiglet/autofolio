@@ -36,6 +36,6 @@
 | [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | Compliance Officer | Market halt/VI risk gates |
 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 진행 중 | Data Engineer | Data quality and corporate action tests |
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Performance Analyst | Portfolio reality model tests |
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Quant Researcher | Scheduled strategy pattern tests |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Quant Researcher | Scheduled strategy pattern tests |
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | QA | Market-hours KIS/UI paper verification |
 | [TASK-036](TASK-036-paper-transaction-ui-sync-soak.md) | 완료 | QA | Paper transaction UI sync soak |

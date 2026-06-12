@@ -14,7 +14,7 @@ from app.brokers.base import OrderResult
 from app.brokers.mock.mock_client import MockBrokerClient
 from app.common.enums import ConditionStatus, OrderStatus
 from app.database.repositories import Repository, WhitelistSymbol
-from app.database.sqlite_db import initialize_database
+from app.database.sqlite_db import get_connection, initialize_database
 from app.engine.live_trading_engine import LiveTradingEngine
 
 
@@ -95,6 +95,15 @@ def _run_scenario(
     )
     messages = engine.run_once()
     return repo, broker, messages, condition_id
+
+
+def _set_order_log_local_today(repo: Repository, order_log_id: int) -> None:
+    """Make synthetic prior orders align with KST-local daily limit checks."""
+    with get_connection(repo.db_path) as conn:
+        conn.execute(
+            "UPDATE order_logs SET created_at = datetime('now', 'localtime') WHERE id = ?",
+            (order_log_id,),
+        )
 
 
 @pytest.mark.parametrize(
@@ -206,7 +215,7 @@ def test_max_order_amount_blocks_non_exception_quantity(monkeypatch):
 def test_daily_order_amount_limit_blocks_new_order(monkeypatch):
     repo, _, engine = _make_env(monkeypatch, price=70_000.0)
     repo.update_global_risk_limit(max_daily_amount=300_000.0)
-    repo.create_order_log(
+    previous_order_id = repo.create_order_log(
         condition_id=None,
         symbol="005930",
         side="BUY",
@@ -217,6 +226,7 @@ def test_daily_order_amount_limit_blocks_new_order(monkeypatch):
         kis_order_id="PREVIOUS",
         order_status=OrderStatus.FILLED.value,
     )
+    _set_order_log_local_today(repo, previous_order_id)
     cid = repo.add_trade_condition(
         symbol="005930",
         side="BUY",

@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-12T23:52:55+09:00` · 열린 작업 10건
+> 생성 시각: `2026-06-13T00:06:48+09:00` · 열린 작업 9건
 
 ---
 
@@ -22,11 +22,11 @@
 
 | 지표 | 값 | 해석 |
 |------|----|------|
-| 열린 작업 | 10건 / 64 ph | frontmatter 기준 |
+| 열린 작업 | 9건 / 58 ph | frontmatter 기준 |
 | 진행 중 WIP | 1건 | WIP 적정 |
-| 대기 | 1건 | 최상위 자율 후보: 대기 중 ACT 후보 없음 |
+| 대기 | 0건 | 최상위 자율 후보: 대기 중 ACT 후보 없음 |
 | 보류 | 8건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 1 / REVIEW 1 / ASK 8 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 1 / REVIEW 0 / ASK 8 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
 **빠른 판단:** 새 착수보다 진행 중/게이트 항목 정리가 우선이다.
 
@@ -37,12 +37,6 @@
 | Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
 |------|------|------|------|--------|------|-----------|-----------|
 | 1 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) data quality corporate action tests | ACT | 진행 중 | Medium / score 25 | L · 5 ph | 회귀 리스크 감소 | 마무리/진행 유지 |
-
-### REVIEW — 자율 가능 + 경계 확인
-
-| Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
-|------|------|------|------|--------|------|-----------|-----------|
-| 1 | [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) scheduled strategy pattern tests | REVIEW | 대기 | Medium / score 20 | L · 6 ph | 운영 자동화; gate: mock/backtest first; live scheduler or order execution requires Owner re... | R2 범위 진행, R3 전 확인 |
 
 ### ASK — Owner/외부 게이트
 
@@ -64,12 +58,6 @@
 | ID | 우선순위 | Owner | 예상 | 게이트 / 태그 |
 |----|----------|-------|------|----------------|
 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | Medium | Data Engineer | 5 ph / ~45000 tok | no live orders; risk integration requires review |
-
-### 대기 (next)
-
-| ID | 우선순위 | Owner | 예상 | 게이트 / 태그 |
-|----|----------|-------|------|----------------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | Medium | Quant Researcher | 6 ph / ~55000 tok | mock/backtest first; live scheduler or order execution requires Owner review |
 
 ### 보류 (게이트 — 외부/결정 대기)
 

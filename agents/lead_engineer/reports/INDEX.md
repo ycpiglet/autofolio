@@ -10,3 +10,4 @@
 | [BRIEF-2026-06-12-006](BRIEF-2026-06-12-006.md) | BRIEF | 2026-06-12 | Owner | standard | Paper Transaction UI Sync Soak | TASK-036 |
 | [BRIEF-2026-06-12-007](BRIEF-2026-06-12-007.md) | BRIEF | 2026-06-12 | Owner | standard | Portfolio Reality Model Tests | TASK-033 |
 | [BRIEF-2026-06-12-008](BRIEF-2026-06-12-008.md) | BRIEF | 2026-06-12 | Owner | standard | FIX-Style Order Lifecycle Tests | TASK-029 |
+| [BRIEF-2026-06-13-001](BRIEF-2026-06-13-001.md) | BRIEF | 2026-06-13 | Owner | standard | Scheduled Strategy Pattern Tests | TASK-034 |

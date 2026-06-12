@@ -302,3 +302,17 @@
 검증: `pytest tests/integration -k order_lifecycle -q` 8 passed; `pytest tests/integration/test_paper_scenario_matrix.py -q` 16 passed; py_compile OK; diff check OK
 관련 기록: TASK-029, EVIDENCE-2026-06-12-008, BRIEF-2026-06-12-008
 남은 리스크: production partial-fill/cancel-replace semantics require explicit R3 Owner review before `OrderFlow` changes.
+
+### AUDIT-2026-06-13-001
+시각: 2026-06-13T00:05:22+09:00
+기록 시각: 2026-06-13T00:05:22+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Quant Researcher + QA (Codex)
+의도: TASK-034 scheduled strategy pattern gap을 mock/backtest first 범위에서 완료
+대상: `tests/integration/test_scheduled_strategy_patterns.py`, `tests/integration/test_paper_scenario_matrix.py`, TASK/BRIEF/EVIDENCE records
+작업: deterministic clock, persistent scheduler harness, DCA/rebalance/pairs/volatility breakout/EOD liquidation strategy intent fixtures, prod-target refusal test 추가. Closure gate 중 기존 daily-limit scenario fixture가 midnight KST에서 SQLite UTC timestamp와 localtime comparison 불일치로 실패해 test-only local-day helper로 안정화.
+방법: test-local scheduler/clock harness + isolated SQLite trade condition repository + focused pytest
+결과: TASK-034 완료. Scheduled strategy harness 7 passed and generated quant/paper scenario regression 119 passed. Live scheduler and production order execution unchanged.
+검증: `pytest tests/integration/test_scheduled_strategy_patterns.py -q` 7 passed; `pytest tests/integration/test_quant_trading_scenario_catalog.py tests/integration/test_paper_scenario_matrix.py -q` 119 passed; py_compile OK; diff check OK
+관련 기록: TASK-034, EVIDENCE-2026-06-13-001, BRIEF-2026-06-13-001
+남은 리스크: production scheduler persistence, live order execution, risk-policy integration require explicit R3 Owner review before code changes. Daily-limit stabilization is test-fixture only; production safety policy unchanged.

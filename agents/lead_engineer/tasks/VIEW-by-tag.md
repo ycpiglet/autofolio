@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-12T23:52:55+09:00`
+> 생성 시각: `2026-06-13T00:06:48+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -104,7 +104,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 
 ## #derivatives
 
@@ -349,7 +349,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 
 ## #paper
 
@@ -398,7 +398,7 @@
 | [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 진행 중 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | High | 중 | 2 ph / ~30000 tok | QA | qa,kis,ui,paper,market-hours,verification |
 | [TASK-036](TASK-036-paper-transaction-ui-sync-soak.md) | 완료 | High | 중 | 2 ph / ~35000 tok | QA | qa,kis,paper,transaction,ui-sync,soak |
 
@@ -425,7 +425,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 
 ## #reit
 
@@ -474,7 +474,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 
 ## #sector
 
@@ -516,7 +516,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 
 ## #streamlit
 
@@ -583,7 +583,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 대기 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 
 ## #websocket
 

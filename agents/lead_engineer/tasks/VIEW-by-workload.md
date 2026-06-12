@@ -1,7 +1,7 @@
 # VIEW — TASK by Workload (cost & concentration)
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-12T23:52:55+09:00`
+> 생성 시각: `2026-06-13T00:06:48+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
