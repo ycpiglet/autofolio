@@ -682,7 +682,7 @@
     {
       "type": "task",
       "id": "TASK-029",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -701,10 +701,10 @@
       ],
       "gate": "mock/test harness first; live order_flow behavior changes require Owner review",
       "trigger_meeting": "Owner direct request",
-      "audit_log": "AUDIT-2026-06-12-009",
+      "audit_log": "AUDIT-2026-06-12-015",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-12T23:51:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-029-fix-style-order-lifecycle-tests.md",
       "_title": "fix style order lifecycle tests"
     },

@@ -288,3 +288,17 @@
 검증: portfolio focused 9 passed; UI/backend focused 19 passed; generated scenarios 119 passed; engine/mock regression 7 passed; py_compile OK; diff check OK
 관련 기록: TASK-033, EVIDENCE-2026-06-12-007, BRIEF-2026-06-12-007
 남은 리스크: tax placeholder와 real broker buying-power/risk-budget enforcement는 별도 정책/R3 review 필요. KIS live order, prod, risk policy, DB schema/migration untouched.
+
+### AUDIT-2026-06-12-015
+시각: 2026-06-12T23:51:57+09:00
+기록 시각: 2026-06-12T23:51:57+09:00
+요청자: Owner ("백로그에 있는 작업들 전부 진행 및 마무리")
+수행자: Backend Engineer + QA (Codex)
+의도: TASK-029 FIX-style order lifecycle gap을 mock/test-harness first 범위에서 완료
+대상: `tests/integration/test_order_lifecycle.py`, TASK/BRIEF/EVIDENCE records
+작업: scripted pending broker, partial fill ledger harness, cumulative fill/remaining/weighted average verification, pending-limit fill-before-cancel, cancel reject, too-late-to-cancel tests 추가
+방법: isolated SQLite + MockBrokerClient subclass + focused pytest
+결과: TASK-029 완료. Order lifecycle harness 8 passed and paper scenario matrix 16 passed. Production order-flow behavior unchanged.
+검증: `pytest tests/integration -k order_lifecycle -q` 8 passed; `pytest tests/integration/test_paper_scenario_matrix.py -q` 16 passed; py_compile OK; diff check OK
+관련 기록: TASK-029, EVIDENCE-2026-06-12-008, BRIEF-2026-06-12-008
+남은 리스크: production partial-fill/cancel-replace semantics require explicit R3 Owner review before `OrderFlow` changes.

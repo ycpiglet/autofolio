@@ -9,3 +9,4 @@
 | [BRIEF-2026-06-12-005](BRIEF-2026-06-12-005.md) | BRIEF | 2026-06-12 | Owner | standard | Market-Hours KIS/UI Paper Verification | TASK-035 |
 | [BRIEF-2026-06-12-006](BRIEF-2026-06-12-006.md) | BRIEF | 2026-06-12 | Owner | standard | Paper Transaction UI Sync Soak | TASK-036 |
 | [BRIEF-2026-06-12-007](BRIEF-2026-06-12-007.md) | BRIEF | 2026-06-12 | Owner | standard | Portfolio Reality Model Tests | TASK-033 |
+| [BRIEF-2026-06-12-008](BRIEF-2026-06-12-008.md) | BRIEF | 2026-06-12 | Owner | standard | FIX-Style Order Lifecycle Tests | TASK-029 |
