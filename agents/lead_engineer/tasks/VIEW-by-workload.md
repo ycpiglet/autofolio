@@ -1,7 +1,7 @@
 # VIEW — TASK by Workload (cost & concentration)
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-13T01:00:23+09:00`
+> 생성 시각: `2026-06-13T01:29:46+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -23,21 +23,21 @@
 | QA | 4 | 6.0 ph | ~110K | 6.0 ph |
 | Compliance Officer | 1 | 5.0 ph | ~50K | 5.0 ph |
 | Data Engineer | 1 | 5.0 ph | ~45K | 0.0 ph |
+| Research Agent | 2 | 4.0 ph | ~60K | 4.0 ph |
 | UI/UX Designer | 1 | 4.0 ph | ~45K | 4.0 ph |
-| Research Agent | 1 | 2.0 ph | ~30K | 2.0 ph |
 
 ## By Assignee (공동 작업 분할 반영)
 
 | Assignee | TASKs | Hours (share) | Tokens (share) |
 |----------|-------|---------------|----------------|
 | KIS API Engineer | 23 | 63.3 ph | ~850K |
-| QA | 18 | 28.8 ph | ~300K |
+| QA | 19 | 29.5 ph | ~310K |
 | Backend Engineer | 6 | 12.0 ph | ~116K |
-| Lead Engineer | 10 | 9.7 ph | ~102K |
+| Lead Engineer | 11 | 10.3 ph | ~112K |
 | UI/UX Designer | 5 | 5.3 ph | ~67K |
 | Compliance Officer | 2 | 5.0 ph | ~43K |
 | Quant Researcher | 2 | 3.3 ph | ~33K |
 | Performance Analyst | 2 | 3.0 ph | ~30K |
 | Data Engineer | 1 | 2.5 ph | ~22K |
 | Backtest Engineer | 1 | 2.0 ph | ~18K |
-| Research Agent | 2 | 1.0 ph | ~18K |
+| Research Agent | 3 | 1.7 ph | ~28K |

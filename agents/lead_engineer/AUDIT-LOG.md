@@ -358,3 +358,17 @@
 검증: `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `python scripts/backlog_sweep.py` shows ACT 4 / ASK 9; `git diff --check` OK
 관련 기록: TASK-037, TASK-038, TASK-039, TASK-040, TASK-041, EVIDENCE-2026-06-13-004, BRIEF-2026-06-13-004, FEATURE-LANDSCAPE-CATALOG
 남은 리스크: Toss Securities 공개 HTML에서 심층 기능 목록은 확인 제한. 실제 KIS 고급 주문 지원은 각 R3 task 승인 후 공식 KIS endpoint 검증 필요. Prod/live real-money order untouched.
+
+### AUDIT-2026-06-13-005
+시각: 2026-06-13T01:24:07+09:00
+기록 시각: 2026-06-13T01:24:07+09:00
+요청자: Owner ("개인 트레이더, 코인, 금, 은, 오일, 달러 환매, 부동산, 저작권 등등...")
+수행자: Research Agent + Lead Engineer + QA (Codex)
+의도: 여러 금융 자산/상품 옵션을 Autofolio에 녹일 수 있는지 조사하고 승인/기각 기록으로 고정
+대상: TASK-042, TASK-041, ASSET-UNIVERSE-DECISION-RECORD, EVIDENCE-2026-06-13-005, BRIEF-2026-06-13-005
+작업: FSC/KRX/BOK/CFTC/FINRA/CME/SEC 공식·1차 출처를 기준으로 개인 트레이더 profile, crypto, gold/silver/oil, USD/FX, real estate, copyright/fractional rights, options/derivatives를 분류. 승인 범위는 read-only/manual/mock/reporting/capability로 제한하고 live execution/custody/withdrawal/환전/송금/derivatives/private platform execution은 R3 또는 기각으로 기록.
+방법: 공식/1차 문서 우선 조사, 기존 TASK-041 capability matrix와 중복 대조, product code mutation 없는 record-only patch
+결과: TASK-042 완료. ASSET-UNIVERSE-DECISION-RECORD active 등록. TASK-041에 asset universe decision record를 capability matrix 입력으로 연결. 신규 live execution task는 만들지 않음.
+검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
+관련 기록: TASK-041, TASK-042, EVIDENCE-2026-06-13-005, BRIEF-2026-06-13-005, ASSET-UNIVERSE-DECISION-RECORD
+남은 리스크: KIS/KRX/crypto/FX/fractional platform별 endpoint·license·custody 세부는 실행 승인 전 별도 검증 필요. Prod/live real-money order untouched.
