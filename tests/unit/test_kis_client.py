@@ -316,3 +316,11 @@ def test_get_today_orders_returns_empty_on_error(monkeypatch):
     client, _ = make_client(monkeypatch, lambda call: bad)
     orders = client.get_today_orders()
     assert orders == []
+
+
+def test_get_today_orders_can_raise_on_error(monkeypatch):
+    bad = FakeResponse({"rt_cd": "1", "msg_cd": "ERR01", "msg1": "fail"})
+    client, _ = make_client(monkeypatch, lambda call: bad)
+
+    with pytest.raises(BrokerError):
+        client.get_today_orders(suppress_errors=False)

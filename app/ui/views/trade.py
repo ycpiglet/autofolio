@@ -48,7 +48,17 @@ def _live() -> None:
             qty = c3.number_input("수량", min_value=1, value=1, key="lv_qty")
             auto = c3.checkbox("자동주문 ON", value=False, key="lv_auto")
             compliance_check = st.toggle("Compliance 검토 후 저장", value=True, key="lv_compliance")
-            if st.button("조건 저장", type="primary", key="lv_save"):
+            disclosure_gate = backend.disclosure_gate_state(sym)
+            if st.button("공시 게이트 확인", key="lv_disclosure_check"):
+                disclosure_gate = backend.refresh_disclosure_gate(sym, days=1)
+            if disclosure_gate.get("blocked"):
+                st.error(f"공시 게이트 차단: {disclosure_gate.get('reason', '')}")
+            if st.button(
+                "조건 저장",
+                type="primary",
+                key="lv_save",
+                disabled=bool(disclosure_gate.get("blocked")),
+            ):
                 if compliance_check:
                     # T-26: compliance-officer 사전 검토
                     with st.spinner("Compliance Officer 검토 중…"):
@@ -78,6 +88,8 @@ def _live() -> None:
                     order_type="LIMIT", auto_enabled=auto,
                 )
                 st.success(f"조건 저장 완료 (id={cid})")
+
+            _order_book_panel(backend, sym, side, int(qty))
 
         st.divider()
         st.caption("등록된 조건")
@@ -115,12 +127,74 @@ def _live() -> None:
             if df.empty:
                 st.info("오늘 주문내역이 없거나 mock 환경입니다.")
             else:
-                st.dataframe(df, hide_index=True, use_container_width=True)
+                st.dataframe(df, hide_index=True, width="stretch")
         except Exception as exc:  # noqa: BLE001
             st.warning(f"KIS 주문내역 조회 실패: {exc}")
 
     with check_tab:
         _pre_trade_checklist(backend)
+
+
+def _price_text(value) -> str:
+    if value in (None, ""):
+        return "-"
+    try:
+        return f"{float(value):,.0f}"
+    except (TypeError, ValueError):
+        return "-"
+
+
+def _order_book_panel(backend, symbol: str, side: str, quantity: int) -> None:
+    st.subheader("호가창")
+    try:
+        snapshot = backend.order_book_snapshot(symbol)
+        df = backend.order_book_levels_df(snapshot)
+    except Exception as exc:  # noqa: BLE001
+        st.warning(f"호가 조회 실패: {exc}")
+        return
+    if df.empty:
+        st.info("호가 데이터가 없습니다.")
+        return
+
+    best = df.iloc[0]
+    spread = None
+    if best["ask_price"] and best["bid_price"]:
+        spread = float(best["ask_price"]) - float(best["bid_price"])
+    c1, c2, c3 = st.columns(3)
+    c1.metric("현재가", _price_text(snapshot.get("current_price")))
+    c2.metric("예상체결가", _price_text(snapshot.get("expected_price")))
+    c3.metric("스프레드", _price_text(spread))
+
+    from app.brokers.kis.kis_client import estimate_order_book_slippage
+
+    estimate = estimate_order_book_slippage(
+        snapshot.get("levels") or [],
+        side,
+        int(quantity),
+        snapshot.get("current_price"),
+    )
+    e1, e2, e3, e4 = st.columns(4)
+    e1.metric("예상평균가", _price_text(estimate.get("average_price")))
+    e2.metric("충족수량", f"{estimate.get('filled_quantity', 0):,}")
+    e3.metric("미충족수량", f"{estimate.get('unfilled_quantity', 0):,}")
+    slippage = estimate.get("slippage_per_share")
+    slippage_rate = estimate.get("slippage_rate")
+    e4.metric(
+        "슬리피지",
+        "-" if slippage is None else f"{slippage:,.1f}",
+        None if slippage_rate is None else f"{slippage_rate:.2f}%",
+    )
+
+    display = df.rename(
+        columns={
+            "level": "단계",
+            "ask_price": "매도호가",
+            "ask_quantity": "매도잔량",
+            "bid_price": "매수호가",
+            "bid_quantity": "매수잔량",
+        }
+    )
+    st.dataframe(display, hide_index=True, width="stretch")
 
 
 def _pre_trade_checklist(backend) -> None:

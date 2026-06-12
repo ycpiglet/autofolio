@@ -45,6 +45,29 @@ from app.common.enums import OrderType, Side  # noqa: E402
 from app.common.errors import BrokerError  # noqa: E402
 
 
+def _tick_size(price: float) -> int:
+    if price < 2_000:
+        return 1
+    if price < 5_000:
+        return 5
+    if price < 20_000:
+        return 10
+    if price < 50_000:
+        return 50
+    if price < 200_000:
+        return 100
+    if price < 500_000:
+        return 500
+    return 1_000
+
+
+def _below_market_limit_price(current_price: float) -> int:
+    """Return a valid below-market KRX tick price for non-fill smoke orders."""
+    tick = _tick_size(current_price)
+    target = int(current_price * 0.9)
+    return max(tick, (target // tick) * tick)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="KIS 모의(paper) 전용 주문 생애주기 스모크")
     ap.add_argument("--symbol", default="005930")
@@ -91,7 +114,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     cur = client.get_current_price(args.symbol).price
-    target = int(cur * 0.5)  # 시장가 한참 아래 → 미체결 의도
+    target = _below_market_limit_price(cur)  # 시장가 아래 유효 호가 → 미체결 의도
     print(f"현재가 {args.symbol} = {cur:,.0f} → 지정가 매수 {args.qty}주 @ {target:,} (미체결 예상)")
     time.sleep(0.7)
 

@@ -35,7 +35,9 @@ def top_bar() -> None:
     c1, c2, c3, c4, c5 = st.columns([4, 2, 2, 1, 2])
     with c1:
         st.markdown(f"### {theme.APP_ICON} {theme.APP_NAME}")
-        if st.session_state.get("demo"):
+        if st.session_state.get("data_source") == "backend":
+            st.caption("📡 라이브 데이터 — KIS paper · SQLite")
+        elif st.session_state.get("demo"):
             st.caption("🧪 데모 모드 — mock 데이터")
     with c2:
         st.markdown(f"**모드** :blue[{mode}] · {theme.MODE_LABELS[mode]}")

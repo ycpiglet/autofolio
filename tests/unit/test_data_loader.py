@@ -79,3 +79,51 @@ def test_load_price_history_multiple_rows_sorted_ascending():
     # Should be sorted ascending by date
     dates = list(df["date"])
     assert dates == sorted(dates)
+
+
+def test_load_intraday_chart_non_kis_broker_returns_empty_df():
+    from app.data.data_loader import load_intraday_chart
+    from app.brokers.mock.mock_client import MockBrokerClient
+
+    mock_broker = MockBrokerClient()
+    with patch("app.brokers.factory.create_broker_client", return_value=mock_broker):
+        df = load_intraday_chart("005930")
+
+    assert isinstance(df, pd.DataFrame)
+    assert list(df.columns) == ["datetime", "open", "high", "low", "close", "volume"]
+    assert len(df) == 0
+
+
+def test_load_intraday_chart_kis_client_returns_sorted_dataframe():
+    from app.data.data_loader import load_intraday_chart
+    from app.brokers.kis.kis_client import KisClient
+
+    fake_rows = [
+        {
+            "datetime": "20260611 090500",
+            "open": 305000.0,
+            "high": 307000.0,
+            "low": 304000.0,
+            "close": 305000.0,
+            "volume": 7000,
+        },
+        {
+            "datetime": "20260611 090000",
+            "open": 302000.0,
+            "high": 306000.0,
+            "low": 301000.0,
+            "close": 304000.0,
+            "volume": 8000,
+        },
+    ]
+    mock_broker = MagicMock(spec=KisClient)
+    mock_broker.get_intraday_chart.return_value = fake_rows
+
+    with patch("app.brokers.factory.create_broker_client", return_value=mock_broker):
+        df = load_intraday_chart("005930", time_unit="5", count=2)
+
+    assert list(df["close"]) == [304000.0, 305000.0]
+    assert "datetime64" in str(df["datetime"].dtype)
+    mock_broker.get_intraday_chart.assert_called_once_with(
+        "005930", time_unit="5", count=2
+    )

@@ -28,6 +28,16 @@ _HOLDINGS = [
 ]
 
 _TARGET_ALLOC = {"주식": 35, "ETF": 30, "채권": 15, "원자재": 5, "현금": 15}
+_DIVIDEND_PER_SHARE = {
+    "005930": 1444.0,
+    "000660": 1200.0,
+    "069500": 780.0,
+    "360750": 260.0,
+    "152380": 1250.0,
+    "411060": 0.0,
+    "AAPL": 1.04,
+    "VOO": 7.20,
+}
 
 
 def cash_balance() -> float:
@@ -41,6 +51,7 @@ def holdings_df() -> pd.DataFrame:
         fx = USD_KRW if region == "US" else 1.0
         market = qty * cur * fx
         cost = qty * avg * fx
+        annual_dividend = qty * _DIVIDEND_PER_SHARE.get(ticker, 0.0) * fx
         rows.append(
             {
                 "종목": name,
@@ -53,6 +64,8 @@ def holdings_df() -> pd.DataFrame:
                 "평가금액": round(market),
                 "평가손익": round(market - cost),
                 "손익률": round((cur / avg - 1) * 100, 1),
+                "예상연배당": round(annual_dividend),
+                "배당수익률": round(annual_dividend / market * 100, 2) if market else 0.0,
             }
         )
     df = pd.DataFrame(rows)

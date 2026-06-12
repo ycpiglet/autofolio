@@ -96,6 +96,9 @@ class OrderFlow:
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(True, "Order filled.", order_log_id)
 
+        if result.status == OrderStatus.PENDING and order_type == OrderType.MARKET:
+            return self._poll_fill(condition, result.broker_order_id, order_log_id, fallback_label="Market order")
+
         if result.status == OrderStatus.PENDING:
             return self._handle_pending_limit_order(condition, result.broker_order_id, order_log_id, current_price)
 

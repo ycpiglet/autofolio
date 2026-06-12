@@ -16,6 +16,11 @@ DEFAULT_KIS_BASE_URLS = {
     "paper": "https://openapivts.koreainvestment.com:29443",
     "prod": "https://openapi.koreainvestment.com:9443",
 }
+DEFAULT_KIS_WS_URLS = {
+    "mock": "",
+    "paper": "ws://ops.koreainvestment.com:31000",
+    "prod": "ws://ops.koreainvestment.com:21000",
+}
 DEFAULT_KIS_TOKEN_PATH = "/oauth2/tokenP"
 
 
@@ -29,7 +34,9 @@ class Settings:
     kis_account_product_code: str = os.getenv("KIS_ACCOUNT_PRODUCT_CODE", "")
 
     kis_base_url: str = os.getenv("KIS_BASE_URL", "")
+    kis_ws_url: str = os.getenv("KIS_WS_URL", "")
     kis_token_path: str = os.getenv("KIS_TOKEN_PATH", "")
+    kis_hts_id: str = os.getenv("KIS_HTS_ID", "")
 
     telegram_bot_token: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
     telegram_chat_id: str = os.getenv("TELEGRAM_CHAT_ID", "")
@@ -60,6 +67,11 @@ def _kis_account(env: str, suffix: str) -> str:
     return os.getenv(f"KIS_{env.upper()}_ACCOUNT_{suffix}") or os.getenv(f"KIS_ACCOUNT_{suffix}", "")
 
 
+def _kis_hts_id(env: str) -> str:
+    """환경별 HTS ID 우선, 없으면 generic 폴백."""
+    return os.getenv(f"KIS_{env.upper()}_HTS_ID") or os.getenv("KIS_HTS_ID", "")
+
+
 def resolve_settings(env: str | None = None) -> Settings:
     """KIS_ENV(또는 인자)에 맞춰 환경별 자격증명·엔드포인트를 해석한 Settings 를 만든다.
 
@@ -73,6 +85,11 @@ def resolve_settings(env: str | None = None) -> Settings:
         or os.getenv("KIS_BASE_URL")
         or DEFAULT_KIS_BASE_URLS.get(env, "")
     )
+    ws_url = (
+        os.getenv(f"KIS_{env.upper()}_WS_URL")
+        or os.getenv("KIS_WS_URL")
+        or DEFAULT_KIS_WS_URLS.get(env, "")
+    )
     token_path = os.getenv("KIS_TOKEN_PATH") or DEFAULT_KIS_TOKEN_PATH
     return Settings(
         kis_env=env,
@@ -81,7 +98,9 @@ def resolve_settings(env: str | None = None) -> Settings:
         kis_account_no=_kis_account(env, "NO"),
         kis_account_product_code=_kis_account(env, "PRODUCT_CODE"),
         kis_base_url=base_url,
+        kis_ws_url=ws_url,
         kis_token_path=token_path,
+        kis_hts_id=_kis_hts_id(env),
     )
 
 
