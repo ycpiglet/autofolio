@@ -3,7 +3,7 @@ unit_id: UNIT-TASK-051-001
 task_id: TASK-051
 task_set_id: TASKSET-AUTOFOLIO-SAFETY-FIXES
 project_id: PROJECT-AUTOFOLIO
-status: worker_ready
+status: completed
 horizon: unit
 model_tier: worker_standard
 escalation_triggers: [high_risk, security, repeated_failure]
@@ -22,7 +22,7 @@ acceptance:
   - "compliance='passed' 오기록 방지 테스트 추가 및 통과"
   - "python -m pytest tests/ -q green"
 verification:
-  - "python -m pytest tests/unit/test_compliance_gate.py -q"
+  - "python -m pytest tests/unit/test_trading_gates.py -q"
   - "python -m pytest tests/ -q"
   - "python scripts/check_agent_docs.py"
 handoff: "변경된 파일 목록, GateResult 변경 내용, fail-closed 테스트 결과 보고."
@@ -84,6 +84,31 @@ python -m pytest tests/unit/test_trading_gates.py -q
 python -m pytest tests/ -q
 python scripts/check_agent_docs.py
 ```
+
+## 완료 기록
+
+완료 시각: 2026-06-14T04:16:05+09:00
+
+### 변경 내용
+
+**`app/services/trading.py`**
+- `GateResult.status` Literal에 `"error"` 추가 (`"saved" | "blocked_disclosure" | "rejected" | "needs_acknowledgement" | "error"`)
+- `GateResult.compliance` Literal에 `"error"` 추가 (`"passed" | "caution_acked" | "skipped" | "error"`)
+- `save_condition_with_gates()` verdict 로직에 오류 감지 분기 추가: `"호출 오류"` 포함 시 → `GateResult(status="error", compliance="error")` 반환 + `add_condition` 미호출 (fail-closed)
+
+**`tests/unit/test_trading_gates.py`**
+- `test_compliance_agent_call_error_fail_closed` 테스트 추가
+  - `agents_runtime.ask` 반환값을 `"[compliance-officer] 호출 오류: timeout"` 으로 패치
+  - `result.status == "error"` 확인
+  - `result.compliance == "error"` 확인
+  - `add_condition` 미호출 확인 (`assert_not_called()`)
+
+### 검증 결과
+
+- 실패 테스트 먼저 작성 → 실행 시 `AssertionError: expected 'error', got 'saved'` 확인 (fail-open 재현)
+- 수정 후 전체 테스트: `615 passed, 1 warning` (pre-existing Windows temp warning)
+- `check_agent_docs.py`: `0 error(s), 104 warning(s)` (pre-existing)
+- fail-closed 동작 확인: 오류 시 조건 저장 차단, compliance="passed" 오기록 방지
 
 ## Handoff
 
