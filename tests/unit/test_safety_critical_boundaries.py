@@ -98,16 +98,16 @@ def test_safety_checker_daily_limit_at_exact_boundary(monkeypatch):
     """Order that pushes past the daily budget is BLOCKED (check is today + order > max_daily)."""
     import app.risk.safety_checker as sc_mod
     from app.database.sqlite_db import get_connection
-    from datetime import datetime as _dt
     monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
     tmpdir, repo, checker = _make_env()
     try:
         repo.update_global_risk_limit(max_order_amount=500_000.0, max_daily_amount=100_000.0)
-        # Insert a FILLED order with today's LOCAL date so today_order_amount() counts it.
-        # The query: DATE(created_at) = DATE('now', 'localtime').
-        # Using Python datetime.now() gives the local date, avoiding UTC/KST offset issues.
-        local_today = _dt.now().strftime("%Y-%m-%d")
-        created_at = f"{local_today} 10:00:00"
+        # Insert a FILLED order that today_order_amount() will count.
+        # today_order_amount() filters: DATE(created_at, '+9 hours') = DATE('now', '+9 hours')
+        # i.e. it compares KST dates.  We use SQLite datetime arithmetic with explicit
+        # '+9 hours' offsets so the result is the same on any machine timezone (never 'localtime').
+        # datetime('now', '+9 hours', 'start of day', '-9 hours', '+12 hours')
+        #   = KST today noon expressed as a UTC timestamp → always inside today's KST day.
         with get_connection(repo.db_path) as conn:
             conn.execute(
                 """
@@ -115,9 +115,9 @@ def test_safety_checker_daily_limit_at_exact_boundary(monkeypatch):
                     condition_id, symbol, side, order_type, order_price,
                     current_price, quantity, kis_order_id, order_status,
                     fallback_to_market, error_message, created_at
-                ) VALUES (1, '005930', 'BUY', 'LIMIT', 1.0, 1.0, 1, NULL, 'FILLED', 0, NULL, ?)
+                ) VALUES (1, '005930', 'BUY', 'LIMIT', 1.0, 1.0, 1, NULL, 'FILLED', 0, NULL,
+                          datetime('now', '+9 hours', 'start of day', '-9 hours', '+12 hours'))
                 """,
-                (created_at,),
             )
         # today_amount = 1.0; order_amount = 100_000 → 1 + 100_000 > 100_000 → BLOCKED
         cond = _cond(qty=1)

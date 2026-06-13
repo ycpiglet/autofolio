@@ -35,28 +35,39 @@ def _insert_order_log(
     quantity: int,
     days_offset: int = 0,
 ) -> None:
-    """Insert an order_log row with created_at set to the local date + days_offset.
+    """Insert an order_log row whose created_at is KST-today-aware.
 
-    today_order_amount() filters with DATE(created_at) = DATE('now', 'localtime').
-    CURRENT_TIMESTAMP stores UTC, which on a UTC+9 machine before 09:00 KST falls
-    on the previous UTC date — so the filter misses those rows.
-    This helper sets created_at to the local date string directly so tests are
-    timezone-safe on any host.
+    today_order_amount() filters with DATE(created_at, '+9 hours') = DATE('now', '+9 hours'),
+    i.e. it compares KST dates.  We compute created_at using SQLite datetime arithmetic
+    with explicit '+9 hours' offsets so the result is identical regardless of the
+    OS/CI timezone (never 'localtime').
+
+    Formula for days_offset=0 (today KST):
+        datetime('now', '+9 hours', 'start of day', '-9 hours', '+12 hours')
+        => KST today at 00:00  expressed as UTC, then +12 h  => KST today noon as UTC.
+    For days_offset=-1 (yesterday KST):
+        append '-1 day' before '-9 hours'.
     """
-    from datetime import datetime as _dt, timedelta as _td
-    local_now = _dt.now()
-    target_day = (local_now + _td(days=days_offset)).strftime("%Y-%m-%d")
-    created_at = f"{target_day} 10:00:00"  # Use a stable mid-day time
+    # Build the modifier chain: +9h → start of KST day → apply day offset → back to UTC → midday.
+    # Using only explicit hour/day offsets (never 'localtime') makes the result identical on
+    # any OS timezone, including the UTC CI environment.
+    modifiers = ["+9 hours", "start of day"]
+    if days_offset != 0:
+        modifiers.append(f"{days_offset:+d} days")
+    modifiers += ["-9 hours", "+12 hours"]
+    modifier_sql = ", ".join(f"'{m}'" for m in modifiers)
+    created_at_expr = f"datetime('now', {modifier_sql})"
     with get_connection(repo.db_path) as conn:
         conn.execute(
-            """
+            f"""
             INSERT INTO order_logs(
                 condition_id, symbol, side, order_type, order_price,
                 current_price, quantity, kis_order_id, order_status,
                 fallback_to_market, error_message, created_at
-            ) VALUES (1, '005930', 'BUY', 'LIMIT', ?, ?, ?, NULL, ?, 0, NULL, ?)
+            ) VALUES (1, '005930', 'BUY', 'LIMIT', ?, ?, ?, NULL, ?, 0, NULL,
+                      {created_at_expr})
             """,
-            (order_price, order_price, quantity, order_status, created_at),
+            (order_price, order_price, quantity, order_status),
         )
 
 
