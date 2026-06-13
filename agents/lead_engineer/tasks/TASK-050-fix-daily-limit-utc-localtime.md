@@ -83,3 +83,12 @@ KST 00:00~08:59 (UTC 전일 15:00~23:59)에 주문하면:
 - `today_order_amount()` KST/UTC 불일치 수정
 - 재현 테스트 KST 야간 시간대 시뮬레이션 통과
 - 전체 pytest green
+
+## v1 이행 (파일럿)
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마로 이행되었다.
+실행 상세 명세는 v1 unit 스펙을 참고:
+
+- Initiative: `agents/project/initiatives/INIT-AUTOFOLIO-SAFETY-FIXES.md`
+- Taskset: `agents/project/initiatives/TASKSET-AUTOFOLIO-SAFETY-FIXES.md`
+- Unit spec: `agents/lead_engineer/tasks/units/TASK-050/UNIT-TASK-050-001.md`

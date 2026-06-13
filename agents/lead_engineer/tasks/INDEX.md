@@ -52,6 +52,6 @@
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | Backend Engineer | UI 대개편 Phase 3 — 매매 + 내역 + 설정 (state-changing + 안전 게이트) ⚠ Owner 승인 필수 |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Backend Engineer | UI 대개편 Phase 4 — 에이전트/IC + 알림 + SSE |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | UI/UX Designer | UI 대개편 Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴 |
-| [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 대기 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) |
-| [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 대기 | Backend Engineer | fix: compliance 게이트 fail-open (Phase 3 전 필수) |
-| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 대기 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 |
+| [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 대기 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) → v1 |
+| [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 대기 | Backend Engineer | fix: compliance 게이트 fail-open (Phase 3 전 필수) → v1 |
+| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 대기 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 → v1 |

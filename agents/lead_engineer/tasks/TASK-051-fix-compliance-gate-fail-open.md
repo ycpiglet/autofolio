@@ -79,3 +79,12 @@ Phase 3 HTTP 매핑 예고:
 - `GateResult.status` `"error"` + `compliance` `"error"` 추가
 - fail-open → fail-closed 변경 확인 테스트 통과
 - 전체 pytest green
+
+## v1 이행 (파일럿)
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마로 이행되었다.
+실행 상세 명세는 v1 unit 스펙을 참고:
+
+- Initiative: `agents/project/initiatives/INIT-AUTOFOLIO-SAFETY-FIXES.md`
+- Taskset: `agents/project/initiatives/TASKSET-AUTOFOLIO-SAFETY-FIXES.md`
+- Unit spec: `agents/lead_engineer/tasks/units/TASK-051/UNIT-TASK-051-001.md`
