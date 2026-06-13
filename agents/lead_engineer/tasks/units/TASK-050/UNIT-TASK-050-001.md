@@ -115,3 +115,30 @@ python scripts/check_agent_docs.py
 - 수정 후: 신규 테스트 PASSED, 기존 `test_daily_order_amount_limit_blocks_new_order` PASSED
 - `tests/integration/test_paper_scenario_matrix.py` 전체 17 passed
 - SQLite 동작 검증: `DATE('2026-06-13 15:01:00', 'localtime')` = `2026-06-14` (KST 오늘) ✓
+
+## 완료 보강 (2026-06-14 — CI UTC 대응)
+
+**배경:** 초기 수정이 `'localtime'`을 사용하여 OS 시간대 의존성을 그대로 남겼다. CI 서버(UTC)에서는 `'localtime'` 오프셋이 +0h(무동작)이므로 `today_order_amount()` 쿼리가 KST 야간 주문을 집계하지 못했고, 테스트 픽스처도 동일한 이유로 CI에서 실패(`1 failed, 578 passed`).
+
+**수정 내용 (fix/task-050-tz-robust 브랜치):**
+
+- `app/database/repositories.py` `today_order_amount()`:
+  - 변경 전: `DATE(created_at, 'localtime') = DATE('now', 'localtime')`
+  - 변경 후: `DATE(created_at, '+9 hours') = DATE('now', '+9 hours')`
+  - KST = UTC+9, DST 없음. `+9 hours`는 OS 시간대 설정에 무관하게 동일하게 동작한다.
+
+- `tests/integration/test_paper_scenario_matrix.py` 헬퍼 `_set_order_log_local_today()`:
+  - 변경 전: `datetime('now', 'localtime')`
+  - 변경 후: `datetime('now', '+9 hours', 'start of day', '-9 hours')`
+
+- `tests/integration/test_paper_scenario_matrix.py` `test_daily_limit_counts_utc_night_kst_today_order` 픽스처:
+  - 변경 전: `datetime('now', 'localtime', 'start of day', '-9 hours', '+1 minute')`
+  - 변경 후: `datetime('now', '+9 hours', 'start of day', '-9 hours', '+1 minute')`
+  - `'localtime'` 완전 제거 → grep으로 SQL 문자열 내 `localtime` 0건 확인.
+
+**TZ-독립성 증명:** `grep localtime app/database/repositories.py` → 0건. `grep localtime tests/integration/test_paper_scenario_matrix.py` → SQL 문자열 내 0건 (주석만). 코드에 `'localtime'`이 없으므로 OS 시간대에 의존하지 않는다.
+
+**검증 결과:**
+- `python -m pytest tests/integration/test_paper_scenario_matrix.py -q` → 17 passed
+- `python -m pytest tests/ -q` → 614 passed
+- `python scripts/check_agent_docs.py` → 0 error(s)
