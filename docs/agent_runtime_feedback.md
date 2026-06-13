@@ -53,3 +53,14 @@
 - 시임 2파일(`AGENTS.md`, `agents/roles.yml`)을 `agent_runtime.yml`의 `sync.unmanaged`로 호스트 소유 선언.
 - 통합/링크 문서 `docs/AGENT_RUNTIME_INTEGRATION.md`(계층 모델·분기 원장·업데이트 런북)로 분리 운영.
 - §1이 생기면 이 우회(특히 AGENTS.md 시임)는 대부분 제거 가능.
+
+---
+
+## 7. 패키징 버그 — wheel이 dotfile/워크플로 템플릿을 누락 (v0.2.0 확인, 2026-06-13)
+**증상**: v0.2.0 git 소스 `templates/project/`에는 있으나 **빌드된 wheel에는 빠져 있어** `pip install agent_runtime` + `sync`로는 영영 받을 수 없는 템플릿 5개:
+`.codex/hooks.json` · `.gitattributes` · `.githooks/pre-commit` · `.github/workflows/owner-doc-format.yml` · `agents/project/teams/.gitkeep`.
+- `sync --check`(설치 패키지 기준)는 **updates=0**으로 "이미 최신"이라 보고하지만, git 소스 트리를 `--template-root`로 주면 **5건 create**가 나타남 → 호스트가 누락을 인지할 방법이 없음.
+- **원인**: setuptools `package_data`/`MANIFEST.in`이 점(.)으로 시작하는 파일·디렉터리(`.codex`, `.githooks`, `.gitattributes`, `.gitkeep`)와 `.github/`를 기본적으로 제외. 정작 그 파일들이 참조하는 스크립트(`precommit_check.py`, `owner_doc_format_gate.py`, `session_dashboard.py`, taskset/governance 훅 등)는 wheel에 포함되어 배포됨 → **배선(dotfile)만 빠지고 알맹이는 옴**.
+- **영향**: 신규 호스트는 line-ending 정책(`.gitattributes`), owner-doc-format CI 게이트, pre-commit 훅, Codex 세션 훅을 자동으로 못 받음.
+- **제안**: `pyproject.toml`/`MANIFEST.in`에 `templates/project/**`를 **점-파일 포함** 전부 패키징하도록 명시(`graft`/`include-package-data` + `force-include`). 또는 `sync`가 패키지 템플릿이 아닌 **소스 매니페스트** 기준으로 비교.
+- **Autofolio 조치(2026-06-13)**: git 소스에서 5개 전부 직접 동봉(의존 스크립트 전부 존재·게이트 green 확인). `.codex/hooks.json`은 Codex 하네스 Session/Stop/Prompt 훅을 신규 활성화하므로 Owner 승인 후 포함(session_dashboard smoke exit 0).

@@ -2,7 +2,7 @@ project: autofolio
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.1.8
+  ref: v0.2.0
 sync:
   mode: check-diff-apply
   allow_silent_overwrite: false
@@ -13,3 +13,7 @@ sync:
     - AGENTS.md
     - agents/roles.yml
     - schemas/task.schema.json
+    - agents/lead_engineer/REPORTING-FORMAT.md
+    - agents/project/SKILL-GOVERNANCE.md
+    - CLAUDE.md
+    - scripts/doc_steward_due.py
