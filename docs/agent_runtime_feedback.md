@@ -63,4 +63,4 @@
 - **원인**: setuptools `package_data`/`MANIFEST.in`이 점(.)으로 시작하는 파일·디렉터리(`.codex`, `.githooks`, `.gitattributes`, `.gitkeep`)와 `.github/`를 기본적으로 제외. 정작 그 파일들이 참조하는 스크립트(`precommit_check.py`, `owner_doc_format_gate.py`, `session_dashboard.py`, taskset/governance 훅 등)는 wheel에 포함되어 배포됨 → **배선(dotfile)만 빠지고 알맹이는 옴**.
 - **영향**: 신규 호스트는 line-ending 정책(`.gitattributes`), owner-doc-format CI 게이트, pre-commit 훅, Codex 세션 훅을 자동으로 못 받음.
 - **제안**: `pyproject.toml`/`MANIFEST.in`에 `templates/project/**`를 **점-파일 포함** 전부 패키징하도록 명시(`graft`/`include-package-data` + `force-include`). 또는 `sync`가 패키지 템플릿이 아닌 **소스 매니페스트** 기준으로 비교.
-- **Autofolio 조치(2026-06-13)**: git 소스에서 4개(`.gitattributes`·`.githooks/pre-commit`·`owner-doc-format.yml`·`teams/.gitkeep`)를 직접 동봉(의존 스크립트 전부 존재·게이트 green 확인). `.codex/hooks.json`은 Codex 하네스 런타임 훅을 신규 활성화하므로 Owner 결정 전 보류.
+- **Autofolio 조치(2026-06-13)**: git 소스에서 5개 전부 직접 동봉(의존 스크립트 전부 존재·게이트 green 확인). `.codex/hooks.json`은 Codex 하네스 Session/Stop/Prompt 훅을 신규 활성화하므로 Owner 승인 후 포함(session_dashboard smoke exit 0).
