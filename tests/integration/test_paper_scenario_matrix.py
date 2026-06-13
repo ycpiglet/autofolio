@@ -242,6 +242,58 @@ def test_daily_order_amount_limit_blocks_new_order(monkeypatch):
     assert any("Daily order amount limit exceeded" in msg for msg in messages)
 
 
+def test_daily_limit_counts_utc_night_kst_today_order(monkeypatch):
+    """UTC/KST 시간대 불일치 버그 회귀 테스트.
+
+    KST 00:00–08:59 구간에 접수된 주문은 created_at(UTC)의 날짜가 전날이지만
+    KST 기준으로는 오늘이다.  today_order_amount()가 해당 주문을 오늘 합산에
+    포함시켜야 하며, 일일 한도 초과 시 신규 주문을 차단해야 한다.
+    """
+    repo, _, engine = _make_env(monkeypatch, price=70_000.0)
+    repo.update_global_risk_limit(max_daily_amount=300_000.0)
+
+    # KST 기준 오늘 01:00 = UTC 기준 어제 16:00 로 시뮬레이션.
+    # SQLite에서 'now'는 UTC이므로 UTC-어제 날짜를 directly 주입한다.
+    previous_order_id = repo.create_order_log(
+        condition_id=None,
+        symbol="005930",
+        side="BUY",
+        order_type="MARKET",
+        order_price=None,
+        current_price=250_000.0,
+        quantity=1,
+        kis_order_id="PREVIOUS-UTC-NIGHT",
+        order_status=OrderStatus.FILLED.value,
+    )
+    # KST 기준 오늘 자정(00:00) = UTC 기준 어제 15:00 로 설정한다.
+    # datetime('now','localtime','start of day') → KST 오늘 00:00 (문자열)
+    # 해당 시각은 UTC 기준으로 9시간 전이므로 UTC-어제 날짜가 된다.
+    # → DATE(created_at) = yesterday(UTC) but DATE(created_at,'localtime') = today(KST)
+    with get_connection(repo.db_path) as conn:
+        conn.execute(
+            """UPDATE order_logs
+               SET created_at = datetime('now', 'localtime', 'start of day', '-9 hours', '+1 minute')
+               WHERE id = ?""",
+            (previous_order_id,),
+        )
+
+    # 일일 한도(300,000)를 초과하는 금액(250,000)이 today_order_amount()에
+    # 반영되어야 신규 주문이 차단된다.
+    cid = repo.add_trade_condition(
+        symbol="005930",
+        side="BUY",
+        target_price=80_000.0,
+        quantity=1,
+        order_type="LIMIT",
+        auto_enabled=True,
+    )
+
+    messages = engine.run_once()
+
+    assert [row for row in repo.list_order_logs() if row["condition_id"] == cid] == []
+    assert any("Daily order amount limit exceeded" in msg for msg in messages)
+
+
 def test_market_order_pending_then_filled_like_kis(monkeypatch):
     repo, broker, engine = _make_env(monkeypatch, price=70_000.0)
     pending = OrderResult("KIS-PENDING-1", OrderStatus.PENDING, message="KIS order accepted")
