@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-052
-status: 대기
+status: 완료
 owner: UI/UX Designer
 assignees: [UI/UX Designer, QA]
 priority: Low
@@ -14,7 +14,7 @@ trigger_meeting: 없음
 audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
-updated_at: 2026-06-13T01:33:29+09:00
+updated_at: 2026-06-14T04:30:06+09:00
 ---
 
 # TASK-052 fix: trade 뷰 ack 체크박스 영구 루프
@@ -80,3 +80,8 @@ Streamlit trade 화면에서 컴플라이언스 CAUTION 조건 저장 시 `needs
 - Initiative: `agents/project/initiatives/INIT-AUTOFOLIO-SAFETY-FIXES.md`
 - Taskset: `agents/project/initiatives/TASKSET-AUTOFOLIO-SAFETY-FIXES.md`
 - Unit spec: `agents/lead_engineer/tasks/units/TASK-052/UNIT-TASK-052-001.md`
+
+## 완료 노트 (2026-06-14T04:30:06+09:00)
+
+`lv_comply_ack` 체크박스를 버튼 블록 밖으로 분리하여 Streamlit 위젯 클린업 문제 해소.
+`trade_ack_checked` 세션 키로 ack 상태 영속화. 617 pytest, 0 doc error.

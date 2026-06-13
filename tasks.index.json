@@ -1350,7 +1350,7 @@
     {
       "type": "task",
       "id": "TASK-051",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1374,14 +1374,14 @@
       "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
-      "updated_at": "2026-06-13T01:33:29+09:00",
+      "updated_at": "2026-06-14T04:16:05+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-051-fix-compliance-gate-fail-open.md",
       "_title": "fix compliance gate fail open"
     },
     {
       "type": "task",
       "id": "TASK-052",
-      "status": "대기",
+      "status": "완료",
       "owner": "UI/UX Designer",
       "assignees": [
         "UI/UX Designer",
@@ -1404,7 +1404,7 @@
       "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
-      "updated_at": "2026-06-13T01:33:29+09:00",
+      "updated_at": "2026-06-14T04:30:06+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-052-fix-trade-ack-checkbox-loop.md",
       "_title": "fix trade ack checkbox loop"
     }
