@@ -50,7 +50,7 @@ Autofolio 매매 엔진에서 발견된 안전-임계 버그 3건을 Phase 3 UI 
 각 유닛의 `project_id: PROJECT-AUTOFOLIO`는 이 저장소의 호스트 프로젝트를 가리키는
 자유 문자열 레이블이다. `task_unit_readiness_gate` 및 `work_schema_gate`는 이 값을
 파일 참조로 검증하지 않으므로, 별도의 PROJECT-CONTEXT.yml 레코드 없이도 게이트를 통과한다.
-호스트 프로젝트 컨텍스트 상세는 `agents/project/VISION.md` 및 `agents/project/ROADMAP.md`를
+호스트 프로젝트 컨텍스트 상세는 `agents/project/ORG.md` 및 `agents/project/ROADMAP.md`를
 참조한다 — Autofolio = KIS 기반 개인 자산운용 OS.
 
 ### 유닛 스키마 vs v1 work-item 봉투
