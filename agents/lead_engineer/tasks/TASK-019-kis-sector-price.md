@@ -5,7 +5,7 @@ status: 완료
 owner: KIS API Engineer
 assignees: [KIS API Engineer]
 priority: Low
-difficulty: 하
+difficulty: 낮
 est_hours: 2
 est_tokens: 50000
 tags: [kis, sector]
