@@ -71,3 +71,12 @@ Streamlit trade 화면에서 컴플라이언스 CAUTION 조건 저장 시 `needs
 
 - ack 체크박스 체크 → 재제출 → 루프 없이 정상 저장
 - 기존 pytest green
+
+## v1 이행 (파일럿)
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마로 이행되었다.
+실행 상세 명세는 v1 unit 스펙을 참고:
+
+- Initiative: `agents/project/initiatives/INIT-AUTOFOLIO-SAFETY-FIXES.md`
+- Taskset: `agents/project/initiatives/TASKSET-AUTOFOLIO-SAFETY-FIXES.md`
+- Unit spec: `agents/lead_engineer/tasks/units/TASK-052/UNIT-TASK-052-001.md`
