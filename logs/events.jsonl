@@ -8892,3 +8892,5 @@
 {"ts": "2026-06-12T17:41:55.166Z", "level": "INFO", "logger": "app.engine.live_trading_engine", "msg": "{\"event\": \"engine_run_end\", \"run\": 151, \"processed\": 0, \"executed\": 0, \"errors\": 0}", "extra": {}}
 {"ts": "2026-06-12T23:01:42.803Z", "level": "INFO", "logger": "app.engine.live_trading_engine", "msg": "{\"event\": \"engine_run_start\", \"run\": 1, \"conditions\": 0}", "extra": {}}
 {"ts": "2026-06-12T23:01:42.804Z", "level": "INFO", "logger": "app.engine.live_trading_engine", "msg": "{\"event\": \"engine_run_end\", \"run\": 1, \"processed\": 0, \"executed\": 0, \"errors\": 0}", "extra": {}}
+{"ts": "2026-06-13T13:29:45.576Z", "level": "INFO", "logger": "app.engine.live_trading_engine", "msg": "{\"event\": \"engine_run_start\", \"run\": 1, \"conditions\": 0}", "extra": {}}
+{"ts": "2026-06-13T13:29:45.576Z", "level": "INFO", "logger": "app.engine.live_trading_engine", "msg": "{\"event\": \"engine_run_end\", \"run\": 1, \"processed\": 0, \"executed\": 0, \"errors\": 0}", "extra": {}}
