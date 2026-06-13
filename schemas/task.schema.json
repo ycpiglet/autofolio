@@ -42,7 +42,7 @@
     },
     "difficulty": {
       "type": "string",
-      "enum": ["상", "중", "하"]
+      "enum": ["상", "중-상", "중", "하", "낮"]
     },
     "est_hours": {
       "type": "number",

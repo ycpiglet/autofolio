@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-14T04:31:39+09:00` · 열린 작업 18건
+> 생성 시각: `2026-06-14T08:42:48+09:00` · 열린 작업 33건
 
 ---
 
@@ -22,13 +22,13 @@
 
 | 지표 | 값 | 해석 |
 |------|----|------|
-| 열린 작업 | 18건 / 149 ph | frontmatter 기준 |
+| 열린 작업 | 33건 / 215 ph | frontmatter 기준 |
 | 진행 중 WIP | 0건 | WIP 적정 |
-| 대기 | 8건 | 최상위 자율 후보: TASK-038 (watchlist screener alert expansion) |
+| 대기 | 23건 | 최상위 자율 후보: TASK-064 (fix condition toctou race) |
 | 보류 | 10건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 4 / REVIEW 4 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 19 / REVIEW 4 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
-**빠른 판단:** 새로 하나를 고른다면 **TASK-038**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
+**빠른 판단:** 새로 하나를 고른다면 **TASK-064**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
 
 ## 결정 레인
 
@@ -36,10 +36,25 @@
 
 | Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
 |------|------|------|------|--------|------|-----------|-----------|
-| 1 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) watchlist screener alert expansion | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
-| 2 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) broker capability feature parity matrix | ACT | 대기 | Medium / score 29 | M · 3 ph | 회귀 리스크 감소 | 바로 착수 후보 |
-| 3 | [TASK-039](TASK-039-backtest-research-report-hardening.md) backtest research report hardening | ACT | 대기 | Medium / score 28 | M · 4 ph | 회귀 리스크 감소 | 바로 착수 후보 |
-| 4 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) portfolio performance tax lot reporting | ACT | 대기 | Medium / score 28 | M · 4 ph | 중간 가치 | 바로 착수 후보 |
+| 1 | [TASK-064](TASK-064-fix-condition-toctou-race.md) fix condition toctou race | ACT | 대기 | Critical / score 44 | L · 8 ph | 치명 리스크 | 바로 착수 후보 |
+| 2 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) fix history live mode early return | ACT | 대기 | High / score 41 | XS · 1 ph | 높은 가치 | 바로 착수 후보 |
+| 3 | [TASK-053](TASK-053-product-maturity-assessment.md) product maturity assessment | ACT | 대기 | High / score 40 | S · 2 ph | 높은 가치 | 바로 착수 후보 |
+| 4 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) fix intraday no try except | ACT | 대기 | High / score 40 | S · 2 ph | 높은 가치 | 바로 착수 후보 |
+| 5 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) fix home proposal buttons noop | ACT | 대기 | High / score 39 | M · 3 ph | 높은 가치 | 바로 착수 후보 |
+| 6 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) fix backend allocation gap | ACT | 대기 | High / score 39 | M · 3 ph | 높은 가치 | 바로 착수 후보 |
+| 7 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) watchlist screener alert expansion | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
+| 8 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) fix alerts settings no persist | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
+| 9 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) fix circuit breaker pnl logic | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
+| 10 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) fix kpi returns hardcoded zero | ACT | 대기 | High / score 36 | L · 6 ph | 높은 가치 | 바로 착수 후보 |
+| 11 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) feat krx holiday calendar | ACT | 대기 | High / score 36 | L · 6 ph | 높은 가치 | 바로 착수 후보 |
+| 12 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) feat price alert engine loop | ACT | 대기 | High / score 34 | L · 8 ph | 높은 가치 | 바로 착수 후보 |
+| 13 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) fix logout incomplete state reset | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
+| 14 | [TASK-065](TASK-065-feat-log-rotation.md) feat log rotation | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
+| 15 | [TASK-066](TASK-066-test-coverage-60pct.md) test coverage 60pct | ACT | 대기 | High / score 30 | XL · 12 ph | 높은 가치 | 바로 착수 후보 |
+| 16 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) broker capability feature parity matrix | ACT | 대기 | Medium / score 29 | M · 3 ph | 회귀 리스크 감소 | 바로 착수 후보 |
+| 17 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) sqlite wal fk enforcement | ACT | 대기 | Medium / score 29 | M · 3 ph | 중간 가치 | 바로 착수 후보 |
+| 18 | [TASK-039](TASK-039-backtest-research-report-hardening.md) backtest research report hardening | ACT | 대기 | Medium / score 28 | M · 4 ph | 회귀 리스크 감소 | 바로 착수 후보 |
+| 19 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) portfolio performance tax lot reporting | ACT | 대기 | Medium / score 28 | M · 4 ph | 중간 가치 | 바로 착수 후보 |
 
 ### REVIEW — 자율 가능 + 경계 확인
 
@@ -71,14 +86,29 @@
 
 | ID | 우선순위 | Owner | 예상 | 게이트 / 태그 |
 |----|----------|-------|------|----------------|
+| [TASK-064](TASK-064-fix-condition-toctou-race.md) | Critical | Backend Engineer | 8 ph / ~60000 tok | safety bug |
 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | High | UI/UX Designer | 4 ph / ~45000 tok | read-only UI/backend only; no order submission, order modification, broker order path, risk policy, schema migration, or prod mutation |
 | [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | High | Backend Engineer | 16 ph / ~120000 tok | no live orders; paper-safe; Owner 승인 전 prod 전환 금지 |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | High | Lead Engineer | 2 ph / ~15000 tok | - |
+| [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | High | UI/UX Designer | 4 ph / ~30000 tok | - |
+| [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | High | UI/UX Designer | 3 ph / ~20000 tok | - |
+| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | High | Backend Engineer | 3 ph / ~25000 tok | - |
+| [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | High | Backend Engineer | 6 ph / ~40000 tok | - |
+| [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | High | UI/UX Designer | 1 ph / ~10000 tok | - |
+| [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | High | Backend Engineer | 8 ph / ~50000 tok | - |
+| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | High | Backend Engineer | 6 ph / ~40000 tok | - |
+| [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | High | Backend Engineer | 4 ph / ~30000 tok | safety bug — no live orders during fix |
+| [TASK-066](TASK-066-test-coverage-60pct.md) | High | QA | 12 ph / ~80000 tok | Phase 3 전 필수 |
+| [TASK-067](TASK-067-fix-intraday-no-try-except.md) | High | UI/UX Designer | 2 ph / ~12000 tok | - |
 | [TASK-039](TASK-039-backtest-research-report-hardening.md) | Medium | Quant Researcher | 4 ph / ~45000 tok | backtest/report/mock-only; no live scheduler, broker order path, risk policy, schema migration, or prod mutation |
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | Medium | Performance Analyst | 4 ph / ~45000 tok | read-only reporting only; no tax advice, order submission, broker order path, risk policy, schema migration, or prod mutation |
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | Medium | Lead Engineer | 3 ph / ~35000 tok | docs/config/test-only; no broker order implementation, order path, risk policy, schema migration, secret, or prod mutation |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | Medium | UI/UX Designer | 12 ph / ~90000 tok | 선행 TASK-045 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요; no live orders |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | Medium | Backend Engineer | 12 ph / ~90000 tok | 선행 TASK-047 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
+| [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | Medium | Backend Engineer | 2 ph / ~15000 tok | - |
+| [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | Medium | Backend Engineer | 3 ph / ~20000 tok | - |
+| [TASK-065](TASK-065-feat-log-rotation.md) | Medium | Backend Engineer | 2 ph / ~12000 tok | - |
 
 ### 보류 (게이트 — 외부/결정 대기)
 

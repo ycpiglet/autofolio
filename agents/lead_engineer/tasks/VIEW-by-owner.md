@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T04:31:39+09:00`
+> 생성 시각: `2026-06-14T08:42:48+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -20,6 +20,15 @@
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
+| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
+| [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 대기 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
+| [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 대기 | Medium | 낮 | 2 ph / ~15000 tok | Backend Engineer | bug,security,session,logout |
+| [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Backend Engineer | database,performance,integrity,sqlite |
+| [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 대기 | High | 중-상 | 8 ph / ~50000 tok | Backend Engineer | feature,engine,alerts,notifications |
+| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
+| [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 대기 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,circuit-breaker,pnl |
+| [TASK-064](TASK-064-fix-condition-toctou-race.md) | 대기 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
+| [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |
 
 ## Compliance Officer
 
@@ -45,14 +54,14 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-010](TASK-010-kis-websocket-realtime.md) | 완료 | High | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,websocket,realtime |
 | [TASK-011](TASK-011-kis-intraday-chart.md) | 완료 | High | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,chart,intraday |
-| [TASK-012](TASK-012-kis-long-term-order-history.md) | 완료 | Medium | 하 | 2 ph / ~50000 tok | KIS API Engineer | kis,history |
-| [TASK-013](TASK-013-kis-batch-price.md) | 완료 | Medium | 하 | 2 ph / ~50000 tok | KIS API Engineer | kis,price,performance |
+| [TASK-012](TASK-012-kis-long-term-order-history.md) | 완료 | Medium | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,history |
+| [TASK-013](TASK-013-kis-batch-price.md) | 완료 | Medium | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,price,performance |
 | [TASK-014](TASK-014-kis-after-hours-order.md) | 보류 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
-| [TASK-015](TASK-015-kis-index-price.md) | 완료 | Low | 하 | 1 ph / ~50000 tok | KIS API Engineer | kis,index |
+| [TASK-015](TASK-015-kis-index-price.md) | 완료 | Low | 낮 | 1 ph / ~50000 tok | KIS API Engineer | kis,index |
 | [TASK-016](TASK-016-kis-fundamental-data.md) | 완료 | Low | 중 | 4 ph / ~50000 tok | KIS API Engineer | kis,fundamental,research |
-| [TASK-017](TASK-017-kis-dividend-info.md) | 완료 | Low | 하 | 2 ph / ~50000 tok | KIS API Engineer | kis,dividend |
+| [TASK-017](TASK-017-kis-dividend-info.md) | 완료 | Low | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,dividend |
 | [TASK-018](TASK-018-kis-order-book.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,orderbook,realtime |
-| [TASK-019](TASK-019-kis-sector-price.md) | 완료 | Low | 하 | 2 ph / ~50000 tok | KIS API Engineer | kis,sector |
+| [TASK-019](TASK-019-kis-sector-price.md) | 완료 | Low | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,sector |
 | [TASK-020](TASK-020-kis-disclosure.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,disclosure,compliance |
 | [TASK-021](TASK-021-kis-margin-short.md) | 보류 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
 | [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
@@ -73,6 +82,7 @@
 | [TASK-008](TASK-008-streamlit-legacy-wrapper.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | streamlit,compatibility |
 | [TASK-009](TASK-009-orchestrator-import-check.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | agent-runtime,import |
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 대기 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
 
 ## Performance Analyst
 
@@ -89,6 +99,7 @@
 | [TASK-025](TASK-025-quant-trading-scenario-catalog.md) | 완료 | High | 중 | 1 ph / ~25000 tok | QA | qa,quant,paper,scenario-catalog,engine |
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | High | 중 | 2 ph / ~30000 tok | QA | qa,kis,ui,paper,market-hours,verification |
 | [TASK-036](TASK-036-paper-transaction-ui-sync-soak.md) | 완료 | High | 중 | 2 ph / ~35000 tok | QA | qa,kis,paper,transaction,ui-sync,soak |
+| [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
 
 ## Quant Researcher
 
@@ -113,4 +124,8 @@
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
+| [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 대기 | High | 중 | 4 ph / ~30000 tok | UI/UX Designer | bug,ui,alerts,persistence |
+| [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
+| [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 대기 | High | 낮 | 1 ph / ~10000 tok | UI/UX Designer | bug,ui,history,pnl |
+| [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 대기 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 

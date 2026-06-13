@@ -55,7 +55,7 @@
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) → v1 |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | Backend Engineer | fix: compliance 게이트 fail-open (Phase 3 전 필수) → v1 |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 → v1 |
-| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | Lead Engineer | 제품 성숙도 평가 지표 문서 등록 (2026-06-14 감사) |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | Lead Engineer | 제품 성숙도 평가 지표 문서 등록 (2026-06-14 감사) |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 대기 | UI/UX Designer | fix: 알림 채널 토글/규칙 설정 미저장 (alerts.py) |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | UI/UX Designer | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | Backend Engineer | fix: backend.allocation_gap() 미구현 → portfolio/analysis mock fallback |
@@ -68,5 +68,5 @@
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 대기 | Backend Engineer | fix: 서킷브레이커 일손실 기준 로직 오류 (안전 버그) |
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 대기 | Backend Engineer | fix: 주문 조건 TOCTOU 레이스 — 중복 주문 위험 (Critical) |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Backend Engineer | feat: 로그 로테이션 + 절대 경로 (ops) |
-| [TASK-066](TASK-066-test-coverage-60pct.md) | 완료 | QA | feat: 테스트 커버리지 60%+ — 누락 35개 케이스 구현 |
+| [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | QA | feat: 테스트 커버리지 60%+ — 누락 35개 케이스 구현 |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 대기 | UI/UX Designer | fix: 분석 탭 _intraday_section try/except 누락 크래시 |
