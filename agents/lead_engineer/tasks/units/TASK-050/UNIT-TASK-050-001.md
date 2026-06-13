@@ -3,7 +3,7 @@ unit_id: UNIT-TASK-050-001
 task_id: TASK-050
 task_set_id: TASKSET-AUTOFOLIO-SAFETY-FIXES
 project_id: PROJECT-AUTOFOLIO
-status: worker_ready
+status: completed
 horizon: unit
 model_tier: worker_standard
 escalation_triggers: [high_risk, repeated_failure]
@@ -101,3 +101,17 @@ python scripts/check_agent_docs.py
 
 `today_order_amount()` 및 동일 파일 내 관련 날짜 쿼리 수정 후 즉시 중단.
 다른 repositories.py 메서드, 인접 모듈, 마이그레이션으로 확장 금지.
+
+## 완료 기록
+
+완료 시각: 2026-06-14T03:22:40+09:00
+
+**변경 내용:**
+- `app/database/repositories.py` `today_order_amount()`: `DATE(created_at)` → `DATE(created_at, 'localtime')` 로 수정 (1줄 변경). UTC 저장값을 KST로 변환 후 비교하여 KST 00:00~08:59 야간 윈도우 버그 해소.
+- `tests/integration/test_paper_scenario_matrix.py`: `test_daily_limit_counts_utc_night_kst_today_order` 신규 추가. `_set_order_log_local_today()` 마스킹 헬퍼를 사용하지 않고 UTC 야간(`datetime('now','localtime','start of day','-9 hours','+1 minute')`)을 직접 주입해 버그 재현 후 수정 증거 확인.
+
+**검증 결과:**
+- 수정 전: 신규 테스트 FAILED (엔진이 한도 초과에도 주문 실행)
+- 수정 후: 신규 테스트 PASSED, 기존 `test_daily_order_amount_limit_blocks_new_order` PASSED
+- `tests/integration/test_paper_scenario_matrix.py` 전체 17 passed
+- SQLite 동작 검증: `DATE('2026-06-13 15:01:00', 'localtime')` = `2026-06-14` (KST 오늘) ✓

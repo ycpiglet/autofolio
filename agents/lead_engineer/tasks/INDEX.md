@@ -52,6 +52,21 @@
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | Backend Engineer | UI 대개편 Phase 3 — 매매 + 내역 + 설정 (state-changing + 안전 게이트) ⚠ Owner 승인 필수 |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Backend Engineer | UI 대개편 Phase 4 — 에이전트/IC + 알림 + SSE |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | UI/UX Designer | UI 대개편 Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴 |
-| [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 대기 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) → v1 |
+| [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) → v1 |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 대기 | Backend Engineer | fix: compliance 게이트 fail-open (Phase 3 전 필수) → v1 |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 대기 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 → v1 |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | Lead Engineer | 제품 성숙도 평가 지표 문서 등록 (2026-06-14 감사) |
+| [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 대기 | UI/UX Designer | fix: 알림 채널 토글/규칙 설정 미저장 (alerts.py) |
+| [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | UI/UX Designer | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op |
+| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | Backend Engineer | fix: backend.allocation_gap() 미구현 → portfolio/analysis mock fallback |
+| [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 대기 | Backend Engineer | fix: 일손익률/누적손익률 KPI 0.0 하드코딩 |
+| [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 대기 | UI/UX Designer | fix: history.py 라이브 모드 조기 return으로 PnL/배당 탭 미렌더 |
+| [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 대기 | Backend Engineer | fix: logout() 미완전 세션 상태 초기화 (security) |
+| [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 대기 | Backend Engineer | SQLite WAL 모드 + FK 제약 적용 |
+| [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 대기 | Backend Engineer | feat: 가격 알림 엔진 평가 루프 구현 (dead feature 해소) |
+| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | Backend Engineer | feat: KRX 휴장일 캘린더 연동 (safety) |
+| [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 대기 | Backend Engineer | fix: 서킷브레이커 일손실 기준 로직 오류 (안전 버그) |
+| [TASK-064](TASK-064-fix-condition-toctou-race.md) | 대기 | Backend Engineer | fix: 주문 조건 TOCTOU 레이스 — 중복 주문 위험 (Critical) |
+| [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Backend Engineer | feat: 로그 로테이션 + 절대 경로 (ops) |
+| [TASK-066](TASK-066-test-coverage-60pct.md) | 완료 | QA | feat: 테스트 커버리지 60%+ — 누락 35개 케이스 구현 |
+| [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 대기 | UI/UX Designer | fix: 분석 탭 _intraday_section try/except 누락 크래시 |
