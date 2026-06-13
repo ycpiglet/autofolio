@@ -98,10 +98,15 @@ def _run_scenario(
 
 
 def _set_order_log_local_today(repo: Repository, order_log_id: int) -> None:
-    """Make synthetic prior orders align with KST-local daily limit checks."""
+    """Make synthetic prior orders align with KST daily limit checks.
+
+    Sets created_at to a UTC timestamp whose KST date (UTC+9) equals today's
+    KST date.  Uses explicit '+9 hours' offset — never 'localtime' — so the
+    result is identical regardless of the OS/CI timezone.
+    """
     with get_connection(repo.db_path) as conn:
         conn.execute(
-            "UPDATE order_logs SET created_at = datetime('now', 'localtime') WHERE id = ?",
+            "UPDATE order_logs SET created_at = datetime('now', '+9 hours', 'start of day', '-9 hours') WHERE id = ?",
             (order_log_id,),
         )
 
@@ -265,14 +270,15 @@ def test_daily_limit_counts_utc_night_kst_today_order(monkeypatch):
         kis_order_id="PREVIOUS-UTC-NIGHT",
         order_status=OrderStatus.FILLED.value,
     )
-    # KST 기준 오늘 자정(00:00) = UTC 기준 어제 15:00 로 설정한다.
-    # datetime('now','localtime','start of day') → KST 오늘 00:00 (문자열)
-    # 해당 시각은 UTC 기준으로 9시간 전이므로 UTC-어제 날짜가 된다.
-    # → DATE(created_at) = yesterday(UTC) but DATE(created_at,'localtime') = today(KST)
+    # KST 기준 오늘 자정 직후(00:01 KST) = UTC 기준 어제 15:01 로 설정한다.
+    # 산술: 'now'(UTC) → +9h → KST 현재 시각 → 'start of day' → KST 오늘 00:00 (shifted frame)
+    #       → -9h → UTC 기준 어제 15:00 → +1 minute → UTC 어제 15:01
+    # 결과: DATE(created_at) = UTC 어제, DATE(created_at, '+9 hours') = KST 오늘
+    # 'localtime' 을 사용하지 않으므로 OS 시간대와 무관 (CI UTC 환경에서도 동일).
     with get_connection(repo.db_path) as conn:
         conn.execute(
             """UPDATE order_logs
-               SET created_at = datetime('now', 'localtime', 'start of day', '-9 hours', '+1 minute')
+               SET created_at = datetime('now', '+9 hours', 'start of day', '-9 hours', '+1 minute')
                WHERE id = ?""",
             (previous_order_id,),
         )

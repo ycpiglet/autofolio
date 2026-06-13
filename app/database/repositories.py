@@ -307,7 +307,7 @@ class Repository:
                 '''
                 SELECT COALESCE(SUM(COALESCE(order_price, current_price, 0) * quantity), 0) AS amount
                 FROM order_logs
-                WHERE DATE(created_at, 'localtime') = DATE('now', 'localtime')
+                WHERE DATE(created_at, '+9 hours') = DATE('now', '+9 hours')
                   AND order_status IN ('REQUESTED', 'FILLED', 'PENDING')
                 '''
             ).fetchone()
