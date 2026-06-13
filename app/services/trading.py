@@ -43,10 +43,10 @@ __all__ = [
 
 @dataclass
 class GateResult:
-    status: Literal["saved", "blocked_disclosure", "rejected", "needs_acknowledgement"]
+    status: Literal["saved", "blocked_disclosure", "rejected", "needs_acknowledgement", "error"]
     message: str  # human-readable reason or verdict text
     condition_id: int | None = None
-    compliance: Literal["passed", "caution_acked", "skipped"] | None = None
+    compliance: Literal["passed", "caution_acked", "skipped", "error"] | None = None
 
 
 def save_condition_with_gates(
@@ -111,6 +111,13 @@ def save_condition_with_gates(
             # caution_acknowledged=True → 저장 진행
             _compliance_tag = "caution_acked"
             _verdict_for_result = verdict_text
+        elif "호출 오류" in verdict_text:
+            # Agent call failed — fail-closed: do NOT save the condition
+            return GateResult(
+                status="error",
+                message=f"Compliance 게이트 평가 불가 (에이전트 오류): {verdict_text}",
+                compliance="error",
+            )
         else:
             _compliance_tag = "passed"
             _verdict_for_result = verdict_text

@@ -133,3 +133,23 @@ def test_compliance_pass():
     assert result.status == "saved"
     assert result.condition_id == 1
     assert result.compliance == "passed"
+
+
+def test_compliance_agent_call_error_fail_closed():
+    """agent 호출 오류 문자열 반환 시 fail-closed — status='error', compliance='error', add_condition 미호출."""
+    mock_add = Mock()
+    with (
+        patch(
+            "app.ui.backend.disclosure_gate_state",
+            return_value={"blocked": False, "reason": ""},
+        ),
+        patch(
+            "app.ui.agents_runtime.ask",
+            return_value="[compliance-officer] 호출 오류: timeout",
+        ),
+        patch("app.ui.backend.add_condition", mock_add),
+    ):
+        result = save_condition_with_gates("005930", "BUY", 70000.0, 1, False)
+    assert result.status == "error", f"expected 'error', got '{result.status}'"
+    assert result.compliance == "error", f"expected compliance='error', got '{result.compliance}'"
+    mock_add.assert_not_called()
