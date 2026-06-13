@@ -54,7 +54,7 @@
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | UI/UX Designer | UI 대개편 Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴 |
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) → v1 |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | Backend Engineer | fix: compliance 게이트 fail-open (Phase 3 전 필수) → v1 |
-| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 대기 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 → v1 |
+| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 → v1 |
 | [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | Lead Engineer | 제품 성숙도 평가 지표 문서 등록 (2026-06-14 감사) |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 대기 | UI/UX Designer | fix: 알림 채널 토글/규칙 설정 미저장 (alerts.py) |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | UI/UX Designer | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op |

@@ -53,6 +53,31 @@ def _live() -> None:
                 disclosure_gate = backend.refresh_disclosure_gate(sym, days=1)
             if disclosure_gate.get("blocked"):
                 st.error(f"공시 게이트 차단: {disclosure_gate.get('reason', '')}")
+
+            # --- Compliance ack state ---
+            # Stale ack: clear when symbol or side changes to avoid carry-over.
+            _ack_context = f"{sym}:{side}"
+            if st.session_state.get("_trade_ack_context") != _ack_context:
+                st.session_state.pop("trade_ack_checked", None)
+                st.session_state.pop("_trade_ack_pending_message", None)
+                st.session_state["_trade_ack_context"] = _ack_context
+
+            # Render pending-ack UI OUTSIDE the button block so the widget
+            # survives reruns (Streamlit deletes widget-keyed state when the
+            # widget is not rendered; a plain session-state key persists).
+            if st.session_state.get("_trade_ack_pending_message"):
+                _msg = st.session_state["_trade_ack_pending_message"]
+                st.warning(f"⚠️ Compliance 주의사항\n{_msg[:300]}")
+                with st.expander("전체 의견"):
+                    st.markdown(_msg)
+                ack_val = st.checkbox(
+                    "위 주의사항을 확인했으며 계속 진행합니다",
+                    key="lv_comply_ack_widget",
+                )
+                # Mirror into persistent key that survives reruns.
+                st.session_state["trade_ack_checked"] = ack_val
+                st.info("체크박스를 선택한 뒤 '조건 저장'을 다시 클릭하세요.")
+
             if st.button(
                 "조건 저장",
                 type="primary",
@@ -66,7 +91,7 @@ def _live() -> None:
                         result = save_condition_with_gates(
                             sym, side, tp, qty, auto,
                             compliance_check=True,
-                            caution_acknowledged=st.session_state.get("lv_comply_ack", False),
+                            caution_acknowledged=st.session_state.get("trade_ack_checked", False),
                         )
                 else:
                     result = save_condition_with_gates(
@@ -81,13 +106,16 @@ def _live() -> None:
                     st.error(f"❌ Compliance Officer 거부\n{result.message[:400]}")
                     st.stop()
                 elif result.status == "needs_acknowledgement":
-                    st.warning(f"⚠️ Compliance 주의사항\n{result.message[:300]}")
-                    with st.expander("전체 의견"):
-                        st.markdown(result.message)
-                    st.checkbox("위 주의사항을 확인했으며 계속 진행합니다", key="lv_comply_ack")
-                    st.info("체크박스를 선택해야 조건이 저장됩니다.")
-                    st.stop()
+                    # Store the CAUTION message in a persistent session key so
+                    # the warning + checkbox render on the NEXT run (outside the
+                    # button block), where Streamlit will not clean up the widget.
+                    st.session_state["_trade_ack_pending_message"] = result.message
+                    st.session_state.pop("trade_ack_checked", None)
+                    st.rerun()
                 elif result.status == "saved":
+                    # Clear ack state on successful save.
+                    st.session_state.pop("trade_ack_checked", None)
+                    st.session_state.pop("_trade_ack_pending_message", None)
                     if result.compliance == "passed":
                         st.success("✅ Compliance 검토 통과")
                     elif result.compliance == "caution_acked":

@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T04:19:34+09:00`
+> 생성 시각: `2026-06-14T04:31:39+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -72,5 +72,5 @@
 | [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
 | [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
 | [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
-| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 대기 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
+| [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
 

@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-052
-status: 대기
+status: 완료
 owner: UI/UX Designer
 assignees: [UI/UX Designer, QA]
 priority: Low
@@ -14,13 +14,13 @@ trigger_meeting: 없음
 audit_log: AUDIT-2026-06-13-007
 created: 2026-06-13
 created_at: 2026-06-13T01:33:29+09:00
-updated_at: 2026-06-13T01:33:29+09:00
+updated_at: 2026-06-14T04:30:06+09:00
 ---
 
 # TASK-052 fix: trade 뷰 ack 체크박스 영구 루프
 
 작업 ID: TASK-052
-상태: 대기
+상태: 완료
 Owner: UI/UX Designer
 요청 시각: 2026-06-13
 기록 시각: 2026-06-13T01:33:29+09:00
@@ -80,3 +80,30 @@ Streamlit trade 화면에서 컴플라이언스 CAUTION 조건 저장 시 `needs
 - Initiative: `agents/project/initiatives/INIT-AUTOFOLIO-SAFETY-FIXES.md`
 - Taskset: `agents/project/initiatives/TASKSET-AUTOFOLIO-SAFETY-FIXES.md`
 - Unit spec: `agents/lead_engineer/tasks/units/TASK-052/UNIT-TASK-052-001.md`
+
+## 완료 노트 (2026-06-14T04:30:06+09:00)
+
+`lv_comply_ack` 체크박스를 버튼 블록 밖으로 분리하여 Streamlit 위젯 클린업 문제 해소.
+`trade_ack_checked` 세션 키로 ack 상태 영속화. 617 pytest, 0 doc error.
+
+## 완료 기록
+
+완료 시각: 2026-06-14T04:39:57+09:00
+검토자: UI/UX Designer + QA (Codex self-review)
+
+## 증거
+
+- `app/ui/views/trade.py`: `lv_comply_ack` 체크박스를 버튼 블록 밖으로 분리. 비위젯 세션키 `_trade_ack_pending_message`/`trade_ack_checked`/`_trade_ack_context`로 ack 상태를 rerun 간 영속화. needs_acknowledgement 시 메시지 저장 후 블록 밖 렌더, 저장 성공 시 키 클리어. fresh CAUTION 자동 승인 방지(context 변경 시 초기화).
+- `tests/unit/test_trade_order_book_view.py`: ack 체크박스가 버튼 블록 밖에 렌더되는 구조 검증 + `trade_ack_checked` 세션키 지속 검증 2건 추가.
+- 전체 pytest 617 passed, check_agent_docs 0 error.
+
+## 리뷰
+
+- 근본 원인(위젯키 클린업)을 비위젯 세션키 분리로 해소 — Streamlit 위젯 생명주기 정석 패턴.
+- Fail-safe: ack 키 없으면 `caution_acknowledged=False` — 자동 승인 없음.
+- 한계(정직): 완전 2단계 E2E(저장→CAUTION→체크→재저장)는 AppTest rerun 경계 mock 미생존으로 미구현. 구조+지속 메커니즘을 분리 검증.
+- scope 준수: trade.py만 수정, 서비스 레이어 무변경.
+
+## Independent Audit
+
+판정: 통과 (구조 수정 + 세션키 지속 분리 검증, 전체 617 passed, 0 doc error).

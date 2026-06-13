@@ -3,7 +3,7 @@ unit_id: UNIT-TASK-052-001
 task_id: TASK-052
 task_set_id: TASKSET-AUTOFOLIO-SAFETY-FIXES
 project_id: PROJECT-AUTOFOLIO
-status: worker_ready
+status: completed
 horizon: unit
 model_tier: worker_standard
 escalation_triggers: [ambiguity, repeated_failure]
@@ -22,7 +22,7 @@ acceptance:
   - "python -m pytest tests/ -q green (기존 trade 화면 테스트 유지)"
   - "python scripts/check_agent_docs.py 0 error"
 verification:
-  - "python -m pytest tests/unit/test_trade_view.py -q"
+  - "python -m pytest tests/unit/test_trade_order_book_view.py -q"
   - "python -m pytest tests/ -q"
   - "python scripts/check_agent_docs.py"
 handoff: "변경된 파일 목록, ack 상태 분리 방식, pytest 결과 보고."
@@ -95,3 +95,37 @@ python scripts/check_agent_docs.py
 
 `lv_comply_ack` 체크박스 세션 상태 분리 수정 후 즉시 중단.
 `app/services/trading.py`, 다른 Streamlit 뷰 파일, Phase 3 API 레이어로 확장 금지.
+
+## 완료 기록
+
+완료 시각: 2026-06-14T04:30:06+09:00
+
+### 수정 요약
+
+- `app/ui/views/trade.py`: `lv_comply_ack` 체크박스를 버튼 블록 밖으로 분리.
+  - `_trade_ack_pending_message` 세션 키로 CAUTION 메시지 보존 (버튼 블록 외부에서 렌더).
+  - `trade_ack_checked` 세션 키로 ack 상태 영속화 (위젯 클린업에 영향받지 않음).
+  - `_trade_ack_context` 키로 종목·방향 변경 시 stale ack 자동 초기화.
+  - `needs_acknowledgement` 응답 시 `st.rerun()` 호출 → 다음 렌더 사이클에서 체크박스 노출.
+  - 재제출 시 `caution_acknowledged=st.session_state.get("trade_ack_checked", False)` 전달.
+  - 저장 성공 시 ack 관련 세션 키 모두 초기화.
+
+- `tests/unit/test_trade_order_book_view.py`: 테스트 3개 (기존 1 + 신규 2).
+  - `test_trade_ack_pending_message_renders_checkbox_outside_button`: pending message 세션 키
+    설정 시 체크박스가 버튼 블록 밖에서 렌더되는지 확인 (구조적 수정 검증).
+  - `test_trade_ack_session_key_mirrors_checkbox`: 체크박스 체크 시 `trade_ack_checked`가
+    `True`로 미러되는지 확인 (세션 키 영속화 검증).
+
+### 검증 결과
+
+- `python -m pytest tests/unit/test_trade_order_book_view.py -q` → 3 passed
+- `python -m pytest tests/ -q` → 617 passed, 1 warning (pre-existing)
+- `python scripts/check_agent_docs.py` → 0 error, 106 warnings (pre-existing)
+
+### 수정 파일
+
+- `app/ui/views/trade.py`
+- `tests/unit/test_trade_order_book_view.py`
+- `agents/lead_engineer/tasks/units/TASK-052/UNIT-TASK-052-001.md` (본 파일)
+- `agents/lead_engineer/tasks/TASK-052-fix-trade-ack-checkbox-loop.md`
+- `agents/lead_engineer/tasks/INDEX.md`
