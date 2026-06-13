@@ -1,7 +1,7 @@
 ---
 schema_version: agent-runtime-work-item/v1
 work_id: INIT-AUTOFOLIO-SAFETY-FIXES
-work_uid: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+work_uid: 38fda8f5-d995-47ee-a7ae-683abcb3bee8
 kind: initiative
 status: planned
 owner: Lead Engineer
@@ -44,3 +44,18 @@ Autofolio 매매 엔진에서 발견된 안전-임계 버그 3건을 Phase 3 UI 
 
 - v1 레코드: `agents/project/initiatives/`, `agents/lead_engineer/tasks/units/TASK-NNN/`
 - 기존 TASK stubs: `agents/lead_engineer/tasks/TASK-NNN.md` (한국어 상태 유지, v1 포인터 추가)
+
+### 호스트 프로젝트 식별자
+
+각 유닛의 `project_id: PROJECT-AUTOFOLIO`는 이 저장소의 호스트 프로젝트를 가리키는
+자유 문자열 레이블이다. `task_unit_readiness_gate` 및 `work_schema_gate`는 이 값을
+파일 참조로 검증하지 않으므로, 별도의 PROJECT-CONTEXT.yml 레코드 없이도 게이트를 통과한다.
+호스트 프로젝트 컨텍스트 상세는 `agents/project/VISION.md` 및 `agents/project/ROADMAP.md`를
+참조한다 — Autofolio = KIS 기반 개인 자산운용 OS.
+
+### 유닛 스키마 vs v1 work-item 봉투
+
+유닛 스펙(`units/TASK-NNN/UNIT-TASK-NNN-NNN.md`)은 readiness-gate 유닛 스키마
+(`unit_id / task_id / task_set_id / project_id / ...`)를 사용하며, v1 work-item 봉투가 아니다.
+따라서 유닛 파일에는 `work_uid` / `schema_version` 필드가 의도적으로 없으며,
+`work_schema_gate --items`가 아닌 `task_unit_readiness_gate`로 검증한다.

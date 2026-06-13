@@ -74,7 +74,14 @@ Out of scope: 다른 서비스 레이어, 마이그레이션, 스키마 변경, 
 ## Acceptance Criteria
 
 - `today_order_amount()` UTC/KST 불일치 수정 완료
-- `test_daily_order_amount_limit_blocks_new_order` KST 00:00~08:59 시뮬레이션 통과
+- 기존 `test_daily_order_amount_limit_blocks_new_order` 통과 유지 — 단, 이 테스트는
+  `_set_order_log_local_today()` 헬퍼(tests/integration/test_paper_scenario_matrix.py ~line 100–106)로
+  `created_at`을 `datetime('now','localtime')`로 패치하므로 **버그를 마스킹**한다.
+  즉, 수정 전·후 모두 이 테스트는 통과할 수 있어 수정 증거가 되지 않는다.
+- **신규 필수**: KST 00:00~08:59 야간 윈도우 재현 케이스를 `_set_order_log_local_today()`
+  헬퍼를 사용하지 않고 추가한다. 해당 케이스는:
+  1. 수정 전 — `today_order_amount()`가 0을 반환해 한도 우회 허용 (버그 재현)
+  2. 수정 후 — `today_order_amount()`가 정확한 금액을 반환해 한도 차단 (수정 증거)
 - `python -m pytest tests/ -q` green
 - `python scripts/check_agent_docs.py` 0 error
 

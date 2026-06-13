@@ -13,7 +13,7 @@ inputs:
   - app/services/trading.py
 target_files:
   - app/services/trading.py
-  - tests/unit/test_compliance_gate.py
+  - tests/unit/test_trading_gates.py
 scope: "app/services/trading.py 의 GateResult 클래스 및 save_condition_with_gates() verdict 로직만 수정. Phase 3 HTTP 매핑은 이 유닛에서 구현하지 않음."
 acceptance:
   - "GateResult.status에 'error' 상태 추가"
@@ -49,7 +49,7 @@ agent 호출 오류 문자열("호출 오류", "오류" 등)을 "reject"/"거부
 ## Target Files
 
 - `app/services/trading.py`
-- `tests/unit/test_compliance_gate.py`
+- `tests/unit/test_trading_gates.py`
 
 ## Scope
 
@@ -80,7 +80,7 @@ Out of scope: Phase 3 HTTP 엔드포인트 매핑 (`status="error"` → HTTP 503
 ## Verification
 
 ```powershell
-python -m pytest tests/unit/test_compliance_gate.py -q
+python -m pytest tests/unit/test_trading_gates.py -q
 python -m pytest tests/ -q
 python scripts/check_agent_docs.py
 ```

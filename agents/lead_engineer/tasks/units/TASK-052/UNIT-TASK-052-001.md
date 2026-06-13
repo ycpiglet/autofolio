@@ -14,7 +14,7 @@ inputs:
   - app/services/trading.py
 target_files:
   - app/ui/views/trade.py
-  - tests/unit/test_trade_view.py
+  - tests/unit/test_trade_order_book_view.py
 scope: "app/ui/views/trade.py 의 lv_comply_ack 체크박스 렌더 로직만 수정. app/services/trading.py 변경 금지 (서비스 레이어는 이미 caution_acknowledged 파라미터 지원)."
 acceptance:
   - "needs_acknowledgement=True 상태에서 체크박스 체크 → 재제출 → 루프 없이 정상 저장"
@@ -55,7 +55,7 @@ depends_on: []
 ## Target Files
 
 - `app/ui/views/trade.py`
-- `tests/unit/test_trade_view.py`
+- `tests/unit/test_trade_order_book_view.py`
 
 ## Scope
 
@@ -82,7 +82,7 @@ Out of scope: `app/services/trading.py` 변경, 다른 뷰 파일, 백엔드 API
 ## Verification
 
 ```powershell
-python -m pytest tests/unit/test_trade_view.py -q
+python -m pytest tests/unit/test_trade_order_book_view.py -q
 python -m pytest tests/ -q
 python scripts/check_agent_docs.py
 ```
