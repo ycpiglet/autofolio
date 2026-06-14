@@ -1523,7 +1523,7 @@
     {
       "type": "task",
       "id": "TASK-057",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1544,7 +1544,7 @@
       "audit_log": "AUDIT-2026-06-14-001",
       "created": "2026-06-14",
       "created_at": "2026-06-14T00:00:00+09:00",
-      "updated_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T11:13:13+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-057-fix-kpi-returns-hardcoded-zero.md",
       "_title": "fix kpi returns hardcoded zero"
     },

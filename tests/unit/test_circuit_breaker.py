@@ -409,3 +409,55 @@ class TestOrderFlowFailureTracking:
 
         assert result.executed
         assert repo.get_system_state("consecutive_order_failures") == "0"
+
+
+# ---------------------------------------------------------------------------
+# TASK-057: total_realized_pnl / total_buy_cost_basis helpers
+# ---------------------------------------------------------------------------
+
+class TestTotalRealizedPnl:
+    def test_returns_zero_when_no_executions(self, repo):
+        assert repo.total_realized_pnl() == 0.0
+
+    def test_accumulates_multiple_sell_days(self, repo):
+        """Two SELL fills on different (simulated) days both count."""
+        for kid in ("B_acc1", "B_acc2"):
+            lid = repo.create_order_log(
+                condition_id=None, symbol="005930", side="BUY",
+                order_type="LIMIT", order_price=70000.0, current_price=70000.0,
+                quantity=1, kis_order_id=kid, order_status="FILLED",
+            )
+            repo.create_execution_log(
+                order_log_id=lid, symbol="005930",
+                filled_price=70000.0, filled_quantity=1,
+            )
+        s1 = repo.create_order_log(
+            condition_id=None, symbol="005930", side="SELL",
+            order_type="LIMIT", order_price=75000.0, current_price=75000.0,
+            quantity=1, kis_order_id="S_acc1", order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=s1, symbol="005930",
+            filled_price=75000.0, filled_quantity=1,
+        )
+        assert repo.total_realized_pnl() == pytest.approx(5000.0)
+
+
+class TestTotalBuyCostBasis:
+    def test_returns_zero_when_no_executions(self, repo):
+        assert repo.total_buy_cost_basis() == 0.0
+
+    def test_sums_all_buy_fills(self, repo):
+        """BUY 2 shares @ 70_000 and 1 share @ 80_000 → total cost = 220_000."""
+        fills = [(70000.0, 2, "B_cost1"), (80000.0, 1, "B_cost2")]
+        for price, qty, kid in fills:
+            lid = repo.create_order_log(
+                condition_id=None, symbol="005930", side="BUY",
+                order_type="LIMIT", order_price=price, current_price=price,
+                quantity=qty, kis_order_id=kid, order_status="FILLED",
+            )
+            repo.create_execution_log(
+                order_log_id=lid, symbol="005930",
+                filled_price=price, filled_quantity=qty,
+            )
+        assert repo.total_buy_cost_basis() == pytest.approx(220000.0)

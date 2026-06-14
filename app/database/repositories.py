@@ -374,6 +374,63 @@ class Repository:
             ).fetchone()
             return float(row["realized_pnl"] or 0.0)
 
+    def total_realized_pnl(self) -> float:
+        """전체 기간 SELL 체결 기준 실현 손익 합계 (누적손익률 분자 사용).
+
+        실현 손익 = Σ (매도체결가 − 종목별 평균매입가) × 매도수량
+        평균매입가: 전체 기간 BUY 체결 가중평균 (avg cost basis).
+        체결 내역 없으면 0.0 반환.
+        today_realized_pnl()과 동일한 로직이나 날짜 필터 없음.
+        """
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                '''
+                WITH avg_cost AS (
+                    SELECT
+                        el.symbol,
+                        SUM(el.filled_price * el.filled_quantity) /
+                            SUM(el.filled_quantity) AS avg_buy_price
+                    FROM execution_logs el
+                    JOIN order_logs ol ON el.order_log_id = ol.id
+                    WHERE ol.side = 'BUY'
+                      AND el.filled_quantity > 0
+                    GROUP BY el.symbol
+                )
+                SELECT COALESCE(
+                    SUM(
+                        (el.filled_price - COALESCE(ac.avg_buy_price, el.filled_price))
+                        * el.filled_quantity
+                    ), 0
+                ) AS realized_pnl
+                FROM execution_logs el
+                JOIN order_logs ol ON el.order_log_id = ol.id
+                LEFT JOIN avg_cost ac ON ac.symbol = el.symbol
+                WHERE ol.side = 'SELL'
+                  AND el.filled_quantity > 0
+                '''
+            ).fetchone()
+            return float(row["realized_pnl"] or 0.0)
+
+    def total_buy_cost_basis(self) -> float:
+        """전체 기간 BUY 체결 원가 합계 (누적손익률 분모 사용).
+
+        투자 원금 = Σ (매수체결가 × 매수수량) for all BUY fills ever.
+        체결 내역 없으면 0.0 반환.
+        """
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                '''
+                SELECT COALESCE(
+                    SUM(el.filled_price * el.filled_quantity), 0
+                ) AS total_cost
+                FROM execution_logs el
+                JOIN order_logs ol ON el.order_log_id = ol.id
+                WHERE ol.side = 'BUY'
+                  AND el.filled_quantity > 0
+                '''
+            ).fetchone()
+            return float(row["total_cost"] or 0.0)
+
     def increment_consecutive_failures(self) -> None:
         """연속 주문 실패 카운터를 1 증가시킨다."""
         current = self.get_system_state("consecutive_order_failures", "0")
