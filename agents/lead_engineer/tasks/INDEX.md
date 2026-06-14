@@ -57,7 +57,7 @@
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 → v1 |
 | [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | Lead Engineer | 제품 성숙도 평가 지표 문서 등록 (2026-06-14 감사) → v1 |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 완료 | UI/UX Designer | fix: 알림 채널 토글/규칙 설정 미저장 (alerts.py) → v1 |
-| [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | UI/UX Designer | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op → v1 |
+| [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | UI/UX Designer | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op → v1 |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | Backend Engineer | fix: backend.allocation_gap() 미구현 → portfolio/analysis mock fallback → v1 |
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | Backend Engineer | fix: 일손익률/누적손익률 KPI 0.0 하드코딩 → v1 |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 대기 | UI/UX Designer | fix: history.py 라이브 모드 조기 return으로 PnL/배당 탭 미렌더 → v1 |

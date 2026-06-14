@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-055
-status: 대기
+status: 완료
 owner: UI/UX Designer
 assignees: [UI/UX Designer, QA]
 priority: High
@@ -14,13 +14,13 @@ trigger_meeting: 즉시 처리 권고
 audit_log: AUDIT-2026-06-14-001
 created: 2026-06-14
 created_at: 2026-06-14T00:00:00+09:00
-updated_at: 2026-06-14T00:00:00+09:00
+updated_at: 2026-06-14T13:55:00+09:00
 ---
 
 # TASK-055 fix: 홈 화면 제안 승인/거부 버튼 no-op (home.py)
 
 작업 ID: TASK-055
-상태: 대기
+상태: 완료
 Owner: UI/UX Designer
 요청 시각: 2026-06-14
 기록 시각: 2026-06-14T00:00:00+09:00
@@ -64,3 +64,34 @@ Owner: UI/UX Designer
 
 - Initiative: `agents/project/initiatives/INIT-PRODUCT-MATURITY.md`
 - Taskset: `agents/project/initiatives/TASKSET-PRODUCT-MATURITY.md`
+
+## 완료 기록
+
+완료 시각: 2026-06-14T13:55:00+09:00
+검토자: UI/UX Designer / QA
+
+## 증거
+
+- `app/ui/views/home.py`: `_handle_approve()` + `_handle_reject()` 헬퍼 추가. 버튼 반환값 수집 후 핸들러 호출. `handled_proposals` set으로 처리된 제안 필터링.
+  - 승인: backend 모드 → `backend.add_condition()` (auto_enabled=False, created_by="HOME_IC"); demo 모드 → st.success 피드백.
+  - 거부: `st.info` 피드백 + handled_proposals 등록.
+- `tests/unit/test_home_proposals.py`: 신규 3개 AppTest 테스트 (patch.object, no sys.modules swap, TZ-independent).
+  - `test_approve_button_is_not_noop`: 승인 클릭 → st.success 확인 + add_condition 호출 횟수 assert.
+  - `test_reject_button_is_not_noop`: 거부 클릭 → st.info 확인 (demo mode).
+  - `test_handled_proposal_removed_from_pending`: 처리된 제안 필터링 확인.
+- 수정 전: 3 FAILED (no-op 증거: AssertionError on all 3 assertions).
+- 수정 후: 666 passed (전체).
+
+## 리뷰
+
+- 데모 한계: 데모 모드에서는 조건 미저장 — st.success에 명기함.
+- 백엔드 모드: 기존 `backend.add_condition()` 경로 사용 (auto_enabled=False).
+- 새 주문 경로 없음, 새 DB 테이블 없음.
+- symbol 해상도: 티커 필드 없는 제안에서 display name 폴백, 향후 proposals에 티커 필드 추가 시 자동 개선.
+
+실측 비용 (시간): ~0.5h (subagent)
+실측 비용 (LLM 토큰): ~160k (subagent)
+
+## Independent Audit
+
+판정: 통과 — 승인/거부 버튼 no-op 해소 확인. TDD(실패 테스트 선행 3개 FAIL→PASS). 기존 홈 테스트 통과 유지. 데모 한계 명기. 새 주문 경로 없음. add_condition 호출 assert로 silent-fallback 방지.
