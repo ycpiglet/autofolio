@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T14:16:54+09:00`
+> 생성 시각: `2026-06-14T14:41:01+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -26,6 +26,7 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-004](TASK-004-runtime-update-gate.md) | 완료 | Medium | 중 | 1 ph / ~10000 tok | Lead Engineer | agent-runtime,sync |
 | [TASK-009](TASK-009-orchestrator-import-check.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | agent-runtime,import |
+| [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
 
 ## #agents
 
@@ -112,6 +113,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+
+## #benchmark
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
 
 ## #block-trade
 
@@ -272,6 +279,12 @@
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 대기 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
 | [TASK-044](TASK-044-external-api-owner-setup-manual.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Doc Steward | docs,external-api,integrations,owner-manual,setup,secrets |
 
+## #dogfooding
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
+
 ## #e2e
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -304,6 +317,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+
+## #eval
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
 
 ## #execution
 
@@ -714,6 +733,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+
+## #pilot
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
 
 ## #planning
 
