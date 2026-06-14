@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-041
-status: 대기
+status: 완료
 owner: Lead Engineer
 assignees: [Lead Engineer, KIS API Engineer, QA]
 priority: Medium
@@ -14,13 +14,13 @@ trigger_meeting: Owner direct request
 audit_log: AUDIT-2026-06-13-004
 created: 2026-06-13
 created_at: 2026-06-13T00:53:23+09:00
-updated_at: 2026-06-13T00:53:23+09:00
+updated_at: 2026-06-14T17:28:16+09:00
 ---
 
 # TASK-041 Broker Capability Feature Parity Matrix
 
 작업 ID: TASK-041
-상태: 대기
+상태: 완료
 Owner: Lead Engineer
 요청 시각: 2026-06-12
 기록 시각: 2026-06-13T00:53:23+09:00
@@ -61,3 +61,44 @@ Owner: Lead Engineer
 
 - Initiative: `agents/project/initiatives/INIT-RESEARCH-REPORTING.md`
 - Taskset: `agents/project/initiatives/TASKSET-RESEARCH-REPORTING.md`
+
+## 완료 기록
+
+완료 시각: 2026-06-14T17:28:16+09:00
+검토자: Lead Engineer / KIS API Engineer / QA (self-review)
+
+- 원 요청: 브로커/플랫폼 capability parity matrix 작성 — KIS/mock/paper vs 참조 플랫폼 비교.
+- 실제 작업:
+  - `ASSET-UNIVERSE-DECISION-RECORD`(자산군 승인/조건부/R3/기각) 흡수.
+  - `EXTERNAL-APP-API-DECISION-RECORD`(커넥터 권한 클래스) 흡수.
+  - `FEATURE-LANDSCAPE-CATALOG` feature family 분류 반영.
+  - `app/brokers/`, `app/common/enums.py`, `app/risk/` 코드 실측 기반 데이터 입력.
+  - 13개 섹션 capability matrix 작성 (`docs/BROKER-CAPABILITY-PARITY-MATRIX.md`).
+  - 구조 gate 테스트 10개 작성 (`tests/integration/test_capability_matrix.py`).
+  - UNIT-TASK-041-001.md 작성.
+  - TASK-041 stub 완료 처리, INDEX.md 갱신.
+- 결과:
+  - UI/전략이 참조할 수 있는 단일 capability vocabulary 확립.
+  - SUPPORTED/MOCK-ONLY/PAPER-ONLY/CONDITIONAL/R3-HOLD/REJECTED/NOT-IMPL 7개 label 정의.
+  - R3 태스크(014/021/022/026/027/028/030/031/032) 모두 blocked 기능과 매핑.
+  - 레버리지/인버스 ETP, DeFi 등 기각 자산 명시.
+
+## 증거
+
+- `docs/BROKER-CAPABILITY-PARITY-MATRIX.md` — 주요 capability matrix 산출물 (13섹션)
+- `tests/integration/test_capability_matrix.py` — 구조 gate 테스트 (10 tests)
+- `agents/lead_engineer/tasks/units/TASK-041/UNIT-TASK-041-001.md` — 유닛 스펙
+- 입력 근거:
+  - `agents/qa/test_cases/ASSET-UNIVERSE-DECISION-RECORD.md`
+  - `agents/qa/test_cases/EXTERNAL-APP-API-DECISION-RECORD.md`
+  - `agents/qa/test_cases/FEATURE-LANDSCAPE-CATALOG.md`
+
+## 리뷰
+
+- KIS TR ID 및 `OrderType` enum은 코드 실측값 사용 (추정 없음).
+- `trading_window.py` 09:10–15:20 KST 창은 SafetyChecker 실측값.
+- Mock fee/slippage 기본값(0.0)은 코드에서 직접 확인.
+- CONDITIONAL 자산은 read-only/manual 범위로만 허용 — UI 실행 버튼 금지 규칙 명시.
+
+실측 비용 (시간): ~0.7h
+실측 비용 (LLM 토큰): unknown
