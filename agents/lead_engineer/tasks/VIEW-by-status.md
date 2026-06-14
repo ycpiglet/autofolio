@@ -1,7 +1,7 @@
 # VIEW — TASK by Status
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T10:29:15+09:00`
+> 생성 시각: `2026-06-14T11:17:33+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -24,7 +24,6 @@
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 대기 | High | 중 | 4 ph / ~30000 tok | UI/UX Designer | bug,ui,alerts,persistence |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
-| [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 대기 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 대기 | High | 낮 | 1 ph / ~10000 tok | UI/UX Designer | bug,ui,history,pnl |
 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 대기 | Medium | 낮 | 2 ph / ~15000 tok | Backend Engineer | bug,security,session,logout |
 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Backend Engineer | database,performance,integrity,sqlite |
@@ -86,6 +85,7 @@
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
+| [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,circuit-breaker,pnl |
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
 
