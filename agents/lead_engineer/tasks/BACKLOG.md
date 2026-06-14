@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-15T00:37:54+09:00` · 열린 작업 14건
+> 생성 시각: `2026-06-15T01:10:35+09:00` · 열린 작업 13건
 
 ---
 
@@ -22,13 +22,13 @@
 
 | 지표 | 값 | 해석 |
 |------|----|------|
-| 열린 작업 | 14건 / 112 ph | frontmatter 기준 |
+| 열린 작업 | 13건 / 108 ph | frontmatter 기준 |
 | 진행 중 WIP | 0건 | WIP 적정 |
-| 대기 | 4건 | 최상위 자율 후보: TASK-038 (watchlist screener alert expansion) |
+| 대기 | 3건 | 최상위 자율 후보: TASK-069 (product maturity reassessment 2026 12) |
 | 보류 | 10건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 2 / REVIEW 2 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 1 / REVIEW 2 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
-**빠른 판단:** 새로 하나를 고른다면 **TASK-038**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
+**빠른 판단:** 새로 하나를 고른다면 **TASK-069**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
 
 ## 결정 레인
 
@@ -36,8 +36,7 @@
 
 | Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
 |------|------|------|------|--------|------|-----------|-----------|
-| 1 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) watchlist screener alert expansion | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
-| 2 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) product maturity reassessment 2026 12 | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
+| 1 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) product maturity reassessment 2026 12 | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
 
 ### REVIEW — 자율 가능 + 경계 확인
 
@@ -67,7 +66,6 @@
 
 | ID | 우선순위 | Owner | 예상 | 게이트 / 태그 |
 |----|----------|-------|------|----------------|
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | High | UI/UX Designer | 4 ph / ~45000 tok | read-only UI/backend only; no order submission, order modification, broker order path, risk policy, schema migration, or prod mutation |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | Medium | Backend Engineer | 12 ph / ~90000 tok | 선행 TASK-047 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | Medium | Lead Engineer | 2 ph / ~15000 tok | - |

@@ -955,7 +955,7 @@
     {
       "type": "task",
       "id": "TASK-038",
-      "status": "대기",
+      "status": "완료",
       "owner": "UI/UX Designer",
       "assignees": [
         "UI/UX Designer",
@@ -1169,7 +1169,7 @@
     {
       "type": "task",
       "id": "TASK-045",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1199,7 +1199,7 @@
     {
       "type": "task",
       "id": "TASK-046",
-      "status": "대기",
+      "status": "완료",
       "owner": "UI/UX Designer",
       "assignees": [
         "UI/UX Designer",
