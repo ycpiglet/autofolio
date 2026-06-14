@@ -35,6 +35,11 @@ def _make_env(*, auto_enabled="true", kill_switch="false", global_mode=None):
     repo.set_system_state("kill_switch_active", kill_switch)
     if global_mode is not None:
         repo.set_system_state("global_mode", global_mode)
+    # Pre-create a trade_condition so order_logs.condition_id FK is satisfiable when FK=ON.
+    repo._test_condition_id = repo.add_trade_condition(
+        symbol="005930", side="BUY", target_price=70_000.0, quantity=1,
+        order_type="LIMIT", auto_enabled=False, created_by="FIXTURE",
+    )
     checker = SafetyChecker(repo)
     return tmpdir, repo, checker
 
@@ -115,9 +120,10 @@ def test_safety_checker_daily_limit_at_exact_boundary(monkeypatch):
                     condition_id, symbol, side, order_type, order_price,
                     current_price, quantity, kis_order_id, order_status,
                     fallback_to_market, error_message, created_at
-                ) VALUES (1, '005930', 'BUY', 'LIMIT', 1.0, 1.0, 1, NULL, 'FILLED', 0, NULL,
+                ) VALUES (?, '005930', 'BUY', 'LIMIT', 1.0, 1.0, 1, NULL, 'FILLED', 0, NULL,
                           datetime('now', '+9 hours', 'start of day', '-9 hours', '+12 hours'))
                 """,
+                (repo._test_condition_id,),
             )
         # today_amount = 1.0; order_amount = 100_000 → 1 + 100_000 > 100_000 → BLOCKED
         cond = _cond(qty=1)

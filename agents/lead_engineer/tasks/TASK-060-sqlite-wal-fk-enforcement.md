@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-060
-status: 대기
+status: 완료
 owner: Backend Engineer
 assignees: [Backend Engineer, QA]
 priority: Medium
@@ -14,13 +14,13 @@ trigger_meeting: 다음 사이클
 audit_log: AUDIT-2026-06-14-001
 created: 2026-06-14
 created_at: 2026-06-14T00:00:00+09:00
-updated_at: 2026-06-14T00:00:00+09:00
+updated_at: 2026-06-14T15:35:45+09:00
 ---
 
 # TASK-060 fix: SQLite WAL 모드 및 FK 미적용 (repositories.py)
 
 작업 ID: TASK-060
-상태: 대기
+상태: 완료
 Owner: Backend Engineer
 요청 시각: 2026-06-14
 기록 시각: 2026-06-14T00:00:00+09:00
@@ -66,7 +66,40 @@ Owner: Backend Engineer
 ## v1 이행
 
 이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
-유닛 스펙은 실행 시점에 생성된다 (현재 없음).
 
 - Initiative: `agents/project/initiatives/INIT-PRODUCT-MATURITY.md`
 - Taskset: `agents/project/initiatives/TASKSET-PRODUCT-MATURITY.md`
+- Unit: `agents/lead_engineer/tasks/units/TASK-060/UNIT-TASK-060-001.md`
+
+## 완료 기록
+
+완료 시각: 2026-06-14T15:35:45+09:00
+검토자: Backend Engineer (implementer), QA (verification)
+
+## 증거
+
+- `python -m pytest tests/unit/test_sqlite_wal_fk.py -v` → 8 passed
+- `python -m pytest tests/ -q` → 675 passed, 1 pre-existing failure (time-gated, FK 무관)
+- `python scripts/check_agent_docs.py` → 0 error
+- `python scripts/work_schema_gate.py --items --check` → pass
+- `python scripts/build_task_index.py --check` → OK
+- `python scripts/generate_views.py --check` → OK
+
+## 리뷰
+
+**변경 사항 요약:**
+
+1. `app/database/sqlite_db.py`:
+   - `get_connection()`: `PRAGMA foreign_keys=ON` per-connection 추가
+   - `initialize_database()`: `PRAGMA journal_mode=WAL` persistent 추가
+
+2. `app/database/schema.sql`:
+   - `order_logs.condition_id REFERENCES trade_conditions(id) ON DELETE SET NULL`
+   - `execution_logs.order_log_id REFERENCES order_logs(id) ON DELETE CASCADE`
+   - `trade_journal.order_log_id REFERENCES order_logs(id) ON DELETE SET NULL`
+
+3. `tests/unit/test_sqlite_wal_fk.py` (신규): WAL + FK TDD 검증 8개 테스트
+
+4. **FK 활성화로 깨진 기존 테스트 2개 수정:**
+   - `tests/unit/test_repository_edge_cases.py`: fixture에 trade_condition pre-seed
+   - `tests/unit/test_safety_critical_boundaries.py`: fixture에 trade_condition pre-seed + INSERT 파라미터화

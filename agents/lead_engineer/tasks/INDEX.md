@@ -62,7 +62,7 @@
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | Backend Engineer | fix: 일손익률/누적손익률 KPI 0.0 하드코딩 → v1 |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 완료 | UI/UX Designer | fix: history.py 라이브 모드 조기 return으로 PnL/배당 탭 미렌더 → v1 |
 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 완료 | Backend Engineer | fix: logout() 미완전 세션 상태 초기화 (security) → v1 |
-| [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 대기 | Backend Engineer | SQLite WAL 모드 + FK 제약 적용 → v1 |
+| [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 완료 | Backend Engineer | SQLite WAL 모드 + FK 제약 적용 → v1 |
 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 대기 | Backend Engineer | feat: 가격 알림 엔진 평가 루프 구현 (dead feature 해소) → v1 |
 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | Backend Engineer | feat: KRX 휴장일 캘린더 연동 (safety) → v1 |
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 완료 | Backend Engineer | fix: 서킷브레이커 일손실 기준 로직 오류 (안전 버그) → v1 |
