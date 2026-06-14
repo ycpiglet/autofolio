@@ -3,38 +3,22 @@
 Verifies that logout() resets ALL session state keys, not just 'authed',
 'user', and 'demo'. Pre-fix, keys like kill_switch, auto_enabled, mode,
 symbol_modes, data_source, and trade ack keys leak to the next session.
+
+Isolation note: these tests patch ONLY ``app.ui.state.st`` (the module-level
+streamlit reference) with a SimpleNamespace whose ``session_state`` is a plain
+dict. They do NOT touch ``sys.modules`` or the real streamlit module, so they
+cannot pollute later AppTest-based tests (an earlier sys.modules-swapping
+approach corrupted streamlit's globals and broke test_top_bar_data_source).
 """
 from __future__ import annotations
 
-import copy
-import sys
-from types import ModuleType
-from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
+from unittest.mock import patch
+
+import app.ui.state as state_mod
 
 
-def _load_state_with_mock_st():
-    """Import app.ui.state with st.session_state as a real dict."""
-    # Build a minimal streamlit stub that uses a plain dict for session_state
-    fake_st = MagicMock()
-    session: dict = {}
-
-    # Support both attribute-style and item-style access on session_state
-    ss = MagicMock()
-    ss.__getitem__ = lambda self, k: session[k]
-    ss.__setitem__ = lambda self, k, v: session.__setitem__(k, v)
-    ss.__contains__ = lambda self, k: k in session
-    ss.setdefault = session.setdefault
-    ss.pop = session.pop
-    # Attribute-style writes (st.session_state.foo = x) go through __setattr__
-    # MagicMock records those, so we intercept via __setattr__:
-    object.__setattr__(ss, "_session", session)
-
-    fake_st.session_state = ss
-
-    return fake_st, session
-
-
-def _build_pre_logout_session(session: dict, defaults: dict) -> None:
+def _build_pre_logout_session(session: dict) -> None:
     """Populate session with non-default 'logged-in' values for every key."""
     session["authed"] = True
     session["user"] = {"name": "Alice", "provider": "google"}
@@ -51,6 +35,13 @@ def _build_pre_logout_session(session: dict, defaults: dict) -> None:
     session["_trade_ack_context"] = {"order_id": 42}
 
 
+def _logout_with(session: dict) -> None:
+    """Run the real logout() against a dict-backed fake session_state."""
+    fake_st = SimpleNamespace(session_state=session)
+    with patch.object(state_mod, "st", fake_st):
+        state_mod.logout()
+
+
 class TestLogout:
     """Security tests for state.logout()."""
 
@@ -59,20 +50,10 @@ class TestLogout:
 
         Returns (session_dict, defaults_dict) after logout() has been called.
         """
-        fake_st, session = _load_state_with_mock_st()
-
-        with patch.dict(sys.modules, {"streamlit": fake_st}):
-            # Force re-import so the module picks up our fake streamlit
-            if "app.ui.state" in sys.modules:
-                del sys.modules["app.ui.state"]
-            import app.ui.state as state_mod  # noqa: PLC0415
-
-            defaults = copy.deepcopy(state_mod.DEFAULTS)
-            _build_pre_logout_session(session, defaults)
-
-            state_mod.logout()
-
-        return session, defaults
+        session: dict = {}
+        _build_pre_logout_session(session)
+        _logout_with(session)
+        return session, state_mod.DEFAULTS
 
     # ------------------------------------------------------------------
     # Core DEFAULTS keys must be reset
@@ -134,22 +115,22 @@ class TestLogout:
     # ------------------------------------------------------------------
 
     def test_logout_symbol_modes_is_independent_copy(self):
-        """Mutating session symbol_modes after logout must not corrupt DEFAULTS."""
-        fake_st, session = _load_state_with_mock_st()
+        """logout() must store a copy of symbol_modes, not the shared DEFAULTS dict.
 
-        with patch.dict(sys.modules, {"streamlit": fake_st}):
-            if "app.ui.state" in sys.modules:
-                del sys.modules["app.ui.state"]
-            import app.ui.state as state_mod  # noqa: PLC0415
+        Asserted via object identity + targeted-key propagation so the test is
+        robust to other suites mutating the shared DEFAULTS global (init_state
+        aliases DEFAULTS mutables via setdefault — a separate latent issue).
+        """
+        session: dict = {}
+        _build_pre_logout_session(session)
+        _logout_with(session)
 
-            _build_pre_logout_session(session, state_mod.DEFAULTS)
-            state_mod.logout()
+        # logout used copy.copy → the post-logout value must be a DISTINCT object
+        assert session["symbol_modes"] is not state_mod.DEFAULTS["symbol_modes"]
 
-            # Mutate the post-logout session value
-            session["symbol_modes"]["TEST"] = "L2"
-
-            # DEFAULTS must remain untouched
-            assert state_mod.DEFAULTS["symbol_modes"] == {}
+        # Mutating the post-logout session value must not propagate to DEFAULTS
+        session["symbol_modes"]["TEST"] = "L2"
+        assert "TEST" not in state_mod.DEFAULTS["symbol_modes"]
 
     # ------------------------------------------------------------------
     # Extra trade-ack keys must be removed
@@ -169,25 +150,18 @@ class TestLogout:
 
     def test_logout_no_error_when_extra_keys_absent(self):
         """logout() must not raise even if trade-ack keys were never set."""
-        fake_st, session = _load_state_with_mock_st()
-
-        with patch.dict(sys.modules, {"streamlit": fake_st}):
-            if "app.ui.state" in sys.modules:
-                del sys.modules["app.ui.state"]
-            import app.ui.state as state_mod  # noqa: PLC0415
-
-            # Only set the DEFAULTS keys (no trade-ack extras)
-            session["authed"] = True
-            session["user"] = {"name": "Bob", "provider": "demo"}
-            session["demo"] = False
-            session["mode"] = "L2"
-            session["auto_enabled"] = False
-            session["kill_switch"] = False
-            session["pnl_kr_colors"] = True
-            session["symbol_modes"] = {}
-            session["data_source"] = "demo"
-
-            # Must not raise
-            state_mod.logout()
+        session = {
+            "authed": True,
+            "user": {"name": "Bob", "provider": "demo"},
+            "demo": False,
+            "mode": "L2",
+            "auto_enabled": False,
+            "kill_switch": False,
+            "pnl_kr_colors": True,
+            "symbol_modes": {},
+            "data_source": "demo",
+        }
+        # Must not raise
+        _logout_with(session)
 
         assert session["authed"] is False
