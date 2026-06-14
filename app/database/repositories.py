@@ -332,29 +332,47 @@ class Repository:
             return float(row["amount"] or 0.0)
 
     def today_realized_pnl(self) -> float:
-        """오늘 체결된 실현 현금흐름 합계.
+        """오늘 SELL 체결 기준 실현 손익 합계.
 
-        SELL: 양수(현금 유입), BUY: 음수(현금 유출).
-        execution_logs 와 order_logs 를 조인해 당일 체결 행만 집계한다.
-        체결 내역이 없으면 0.0 을 반환한다.
+        실현 손익 = Σ (매도체결가 − 종목별 평균매입가) × 매도수량
+        - SELL 체결만 집계 (BUY 체결은 실현 손익 없음 → 0).
+        - 평균매입가: execution_logs 전체 BUY 체결의 가중평균 (포지션 테이블 없음).
+        - KST 당일 필터: DATE(filled_at, '+9 hours') = DATE('now', '+9 hours').
+        - 체결 내역 없으면 0.0 반환.
+
+        Cost basis: 전체 기간 BUY 체결 가중평균 (average cost basis).
+        SELL 체결이 없으면 realized PnL = 0 (매수만인 날 서킷브레이커 오발동 방지).
         """
         with get_connection(self.db_path) as conn:
             row = conn.execute(
                 '''
+                WITH avg_cost AS (
+                    -- 종목별 전체 기간 BUY 체결 가중평균 매입가
+                    SELECT
+                        el.symbol,
+                        SUM(el.filled_price * el.filled_quantity) /
+                            SUM(el.filled_quantity) AS avg_buy_price
+                    FROM execution_logs el
+                    JOIN order_logs ol ON el.order_log_id = ol.id
+                    WHERE ol.side = 'BUY'
+                      AND el.filled_quantity > 0
+                    GROUP BY el.symbol
+                )
                 SELECT COALESCE(
                     SUM(
-                        CASE WHEN ol.side = 'SELL'
-                             THEN el.filled_price * el.filled_quantity
-                             ELSE -el.filled_price * el.filled_quantity
-                        END
+                        (el.filled_price - COALESCE(ac.avg_buy_price, el.filled_price))
+                        * el.filled_quantity
                     ), 0
-                ) AS net_pnl
+                ) AS realized_pnl
                 FROM execution_logs el
                 JOIN order_logs ol ON el.order_log_id = ol.id
-                WHERE DATE(el.filled_at) = DATE('now')
+                LEFT JOIN avg_cost ac ON ac.symbol = el.symbol
+                WHERE ol.side = 'SELL'
+                  AND el.filled_quantity > 0
+                  AND DATE(el.filled_at, '+9 hours') = DATE('now', '+9 hours')
                 '''
             ).fetchone()
-            return float(row["net_pnl"] or 0.0)
+            return float(row["realized_pnl"] or 0.0)
 
     def increment_consecutive_failures(self) -> None:
         """연속 주문 실패 카운터를 1 증가시킨다."""
