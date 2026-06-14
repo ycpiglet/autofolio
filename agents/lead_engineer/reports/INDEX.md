@@ -17,3 +17,4 @@
 | [BRIEF-2026-06-13-005](BRIEF-2026-06-13-005.md) | BRIEF | 2026-06-13 | Owner | standard | Asset Universe Approval And Rejection Record | TASK-042 |
 | [BRIEF-2026-06-13-006](BRIEF-2026-06-13-006.md) | BRIEF | 2026-06-13 | Owner | standard | External App And API Approval Record | TASK-043 |
 | [BRIEF-2026-06-13-007](BRIEF-2026-06-13-007.md) | BRIEF | 2026-06-13 | Owner | standard | External API Owner Setup Manual | TASK-044 |
+| [BRIEF-2026-06-14-001](BRIEF-2026-06-14-001.md) | BRIEF | 2026-06-14 | mixed | standard | agent_runtime 평가 파일럿 — v0.2.0 순차 실행 고정지표 baseline | TASK-068 |
