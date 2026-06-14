@@ -17,7 +17,7 @@ def _reset_logger(name: str) -> None:
 
 
 class TestGetLoggerUsesRotatingFileHandler:
-    def test_file_handler_is_rotating(self, tmp_path):
+    def test_file_handler_is_rotating(self):
         """get_logger must attach a RotatingFileHandler, not a plain FileHandler."""
         import app.common.logger as lg
         importlib.reload(lg)
@@ -33,7 +33,7 @@ class TestGetLoggerUsesRotatingFileHandler:
                 f"Expected RotatingFileHandler, got {type(h).__name__}"
             )
 
-    def test_rotating_handler_max_bytes(self, tmp_path):
+    def test_rotating_handler_max_bytes(self):
         """RotatingFileHandler must be configured for 10 MB max."""
         import app.common.logger as lg
         importlib.reload(lg)
@@ -48,7 +48,7 @@ class TestGetLoggerUsesRotatingFileHandler:
             f"Expected 10485760 bytes, got {rotating[0].maxBytes}"
         )
 
-    def test_rotating_handler_backup_count(self, tmp_path):
+    def test_rotating_handler_backup_count(self):
         """RotatingFileHandler must keep 5 backup files."""
         import app.common.logger as lg
         importlib.reload(lg)
@@ -63,7 +63,7 @@ class TestGetLoggerUsesRotatingFileHandler:
             f"Expected backupCount=5, got {rotating[0].backupCount}"
         )
 
-    def test_log_path_is_absolute(self, tmp_path):
+    def test_log_path_is_absolute(self):
         """The log file path must be absolute (not CWD-relative)."""
         import app.common.logger as lg
         importlib.reload(lg)
