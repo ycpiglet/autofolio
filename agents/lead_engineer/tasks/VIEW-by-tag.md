@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T16:07:33+09:00`
+> 생성 시각: `2026-06-14T16:41:02+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -356,7 +356,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 완료 | High | 중-상 | 8 ph / ~50000 tok | Backend Engineer | feature,engine,alerts,notifications |
-| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
+| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 완료 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
 
 ## #feature-landscape
 
@@ -439,7 +439,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
+| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 완료 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
 
 ## #home
 
@@ -895,7 +895,7 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
-| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
+| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 완료 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,circuit-breaker,pnl |
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
@@ -1062,7 +1062,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
+| [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 완료 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
 
 ## #trailing
 

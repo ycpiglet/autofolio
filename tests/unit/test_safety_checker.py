@@ -105,3 +105,26 @@ def test_one_share_exception_allowed(env, monkeypatch):
     # 200,000 × 1주 = 200,000 > 100,000 한도 → 1주 예외 적용됨
     r = checker.check(condition=_cond(qty=1), current_price=200_000, now=datetime.now())
     assert r.allowed, r.reason
+
+
+# ---- KRX 휴장일 차단 ----
+
+def test_krx_holiday_blocks_order(env, monkeypatch):
+    """KRX 휴장일에는 SafetyChecker가 주문을 차단한다."""
+    repo, checker = env
+    import app.risk.safety_checker as sc_mod
+    monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
+    monkeypatch.setattr(sc_mod, "is_krx_holiday", lambda d: True)
+    r = checker.check(condition=_cond(), current_price=70000, now=datetime.now())
+    assert not r.allowed
+    assert "휴장" in r.reason or "holiday" in r.reason.lower() or "krx" in r.reason.lower()
+
+
+def test_non_holiday_does_not_block(env, monkeypatch):
+    """KRX 휴장일이 아닌 날에는 holiday 사유로 차단하지 않는다."""
+    repo, checker = env
+    import app.risk.safety_checker as sc_mod
+    monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
+    monkeypatch.setattr(sc_mod, "is_krx_holiday", lambda d: False)
+    r = checker.check(condition=_cond(), current_price=70000, now=datetime.now())
+    assert r.allowed, r.reason

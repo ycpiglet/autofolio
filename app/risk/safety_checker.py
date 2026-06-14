@@ -5,6 +5,7 @@ from datetime import datetime
 
 from app.config.settings import settings
 from app.database.repositories import Repository
+from app.data.krx_holidays import is_krx_holiday
 from app.risk.duplicate_guard import is_condition_executable
 from app.risk.trading_window import is_within_trading_window, now_kst
 
@@ -96,6 +97,10 @@ class SafetyChecker:
             settings.default_trading_end,
         ):
             return SafetyResult(False, "Outside trading window.")
+
+        # --- KRX 휴장일 차단 ---
+        if is_krx_holiday(now.date()):
+            return SafetyResult(False, "KRX 휴장일 — 오늘은 KRX 휴장일입니다.")
 
         if not is_condition_executable(
             condition["status"],
