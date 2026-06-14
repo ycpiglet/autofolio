@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from app.api.routers import auth, engine, market, portfolio, trade
+from app.api.routers import analysis, auth, engine, market, portfolio, trade
 from app.api.schemas import HealthResponse
 
 
@@ -40,5 +40,6 @@ def create_app() -> FastAPI:
     app.include_router(portfolio.router, prefix="/api")
     app.include_router(market.router, prefix="/api")
     app.include_router(trade.router, prefix="/api")
+    app.include_router(analysis.router, prefix="/api")
 
     return app
