@@ -51,3 +51,11 @@ parameters, fills/fees/slippage assumptions, scheduled-event caveat, paper/live 
 2. benchmark, drawdown, trades, fees/slippage assumptions가 빠지면 테스트가 실패한다.
 3. scheduled-event와 paper/live 차이를 명시한다.
 4. focused regression과 docs record가 통과한다.
+
+## v1 이행
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
+유닛 스펙은 실행 시점에 생성된다 (현재 없음).
+
+- Initiative: `agents/project/initiatives/INIT-RESEARCH-REPORTING.md`
+- Taskset: `agents/project/initiatives/TASKSET-RESEARCH-REPORTING.md`

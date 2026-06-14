@@ -82,3 +82,11 @@ Phase 0(services 추출)이 완료된 상태에서 진행. `app/services/*`가 F
 - API `GET /api/engine/status` 응답 200
 - `tests/api/` 신규 계약 테스트 green
 - `npm run build` 오류 없음
+
+## v1 이행
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
+유닛 스펙은 실행 시점에 생성된다 (현재 없음).
+
+- Initiative: `agents/project/initiatives/INIT-UI-OVERHAUL.md`
+- Taskset: `agents/project/initiatives/TASKSET-UI-OVERHAUL.md`

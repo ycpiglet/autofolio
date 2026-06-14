@@ -74,3 +74,11 @@ Owner: Data Engineer
 - `pytest tests/unit/test_data_quality.py tests/unit/test_quant_data_loader.py -q` -> 19 passed.
 - `python -m py_compile app/brokers/base.py app/data/quality.py tests/unit/test_data_quality.py` -> OK.
 - engine no-order tests for invalid market data -> 보류, R3 Owner approval required.
+
+## v1 이행
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
+유닛 스펙은 실행 시점에 생성된다 (현재 없음).
+
+- Initiative: `agents/project/initiatives/INIT-R3-ORDER-SURFACE.md`
+- Taskset: `agents/project/initiatives/TASKSET-R3-ORDER-SURFACE.md`

@@ -63,3 +63,11 @@ Owner: Backend Engineer
 - 순매수 일에 서킷브레이커 미발동
 - 실현 손실 기준 발동
 - 단위테스트 통과
+
+## v1 이행
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
+유닛 스펙은 실행 시점에 생성된다 (현재 없음).
+
+- Initiative: `agents/project/initiatives/INIT-PRODUCT-MATURITY.md`
+- Taskset: `agents/project/initiatives/TASKSET-PRODUCT-MATURITY.md`
