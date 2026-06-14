@@ -41,7 +41,7 @@
 | [TASK-036](TASK-036-paper-transaction-ui-sync-soak.md) | 완료 | QA | Paper transaction UI sync soak |
 | [TASK-037](TASK-037-feature-landscape-research.md) | 완료 | Research Agent | Feature landscape research |
 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | UI/UX Designer | Watchlist/screener/alert rule expansion → v1 |
-| [TASK-039](TASK-039-backtest-research-report-hardening.md) | 대기 | Quant Researcher | Backtest research report hardening → v1 |
+| [TASK-039](TASK-039-backtest-research-report-hardening.md) | 완료 | Quant Researcher | Backtest research report hardening |
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 대기 | Performance Analyst | Portfolio performance and tax-lot style reporting → v1 |
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 완료 | Lead Engineer | Broker capability feature parity matrix |
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | Research Agent | Asset universe approval and rejection record |
