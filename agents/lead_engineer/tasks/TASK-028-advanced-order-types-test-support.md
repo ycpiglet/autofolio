@@ -43,3 +43,11 @@ Owner: Backend Engineer
 
 - advanced order type unit/integration tests
 - generated scenario catalog rows promoted from catalog-only to executable
+
+## v1 이행
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
+유닛 스펙은 실행 시점에 생성된다 (현재 없음).
+
+- Initiative: `agents/project/initiatives/INIT-R3-ORDER-SURFACE.md`
+- Taskset: `agents/project/initiatives/TASKSET-R3-ORDER-SURFACE.md`

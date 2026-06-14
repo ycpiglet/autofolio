@@ -69,3 +69,11 @@ Owner: Backend Engineer
 - condition 상태 atomic CAS 구현
 - 동시 호출 시 하나만 처리 보장
 - 동시성 통합 테스트
+
+## v1 이행
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
+유닛 스펙은 실행 시점에 생성된다 (현재 없음).
+
+- Initiative: `agents/project/initiatives/INIT-PRODUCT-MATURITY.md`
+- Taskset: `agents/project/initiatives/TASKSET-PRODUCT-MATURITY.md`

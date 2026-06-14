@@ -53,3 +53,11 @@ Owner: Lead Engineer
 3. unsupported/r3-hold/rejected 기능이 UI에서 supported로 표시되지 않도록 테스트가 있다.
 4. 기존 TASK-014/021/022/026/027/028/030/031/032/042/043과 연결된다.
 5. docs/schema gates가 통과한다.
+
+## v1 이행
+
+이 태스크는 agent_runtime v0.2.0 work-item 스키마(`agent-runtime-work-item/v1`) 계층에 포함된다.
+유닛 스펙은 실행 시점에 생성된다 (현재 없음).
+
+- Initiative: `agents/project/initiatives/INIT-RESEARCH-REPORTING.md`
+- Taskset: `agents/project/initiatives/TASKSET-RESEARCH-REPORTING.md`
