@@ -114,15 +114,32 @@ class TestKpis:
         assert result["총자산"] == 0.0
         assert result["평가손익"] == 0.0
 
-    def test_daily_and_cumulative_pnl_rates_are_placeholder(self):
-        """일손익률 and 누적손익률 are 0.0 placeholders (not yet live)."""
-        df = self._make_holdings_df(1_000_000.0, 50_000.0)
-        with (
-            patch("app.ui.backend.holdings_df", return_value=df),
-            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
-        ):
-            from app.ui import backend
-            result = backend.kpis()
+    def test_daily_and_cumulative_pnl_rates_zero_when_no_fills(self):
+        """일손익률 and 누적손익률 are 0.0 when no execution fills exist.
+
+        With an empty repo (no execution_logs), both return 0.0.
+        This is correct behavior (empty portfolio), not a placeholder.
+        """
+        import pathlib
+        import tempfile
+        from types import SimpleNamespace
+
+        from app.database.repositories import Repository
+        from app.database.sqlite_db import initialize_database
+
+        with tempfile.TemporaryDirectory() as td:
+            db_path = pathlib.Path(td) / "empty.db"
+            initialize_database(db_path)
+            empty_repo = Repository(db_path)
+
+            df = self._make_holdings_df(1_000_000.0, 50_000.0)
+            fake_broker = SimpleNamespace(get_cash_balance=lambda: 0.0)
+            with (
+                patch("app.ui.backend.holdings_df", return_value=df),
+                patch("app.ui.backend._ctx", return_value=(empty_repo, fake_broker, None, None)),
+            ):
+                from app.ui import backend
+                result = backend.kpis()
         assert result["일손익률"] == 0.0
         assert result["누적손익률"] == 0.0
 
@@ -207,3 +224,127 @@ class TestRecentFills:
             result = backend.recent_fills()
         assert result.empty
         assert list(result.columns) == ["시각", "종목", "방향", "수량", "체결가"]
+
+
+# ---------------------------------------------------------------------------
+# kpis() daily_return / total_return — integration-style (in-process SQLite)
+# ---------------------------------------------------------------------------
+
+class TestKpisReturnRates:
+    """kpis() daily_return and total_return must be non-zero when there is
+    realized PnL and holdings. Uses a real temp SQLite DB — no network."""
+
+    @pytest.fixture()
+    def backend_with_fills(self, tmp_path, monkeypatch):
+        """Seed: BUY 1 share @ 70_000, SELL 1 @ 75_000 (profit 5_000).
+        Holdings: still hold 1 share with avg_price=70_000, current_price=77_000.
+        unrealized PnL = (77_000 - 70_000) * 1 = 7_000.
+        total_buy_cost = 2 * 70_000 = 140_000  (two BUY fills total).
+        total_realized = 5_000.
+        unrealized = 7_000.
+        total_return = (5_000 + 7_000) / 140_000 * 100 ≈ 8.57%.
+        daily holdings buy cost = 1 × 70_000 = 70_000.
+        daily_return = 5_000 / 70_000 * 100 ≈ 7.14%.
+        """
+        from types import SimpleNamespace
+
+        from app.brokers.base import Position
+        from app.database.repositories import Repository, WhitelistSymbol
+        from app.database.sqlite_db import initialize_database, get_connection
+        from app.ui import backend
+
+        db_path = tmp_path / "kpi_test.db"
+        initialize_database(db_path)
+        repo = Repository(db_path)
+        repo.add_whitelist_symbol(
+            WhitelistSymbol(symbol="005930", name="삼성전자", market="KRX", role="LARGE_CAP_TEST")
+        )
+
+        # BUY 1 @ 70_000 (first buy — will be sold)
+        buy1 = repo.create_order_log(
+            condition_id=None, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=70000.0, current_price=70000.0,
+            quantity=1, kis_order_id="B1", order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=buy1, symbol="005930",
+            filled_price=70000.0, filled_quantity=1,
+        )
+
+        # BUY 1 @ 70_000 (second buy — still held)
+        buy2 = repo.create_order_log(
+            condition_id=None, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=70000.0, current_price=70000.0,
+            quantity=1, kis_order_id="B2", order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=buy2, symbol="005930",
+            filled_price=70000.0, filled_quantity=1,
+        )
+
+        # SELL 1 @ 75_000 today (realized = 5_000)
+        # Use explicit KST-today timestamp so the test is TZ-independent
+        sell1 = repo.create_order_log(
+            condition_id=None, symbol="005930", side="SELL",
+            order_type="LIMIT", order_price=75000.0, current_price=75000.0,
+            quantity=1, kis_order_id="S1", order_status="FILLED",
+        )
+        # Inject today-KST into filled_at ('+9 hours' = KST; avoids localtime)
+        with get_connection(db_path) as conn:
+            conn.execute(
+                """
+                INSERT INTO execution_logs(order_log_id, symbol, filled_price, filled_quantity, filled_at)
+                VALUES (?, ?, ?, ?, datetime('now', '+9 hours', 'start of day', '-9 hours', '+1 minute'))
+                """,
+                (sell1, "005930", 75000.0, 1),
+            )
+
+        # Mock holdings: 1 share of 005930 @ avg_price=70_000, current=77_000
+        fake_positions = [Position("005930", 1, 70000.0)]
+        fake_broker = SimpleNamespace(
+            get_positions=lambda: fake_positions,
+            get_prices_batch=lambda syms: {"005930": 77000.0},
+            get_current_price=lambda s: SimpleNamespace(price=77000.0),
+            get_cash_balance=lambda: 0.0,
+        )
+
+        monkeypatch.setattr(backend, "_ctx", lambda: (repo, fake_broker, None, None))
+        return repo
+
+    def test_daily_return_is_nonzero(self, backend_with_fills, monkeypatch):
+        """daily_return must be > 0 when there is today's realized profit.
+
+        Current code returns 0.0 (FAIL before fix).
+        """
+        from app.ui import backend
+        result = backend.kpis()
+        assert result["일손익률"] > 0.0, (
+            f"Expected daily_return > 0 (got {result['일손익률']}). "
+            "Hardcoded 0.0 not yet replaced."
+        )
+
+    def test_total_return_is_nonzero(self, backend_with_fills, monkeypatch):
+        """total_return must be > 0 when there is realized + unrealized profit.
+
+        Current code returns 0.0 (FAIL before fix).
+        """
+        from app.ui import backend
+        result = backend.kpis()
+        assert result["누적손익률"] > 0.0, (
+            f"Expected total_return > 0 (got {result['누적손익률']}). "
+            "Hardcoded 0.0 not yet replaced."
+        )
+
+    def test_return_values_match_formula(self, backend_with_fills, monkeypatch):
+        """Verify exact formula output.
+
+        total_buy_cost = 140_000 (2 BUY fills × 70_000).
+        total_realized = 5_000. unrealized = 7_000.
+        total_return = (5_000 + 7_000) / 140_000 * 100 ≈ 8.57%.
+        daily holdings buy cost = 1 × 70_000 = 70_000.
+        daily_return = 5_000 / 70_000 * 100 ≈ 7.14%.
+        """
+        from app.ui import backend
+        result = backend.kpis()
+        assert result["누적손익률"] == pytest.approx(12000 / 140000 * 100, rel=0.01)
+        assert result["일손익률"] == pytest.approx(5000 / 70000 * 100, rel=0.01)
