@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T11:17:33+09:00`
+> 생성 시각: `2026-06-14T11:54:22+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -45,7 +45,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
+| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
 
 ## #analysis
 
@@ -89,7 +89,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
+| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
 
 ## #backlog
@@ -140,7 +140,7 @@
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 대기 | High | 중 | 4 ph / ~30000 tok | UI/UX Designer | bug,ui,alerts,persistence |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
-| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
+| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 대기 | High | 낮 | 1 ph / ~10000 tok | UI/UX Designer | bug,ui,history,pnl |
 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 대기 | Medium | 낮 | 2 ph / ~15000 tok | Backend Engineer | bug,security,session,logout |
@@ -735,7 +735,7 @@
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 대기 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
-| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
+| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
 
 ## #price
 

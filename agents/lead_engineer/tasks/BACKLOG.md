@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-14T11:17:33+09:00` · 열린 작업 30건
+> 생성 시각: `2026-06-14T11:54:22+09:00` · 열린 작업 29건
 
 ---
 
@@ -22,11 +22,11 @@
 
 | 지표 | 값 | 해석 |
 |------|----|------|
-| 열린 작업 | 30건 / 197 ph | frontmatter 기준 |
+| 열린 작업 | 29건 / 194 ph | frontmatter 기준 |
 | 진행 중 WIP | 0건 | WIP 적정 |
-| 대기 | 20건 | 최상위 자율 후보: TASK-058 (fix history live mode early return) |
+| 대기 | 19건 | 최상위 자율 후보: TASK-058 (fix history live mode early return) |
 | 보류 | 10건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 16 / REVIEW 4 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 15 / REVIEW 4 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
 **빠른 판단:** 새로 하나를 고른다면 **TASK-058**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
 
@@ -40,18 +40,17 @@
 | 2 | [TASK-053](TASK-053-product-maturity-assessment.md) product maturity assessment | ACT | 대기 | High / score 40 | S · 2 ph | 높은 가치 | 바로 착수 후보 |
 | 3 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) fix intraday no try except | ACT | 대기 | High / score 40 | S · 2 ph | 높은 가치 | 바로 착수 후보 |
 | 4 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) fix home proposal buttons noop | ACT | 대기 | High / score 39 | M · 3 ph | 높은 가치 | 바로 착수 후보 |
-| 5 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) fix backend allocation gap | ACT | 대기 | High / score 39 | M · 3 ph | 높은 가치 | 바로 착수 후보 |
-| 6 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) watchlist screener alert expansion | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
-| 7 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) fix alerts settings no persist | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
-| 8 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) feat krx holiday calendar | ACT | 대기 | High / score 36 | L · 6 ph | 높은 가치 | 바로 착수 후보 |
-| 9 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) feat price alert engine loop | ACT | 대기 | High / score 34 | L · 8 ph | 높은 가치 | 바로 착수 후보 |
-| 10 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) fix logout incomplete state reset | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
-| 11 | [TASK-065](TASK-065-feat-log-rotation.md) feat log rotation | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
-| 12 | [TASK-066](TASK-066-test-coverage-60pct.md) test coverage 60pct | ACT | 대기 | High / score 30 | XL · 12 ph | 높은 가치 | 바로 착수 후보 |
-| 13 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) broker capability feature parity matrix | ACT | 대기 | Medium / score 29 | M · 3 ph | 회귀 리스크 감소 | 바로 착수 후보 |
-| 14 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) sqlite wal fk enforcement | ACT | 대기 | Medium / score 29 | M · 3 ph | 중간 가치 | 바로 착수 후보 |
-| 15 | [TASK-039](TASK-039-backtest-research-report-hardening.md) backtest research report hardening | ACT | 대기 | Medium / score 28 | M · 4 ph | 회귀 리스크 감소 | 바로 착수 후보 |
-| 16 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) portfolio performance tax lot reporting | ACT | 대기 | Medium / score 28 | M · 4 ph | 중간 가치 | 바로 착수 후보 |
+| 5 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) watchlist screener alert expansion | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
+| 6 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) fix alerts settings no persist | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
+| 7 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) feat krx holiday calendar | ACT | 대기 | High / score 36 | L · 6 ph | 높은 가치 | 바로 착수 후보 |
+| 8 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) feat price alert engine loop | ACT | 대기 | High / score 34 | L · 8 ph | 높은 가치 | 바로 착수 후보 |
+| 9 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) fix logout incomplete state reset | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
+| 10 | [TASK-065](TASK-065-feat-log-rotation.md) feat log rotation | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
+| 11 | [TASK-066](TASK-066-test-coverage-60pct.md) test coverage 60pct | ACT | 대기 | High / score 30 | XL · 12 ph | 높은 가치 | 바로 착수 후보 |
+| 12 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) broker capability feature parity matrix | ACT | 대기 | Medium / score 29 | M · 3 ph | 회귀 리스크 감소 | 바로 착수 후보 |
+| 13 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) sqlite wal fk enforcement | ACT | 대기 | Medium / score 29 | M · 3 ph | 중간 가치 | 바로 착수 후보 |
+| 14 | [TASK-039](TASK-039-backtest-research-report-hardening.md) backtest research report hardening | ACT | 대기 | Medium / score 28 | M · 4 ph | 회귀 리스크 감소 | 바로 착수 후보 |
+| 15 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) portfolio performance tax lot reporting | ACT | 대기 | Medium / score 28 | M · 4 ph | 중간 가치 | 바로 착수 후보 |
 
 ### REVIEW — 자율 가능 + 경계 확인
 
@@ -88,7 +87,6 @@
 | [TASK-053](TASK-053-product-maturity-assessment.md) | High | Lead Engineer | 2 ph / ~15000 tok | - |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | High | UI/UX Designer | 4 ph / ~30000 tok | - |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | High | UI/UX Designer | 3 ph / ~20000 tok | - |
-| [TASK-056](TASK-056-fix-backend-allocation-gap.md) | High | Backend Engineer | 3 ph / ~25000 tok | - |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | High | UI/UX Designer | 1 ph / ~10000 tok | - |
 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | High | Backend Engineer | 8 ph / ~50000 tok | - |
 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | High | Backend Engineer | 6 ph / ~40000 tok | - |

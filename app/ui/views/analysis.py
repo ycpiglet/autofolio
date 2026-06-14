@@ -38,8 +38,8 @@ def _alloc_gap():
         try:
             from app.ui import backend
             return backend.allocation_gap()
-        except Exception:  # noqa: BLE001
-            pass
+        except Exception as exc:  # noqa: BLE001
+            st.warning(f"라이브 갭 조회 실패 — 데모 데이터로 대체합니다: {exc}")
     return mock_data.allocation_gap()
 
 

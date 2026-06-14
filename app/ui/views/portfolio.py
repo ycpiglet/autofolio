@@ -88,7 +88,8 @@ def render() -> None:
             try:
                 from app.ui import backend
                 st.dataframe(backend.allocation_gap(), hide_index=True, width="stretch")
-            except Exception:  # noqa: BLE001
+            except Exception as exc:  # noqa: BLE001
+                st.warning(f"라이브 갭 조회 실패 — 데모 데이터로 대체합니다: {exc}")
                 st.dataframe(data.allocation_gap(), hide_index=True, width="stretch")
         else:
             st.dataframe(data.allocation_gap(), hide_index=True, width="stretch")
