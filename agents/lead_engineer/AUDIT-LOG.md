@@ -415,6 +415,20 @@
 관련 기록: TASK-053, TASK-054, TASK-055, TASK-056, TASK-057, TASK-058, TASK-059, TASK-060, TASK-061, TASK-062, TASK-063, TASK-064, TASK-065, TASK-066, TASK-067
 남은 리스크: 병렬 세션 WIP는 대기 상태로 채택됨. 실구현은 각 TASK 개별 Owner/승인 절차에 따라 진행.
 
+### AUDIT-2026-06-14-002
+시각: 2026-06-14T14:36:48+09:00
+기록 시각: 2026-06-14T14:36:48+09:00
+요청자: Owner
+수행자: Lead Engineer (Claude)
+의도: agent_runtime 평가 파일럿(TASK-068) 등록 — docs/AGENT_RUNTIME_EVAL_METRICS.md §3 파일럿 계획을 추적할 작업 레코드가 없어 TASK-068로 등록. 측정 전용이며 코드 변경 없음.
+대상: agents/lead_engineer/tasks/TASK-068-agent-runtime-eval-pilot.md, agents/project/initiatives/INIT-PLATFORM-EVAL.md, agents/project/initiatives/TASKSET-PLATFORM-EVAL.md, agents/lead_engineer/tasks/INDEX.md, agents/lead_engineer/AUDIT-LOG.md
+작업: TASK-068 호스트 스텁 생성(frontmatter + 8개 감사 필드 포함 body), v1 계층 INIT-PLATFORM-EVAL + TASKSET-PLATFORM-EVAL 생성, INDEX.md TASK-068 행 추가, AUDIT-2026-06-14-002 엔트리 추가, generate_views + build_task_index 재실행
+방법: Write(신규 파일 3개) + Edit(INDEX.md/AUDIT-LOG.md) + python scripts/generate_views.py + python scripts/build_task_index.py
+결과: check_agent_docs 0 errors, build_task_index OK, generate_views OK, work_schema_gate findings=0
+검증: python scripts/check_agent_docs.py -> 0 errors; python scripts/build_task_index.py --check -> OK; python scripts/generate_views.py --check -> OK; python scripts/work_schema_gate.py --check -> findings=0; python scripts/work_schema_gate.py --items --check -> findings=0; python -m pytest tests/unit/test_services_shim.py -q -> pass
+관련 기록: TASK-068, INIT-PLATFORM-EVAL, TASKSET-PLATFORM-EVAL, docs/AGENT_RUNTIME_EVAL_METRICS.md, agent_runtime#128, agent_runtime#125, agent_runtime#121
+남은 리스크: 파일럿 실행(baseline 측정 및 wave 측정)은 TASK-068 수행자가 별도로 진행. 코드·prod·live order 미변경.
+
 ### AUDIT-2026-06-13-008
 시각: 2026-06-13T07:58:00+09:00
 기록 시각: 2026-06-13T07:58:00+09:00
