@@ -1,8 +1,22 @@
 import json
 import logging
+import logging.handlers
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# ---------------------------------------------------------------------------
+# Project-root absolute log directory
+# ---------------------------------------------------------------------------
+# logger.py lives at app/common/logger.py  →  .parents[0] = app/common
+#                                             .parents[1] = app
+#                                             .parents[2] = <repo root>
+BASE_DIR = Path(__file__).resolve().parents[2]
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
+_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
+_BACKUP_COUNT = 5
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -19,9 +33,12 @@ def get_logger(name: str) -> logging.Logger:
     stream_handler.setFormatter(formatter)
     logger.addHandler(stream_handler)
 
-    logs_dir = Path("logs")
-    logs_dir.mkdir(exist_ok=True)
-    file_handler = logging.FileHandler(logs_dir / "trading_app.log", encoding="utf-8")
+    file_handler = logging.handlers.RotatingFileHandler(
+        LOG_DIR / "trading_app.log",
+        maxBytes=_MAX_BYTES,
+        backupCount=_BACKUP_COUNT,
+        encoding="utf-8",
+    )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
@@ -67,7 +84,7 @@ class _JsonLinesFormatter(logging.Formatter):
 def get_structured_logger(name: str) -> logging.Logger:
     """Return a logger that additionally writes JSON Lines to logs/events.jsonl.
 
-    The logger also inherits standard StreamHandler + plain-text FileHandler
+    The logger also inherits standard StreamHandler + RotatingFileHandler
     behaviour from get_logger so that human-readable output is preserved.
     """
     # Re-use (or create) the plain-text logger first so we get its handlers.
@@ -78,11 +95,11 @@ def get_structured_logger(name: str) -> logging.Logger:
     if getattr(logger, _JSONL_MARKER, False):
         return logger
 
-    logs_dir = Path("logs")
-    logs_dir.mkdir(exist_ok=True)
-
-    jsonl_handler = logging.FileHandler(
-        logs_dir / "events.jsonl", encoding="utf-8"
+    jsonl_handler = logging.handlers.RotatingFileHandler(
+        LOG_DIR / "events.jsonl",
+        maxBytes=_MAX_BYTES,
+        backupCount=_BACKUP_COUNT,
+        encoding="utf-8",
     )
     jsonl_handler.setFormatter(_JsonLinesFormatter())
     jsonl_handler.setLevel(logging.INFO)
