@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-065
-status: 대기
+status: 완료
 owner: Backend Engineer
 assignees: [Backend Engineer, QA]
 priority: Medium
@@ -20,7 +20,7 @@ updated_at: 2026-06-14T00:00:00+09:00
 # TASK-065 feat: 로그 로테이션 구현 (logger.py)
 
 작업 ID: TASK-065
-상태: 대기
+상태: 완료
 Owner: Backend Engineer
 요청 시각: 2026-06-14
 기록 시각: 2026-06-14T00:00:00+09:00
@@ -67,6 +67,30 @@ Owner: Backend Engineer
 - RotatingFileHandler 적용
 - 절대 경로 로그 위치
 - 기존 구조화 로깅 동작 유지
+
+## 완료 기록
+
+완료 시각: 2026-06-14T17:09:06+09:00
+검토자: Backend Engineer / QA
+
+실측 비용 (시간): ~0.4h (subagent)
+실측 비용 (LLM 토큰): ~130k (subagent)
+
+## 증거
+
+- `app/common/logger.py`: `FileHandler` → `RotatingFileHandler(maxBytes=10*1024*1024, backupCount=5)`.
+  - `BASE_DIR = Path(__file__).resolve().parents[2]` (app/common/logger.py → app/common → app → repo root).
+  - `LOG_DIR = BASE_DIR / "logs"` — 절대 경로, CWD 무관.
+  - `trading_app.log` (get_logger) + `events.jsonl` (get_structured_logger) 모두 RotatingFileHandler 적용.
+- `tests/unit/test_log_rotation.py` (신규): RotatingFileHandler 타입 검증, maxBytes=10MB, backupCount=5, 절대 경로, logs/ 디렉토리 검증 — 9개 테스트.
+- 수정 전: `test_file_handler_is_rotating` FAILED (FileHandler, not RotatingFileHandler).
+- 수정 후: 9 passed (test_log_rotation.py), 702 passed (전체).
+
+## 리뷰
+
+- `RotatingFileHandler`는 `FileHandler`의 서브클래스이므로 기존 `isinstance(h, FileHandler)` 검사는 여전히 통과.
+- `LOG_DIR.mkdir(parents=True, exist_ok=True)` — 모듈 임포트 시 로그 디렉토리 자동 생성.
+- 기존 `_JsonLinesFormatter`, `log_event()`, 로그 포맷/레벨 변경 없음.
 
 ## v1 이행
 

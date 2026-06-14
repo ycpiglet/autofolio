@@ -1663,7 +1663,7 @@
     {
       "type": "task",
       "id": "TASK-062",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1748,7 +1748,7 @@
     {
       "type": "task",
       "id": "TASK-065",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
