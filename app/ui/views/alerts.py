@@ -3,6 +3,12 @@ from __future__ import annotations
 
 import streamlit as st
 
+from app.services.connections import (
+    _DEFAULT_ALERT_CHANNELS,
+    _DEFAULT_ALERT_RULES,
+    get_alert_settings,
+    save_alert_settings,
+)
 from app.ui.mock import data as mock_data
 
 
@@ -10,16 +16,46 @@ def render() -> None:
     st.header("🔔 알림")
     live = st.session_state.get("data_source") == "backend"
 
+    # Load persisted settings on first render
+    if "_alert_channels" not in st.session_state or "_alert_rules" not in st.session_state:
+        saved = get_alert_settings()
+        st.session_state["_alert_channels"] = saved["channels"]
+        st.session_state["_alert_rules"] = saved["rules"]
+
     st.subheader("채널")
-    channels = [("Telegram", True), ("Kakao", False), ("Discord", False), ("Notion", True), ("Email", True)]
-    for col, (name, on) in zip(st.columns(len(channels)), channels):
-        col.toggle(name, value=on, key=f"alert_ch_{name}")
+    channels_list = list(st.session_state["_alert_channels"].items())
+
+    def _on_channel_change(name: str) -> None:
+        st.session_state["_alert_channels"][name] = st.session_state[f"alert_ch_{name}"]
+        save_alert_settings(
+            st.session_state["_alert_channels"],
+            st.session_state["_alert_rules"],
+        )
+
+    for col, (name, on) in zip(st.columns(len(channels_list)), channels_list):
+        col.toggle(
+            name,
+            value=on,
+            key=f"alert_ch_{name}",
+            on_change=_on_channel_change,
+            args=(name,),
+        )
 
     st.subheader("알림 규칙")
+
+    def _on_rules_change() -> None:
+        st.session_state["_alert_rules"] = st.session_state["alert_rules_widget"]
+        save_alert_settings(
+            st.session_state["_alert_channels"],
+            st.session_state["_alert_rules"],
+        )
+
     st.multiselect(
         "켜둘 알림",
         ["체결", "가격도달", "조건충족", "리스크한도", "서킷브레이커", "뉴스/공시", "일일요약"],
-        default=["체결", "가격도달", "리스크한도", "서킷브레이커"],
+        default=st.session_state["_alert_rules"],
+        key="alert_rules_widget",
+        on_change=_on_rules_change,
     )
 
     if live:
