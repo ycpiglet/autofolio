@@ -8,6 +8,8 @@ def get_connection(db_path: Path | None = None) -> sqlite3.Connection:
     path = db_path or settings.db_path
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
+    # FK enforcement is per-connection in SQLite — must be set on EVERY connection.
+    conn.execute("PRAGMA foreign_keys=ON")
     return conn
 
 
@@ -15,6 +17,8 @@ def initialize_database(db_path: Path | None = None) -> None:
     schema_path = Path(__file__).with_name("schema.sql")
     sql = schema_path.read_text(encoding="utf-8")
     with get_connection(db_path) as conn:
+        # WAL mode is persistent (survives reconnect); ignored gracefully for :memory: DBs.
+        conn.execute("PRAGMA journal_mode=WAL")
         conn.executescript(sql)
         _seed_system_state(conn)
         _seed_global_risk_limit(conn)

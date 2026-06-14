@@ -199,12 +199,24 @@ def test_run_once_does_not_process_already_processing_condition(tmp_path):
     )
 
 
-def test_run_once_atomic_claim_prevents_double_order(tmp_path):
+def test_run_once_atomic_claim_prevents_double_order(tmp_path, monkeypatch):
     """Two sequential run_once() calls on the same ACTIVE condition only place one order.
 
     First call claims (ACTIVE→PROCESSING) and processes (→TRIGGERED).
     Second call: list_active_conditions() returns nothing (status=TRIGGERED) → 0 new orders.
+
+    Mocks the trading-window check so the order actually executes regardless of
+    wall-clock time (otherwise the safety checker rejects with "Outside trading
+    window" outside KST 09:10–15:20, making the test fail on UTC CI / after close).
     """
+    import app.risk.safety_checker as safety_checker_module
+
+    monkeypatch.setattr(
+        safety_checker_module,
+        "is_within_trading_window",
+        lambda *args, **kwargs: True,
+    )
+
     repo = _make_repo_with_trading_enabled(tmp_path)
     _insert_active_condition(repo)
     engine = _make_engine(repo)

@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS trade_conditions (
 
 CREATE TABLE IF NOT EXISTS order_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    condition_id INTEGER,
+    condition_id INTEGER REFERENCES trade_conditions(id) ON DELETE SET NULL,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
     order_type TEXT NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS order_logs (
 
 CREATE TABLE IF NOT EXISTS execution_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_log_id INTEGER NOT NULL,
+    order_log_id INTEGER NOT NULL REFERENCES order_logs(id) ON DELETE CASCADE,
     symbol TEXT NOT NULL,
     filled_price REAL,
     filled_quantity INTEGER,
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS price_alerts (
 
 CREATE TABLE IF NOT EXISTS trade_journal (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    order_log_id INTEGER,
+    order_log_id INTEGER REFERENCES order_logs(id) ON DELETE SET NULL,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
     entry_reason TEXT,

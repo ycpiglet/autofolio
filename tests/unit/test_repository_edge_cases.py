@@ -24,6 +24,11 @@ def repo():
         r.add_whitelist_symbol(
             WhitelistSymbol(symbol="005930", name="삼성전자", market="KRX", role="LARGE_CAP_TEST")
         )
+        # Pre-create a trade_condition so that order_logs.condition_id FK is satisfiable.
+        r._test_condition_id = r.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000.0, quantity=1,
+            order_type="LIMIT", auto_enabled=False, created_by="FIXTURE",
+        )
         yield r
 
 
@@ -57,6 +62,8 @@ def _insert_order_log(
     modifiers += ["-9 hours", "+12 hours"]
     modifier_sql = ", ".join(f"'{m}'" for m in modifiers)
     created_at_expr = f"datetime('now', {modifier_sql})"
+    # Use the pre-seeded condition_id so FK foreign_keys=ON is satisfied.
+    condition_id = getattr(repo, "_test_condition_id", None)
     with get_connection(repo.db_path) as conn:
         conn.execute(
             f"""
@@ -64,10 +71,10 @@ def _insert_order_log(
                 condition_id, symbol, side, order_type, order_price,
                 current_price, quantity, kis_order_id, order_status,
                 fallback_to_market, error_message, created_at
-            ) VALUES (1, '005930', 'BUY', 'LIMIT', ?, ?, ?, NULL, ?, 0, NULL,
+            ) VALUES (?, '005930', 'BUY', 'LIMIT', ?, ?, ?, NULL, ?, 0, NULL,
                       {created_at_expr})
             """,
-            (order_price, order_price, quantity, order_status),
+            (condition_id, order_price, order_price, quantity, order_status),
         )
 
 
