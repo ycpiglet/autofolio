@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createChart, ColorType, type IChartApi } from "lightweight-charts";
+import { createChart, ColorType, AreaSeries, type IChartApi } from "lightweight-charts";
 import { cn } from "@/lib/utils";
 import type { TableResponse } from "@/lib/api";
 
@@ -52,7 +52,7 @@ export function EquityChart({
     });
     chartRef.current = chart;
 
-    const series = chart.addAreaSeries({
+    const series = chart.addSeries(AreaSeries, {
       lineColor: "#3182F6",
       topColor: "rgba(49, 130, 246, 0.3)",
       bottomColor: "rgba(49, 130, 246, 0.0)",

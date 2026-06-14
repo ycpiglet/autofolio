@@ -192,12 +192,13 @@ test.describe("Dashboard — Home", () => {
     await loginAsGuest(page);
 
     // Holdings table should show Korean column header "종목명"
-    await expect(page.getByRole("columnheader", { name: "종목명" })).toBeVisible({
+    // Use .first() because multiple tables on the page share this header name
+    await expect(page.getByRole("columnheader", { name: "종목명" }).first()).toBeVisible({
       timeout: 10_000,
     });
 
     // And at least one data row
-    await expect(page.getByRole("cell", { name: "삼성전자" })).toBeVisible({
+    await expect(page.getByRole("cell", { name: "삼성전자" }).first()).toBeVisible({
       timeout: 5_000,
     });
   });

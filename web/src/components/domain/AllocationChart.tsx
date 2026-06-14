@@ -121,7 +121,7 @@ export function AllocationChart({
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number) => [`${value.toFixed(1)}%`, "비중"]}
+            formatter={(value: unknown) => [`${(value as number).toFixed(1)}%`, "비중"]}
           />
           <Legend />
         </PieChart>
