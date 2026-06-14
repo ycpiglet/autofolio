@@ -95,3 +95,10 @@ Owner: Backend Engineer
 - 평균단가 근거: execution_logs 전체 BUY 기록 가중평균 (positions 테이블 없음).
 - 안전 폴백: 매입 기록 없는 종목 SELL → avg_price = sell_price → realized = 0 (오발동 방지).
 - TZ: `'+9 hours'` 고정, `'localtime'` 미사용.
+
+실측 비용 (시간): ~0.7h (subagent)
+실측 비용 (LLM 토큰): ~101k (subagent)
+
+## Independent Audit
+
+판정: 통과 — 매수-only 일 realized PnL 0 (구버전 큰 음수 FAIL→수정 후 PASS), 서킷브레이커 오발동 제거 검증. 전체 630 passed, 0 doc error. TDD(실패 테스트 선행). self-review(Backend Engineer/QA) + CI 그린으로 외부 검증 보강.
