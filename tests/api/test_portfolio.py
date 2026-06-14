@@ -57,6 +57,12 @@ class TestAssetCurve:
         body = guest_client.get("/api/portfolio/asset-curve").json()
         assert "columns" in body and "rows" in body
         assert "자산" in body["columns"]
+        assert "date" in body["columns"]  # named index must be preserved
+
+    def test_asset_curve_date_in_rows(self, guest_client, mock_backend):
+        body = guest_client.get("/api/portfolio/asset-curve").json()
+        assert len(body["rows"]) == 3
+        assert "date" in body["rows"][0]
 
     def test_asset_curve_days_param(self, guest_client, mock_backend):
         resp = guest_client.get("/api/portfolio/asset-curve?days=30")

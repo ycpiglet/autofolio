@@ -54,7 +54,13 @@ def login(body: LoginRequest, response: Response) -> SessionResponse:
 @router.post("/logout")
 def logout(response: Response) -> dict[str, str]:
     """Clear the session cookie."""
-    response.delete_cookie(COOKIE_NAME, httponly=True, samesite="lax")
+    response.delete_cookie(
+        COOKIE_NAME,
+        path=COOKIE_KWARGS.get("path", "/"),
+        samesite=COOKIE_KWARGS.get("samesite", "lax"),
+        httponly=COOKIE_KWARGS.get("httponly", True),
+        secure=COOKIE_KWARGS.get("secure", False),
+    )
     return {"status": "logged_out"}
 
 

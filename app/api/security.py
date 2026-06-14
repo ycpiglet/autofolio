@@ -17,10 +17,17 @@ _KEY_FILE = _KEY_DIR / "api_session.key"
 _COOKIE_NAME = "af_session"
 _MAX_AGE = 86_400 * 7  # 7 days in seconds
 _SALT = "autofolio-session"
+_SECRET: str | None = None
 
 
 def _load_or_create_key() -> str:
-    """Return the hex secret key, generating and persisting it if absent."""
+    """Return the hex secret key, generating and persisting it if absent.
+
+    Cached at module level after first load to avoid per-request file reads.
+    """
+    global _SECRET
+    if _SECRET is not None:
+        return _SECRET
     _KEY_DIR.mkdir(parents=True, exist_ok=True)
     if not _KEY_FILE.exists():
         secret = os.urandom(32).hex()
@@ -29,8 +36,10 @@ def _load_or_create_key() -> str:
             os.chmod(_KEY_FILE, 0o600)
         except OSError:
             pass
-        return secret
-    return _KEY_FILE.read_text(encoding="utf-8").strip()
+        _SECRET = secret
+        return _SECRET
+    _SECRET = _KEY_FILE.read_text(encoding="utf-8").strip()
+    return _SECRET
 
 
 def _serializer() -> URLSafeTimedSerializer:

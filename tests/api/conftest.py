@@ -49,7 +49,12 @@ SAMPLE_KPIS: dict[str, Any] = {
     "평가손익": 50_000.0,
 }
 
-SAMPLE_ASSET_CURVE = pd.DataFrame({"자산": [700_000.0, 720_000.0, 750_000.0]}, index=["2026-06-12", "2026-06-13", "2026-06-14"])
+SAMPLE_ASSET_CURVE = pd.DataFrame(
+    {"자산": [700_000.0, 720_000.0, 750_000.0]},
+    index=pd.DatetimeIndex(
+        ["2026-06-12", "2026-06-13", "2026-06-14"], name="date"
+    ),
+)
 
 SAMPLE_ALLOCATION_GAP = pd.DataFrame(
     [{"자산군": "주식", "목표%": 35, "현재%": 100.0, "갭%": 65.0}]

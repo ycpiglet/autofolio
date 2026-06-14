@@ -55,6 +55,11 @@ def df_records(df: pd.DataFrame) -> TableResponse:
     if df is None or df.empty:
         return TableResponse(columns=list(df.columns) if df is not None else [], rows=[])
 
+    # Preserve named index (e.g. DatetimeIndex with name="date") as a column.
+    # Do NOT reset an unnamed/default RangeIndex (that would add a junk "index" column).
+    if df.index.name is not None:
+        df = df.reset_index()
+
     columns = list(df.columns)
     rows: list[dict[str, Any]] = []
     for record in df.to_dict(orient="records"):

@@ -94,3 +94,11 @@ class TestMe:
         client.cookies.clear()
         resp = client.get("/api/auth/me")
         assert resp.status_code == 401
+
+
+class TestTamperedCookie:
+    def test_tampered_cookie_returns_401(self, client):
+        """A garbage/tampered af_session cookie must fail closed (401)."""
+        client.cookies.set("af_session", "this.is.garbage.not.a.real.signed.cookie")
+        resp = client.get("/api/auth/me")
+        assert resp.status_code == 401

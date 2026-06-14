@@ -101,3 +101,18 @@ class TestDfRecords:
         result = df_records(None)
         assert result.columns == []
         assert result.rows == []
+
+    def test_named_datetime_index_included_as_column(self):
+        """Named DatetimeIndex must appear as a column in the output."""
+        dates = pd.date_range("2026-06-12", periods=3, freq="D")
+        df = pd.DataFrame({"자산": [700_000.0, 720_000.0, 750_000.0]}, index=dates)
+        df.index.name = "date"
+        result = df_records(df)
+        assert "date" in result.columns
+        assert "date" in result.rows[0]
+
+    def test_unnamed_range_index_not_added(self):
+        """Default RangeIndex (unnamed) must NOT add a junk 'index' column."""
+        df = pd.DataFrame([{"종목": "삼성전자", "가격": 75_000}])
+        result = df_records(df)
+        assert "index" not in result.columns
