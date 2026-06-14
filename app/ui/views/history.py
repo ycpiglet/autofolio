@@ -38,6 +38,30 @@ def render() -> None:
                     st.dataframe(df_hist, hide_index=True, use_container_width=True)
             except Exception as exc:
                 st.warning(f"조회 실패: {exc}")
+
+        # --- 일·월 손익 섹션 (라이브) ---
+        st.divider()
+        st.subheader("일·월 손익")
+        try:
+            pnl_df = backend.daily_pnl_series()
+        except Exception:
+            pnl_df = None
+        if pnl_df is None or pnl_df.empty:
+            ui.empty_state(
+                "손익 데이터 없음",
+                "체결 내역이 쌓이면 일별 실현손익이 표시됩니다.",
+            )
+        else:
+            st.bar_chart(pnl_df.set_index("date")["pnl"], height=260)
+            st.caption("체결 내역 기반 일별 실현손익 (수수료·세금 미반영).")
+
+        # --- 배당 섹션 (라이브) ---
+        st.divider()
+        st.subheader("배당")
+        ui.empty_state(
+            "배당 내역 없음",
+            "KIS 배당 내역 조회 기능은 준비 중입니다.",
+        )
         return
 
     fills_tab, pnl_tab, div_tab = st.tabs(["체결내역", "일·월 손익", "배당"])
