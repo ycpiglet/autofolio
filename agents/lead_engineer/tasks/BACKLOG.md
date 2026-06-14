@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-14T19:39:42+09:00` · 열린 작업 17건
+> 생성 시각: `2026-06-14T20:07:10+09:00` · 열린 작업 16건
 
 ---
 
@@ -22,11 +22,11 @@
 
 | 지표 | 값 | 해석 |
 |------|----|------|
-| 열린 작업 | 17건 / 152 ph | frontmatter 기준 |
+| 열린 작업 | 16건 / 140 ph | frontmatter 기준 |
 | 진행 중 WIP | 0건 | WIP 적정 |
-| 대기 | 7건 | 최상위 자율 후보: TASK-038 (watchlist screener alert expansion) |
+| 대기 | 6건 | 최상위 자율 후보: TASK-038 (watchlist screener alert expansion) |
 | 보류 | 10건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 3 / REVIEW 4 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 2 / REVIEW 4 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
 **빠른 판단:** 새로 하나를 고른다면 **TASK-038**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
 
@@ -38,7 +38,6 @@
 |------|------|------|------|--------|------|-----------|-----------|
 | 1 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) watchlist screener alert expansion | ACT | 대기 | High / score 38 | M · 4 ph | 높은 가치 | 바로 착수 후보 |
 | 2 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) product maturity reassessment 2026 12 | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
-| 3 | [TASK-066](TASK-066-test-coverage-60pct.md) test coverage 60pct | ACT | 대기 | High / score 30 | XL · 12 ph | 높은 가치 | 바로 착수 후보 |
 
 ### REVIEW — 자율 가능 + 경계 확인
 
@@ -72,7 +71,6 @@
 |----|----------|-------|------|----------------|
 | [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | High | UI/UX Designer | 4 ph / ~45000 tok | read-only UI/backend only; no order submission, order modification, broker order path, risk policy, schema migration, or prod mutation |
 | [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | High | Backend Engineer | 16 ph / ~120000 tok | no live orders; paper-safe; Owner 승인 전 prod 전환 금지 |
-| [TASK-066](TASK-066-test-coverage-60pct.md) | High | QA | 12 ph / ~80000 tok | Phase 3 전 필수 |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | Medium | UI/UX Designer | 12 ph / ~90000 tok | 선행 TASK-045 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요; no live orders |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | Medium | Backend Engineer | 12 ph / ~90000 tok | 선행 TASK-047 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |

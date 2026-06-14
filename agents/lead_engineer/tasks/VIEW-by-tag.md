@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T19:39:42+09:00`
+> 생성 시각: `2026-06-14T20:07:10+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -217,7 +217,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
+| [TASK-066](TASK-066-test-coverage-60pct.md) | 완료 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
 
 ## #cycle
 
@@ -898,7 +898,7 @@
 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 완료 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,circuit-breaker,pnl |
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
-| [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
+| [TASK-066](TASK-066-test-coverage-60pct.md) | 완료 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
 
 ## #safety-gates
 
@@ -1043,7 +1043,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
+| [TASK-066](TASK-066-test-coverage-60pct.md) | 완료 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
 
 ## #trade
 
