@@ -159,9 +159,10 @@ def _backtest_section() -> None:
             try:
                 from app.quant.data_loader import fetch_and_cache
                 fetched = fetch_and_cache(sym, start, end)
-                from app.quant.backtest import run_sma_crossover
+                from app.quant.backtest import run_sma_crossover, build_report
                 result = run_sma_crossover(sym, start, end, fast=int(fast), slow=int(slow))
-                st.session_state["bt_result"] = result
+                report = build_report(result, fast=int(fast), slow=int(slow), initial_cash=1_000_000.0)
+                st.session_state["bt_result"] = report
                 if fetched:
                     st.caption(f"📥 {fetched}일치 시세 캐시 갱신")
             except Exception as exc:  # noqa: BLE001
@@ -174,10 +175,53 @@ def _backtest_section() -> None:
         c2.metric("거래 횟수", f"{r.trade_count}회")
         c3.metric("승률", f"{r.win_rate_pct:.1f}%")
         c4.metric("최대낙폭", f"-{r.max_drawdown_pct:.1f}%")
-        if r.equity_curve:
+
+        # ── 리서치 리포트 추가 필드 ─────────────────────────────
+        with st.expander("📋 백테스트 리서치 리포트", expanded=True):
+            # 파라미터 테이블
+            st.markdown("**파라미터**")
+            params = r.parameters
+            st.table({
+                "항목": ["전략", "종목", "기간 (시작)", "기간 (종료)",
+                         "빠른 SMA", "느린 SMA", "초기 자본"],
+                "값": [
+                    r.strategy,
+                    r.symbol,
+                    str(r.start),
+                    str(r.end),
+                    str(params.get("fast", "-")),
+                    str(params.get("slow", "-")),
+                    f"{params.get('initial_cash', 0):,.0f}원",
+                ],
+            })
+
+            # 성과 요약 vs 벤치마크
+            st.markdown("**성과 요약**")
+            p1, p2, p3 = st.columns(3)
+            p1.metric("전략 수익률", f"{r.total_return_pct:+.2f}%")
+            p2.metric("벤치마크 수익률", f"{r.benchmark_return_pct:+.2f}%",
+                      help="기간 내 equity curve 전체 성장률 (buy-and-hold 근사)")
+            p3.metric("턴오버", f"{r.turnover_pct:.1f}%",
+                      help="총 BUY 거래금액 / 초기자본 × 100")
+
+            # 에쿼티 커브 / 거래 내역
             import pandas as pd
-            df = pd.DataFrame(r.equity_curve).set_index("date")
-            st.line_chart(df["equity"], height=200)
+            if r.equity_curve:
+                df = pd.DataFrame(r.equity_curve).set_index("date")
+                st.line_chart(df["equity"], height=200)
+
+            # 거래 내역 테이블
+            if r.trades:
+                st.markdown("**거래 내역**")
+                trade_df = pd.DataFrame(r.trades)
+                st.dataframe(trade_df, hide_index=True, use_container_width=True)
+
+            # 가정 및 면책
+            st.markdown("**가정 및 한계**")
+            st.info(f"수수료/슬리피지: {r.fee_slippage_assumption}")
+            st.warning(f"정기 이벤트 주의: {r.scheduled_event_caveat}")
+            st.caption(f"페이퍼/실거래 차이: {r.paper_live_parity_note}")
+
         st.caption("⚠️ 이 백테스트는 참고용입니다. 과거 성과가 미래를 보장하지 않습니다.")
 
 
