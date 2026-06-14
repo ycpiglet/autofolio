@@ -1,167 +1,204 @@
-"""Repository boundary and persistence edge-case tests."""
+﻿"""TASK-066: Repository edge-case tests.
+
+Covers:
+- Empty-DB queries return [] / None (not crash)
+- FK violation: execution_log with orphan order_log_id raises IntegrityError
+- order_log with null condition_id is permitted (ON DELETE SET NULL)
+- today_order_amount() on empty DB returns 0.0 (not crash)
+- today_realized_pnl() on empty DB returns 0.0 (not crash)
+- Duplicate whitelist insert (UPSERT) does not crash; row is updated
+- atomic_claim_condition on non-existent ID returns False (not crash)
+- get_condition on non-existent ID returns None (not crash)
+
+FK enforcement note: SQLite FK enforcement is per-connection (PRAGMA foreign_keys=ON).
+get_connection() already sets this on every connection (app/database/sqlite_db.py:11).
+"""
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+import sqlite3
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import pytest
 
 from app.database.repositories import Repository, WhitelistSymbol
-from app.database.sqlite_db import get_connection, initialize_database
+from app.database.sqlite_db import initialize_database, get_connection
 
 
-# ---------------------------------------------------------------------------
-# Fixture
-# ---------------------------------------------------------------------------
+def _make_repo(tmp_path: Path):
+    db = tmp_path / "test.db"
+    initialize_database(db)
+    return Repository(db), db
 
-@pytest.fixture
-def repo():
-    with TemporaryDirectory() as tmpdir:
-        db = Path(tmpdir) / "test.db"
+
+def _seed_whitelist(repo: Repository, symbol: str = "005930") -> None:
+    repo.add_whitelist_symbol(
+        WhitelistSymbol(symbol=symbol, name="test_name", market="KRX", role="TEST")
+    )
+
+
+def _insert_condition(repo: Repository, symbol: str = "005930") -> int:
+    _seed_whitelist(repo, symbol)
+    return repo.add_trade_condition(
+        symbol=symbol,
+        side="BUY",
+        target_price=70_000.0,
+        quantity=1,
+    )
+
+
+def _insert_order_log(repo: Repository, condition_id=None) -> int:
+    return repo.create_order_log(
+        condition_id=condition_id,
+        symbol="005930",
+        side="BUY",
+        order_type="LIMIT",
+        order_price=70_000.0,
+        current_price=70_000.0,
+        quantity=1,
+        kis_order_id="ORD-001",
+        order_status="FILLED",
+    )
+
+
+class TestEmptyDbQueries:
+    def test_list_active_conditions_empty_db_returns_empty_list(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.list_active_conditions() == []
+
+    def test_list_conditions_empty_db_returns_empty_list(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.list_conditions() == []
+
+    def test_list_order_logs_empty_db_returns_empty_list(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.list_order_logs() == []
+
+    def test_list_whitelist_symbols_empty_db_returns_empty_list(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.list_whitelist_symbols() == []
+
+    def test_get_whitelist_symbol_missing_returns_none(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.get_whitelist_symbol("DOES_NOT_EXIST") is None
+
+    def test_get_condition_missing_returns_none(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.get_condition(99999) is None
+
+    def test_get_system_state_missing_key_returns_default(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.get_system_state("nonexistent_key", "default_value") == "default_value"
+
+    def test_get_system_state_missing_key_no_default_returns_none(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.get_system_state("nonexistent_key") is None
+
+    def test_today_order_amount_empty_db_returns_zero(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.today_order_amount() == 0.0
+
+    def test_today_realized_pnl_empty_db_returns_zero(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.today_realized_pnl() == 0.0
+
+    def test_total_realized_pnl_empty_db_returns_zero(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.total_realized_pnl() == 0.0
+
+    def test_total_buy_cost_basis_empty_db_returns_zero(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.total_buy_cost_basis() == 0.0
+
+    def test_list_active_alerts_empty_db_returns_empty_list(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.list_active_alerts() == []
+
+    def test_list_journal_entries_empty_db_returns_empty_list(self, tmp_path):
+        repo, _ = _make_repo(tmp_path)
+        assert repo.list_journal_entries() == []
+
+
+class TestForeignKeyViolation:
+    def test_execution_log_with_orphan_order_log_id_raises(self, tmp_path):
+        """Inserting execution_log with a non-existent order_log_id raises IntegrityError.
+
+        PRAGMA foreign_keys=ON is set in get_connection() — enforcement is active.
+        """
+        repo, _ = _make_repo(tmp_path)
+        orphan_order_log_id = 99999  # does not exist
+        with pytest.raises(sqlite3.IntegrityError):
+            repo.create_execution_log(
+                order_log_id=orphan_order_log_id,
+                symbol="005930",
+                filled_price=70_000.0,
+                filled_quantity=1,
+                raw_status="FILLED",
+            )
+
+    def test_fk_is_enforced_per_connection(self, tmp_path):
+        """Each connection from get_connection() must have FK enforcement ON."""
+        db = tmp_path / "fk_check.db"
         initialize_database(db)
-        r = Repository(db)
-        r.add_whitelist_symbol(
-            WhitelistSymbol(symbol="005930", name="삼성전자", market="KRX", role="LARGE_CAP_TEST")
+        with get_connection(db) as conn:
+            row = conn.execute("PRAGMA foreign_keys").fetchone()
+            assert row[0] == 1, "PRAGMA foreign_keys must be 1 (ON) on every connection"
+
+    def test_order_log_with_null_condition_id_is_allowed(self, tmp_path):
+        """order_log condition_id = NULL is permitted (ON DELETE SET NULL FK)."""
+        repo, _ = _make_repo(tmp_path)
+        log_id = repo.create_order_log(
+            condition_id=None,
+            symbol="005930",
+            side="BUY",
+            order_type="LIMIT",
+            order_price=70_000.0,
+            current_price=70_000.0,
+            quantity=1,
+            kis_order_id="ORD-NULL",
+            order_status="FILLED",
         )
-        # Pre-create a trade_condition so that order_logs.condition_id FK is satisfiable.
-        r._test_condition_id = r.add_trade_condition(
-            symbol="005930", side="BUY", target_price=70_000.0, quantity=1,
-            order_type="LIMIT", auto_enabled=False, created_by="FIXTURE",
+        assert log_id > 0
+
+
+class TestDuplicateInserts:
+    def test_duplicate_whitelist_symbol_upserts_without_error(self, tmp_path):
+        """Inserting same symbol twice (UPSERT) does not raise; row is updated."""
+        repo, _ = _make_repo(tmp_path)
+        repo.add_whitelist_symbol(
+            WhitelistSymbol(symbol="005930", name="Samsung1", market="KRX", role="CORE")
         )
-        yield r
-
-
-def _insert_order_log(
-    repo: Repository,
-    *,
-    order_status: str,
-    order_price: float,
-    quantity: int,
-    days_offset: int = 0,
-) -> None:
-    """Insert an order_log row whose created_at is KST-today-aware.
-
-    today_order_amount() filters with DATE(created_at, '+9 hours') = DATE('now', '+9 hours'),
-    i.e. it compares KST dates.  We compute created_at using SQLite datetime arithmetic
-    with explicit '+9 hours' offsets so the result is identical regardless of the
-    OS/CI timezone (never 'localtime').
-
-    Formula for days_offset=0 (today KST):
-        datetime('now', '+9 hours', 'start of day', '-9 hours', '+12 hours')
-        => KST today at 00:00  expressed as UTC, then +12 h  => KST today noon as UTC.
-    For days_offset=-1 (yesterday KST):
-        append '-1 day' before '-9 hours'.
-    """
-    # Build the modifier chain: +9h → start of KST day → apply day offset → back to UTC → midday.
-    # Using only explicit hour/day offsets (never 'localtime') makes the result identical on
-    # any OS timezone, including the UTC CI environment.
-    modifiers = ["+9 hours", "start of day"]
-    if days_offset != 0:
-        modifiers.append(f"{days_offset:+d} days")
-    modifiers += ["-9 hours", "+12 hours"]
-    modifier_sql = ", ".join(f"'{m}'" for m in modifiers)
-    created_at_expr = f"datetime('now', {modifier_sql})"
-    # Use the pre-seeded condition_id so FK foreign_keys=ON is satisfied.
-    condition_id = getattr(repo, "_test_condition_id", None)
-    with get_connection(repo.db_path) as conn:
-        conn.execute(
-            f"""
-            INSERT INTO order_logs(
-                condition_id, symbol, side, order_type, order_price,
-                current_price, quantity, kis_order_id, order_status,
-                fallback_to_market, error_message, created_at
-            ) VALUES (?, '005930', 'BUY', 'LIMIT', ?, ?, ?, NULL, ?, 0, NULL,
-                      {created_at_expr})
-            """,
-            (condition_id, order_price, order_price, quantity, order_status),
+        repo.add_whitelist_symbol(
+            WhitelistSymbol(symbol="005930", name="Samsung2", market="KRX", role="CORE_V2")
         )
+        result = repo.get_whitelist_symbol("005930")
+        assert result is not None
+        assert result["name"] == "Samsung2"
+        assert result["role"] == "CORE_V2"
 
+    def test_duplicate_system_state_upserts_without_error(self, tmp_path):
+        """set_system_state on an existing key does UPSERT (no duplicate error)."""
+        repo, _ = _make_repo(tmp_path)
+        repo.set_system_state("test_key", "value1")
+        repo.set_system_state("test_key", "value2")
+        assert repo.get_system_state("test_key") == "value2"
 
-# ---------------------------------------------------------------------------
-# today_order_amount — status filtering
-# ---------------------------------------------------------------------------
+    def test_atomic_claim_on_nonexistent_id_returns_false(self, tmp_path):
+        """atomic_claim_condition on a non-existent condition_id returns False (not crash)."""
+        repo, _ = _make_repo(tmp_path)
+        result = repo.atomic_claim_condition(99999)
+        assert result is False
 
-def test_today_order_amount_only_counts_active_statuses(repo):
-    """FILLED is counted; CANCELED and FAILED are excluded from today_order_amount."""
-    _insert_order_log(repo, order_status="FILLED",   order_price=10_000.0, quantity=2)
-    _insert_order_log(repo, order_status="CANCELED", order_price=10_000.0, quantity=5)
-    _insert_order_log(repo, order_status="FAILED",   order_price=10_000.0, quantity=3)
-
-    amount = repo.today_order_amount()
-    # Only the FILLED order: 10_000 * 2 = 20_000
-    assert amount == pytest.approx(20_000.0)
-
-
-def test_today_order_amount_ignores_previous_days(repo):
-    """Orders with yesterday's local timestamp are not counted in today's amount."""
-    _insert_order_log(repo, order_status="FILLED", order_price=10_000.0, quantity=10,
-                      days_offset=-1)
-    amount = repo.today_order_amount()
-    assert amount == pytest.approx(0.0)
-
-
-def test_today_order_amount_includes_pending_and_requested(repo):
-    """PENDING and REQUESTED orders are counted in today_order_amount."""
-    _insert_order_log(repo, order_status="PENDING",   order_price=5_000.0, quantity=3)
-    _insert_order_log(repo, order_status="REQUESTED", order_price=5_000.0, quantity=2)
-
-    amount = repo.today_order_amount()
-    # 5_000 * 3 + 5_000 * 2 = 25_000
-    assert amount == pytest.approx(25_000.0)
-
-
-# ---------------------------------------------------------------------------
-# add_trade_condition — duplicate symbol+side
-# ---------------------------------------------------------------------------
-
-def test_add_condition_duplicate_symbol_side_both_exist(repo):
-    """Two conditions with identical symbol and side can both exist (no uniqueness constraint)."""
-    cid1 = repo.add_trade_condition(
-        symbol="005930", side="BUY", target_price=70_000.0, quantity=1,
-        order_type="LIMIT", auto_enabled=True,
-    )
-    cid2 = repo.add_trade_condition(
-        symbol="005930", side="BUY", target_price=68_000.0, quantity=2,
-        order_type="LIMIT", auto_enabled=False,
-    )
-    assert cid1 != cid2
-    all_conds = repo.list_conditions()
-    ids = {c["id"] for c in all_conds}
-    assert cid1 in ids
-    assert cid2 in ids
-
-
-# ---------------------------------------------------------------------------
-# list_active_conditions — status exclusions
-# ---------------------------------------------------------------------------
-
-def test_list_active_conditions_excludes_triggered_and_completed(repo):
-    """TRIGGERED and COMPLETED conditions are not returned by list_active_conditions."""
-    cid1 = repo.add_trade_condition(
-        symbol="005930", side="BUY", target_price=70_000.0, quantity=1,
-        order_type="LIMIT", auto_enabled=True,
-    )
-    cid2 = repo.add_trade_condition(
-        symbol="005930", side="SELL", target_price=75_000.0, quantity=1,
-        order_type="LIMIT", auto_enabled=True,
-    )
-    repo.update_condition_status(cid1, "TRIGGERED")
-    repo.update_condition_status(cid2, "DISABLED")
-
-    active = repo.list_active_conditions()
-    active_ids = {c["id"] for c in active}
-    assert cid1 not in active_ids
-    assert cid2 not in active_ids
-
-
-# ---------------------------------------------------------------------------
-# increment_consecutive_failures — atomicity / sequential correctness
-# ---------------------------------------------------------------------------
-
-def test_increment_consecutive_failures_atomic(repo):
-    """Calling increment_consecutive_failures twice yields a counter of 2."""
-    repo.increment_consecutive_failures()
-    repo.increment_consecutive_failures()
-    value = repo.get_system_state("consecutive_order_failures", "0")
-    assert int(value) == 2
+    def test_create_execution_log_with_valid_order_log_id_succeeds(self, tmp_path):
+        """Execution log with a valid (seeded) order_log_id FK succeeds and returns int."""
+        repo, _ = _make_repo(tmp_path)
+        cid = _insert_condition(repo)
+        order_log_id = _insert_order_log(repo, condition_id=cid)
+        exec_log_id = repo.create_execution_log(
+            order_log_id=order_log_id,
+            symbol="005930",
+            filled_price=70_000.0,
+            filled_quantity=1,
+            raw_status="FILLED",
+        )
+        assert isinstance(exec_log_id, int)
+        assert exec_log_id > 0

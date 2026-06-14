@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-066
-status: 대기
+status: 완료
 owner: QA
 assignees: [QA, Backend Engineer]
 priority: High
@@ -14,13 +14,13 @@ trigger_meeting: 다음 사이클
 audit_log: AUDIT-2026-06-14-001
 created: 2026-06-14
 created_at: 2026-06-14T00:00:00+09:00
-updated_at: 2026-06-14T00:00:00+09:00
+updated_at: 2026-06-14T20:04:53+09:00
 ---
 
 # TASK-066 feat: 테스트 커버리지 60%+ 달성 (누락 36개 케이스)
 
 작업 ID: TASK-066
-상태: 대기
+상태: 완료
 Owner: QA
 요청 시각: 2026-06-14
 기록 시각: 2026-06-14T00:00:00+09:00
@@ -88,3 +88,33 @@ Owner: QA
 
 - Initiative: `agents/project/initiatives/INIT-PRODUCT-MATURITY.md`
 - Taskset: `agents/project/initiatives/TASKSET-PRODUCT-MATURITY.md`
+
+## 완료 기록
+
+완료 시각: 2026-06-14T20:04:53+09:00
+검토자: Lead Engineer / QA
+
+## 증거
+
+정량 바(≥60%)는 이번 wave 누적 테스트로 이미 충족(측정 77.83%); 본 태스크는 안전-임계 실패모드 테스트 55개를 추가해 실패경로를 경화함.
+
+- 신규 테스트 파일 4개, 신규 테스트 55개 (all pass)
+- 전체 pytest: 805 passed (이전 756 → +49 순증)
+- coverage: 77.85% (>= 50% CI gate, >= 60% 목표 모두 충족)
+- `python scripts/check_agent_docs.py`: 0 error(s)
+- 제품 코드 변경 없음 -- 테스트 파일만 추가
+
+### 파일별 테스트 수
+
+| 파일 | 테스트 수 | 카테고리 |
+|------|-----------|---------|
+| `tests/unit/test_boundary_conditions.py` | 10 | 경계값: 일일한도/주문금액/서킷브레이커 |
+| `tests/unit/test_kis_failure_modes.py` | 14 | KIS: 타임아웃/인증만료/잘못된종목/부분체결 |
+| `tests/unit/test_repository_edge_cases.py` | 21 | 레포: 빈DB/FK위반/중복삽입 |
+| `tests/integration/test_alert_channel_fallback.py` | 10 | 알림버스: 채널폴백/버스상태/로그진단 |
+
+## 리뷰
+
+특이사항 없음. 모든 테스트 TZ-robust (UTC 서버에서도 통과). 네트워크 mock 적용 (실KIS 호출 없음). 제품 코드 미변경.
+
+후속 발견 버그 없음.

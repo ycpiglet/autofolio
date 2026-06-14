@@ -1775,7 +1775,7 @@
     {
       "type": "task",
       "id": "TASK-066",
-      "status": "대기",
+      "status": "완료",
       "owner": "QA",
       "assignees": [
         "QA",
@@ -1795,7 +1795,7 @@
       "audit_log": "AUDIT-2026-06-14-001",
       "created": "2026-06-14",
       "created_at": "2026-06-14T00:00:00+09:00",
-      "updated_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T20:04:53+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-066-test-coverage-60pct.md",
       "_title": "test coverage 60pct"
     },
@@ -1830,7 +1830,7 @@
     {
       "type": "task",
       "id": "TASK-068",
-      "status": "대기",
+      "status": "완료",
       "owner": "Performance Analyst",
       "assignees": [
         "Performance Analyst",
@@ -1852,7 +1852,7 @@
       "audit_log": "AUDIT-2026-06-14-002",
       "created": "2026-06-14",
       "created_at": "2026-06-14T14:36:48+09:00",
-      "updated_at": "2026-06-14T14:36:48+09:00",
+      "updated_at": "2026-06-14T19:32:17+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-068-agent-runtime-eval-pilot.md",
       "_title": "agent runtime eval pilot"
     },
