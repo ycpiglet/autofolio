@@ -197,26 +197,61 @@ def holdings_df(*, include_dividends: bool = True) -> pd.DataFrame:
 
 
 def kpis() -> dict:
-    """라이브 KPI — 총자산·평가손익·현금비중. holdings_df 기반.
+    """라이브 KPI — 총자산·평가손익·일손익률·누적손익률·현금비중.
 
-    KIS paper/prod 에서는 예수금 조회를 포함한다. 실패 시 화면 안정성을 위해 0.0으로
-    폴백하되, 정상 경로에서는 총자산과 현금비중에 반영한다.
     반환 키: 총자산, 일손익률, 누적손익률, 현금비중, 평가손익.
+
+    ## 계산 기준 (Basis Notes)
+
+    ### 일손익률 (daily_return)
+    분자: today_realized_pnl() — 당일 SELL 기준 실현 손익 (TASK-063 수정 완료).
+    분모: 현재 보유 종목의 매수 원가 합계 = Σ(평단 × 수량).
+    단순화: 전일 종가 기준 평가액 대신 현재 보유 원가를 분모로 사용.
+    이유: 일별 가격 시계열 테이블이 없어 전일 평가액 조회 불가.
+
+    ### 누적손익률 (total_return)
+    분자: total_realized_pnl() + 현재 보유 미실현 평가손익 합계.
+    분모: total_buy_cost_basis() — 전체 기간 BUY 체결 원가 합계 (투자 원금).
+    단순화: 매도 후 회수된 원금도 분모에 포함 → 실제 TWR보다 보수적 수치.
+    이유: 일별 포트폴리오 스냅샷 테이블 없음.
+
+    실패 시 0.0 폴백 (화면 안정성 유지).
     """
+    repo, broker, _, _ = _ctx()
     df = holdings_df(include_dividends=False)
     total_market = float(df["평가금액"].sum()) if not df.empty else 0.0
     total_pnl = float(df["평가손익"].sum()) if not df.empty else 0.0
+
     try:
-        _, broker, _, _ = _ctx()
         cash = float(broker.get_cash_balance()) if hasattr(broker, "get_cash_balance") else 0.0
     except Exception:
         cash = 0.0
+
     total_assets = total_market + cash
     cash_ratio = (cash / total_assets * 100) if total_assets else 0.0
+
+    # --- daily_return ---
+    try:
+        today_realized = repo.today_realized_pnl()
+        # 보유 종목 매수 원가 합계 (분모) — 전일 평가액 대체 (가격 시계열 없음)
+        holdings_cost = float((df["평단"] * df["수량"]).sum()) if not df.empty else 0.0
+        daily_return = (today_realized / holdings_cost * 100) if holdings_cost else 0.0
+    except Exception:
+        daily_return = 0.0
+
+    # --- total_return ---
+    try:
+        total_realized = repo.total_realized_pnl()
+        total_cost = repo.total_buy_cost_basis()
+        total_net_pnl = total_realized + total_pnl  # 실현 + 미실현
+        total_return = (total_net_pnl / total_cost * 100) if total_cost else 0.0
+    except Exception:
+        total_return = 0.0
+
     return {
         "총자산": total_assets,
-        "일손익률": 0.0,
-        "누적손익률": 0.0,
+        "일손익률": daily_return,
+        "누적손익률": total_return,
         "현금비중": cash_ratio,
         "평가손익": total_pnl,
     }
