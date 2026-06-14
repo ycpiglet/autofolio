@@ -1,7 +1,7 @@
 # VIEW — TASK by Status
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T14:41:01+09:00`
+> 생성 시각: `2026-06-14T15:08:30+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -20,13 +20,13 @@
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
-| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Backend Engineer | database,performance,integrity,sqlite |
 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 대기 | High | 중-상 | 8 ph / ~50000 tok | Backend Engineer | feature,engine,alerts,notifications |
 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
 | [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## 보류
 
@@ -80,6 +80,7 @@
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 완료 | High | 중 | 4 ph / ~30000 tok | UI/UX Designer | bug,ui,alerts,persistence |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |

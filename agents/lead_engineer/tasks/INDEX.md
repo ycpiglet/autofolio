@@ -55,7 +55,7 @@
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) → v1 |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | Backend Engineer | fix: compliance 게이트 fail-open (Phase 3 전 필수) → v1 |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | UI/UX Designer | fix: trade 뷰 ack 체크박스 영구 루프 → v1 |
-| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | Lead Engineer | 제품 성숙도 평가 지표 문서 등록 (2026-06-14 감사) → v1 |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | Lead Engineer | 제품 성숙도 평가 지표 문서 등록 (2026-06-14 감사) → v1 |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 완료 | UI/UX Designer | fix: 알림 채널 토글/규칙 설정 미저장 (alerts.py) → v1 |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | UI/UX Designer | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op → v1 |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | Backend Engineer | fix: backend.allocation_gap() 미구현 → portfolio/analysis mock fallback → v1 |
@@ -71,3 +71,4 @@
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | QA | feat: 테스트 커버리지 60%+ — 누락 35개 케이스 구현 → v1 |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | UI/UX Designer | fix: 분석 탭 _intraday_section try/except 누락 크래시 → v1 |
 | [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Performance Analyst | agent_runtime 평가 파일럿 — baseline vs wave 측정 → v1 |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Lead Engineer | 제품 성숙도 반기 재평가 (2026-12-14) → v1 |

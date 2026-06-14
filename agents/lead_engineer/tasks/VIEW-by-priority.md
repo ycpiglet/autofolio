@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T14:41:01+09:00`
+> 생성 시각: `2026-06-14T15:08:30+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -36,7 +36,7 @@
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,safety,daily-limit,utc,localtime,database |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
-| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 완료 | High | 중 | 4 ph / ~30000 tok | UI/UX Designer | bug,ui,alerts,persistence |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
@@ -72,6 +72,7 @@
 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Backend Engineer | database,performance,integrity,sqlite |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |
 | [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## Low
 
