@@ -66,6 +66,36 @@ def _market_indices() -> "pd.DataFrame":  # type: ignore[name-defined]
     return pd.DataFrame(columns=["name", "code", "price", "change", "change_rate"])
 
 
+def _handle_approve(proposal_id: str, proposal_row) -> None:
+    """승인 핸들러 — 조건 등록(백엔드 모드) 또는 데모 피드백."""
+    st.session_state.setdefault("handled_proposals", set()).add(proposal_id)
+    if st.session_state.get("data_source") == "backend":
+        try:
+            from app.ui import backend
+            # symbol: proposals from data.proposals() carry 종목(display name); 티커 used when available.
+            cid = backend.add_condition(
+                symbol=str(proposal_row.get("티커") or proposal_row.get("종목", "")),
+                side="BUY" if proposal_row.get("방향") == "매수" else "SELL",
+                target_price=float(proposal_row.get("목표가", 0)),
+                quantity=int(proposal_row.get("수량", 1)),
+                order_type="LIMIT",
+                auto_enabled=False,
+                created_by="HOME_IC",
+                rationale=str(proposal_row.get("근거", "")),
+            )
+            st.success(f"✅ {proposal_row.get('종목', '?')} 조건 등록 완료 (id={cid}). 매매 화면에서 자동주문을 활성화하세요.")
+        except Exception as exc:  # noqa: BLE001
+            st.success(f"✅ {proposal_row.get('종목', '?')} 승인됨 (조건 저장 실패: {exc})")
+    else:
+        st.success(f"✅ {proposal_row.get('종목', '?')} 승인됨 (데모 모드 — 조건은 저장되지 않습니다).")
+
+
+def _handle_reject(proposal_id: str, proposal_row) -> None:
+    """거부 핸들러 — 대기 목록에서 제거 + 피드백."""
+    st.session_state.setdefault("handled_proposals", set()).add(proposal_id)
+    st.info(f"🚫 {proposal_row.get('종목', '?')} 제안 거부됨.")
+
+
 def render() -> None:
     ui.page_header("🏠 홈", "포트폴리오 한눈에 보기")
 
@@ -114,13 +144,20 @@ def render() -> None:
     left, right = st.columns([3, 2])
     with left:
         st.subheader("오늘의 제안 (승인 대기)")
-        for _, p in data.proposals().iterrows():
+        handled = st.session_state.get("handled_proposals", set())
+        pending = data.proposals()
+        pending = pending[~pending["id"].isin(handled)]
+        if pending.empty:
+            st.caption("처리 대기 중인 제안이 없습니다.")
+        for _, p in pending.iterrows():
             with st.container(border=True):
                 a, b = st.columns([5, 2])
                 a.markdown(f"**{p['종목']}** · {p['방향']} · 목표 {p['목표가']:,} · {p['수량']}주")
                 a.caption(f"🤖 {p['에이전트']} · 확신도 {p['확신도']} — {p['근거']}")
-                b.button("승인", key=f"ap_{p['id']}", width="stretch")
-                b.button("거부", key=f"rj_{p['id']}", width="stretch")
+                if b.button("승인", key=f"ap_{p['id']}", width="stretch"):
+                    _handle_approve(p["id"], p)
+                if b.button("거부", key=f"rj_{p['id']}", width="stretch"):
+                    _handle_reject(p["id"], p)
     with right:
         st.subheader("최근 체결")
         st.dataframe(_recent_fills(), hide_index=True, width="stretch")
@@ -132,9 +169,6 @@ def render() -> None:
                 from app.ui import backend
                 wl = backend.watchlist()
                 if not wl.empty:
-                    def _pct(row):
-                        p = row.get("price")
-                        return f"{p:,.0f}" if p else "-"
                     wl["현재가"] = wl["price"].apply(lambda p: f"{p:,.0f}" if p else "-")
                     st.dataframe(wl[["symbol", "name", "현재가"]], hide_index=True, width="stretch")
                 else:
