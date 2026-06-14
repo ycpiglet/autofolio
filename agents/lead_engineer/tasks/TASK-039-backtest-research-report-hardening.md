@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-039
-status: 대기
+status: 완료
 owner: Quant Researcher
 assignees: [Quant Researcher, QA, UI/UX Designer]
 priority: Medium
@@ -14,13 +14,13 @@ trigger_meeting: Owner direct request
 audit_log: AUDIT-2026-06-13-004
 created: 2026-06-13
 created_at: 2026-06-13T00:53:23+09:00
-updated_at: 2026-06-13T00:53:23+09:00
+updated_at: 2026-06-14T18:23:09+09:00
 ---
 
 # TASK-039 Backtest Research Report Hardening
 
 작업 ID: TASK-039
-상태: 대기
+상태: 완료
 Owner: Quant Researcher
 요청 시각: 2026-06-12
 기록 시각: 2026-06-13T00:53:23+09:00
@@ -59,3 +59,28 @@ parameters, fills/fees/slippage assumptions, scheduled-event caveat, paper/live 
 
 - Initiative: `agents/project/initiatives/INIT-RESEARCH-REPORTING.md`
 - Taskset: `agents/project/initiatives/TASKSET-RESEARCH-REPORTING.md`
+
+## 완료 기록
+
+완료 시각: 2026-06-14T18:23:09+09:00
+검토자: Lead Engineer
+
+## 증거
+
+- `app/quant/backtest.py` — `BacktestReport` + `build_report()` 추가 (BacktestResult 변경 없음)
+- `app/ui/views/analysis.py` — `_backtest_section` expander 확장 (파라미터 테이블·벤치마크·거래내역·가정)
+- `tests/unit/test_backtest.py` — 5개 신규 테스트 추가 (8 passed)
+- `agents/lead_engineer/tasks/units/TASK-039/UNIT-TASK-039-001.md` — 완료 기록
+- `python -m pytest tests/ -q` → 739 passed, 0 failed
+- `python -m pytest tests/unit -q` → 560 passed, 0 failed
+- `python scripts/check_agent_docs.py` → 0 error
+- `python scripts/generate_views.py --check` → OK
+- `python scripts/build_task_index.py --check` → OK
+
+## 리뷰
+
+- 기존 `BacktestResult` 변경 없음 — 하위 호환
+- `build_report()` 결정적 (고정 캐시 데이터 → 고정 출력, 랜덤 없음)
+- 수수료/슬리피지 정직하게 "미반영" 명시 (fabrication 없음)
+- 정기 이벤트 주의 및 페이퍼/실거래 차이 안내 포함
+- UI는 read-only 분석 전용 — live 주문 경로 미변경
