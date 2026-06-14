@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-061
-status: 대기
+status: 완료
 owner: Backend Engineer
 assignees: [Backend Engineer, QA]
 priority: High
@@ -14,13 +14,13 @@ trigger_meeting: 다음 사이클
 audit_log: AUDIT-2026-06-14-001
 created: 2026-06-14
 created_at: 2026-06-14T00:00:00+09:00
-updated_at: 2026-06-14T00:00:00+09:00
+updated_at: 2026-06-14T16:05:07+09:00
 ---
 
 # TASK-061 feat: 가격 알림 엔진 평가 루프 구현
 
 작업 ID: TASK-061
-상태: 대기
+상태: 완료
 Owner: Backend Engineer
 요청 시각: 2026-06-14
 기록 시각: 2026-06-14T00:00:00+09:00
@@ -73,3 +73,25 @@ Owner: Backend Engineer
 
 - Initiative: `agents/project/initiatives/INIT-PRODUCT-MATURITY.md`
 - Taskset: `agents/project/initiatives/TASKSET-PRODUCT-MATURITY.md`
+
+## 완료 기록
+
+완료 시각: 2026-06-14T16:05:07+09:00
+검토자: Backend Engineer
+
+## 증거
+
+- `tests/unit/test_price_alert_engine.py`: 7 신규 TDD 테스트 (RED→GREEN 검증 완료)
+- `app/engine/live_trading_engine.py`: `evaluate_price_alerts()` 추가, `run_once()` 말미 연결
+- `python -m pytest tests/unit/test_price_alert_engine.py -v` → 7 passed
+- `python -m pytest tests/ -q` → 683 passed
+- `python scripts/check_agent_docs.py` → 0 error
+
+## 리뷰
+
+구현 방향:
+- 기존 `repo.trigger_alert()` 재사용 (`mark_alert_fired` 별칭 불필요 — 이미 존재하는 메서드 사용)
+- `NotificationBus` 대신 `Notifier` 직접 사용 (엔진 기존 패턴 — `self.notifier`)
+- 거래 시간 창 독립 (알림 = 주문 아님, 트레이딩 창 없이 언제든 발송)
+- `notifier=None` 안전 처리 (`if self.notifier:` 가드)
+- 가격 조회 실패 시 해당 알림 건너뜀 (다른 알림 평가 계속)
