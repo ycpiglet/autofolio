@@ -54,9 +54,30 @@ class TestTodayRealizedPnl:
     def test_returns_zero_when_no_executions(self, repo):
         assert repo.today_realized_pnl() == 0.0
 
-    def test_sell_positive_buy_negative(self, repo):
-        """SELL 체결 → 양수, BUY 체결 → 음수."""
-        # Insert a BUY order log and execution
+    def test_buy_only_day_returns_zero(self, repo):
+        """BUG REGRESSION: BUY-only day must return 0 (not a large negative)."""
+        buy_log_id = repo.create_order_log(
+            condition_id=None,
+            symbol="005930",
+            side="BUY",
+            order_type="LIMIT",
+            order_price=70000.0,
+            current_price=70000.0,
+            quantity=10,
+            kis_order_id="B1",
+            order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=buy_log_id,
+            symbol="005930",
+            filled_price=70000.0,
+            filled_quantity=10,
+        )
+        # No SELL fills → realized PnL must be 0, not -700_000
+        assert repo.today_realized_pnl() == pytest.approx(0.0)
+
+    def test_sell_after_buy_profit(self, repo):
+        """BUY at 70_000, SELL at 75_000 → realized = (75_000 − 70_000) × 1 = 5_000."""
         buy_log_id = repo.create_order_log(
             condition_id=None,
             symbol="005930",
@@ -74,11 +95,6 @@ class TestTodayRealizedPnl:
             filled_price=70000.0,
             filled_quantity=1,
         )
-
-        pnl = repo.today_realized_pnl()
-        assert pnl == pytest.approx(-70000.0)
-
-        # Add a SELL execution
         sell_log_id = repo.create_order_log(
             condition_id=None,
             symbol="005930",
@@ -96,9 +112,88 @@ class TestTodayRealizedPnl:
             filled_price=75000.0,
             filled_quantity=1,
         )
+        assert repo.today_realized_pnl() == pytest.approx(5000.0)
 
-        pnl = repo.today_realized_pnl()
-        assert pnl == pytest.approx(-70000.0 + 75000.0)
+    def test_sell_after_buy_loss(self, repo):
+        """BUY at 70_000, SELL at 65_000 → realized = (65_000 − 70_000) × 1 = −5_000."""
+        buy_log_id = repo.create_order_log(
+            condition_id=None,
+            symbol="005930",
+            side="BUY",
+            order_type="LIMIT",
+            order_price=70000.0,
+            current_price=70000.0,
+            quantity=1,
+            kis_order_id="B2",
+            order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=buy_log_id,
+            symbol="005930",
+            filled_price=70000.0,
+            filled_quantity=1,
+        )
+        sell_log_id = repo.create_order_log(
+            condition_id=None,
+            symbol="005930",
+            side="SELL",
+            order_type="LIMIT",
+            order_price=65000.0,
+            current_price=65000.0,
+            quantity=1,
+            kis_order_id="S2",
+            order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=sell_log_id,
+            symbol="005930",
+            filled_price=65000.0,
+            filled_quantity=1,
+        )
+        assert repo.today_realized_pnl() == pytest.approx(-5000.0)
+
+    def test_avg_cost_weighted_correctly(self, repo):
+        """Two BUYs at different prices → avg cost used for SELL realized PnL.
+
+        BUY 1 share @ 60_000, BUY 1 share @ 80_000 → avg_cost = 70_000.
+        SELL 1 share @ 75_000 → realized = (75_000 − 70_000) × 1 = 5_000.
+        """
+        for price, kid in [(60000.0, "B3a"), (80000.0, "B3b")]:
+            lid = repo.create_order_log(
+                condition_id=None,
+                symbol="005930",
+                side="BUY",
+                order_type="LIMIT",
+                order_price=price,
+                current_price=price,
+                quantity=1,
+                kis_order_id=kid,
+                order_status="FILLED",
+            )
+            repo.create_execution_log(
+                order_log_id=lid,
+                symbol="005930",
+                filled_price=price,
+                filled_quantity=1,
+            )
+        sell_lid = repo.create_order_log(
+            condition_id=None,
+            symbol="005930",
+            side="SELL",
+            order_type="LIMIT",
+            order_price=75000.0,
+            current_price=75000.0,
+            quantity=1,
+            kis_order_id="S3",
+            order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=sell_lid,
+            symbol="005930",
+            filled_price=75000.0,
+            filled_quantity=1,
+        )
+        assert repo.today_realized_pnl() == pytest.approx(5000.0)
 
 
 class TestConsecutiveFailures:
@@ -135,14 +230,16 @@ def _make_condition(repo):
 
 
 class TestSafetyCheckerCircuitBreaker:
-    def test_consecutive_failures_trips_at_3(self, repo):
+    def test_consecutive_failures_trips_at_3(self, repo, monkeypatch):
+        import app.risk.safety_checker as sc_mod
+        monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
+
         checker = SafetyChecker(repo)
         condition = _make_condition(repo)
 
         # 2 failures — still allowed
         repo.set_system_state("consecutive_order_failures", "2")
-        with patch("app.risk.safety_checker.is_within_trading_window", return_value=True):
-            result = checker.check(condition=condition, current_price=69900.0)
+        result = checker.check(condition=condition, current_price=69900.0)
         assert result.allowed
 
         # 3 failures — tripped
@@ -154,26 +251,41 @@ class TestSafetyCheckerCircuitBreaker:
         assert repo.get_system_state("auto_trading_enabled") == "false"
 
     def test_daily_loss_trips_when_loss_exceeds_threshold(self, repo, monkeypatch):
-        """당일 실현 손실이 max_daily_amount 의 threshold_pct% 이상이면 트립."""
+        """당일 실현 손실이 max_daily_amount 의 threshold_pct% 이상이면 트립.
+
+        SELL at a loss that exceeds threshold — NOT a BUY fill.
+        BUY fills never realize PnL (regression guard).
+        """
         import app.risk.safety_checker as sc_mod
         monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
 
         checker = SafetyChecker(repo)
         condition = _make_condition(repo)
 
-        # Set threshold to 3% and max_daily_amount to 1_000_000
+        # threshold 3%, max_daily_amount 1_000_000 → trip if loss >= 30_000
         repo.set_system_state("circuit_breaker_threshold_pct", "3.0")
         repo.update_global_risk_limit(max_daily_amount=1_000_000.0)
 
-        # Inject a BUY execution that causes -40_000 PnL (4% of 1M)
-        log_id = repo.create_order_log(
+        # BUY 1 share @ 40_000 (avg cost = 40_000)
+        buy_lid = repo.create_order_log(
             condition_id=None, symbol="005930", side="BUY",
             order_type="LIMIT", order_price=40000.0, current_price=40000.0,
-            quantity=1, kis_order_id="X1", order_status="FILLED",
+            quantity=1, kis_order_id="CB_B1", order_status="FILLED",
         )
         repo.create_execution_log(
-            order_log_id=log_id, symbol="005930",
+            order_log_id=buy_lid, symbol="005930",
             filled_price=40000.0, filled_quantity=1,
+        )
+
+        # SELL 1 share @ 0 (extreme loss: realized = (0 − 40_000) × 1 = −40_000 = 4% of 1M)
+        sell_lid = repo.create_order_log(
+            condition_id=None, symbol="005930", side="SELL",
+            order_type="LIMIT", order_price=0.0, current_price=0.0,
+            quantity=1, kis_order_id="CB_S1", order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=sell_lid, symbol="005930",
+            filled_price=0.0, filled_quantity=1,
         )
 
         result = checker.check(condition=condition, current_price=69900.0)
@@ -181,27 +293,67 @@ class TestSafetyCheckerCircuitBreaker:
         assert "circuit breaker" in result.reason.lower()
         assert repo.get_system_state("auto_trading_enabled") == "false"
 
-    def test_daily_loss_below_threshold_does_not_trip(self, repo):
+    def test_daily_loss_below_threshold_does_not_trip(self, repo, monkeypatch):
+        """Realized loss of -1_000 (0.1% of 1M) is well below the 3% threshold."""
+        import app.risk.safety_checker as sc_mod
+        monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
+
         checker = SafetyChecker(repo)
         condition = _make_condition(repo)
 
         repo.set_system_state("circuit_breaker_threshold_pct", "3.0")
         repo.update_global_risk_limit(max_daily_amount=1_000_000.0)
 
-        # 2% loss — below threshold
-        log_id = repo.create_order_log(
+        # BUY 1 share @ 20_000 → avg cost = 20_000
+        buy_lid = repo.create_order_log(
             condition_id=None, symbol="005930", side="BUY",
             order_type="LIMIT", order_price=20000.0, current_price=20000.0,
-            quantity=1, kis_order_id="X2", order_status="FILLED",
+            quantity=1, kis_order_id="X2_B", order_status="FILLED",
         )
         repo.create_execution_log(
-            order_log_id=log_id, symbol="005930",
+            order_log_id=buy_lid, symbol="005930",
             filled_price=20000.0, filled_quantity=1,
         )
 
-        with patch("app.risk.safety_checker.is_within_trading_window", return_value=True):
-            result = checker.check(condition=condition, current_price=69900.0)
+        # SELL 1 share @ 19_000 → realized = (19_000 − 20_000) × 1 = −1_000 (0.1% of 1M)
+        sell_lid = repo.create_order_log(
+            condition_id=None, symbol="005930", side="SELL",
+            order_type="LIMIT", order_price=19000.0, current_price=19000.0,
+            quantity=1, kis_order_id="X2_S", order_status="FILLED",
+        )
+        repo.create_execution_log(
+            order_log_id=sell_lid, symbol="005930",
+            filled_price=19000.0, filled_quantity=1,
+        )
+
+        result = checker.check(condition=condition, current_price=69900.0)
         assert result.allowed
+
+    def test_buy_only_day_does_not_trip_circuit_breaker(self, repo, monkeypatch):
+        """BUG REGRESSION: buy-heavy day must NOT trip the daily-loss circuit breaker."""
+        import app.risk.safety_checker as sc_mod
+        monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
+
+        checker = SafetyChecker(repo)
+        condition = _make_condition(repo)
+
+        repo.set_system_state("circuit_breaker_threshold_pct", "3.0")
+        repo.update_global_risk_limit(max_daily_amount=1_000_000.0)
+
+        # Large BUY fills — old code would return −800_000 PnL and trip (80% of 1M)
+        for i in range(10):
+            lid = repo.create_order_log(
+                condition_id=None, symbol="005930", side="BUY",
+                order_type="LIMIT", order_price=80000.0, current_price=80000.0,
+                quantity=1, kis_order_id=f"BIG_B{i}", order_status="FILLED",
+            )
+            repo.create_execution_log(
+                order_log_id=lid, symbol="005930",
+                filled_price=80000.0, filled_quantity=1,
+            )
+
+        result = checker.check(condition=condition, current_price=69900.0)
+        assert result.allowed, f"Circuit breaker falsely tripped on buy-only day: {result.reason}"
 
 
 # ---------------------------------------------------------------------------

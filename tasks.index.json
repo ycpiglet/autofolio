@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 51,
+  "count": 66,
   "tasks": [
     {
       "type": "task",
@@ -246,7 +246,7 @@
         "KIS API Engineer"
       ],
       "priority": "Medium",
-      "difficulty": "하",
+      "difficulty": "낮",
       "est_hours": "2",
       "est_tokens": "50000",
       "tags": [
@@ -270,7 +270,7 @@
         "KIS API Engineer"
       ],
       "priority": "Medium",
-      "difficulty": "하",
+      "difficulty": "낮",
       "est_hours": "2",
       "est_tokens": "50000",
       "tags": [
@@ -320,7 +320,7 @@
         "KIS API Engineer"
       ],
       "priority": "Low",
-      "difficulty": "하",
+      "difficulty": "낮",
       "est_hours": "1",
       "est_tokens": "50000",
       "tags": [
@@ -367,7 +367,7 @@
         "KIS API Engineer"
       ],
       "priority": "Low",
-      "difficulty": "하",
+      "difficulty": "낮",
       "est_hours": "2",
       "est_tokens": "50000",
       "tags": [
@@ -414,7 +414,7 @@
         "KIS API Engineer"
       ],
       "priority": "Low",
-      "difficulty": "하",
+      "difficulty": "낮",
       "est_hours": "2",
       "est_tokens": "50000",
       "tags": [
@@ -1407,6 +1407,425 @@
       "updated_at": "2026-06-14T04:30:06+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-052-fix-trade-ack-checkbox-loop.md",
       "_title": "fix trade ack checkbox loop"
+    },
+    {
+      "type": "task",
+      "id": "TASK-053",
+      "status": "대기",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "Doc Steward"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "15000",
+      "tags": [
+        "assessment",
+        "metrics",
+        "reporting"
+      ],
+      "gate": "-",
+      "trigger_meeting": "다음 사이클",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-053-product-maturity-assessment.md",
+      "_title": "product maturity assessment"
+    },
+    {
+      "type": "task",
+      "id": "TASK-054",
+      "status": "대기",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "30000",
+      "tags": [
+        "bug",
+        "ui",
+        "alerts",
+        "persistence"
+      ],
+      "gate": "-",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-054-fix-alerts-settings-no-persist.md",
+      "_title": "fix alerts settings no persist"
+    },
+    {
+      "type": "task",
+      "id": "TASK-055",
+      "status": "대기",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "20000",
+      "tags": [
+        "bug",
+        "ui",
+        "home",
+        "ic",
+        "proposals"
+      ],
+      "gate": "-",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-055-fix-home-proposal-buttons-noop.md",
+      "_title": "fix home proposal buttons noop"
+    },
+    {
+      "type": "task",
+      "id": "TASK-056",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "25000",
+      "tags": [
+        "bug",
+        "backend",
+        "portfolio",
+        "allocation"
+      ],
+      "gate": "-",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-056-fix-backend-allocation-gap.md",
+      "_title": "fix backend allocation gap"
+    },
+    {
+      "type": "task",
+      "id": "TASK-057",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중-상",
+      "est_hours": "6",
+      "est_tokens": "40000",
+      "tags": [
+        "bug",
+        "backend",
+        "kpi",
+        "performance"
+      ],
+      "gate": "-",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-057-fix-kpi-returns-hardcoded-zero.md",
+      "_title": "fix kpi returns hardcoded zero"
+    },
+    {
+      "type": "task",
+      "id": "TASK-058",
+      "status": "대기",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "낮",
+      "est_hours": "1",
+      "est_tokens": "10000",
+      "tags": [
+        "bug",
+        "ui",
+        "history",
+        "pnl"
+      ],
+      "gate": "-",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-058-fix-history-live-mode-early-return.md",
+      "_title": "fix history live mode early return"
+    },
+    {
+      "type": "task",
+      "id": "TASK-059",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "낮",
+      "est_hours": "2",
+      "est_tokens": "15000",
+      "tags": [
+        "bug",
+        "security",
+        "session",
+        "logout"
+      ],
+      "gate": "-",
+      "trigger_meeting": "다음 사이클",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-059-fix-logout-incomplete-state-reset.md",
+      "_title": "fix logout incomplete state reset"
+    },
+    {
+      "type": "task",
+      "id": "TASK-060",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "20000",
+      "tags": [
+        "database",
+        "performance",
+        "integrity",
+        "sqlite"
+      ],
+      "gate": "-",
+      "trigger_meeting": "다음 사이클",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-060-sqlite-wal-fk-enforcement.md",
+      "_title": "sqlite wal fk enforcement"
+    },
+    {
+      "type": "task",
+      "id": "TASK-061",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중-상",
+      "est_hours": "8",
+      "est_tokens": "50000",
+      "tags": [
+        "feature",
+        "engine",
+        "alerts",
+        "notifications"
+      ],
+      "gate": "-",
+      "trigger_meeting": "다음 사이클",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-061-feat-price-alert-engine-loop.md",
+      "_title": "feat price alert engine loop"
+    },
+    {
+      "type": "task",
+      "id": "TASK-062",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "6",
+      "est_tokens": "40000",
+      "tags": [
+        "feature",
+        "safety",
+        "trading-window",
+        "holidays"
+      ],
+      "gate": "-",
+      "trigger_meeting": "다음 사이클",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-062-feat-krx-holiday-calendar.md",
+      "_title": "feat krx holiday calendar"
+    },
+    {
+      "type": "task",
+      "id": "TASK-063",
+      "status": "완료",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "30000",
+      "tags": [
+        "bug",
+        "safety",
+        "circuit-breaker",
+        "pnl"
+      ],
+      "gate": "safety bug — no live orders during fix",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-063-fix-circuit-breaker-pnl-logic.md",
+      "_title": "fix circuit breaker pnl logic"
+    },
+    {
+      "type": "task",
+      "id": "TASK-064",
+      "status": "완료",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "Critical",
+      "difficulty": "상",
+      "est_hours": "8",
+      "est_tokens": "60000",
+      "tags": [
+        "bug",
+        "safety",
+        "race-condition",
+        "database",
+        "order-flow"
+      ],
+      "gate": "safety bug",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T09:35:04+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-064-fix-condition-toctou-race.md",
+      "_title": "fix condition toctou race"
+    },
+    {
+      "type": "task",
+      "id": "TASK-065",
+      "status": "대기",
+      "owner": "Backend Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "낮",
+      "est_hours": "2",
+      "est_tokens": "12000",
+      "tags": [
+        "ops",
+        "logging",
+        "maintenance"
+      ],
+      "gate": "-",
+      "trigger_meeting": "다음 사이클",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-065-feat-log-rotation.md",
+      "_title": "feat log rotation"
+    },
+    {
+      "type": "task",
+      "id": "TASK-066",
+      "status": "대기",
+      "owner": "QA",
+      "assignees": [
+        "QA",
+        "Backend Engineer"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "12",
+      "est_tokens": "80000",
+      "tags": [
+        "testing",
+        "coverage",
+        "safety"
+      ],
+      "gate": "Phase 3 전 필수",
+      "trigger_meeting": "다음 사이클",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-066-test-coverage-60pct.md",
+      "_title": "test coverage 60pct"
+    },
+    {
+      "type": "task",
+      "id": "TASK-067",
+      "status": "대기",
+      "owner": "UI/UX Designer",
+      "assignees": [
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "낮",
+      "est_hours": "2",
+      "est_tokens": "12000",
+      "tags": [
+        "bug",
+        "ui",
+        "analysis",
+        "error-handling"
+      ],
+      "gate": "-",
+      "trigger_meeting": "즉시 처리 권고",
+      "audit_log": "AUDIT-2026-06-14-001",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T00:00:00+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-067-fix-intraday-no-try-except.md",
+      "_title": "fix intraday no try except"
     }
   ]
 }

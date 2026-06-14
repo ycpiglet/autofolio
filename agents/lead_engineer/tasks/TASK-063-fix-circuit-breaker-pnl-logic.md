@@ -1,7 +1,7 @@
 ---
 type: task
 id: TASK-063
-status: 대기
+status: 완료
 owner: Backend Engineer
 assignees: [Backend Engineer, QA]
 priority: High
@@ -20,7 +20,7 @@ updated_at: 2026-06-14T00:00:00+09:00
 # TASK-063 fix: 서킷브레이커 일손실 기준 로직 오류 (safety_checker.py)
 
 작업 ID: TASK-063
-상태: 대기
+상태: 완료
 Owner: Backend Engineer
 요청 시각: 2026-06-14
 기록 시각: 2026-06-14T00:00:00+09:00
@@ -71,3 +71,34 @@ Owner: Backend Engineer
 
 - Initiative: `agents/project/initiatives/INIT-PRODUCT-MATURITY.md`
 - Taskset: `agents/project/initiatives/TASKSET-PRODUCT-MATURITY.md`
+
+## 완료 기록
+
+완료 시각: 2026-06-14T10:06:23+09:00
+검토자: Backend Engineer / QA
+
+## 증거
+
+- `app/database/repositories.py` `today_realized_pnl()`: 순현금흐름 SQL → SELL 체결 기준 실현손익 SQL로 수정.
+  - WITH CTE로 종목별 avg_buy_price 계산 (전체 기간 BUY 가중평균).
+  - KST 필터: `DATE(el.filled_at, '+9 hours') = DATE('now', '+9 hours')` — OS TZ 무관.
+- `tests/unit/test_circuit_breaker.py`: 버그 행동을 assert하던 테스트 교체.
+  - 신규: `test_buy_only_day_returns_zero` (버그 재현 → 수정 증거).
+  - 신규: `test_buy_only_day_does_not_trip_circuit_breaker` (서킷브레이커 오발동 재현 → 수정 증거).
+  - `test_sell_after_buy_profit`, `test_sell_after_buy_loss`, `test_avg_cost_weighted_correctly` 추가.
+  - `test_daily_loss_trips_when_loss_exceeds_threshold`: BUY fill → SELL fill로 교체.
+- 수정 전: `test_buy_only_day_returns_zero` FAILED (반환값 -700_000).
+- 수정 후: 14 passed (test_circuit_breaker.py), 630 passed (전체).
+
+## 리뷰
+
+- 평균단가 근거: execution_logs 전체 BUY 기록 가중평균 (positions 테이블 없음).
+- 안전 폴백: 매입 기록 없는 종목 SELL → avg_price = sell_price → realized = 0 (오발동 방지).
+- TZ: `'+9 hours'` 고정, `'localtime'` 미사용.
+
+실측 비용 (시간): ~0.7h (subagent)
+실측 비용 (LLM 토큰): ~101k (subagent)
+
+## Independent Audit
+
+판정: 통과 — 매수-only 일 realized PnL 0 (구버전 큰 음수 FAIL→수정 후 PASS), 서킷브레이커 오발동 제거 검증. 전체 630 passed, 0 doc error. TDD(실패 테스트 선행). self-review(Backend Engineer/QA) + CI 그린으로 외부 검증 보강.
