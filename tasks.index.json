@@ -1016,7 +1016,7 @@
     {
       "type": "task",
       "id": "TASK-040",
-      "status": "대기",
+      "status": "완료",
       "owner": "Performance Analyst",
       "assignees": [
         "Performance Analyst",
@@ -1039,7 +1039,7 @@
       "audit_log": "AUDIT-2026-06-13-004",
       "created": "2026-06-13",
       "created_at": "2026-06-13T00:53:23+09:00",
-      "updated_at": "2026-06-13T00:53:23+09:00",
+      "updated_at": "2026-06-14T19:07:22+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-040-portfolio-performance-tax-lot-reporting.md",
       "_title": "portfolio performance tax lot reporting"
     },
