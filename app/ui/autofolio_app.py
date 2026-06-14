@@ -28,6 +28,7 @@ from app.ui.views import (
     portfolio,
     settings,
     trade,
+    watchlist,
 )
 
 theme.configure_page()
@@ -71,6 +72,7 @@ navigation = st.navigation(
             st.Page(history.render, title="내역 · 손익", icon="📒", url_path="history"),
         ],
         "인텔리전스": [
+            st.Page(watchlist.render, title="워치리스트/스크리너", icon="🔍", url_path="watchlist"),
             st.Page(analysis.render, title="분석", icon="📊", url_path="analysis"),
             st.Page(agents.render, title="에이전트", icon="🤖", url_path="agents"),
         ],

@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-15T00:37:54+09:00`
+> 생성 시각: `2026-06-15T01:10:35+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -38,7 +38,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 완료 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 완료 | High | 중 | 4 ph / ~30000 tok | UI/UX Designer | bug,ui,alerts,persistence |
 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 완료 | High | 중-상 | 8 ph / ~50000 tok | Backend Engineer | feature,engine,alerts,notifications |
 
@@ -363,7 +363,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-037](TASK-037-feature-landscape-research.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,feature-landscape,backlog,planning |
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 완료 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 | [TASK-039](TASK-039-backtest-research-report-hardening.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Quant Researcher | feature-landscape,backtest,research,reports,qa |
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
@@ -818,7 +818,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 완료 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
 
 ## #readme
@@ -928,7 +928,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 완료 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 
 ## #secrets
 
@@ -1082,7 +1082,7 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-024](TASK-024-paper-scenario-matrix-validation.md) | 완료 | High | 중 | 1 ph / ~20000 tok | QA | paper,qa,scenario-matrix,engine,risk,ui |
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | High | 중 | 2 ph / ~30000 tok | QA | qa,kis,ui,paper,market-hours,verification |
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 완료 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 완료 | High | 중 | 4 ph / ~30000 tok | UI/UX Designer | bug,ui,alerts,persistence |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
@@ -1145,7 +1145,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 완료 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 
 ## #websocket
 

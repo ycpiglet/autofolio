@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-15T00:37:54+09:00`
+> 생성 시각: `2026-06-15T01:10:35+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -122,7 +122,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 대기 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
+| [TASK-038](TASK-038-watchlist-screener-alert-expansion.md) | 완료 | High | 중 | 4 ph / ~45000 tok | UI/UX Designer | feature-landscape,watchlist,screener,alerts,ui,read-only |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
