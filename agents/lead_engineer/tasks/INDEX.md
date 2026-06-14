@@ -59,7 +59,7 @@
 | [TASK-054](TASK-054-fix-alerts-settings-no-persist.md) | 대기 | UI/UX Designer | fix: 알림 채널 토글/규칙 설정 미저장 (alerts.py) → v1 |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 대기 | UI/UX Designer | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op → v1 |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 대기 | Backend Engineer | fix: backend.allocation_gap() 미구현 → portfolio/analysis mock fallback → v1 |
-| [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 대기 | Backend Engineer | fix: 일손익률/누적손익률 KPI 0.0 하드코딩 → v1 |
+| [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | Backend Engineer | fix: 일손익률/누적손익률 KPI 0.0 하드코딩 → v1 |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 대기 | UI/UX Designer | fix: history.py 라이브 모드 조기 return으로 PnL/배당 탭 미렌더 → v1 |
 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 대기 | Backend Engineer | fix: logout() 미완전 세션 상태 초기화 (security) → v1 |
 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 대기 | Backend Engineer | SQLite WAL 모드 + FK 제약 적용 → v1 |
