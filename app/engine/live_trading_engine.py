@@ -98,4 +98,45 @@ class LiveTradingEngine:
         )
         if self.notifier and (executed_count > 0 or error_count > 0):
             self.notifier.send_engine_summary(run_id, executed_count, error_count)
+        self.evaluate_price_alerts()
         return messages
+
+    def evaluate_price_alerts(self) -> list[str]:
+        """가격 알림 평가 — active 알림 전체를 순회, 조건 충족 시 발송 후 비활성화.
+
+        거래 시간 제한 없이 실행된다 (주문이 아닌 알림이므로).
+        """
+        alerts = self.repo.list_active_alerts()
+        fired: list[str] = []
+        for alert in alerts:
+            alert_id = alert["id"]
+            symbol = alert["symbol"]
+            target_price = float(alert["target_price"])
+            direction = alert["direction"]
+            try:
+                current_price = float(self.broker.get_current_price(symbol).price)
+            except Exception as exc:  # noqa: BLE001
+                log_event(logger, "price_alert_price_fetch_error",
+                          alert_id=alert_id, symbol=symbol, error=str(exc))
+                continue
+
+            condition_met = (
+                (direction == "ABOVE" and current_price >= target_price)
+                or (direction == "BELOW" and current_price <= target_price)
+            )
+            if not condition_met:
+                continue
+
+            msg = (
+                f"[가격 알림] {symbol} {direction} {target_price:,.0f} — "
+                f"현재가 {current_price:,.0f}"
+            )
+            log_event(logger, "price_alert_fired",
+                      alert_id=alert_id, symbol=symbol,
+                      direction=direction, target_price=target_price,
+                      current_price=current_price)
+            if self.notifier:
+                self.notifier.send(msg)
+            self.repo.trigger_alert(alert_id)
+            fired.append(msg)
+        return fired

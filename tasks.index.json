@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 66,
+  "count": 68,
   "tasks": [
     {
       "type": "task",
@@ -1411,7 +1411,7 @@
     {
       "type": "task",
       "id": "TASK-053",
-      "status": "대기",
+      "status": "완료",
       "owner": "Lead Engineer",
       "assignees": [
         "Lead Engineer",
@@ -1428,10 +1428,10 @@
       ],
       "gate": "-",
       "trigger_meeting": "다음 사이클",
-      "audit_log": "AUDIT-2026-06-14-001",
+      "audit_log": "AUDIT-2026-06-14-003",
       "created": "2026-06-14",
       "created_at": "2026-06-14T00:00:00+09:00",
-      "updated_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T14:54:50+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-053-product-maturity-assessment.md",
       "_title": "product maturity assessment"
     },
@@ -1551,7 +1551,7 @@
     {
       "type": "task",
       "id": "TASK-058",
-      "status": "대기",
+      "status": "완료",
       "owner": "UI/UX Designer",
       "assignees": [
         "UI/UX Designer",
@@ -1572,7 +1572,7 @@
       "audit_log": "AUDIT-2026-06-14-001",
       "created": "2026-06-14",
       "created_at": "2026-06-14T00:00:00+09:00",
-      "updated_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T14:15:00+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-058-fix-history-live-mode-early-return.md",
       "_title": "fix history live mode early return"
     },
@@ -1607,7 +1607,7 @@
     {
       "type": "task",
       "id": "TASK-060",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1628,14 +1628,14 @@
       "audit_log": "AUDIT-2026-06-14-001",
       "created": "2026-06-14",
       "created_at": "2026-06-14T00:00:00+09:00",
-      "updated_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T15:35:45+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-060-sqlite-wal-fk-enforcement.md",
       "_title": "sqlite wal fk enforcement"
     },
     {
       "type": "task",
       "id": "TASK-061",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1656,7 +1656,7 @@
       "audit_log": "AUDIT-2026-06-14-001",
       "created": "2026-06-14",
       "created_at": "2026-06-14T00:00:00+09:00",
-      "updated_at": "2026-06-14T00:00:00+09:00",
+      "updated_at": "2026-06-14T16:05:07+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-061-feat-price-alert-engine-loop.md",
       "_title": "feat price alert engine loop"
     },
@@ -1826,6 +1826,63 @@
       "updated_at": "2026-06-14T12:48:04+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-067-fix-intraday-no-try-except.md",
       "_title": "fix intraday no try except"
+    },
+    {
+      "type": "task",
+      "id": "TASK-068",
+      "status": "대기",
+      "owner": "Performance Analyst",
+      "assignees": [
+        "Performance Analyst",
+        "Lead Engineer"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "3",
+      "est_tokens": "20000",
+      "tags": [
+        "agent-runtime",
+        "eval",
+        "benchmark",
+        "pilot",
+        "dogfooding"
+      ],
+      "gate": "no live orders; measurement only",
+      "trigger_meeting": "없음",
+      "audit_log": "AUDIT-2026-06-14-002",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T14:36:48+09:00",
+      "updated_at": "2026-06-14T14:36:48+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-068-agent-runtime-eval-pilot.md",
+      "_title": "agent runtime eval pilot"
+    },
+    {
+      "type": "task",
+      "id": "TASK-069",
+      "status": "대기",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "Doc Steward"
+      ],
+      "priority": "Medium",
+      "difficulty": "중",
+      "est_hours": "2",
+      "est_tokens": "15000",
+      "tags": [
+        "assessment",
+        "metrics",
+        "reporting",
+        "semi-annual"
+      ],
+      "gate": "-",
+      "trigger_meeting": "2026-12-14",
+      "audit_log": "AUDIT-2026-06-14-003",
+      "created": "2026-06-14",
+      "created_at": "2026-06-14T14:54:50+09:00",
+      "updated_at": "2026-06-14T14:54:50+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-069-product-maturity-reassessment-2026-12.md",
+      "_title": "product maturity reassessment 2026 12"
     }
   ]
 }
