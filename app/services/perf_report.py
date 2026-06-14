@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import pandas as pd
 
+__all__ = ["PortfolioReport", "build_portfolio_report"]
+
 # ---------------------------------------------------------------------------
 # Disclaimer / note constants (deterministic strings)
 # ---------------------------------------------------------------------------
@@ -119,7 +121,7 @@ def build_portfolio_report(
     elif not pnl_series.empty and "date" in pnl_series.columns:
         _report_date = str(pnl_series["date"].iloc[-1])
     else:
-        _report_date = "0000-00-00"
+        _report_date = "0000-00-00"  # sentinel: display-only, not parseable as datetime
 
     # --- unrealized P&L ---
     if not holdings.empty and "평가손익" in holdings.columns:

@@ -6,7 +6,6 @@ Failing on import before implementation.
 from __future__ import annotations
 
 import pandas as pd
-import pytest
 
 # ---------------------------------------------------------------------------
 # Fixtures
