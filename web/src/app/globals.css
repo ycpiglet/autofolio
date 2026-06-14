@@ -1,0 +1,173 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* ─────────────────────────────────────────────────────────────
+   Autofolio Design System — Tailwind v4 CSS-first theme
+   §4.1 Design Tokens + §4.2 Typography
+   ───────────────────────────────────────────────────────────── */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* ── Shadcn semantic aliases ── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ── Autofolio custom palette tokens (§4.1) ── */
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-brand: var(--brand);
+  --color-pnl-up: var(--pnl-up);
+  --color-pnl-down: var(--pnl-down);
+
+  /* ── Radius scale (8–20px, §4.1) ── */
+  --radius-sm: calc(var(--radius) * 0.6);   /* ~8px  */
+  --radius-md: calc(var(--radius) * 0.8);   /* ~10px */
+  --radius-lg: var(--radius);               /* ~12px */
+  --radius-xl: calc(var(--radius) * 1.4);   /* ~17px */
+  --radius-2xl: calc(var(--radius) * 1.8);  /* ~20px */
+
+  /* ── Typography ── */
+  --font-sans: var(--font-pretendard);
+  --font-mono: ui-monospace, "SFMono-Regular", monospace;
+  --font-heading: var(--font-pretendard);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Autofolio semantic CSS variables
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* Autofolio palette (§4.1 — KR convention: up=red, down=blue) */
+  --page:     #F2F4F6;  /* page background */
+  --surface:  #FFFFFF;  /* card / surface  */
+  --text:     #191F28;  /* primary text    */
+  --brand:    #3182F6;  /* toss blue       */
+  --pnl-up:   #F04452;  /* KR: 상승=빨강    */
+  --pnl-down: #3182F6;  /* KR: 하락=파랑    */
+
+  /* Shadcn base */
+  --background: #F2F4F6;
+  --foreground: #191F28;
+  --card: #FFFFFF;
+  --card-foreground: #191F28;
+  --popover: #FFFFFF;
+  --popover-foreground: #191F28;
+  --primary: #3182F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8EDF3;
+  --secondary-foreground: #191F28;
+  --muted: #E8EDF3;
+  --muted-foreground: #8B95A1;
+  --accent: #EBF3FF;
+  --accent-foreground: #1A56C4;
+  --destructive: #F04452;
+  --border: #DDE1E7;
+  --input: #DDE1E7;
+  --ring: #3182F6;
+  --chart-1: #3182F6;
+  --chart-2: #F04452;
+  --chart-3: #34C759;
+  --chart-4: #FF9500;
+  --chart-5: #8E8E93;
+  --radius: 0.75rem;  /* 12px base, so 8–20px scale maps to sm–2xl */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #191F28;
+  --sidebar-primary: #3182F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EBF3FF;
+  --sidebar-accent-foreground: #1A56C4;
+  --sidebar-border: #DDE1E7;
+  --sidebar-ring: #3182F6;
+}
+
+/*
+ * PnL 방향 토글 — Western convention (상승=초록, 하락=빨강)
+ * 사용법: <html data-pnl="western"> 를 설정하면 자동 적용됨.
+ * 기본(속성 없음)은 KR 관습(상승=빨강, 하락=파랑).
+ */
+html[data-pnl="western"] {
+  --pnl-up:   #34C759;  /* Western: 상승=초록 */
+  --pnl-down: #F04452;  /* Western: 하락=빨강 */
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Base styles
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    font-size: 15px;  /* §4.2 body 15px */
+    @apply font-sans;
+  }
+
+  body {
+    background-color: var(--page);
+    color: var(--text);
+    @apply antialiased;
+  }
+
+  /* Korean heading word-break (§4.2) */
+  h1, h2, h3, h4, h5, h6 {
+    word-break: keep-all;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Utility classes
+   ───────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* §4.2 KPI number style — 26px, 700, tabular-nums */
+  .kpi {
+    font-size: 26px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Soft 2-layer shadow (§4.1) */
+  .shadow-soft {
+    box-shadow:
+      0 1px 2px 0 rgb(0 0 0 / 0.04),
+      0 4px 12px 0 rgb(0 0 0 / 0.06);
+  }
+
+  /* PnL color helpers (use CSS vars so western toggle works) */
+  .text-pnl-up   { color: var(--pnl-up);   }
+  .text-pnl-down { color: var(--pnl-down); }
+  .bg-pnl-up     { background-color: var(--pnl-up);   }
+  .bg-pnl-down   { background-color: var(--pnl-down); }
+}
