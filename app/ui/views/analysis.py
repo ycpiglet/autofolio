@@ -208,7 +208,11 @@ def _intraday_section() -> None:
         key="intraday_count",
     )
 
-    df = backend.intraday_chart_df(options[label], time_unit=unit, count=int(count))
+    try:
+        df = backend.intraday_chart_df(options[label], time_unit=unit, count=int(count))
+    except Exception as exc:  # noqa: BLE001
+        st.error(f"분봉 데이터를 불러올 수 없습니다: {exc}")
+        return
     if df.empty:
         st.caption("분봉 데이터가 없습니다.")
         return

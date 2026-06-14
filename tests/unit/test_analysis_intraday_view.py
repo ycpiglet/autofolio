@@ -1,6 +1,70 @@
 from __future__ import annotations
 
 
+def test_intraday_section_degrades_gracefully_on_error(tmp_path):
+    """TDD: _intraday_section must NOT crash the page when intraday_chart_df raises.
+
+    Before the fix this test FAILS (at.exception is truthy).
+    After the fix (try/except in _intraday_section) it must PASS.
+    """
+    from streamlit.testing.v1 import AppTest
+
+    script = tmp_path / "analysis_intraday_error_app.py"
+    script.write_text(
+        """
+import pandas as pd
+import streamlit as st
+from unittest.mock import patch
+
+st.session_state["data_source"] = "backend"
+
+from app.ui import backend
+from app.ui.views import analysis
+
+def intraday_chart_df_raises(symbol, time_unit="1", count=120):
+    raise RuntimeError("KIS API 인증 만료 — 분봉 조회 실패")
+
+def sector_performance_df_empty():
+    return pd.DataFrame()
+
+def fundamental_empty(symbol):
+    return {}
+
+with (
+    patch.object(backend, "list_whitelist", lambda: pd.DataFrame([
+        {"symbol": "005930", "name": "삼성전자", "market": "KRX", "role": "LARGE_CAP_TEST", "enabled": 1}
+    ])),
+    patch.object(backend, "fundamental", fundamental_empty),
+    patch.object(backend, "intraday_chart_df", intraday_chart_df_raises),
+    patch.object(backend, "sector_performance_df", sector_performance_df_empty),
+    patch.object(backend, "attribution_df", lambda: pd.DataFrame(columns=["구분", "기여(만원)"])),
+    patch.object(backend, "retro_metrics", lambda: {"승률": 0, "평균R": 0.0, "MDD": 0.0, "규율": 0}),
+    patch.object(backend, "allocation_gap", lambda: pd.DataFrame(columns=["자산군", "목표%", "현재%", "갭%"])),
+    patch.object(backend, "scenario_analysis", lambda: pd.DataFrame()),
+    patch.object(backend, "watchlist", lambda: pd.DataFrame()),
+):
+    analysis.render()
+""",
+        encoding="utf-8",
+    )
+
+    at = AppTest.from_file(str(script)).run(timeout=15)
+
+    # Page must NOT crash — exception must be falsy after the fix.
+    assert not at.exception, f"Page crashed: {at.exception}"
+    # The intraday section must still render the '분봉 차트' subheader.
+    assert any(item.value == "분봉 차트" for item in at.subheader)
+    # Some graceful message must appear (error/warning/info).
+    all_messages = (
+        [item.value for item in at.error]
+        + [item.value for item in at.warning]
+        + [item.value for item in at.info]
+    )
+    assert any("분봉" in msg for msg in all_messages), (
+        f"Expected a graceful '분봉' message but got: {all_messages}"
+    )
+
+
 def test_analysis_view_renders_intraday_controls(tmp_path):
     from streamlit.testing.v1 import AppTest
 

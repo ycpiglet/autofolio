@@ -69,4 +69,4 @@
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Backend Engineer | fix: 주문 조건 TOCTOU 레이스 — 중복 주문 위험 (Critical) → v1 |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Backend Engineer | feat: 로그 로테이션 + 절대 경로 (ops) → v1 |
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | QA | feat: 테스트 커버리지 60%+ — 누락 35개 케이스 구현 → v1 |
-| [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 대기 | UI/UX Designer | fix: 분석 탭 _intraday_section try/except 누락 크래시 → v1 |
+| [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | UI/UX Designer | fix: 분석 탭 _intraday_section try/except 누락 크래시 → v1 |
