@@ -1,7 +1,7 @@
 # VIEW — TASK by Status
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T19:11:18+09:00`
+> 생성 시각: `2026-06-14T19:39:42+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -18,7 +18,6 @@
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
-| [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 대기 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## 보류
@@ -90,4 +89,5 @@
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 완료 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
+| [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 완료 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
 
