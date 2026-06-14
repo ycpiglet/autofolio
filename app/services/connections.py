@@ -10,6 +10,8 @@ from app.ui import vault
 
 __all__ = [
     "_DEFAULT_CHANNELS",
+    "_DEFAULT_ALERT_CHANNELS",
+    "_DEFAULT_ALERT_RULES",
     "get",
     "brokers_public",
     "add_broker",
@@ -17,6 +19,8 @@ __all__ = [
     "set_default_broker",
     "connect_channel",
     "disconnect_channel",
+    "get_alert_settings",
+    "save_alert_settings",
 ]
 
 _DEFAULT_CHANNELS = [
@@ -26,6 +30,16 @@ _DEFAULT_CHANNELS = [
     {"채널": "Discord", "status": "미연결", "detail": ""},
     {"채널": "Email", "status": "미연결", "detail": ""},
 ]
+
+_DEFAULT_ALERT_RULES = ["체결", "가격도달", "리스크한도", "서킷브레이커"]
+
+_DEFAULT_ALERT_CHANNELS = {
+    "Telegram": True,
+    "Kakao": False,
+    "Discord": False,
+    "Notion": True,
+    "Email": True,
+}
 
 
 def _persist(conn: dict) -> None:
@@ -104,3 +118,24 @@ def disconnect_channel(name: str) -> None:
             c["status"] = "미연결"
             c["detail"] = ""
     _persist(conn)
+
+
+def get_alert_settings() -> dict:
+    """Vault에서 알림 채널 토글/규칙 설정을 로드한다. 없으면 기본값 반환."""
+    data = vault.load()
+    settings = data.get("alert_settings")
+    if settings is None:
+        return {
+            "channels": dict(_DEFAULT_ALERT_CHANNELS),
+            "rules": list(_DEFAULT_ALERT_RULES),
+        }
+    settings.setdefault("channels", dict(_DEFAULT_ALERT_CHANNELS))
+    settings.setdefault("rules", list(_DEFAULT_ALERT_RULES))
+    return settings
+
+
+def save_alert_settings(channels: dict[str, bool], rules: list[str]) -> None:
+    """알림 채널 토글/규칙 설정을 Vault에 저장한다."""
+    data = vault.load()
+    data["alert_settings"] = {"channels": channels, "rules": rules}
+    vault.save(data)
