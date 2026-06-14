@@ -16,6 +16,7 @@ class ConditionStatus(str, Enum):
     TRIGGERED = "TRIGGERED"
     DISABLED = "DISABLED"
     ERROR = "ERROR"
+    PROCESSING = "PROCESSING"
 
 
 class OrderStatus(str, Enum):

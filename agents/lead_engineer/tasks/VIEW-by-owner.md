@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T09:12:20+09:00`
+> 생성 시각: `2026-06-14T09:37:06+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -27,7 +27,7 @@
 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 대기 | High | 중-상 | 8 ph / ~50000 tok | Backend Engineer | feature,engine,alerts,notifications |
 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | High | 중 | 6 ph / ~40000 tok | Backend Engineer | feature,safety,trading-window,holidays |
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 대기 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,circuit-breaker,pnl |
-| [TASK-064](TASK-064-fix-condition-toctou-race.md) | 대기 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
+| [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |
 
 ## Compliance Officer

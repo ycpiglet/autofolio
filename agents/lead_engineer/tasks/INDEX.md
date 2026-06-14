@@ -66,7 +66,7 @@
 | [TASK-061](TASK-061-feat-price-alert-engine-loop.md) | 대기 | Backend Engineer | feat: 가격 알림 엔진 평가 루프 구현 (dead feature 해소) → v1 |
 | [TASK-062](TASK-062-feat-krx-holiday-calendar.md) | 대기 | Backend Engineer | feat: KRX 휴장일 캘린더 연동 (safety) → v1 |
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 대기 | Backend Engineer | fix: 서킷브레이커 일손실 기준 로직 오류 (안전 버그) → v1 |
-| [TASK-064](TASK-064-fix-condition-toctou-race.md) | 대기 | Backend Engineer | fix: 주문 조건 TOCTOU 레이스 — 중복 주문 위험 (Critical) → v1 |
+| [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Backend Engineer | fix: 주문 조건 TOCTOU 레이스 — 중복 주문 위험 (Critical) → v1 |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 대기 | Backend Engineer | feat: 로그 로테이션 + 절대 경로 (ops) → v1 |
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 대기 | QA | feat: 테스트 커버리지 60%+ — 누락 35개 케이스 구현 → v1 |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 대기 | UI/UX Designer | fix: 분석 탭 _intraday_section try/except 누락 크래시 → v1 |

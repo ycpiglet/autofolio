@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.brokers.base import BrokerClient
+from app.common.enums import ConditionStatus
 from app.common.logger import get_structured_logger, log_event
 from app.database.repositories import Repository
 from app.engine.order_flow import OrderFlow
@@ -45,6 +46,18 @@ class LiveTradingEngine:
         for condition in conditions:
             cid = condition.get("id")
             sym = condition.get("symbol", "?")
+
+            # Atomic CAS claim: ACTIVE → PROCESSING.
+            # If another concurrent run_once() already claimed this condition,
+            # skip it entirely to prevent duplicate order execution.
+            if not self.repo.atomic_claim_condition(cid):
+                log_event(
+                    logger, "condition_skipped_already_claimed",
+                    run=run_id, symbol=sym, condition_id=cid,
+                )
+                messages.append(f"condition_id={cid}: skipped (already claimed)")
+                continue
+
             try:
                 result = self.order_flow.process_condition_once(condition)
                 messages.append(f"condition_id={cid}: {result.message}")
@@ -60,10 +73,19 @@ class LiveTradingEngine:
                             f"✅ 체결 [run#{run_id}]: {sym} {condition.get('side')} "
                             f"{condition.get('quantity')}주 — {result.message}"
                         )
+                else:
+                    # If process_condition_once() returned without triggering a terminal
+                    # status transition (e.g. "not triggered", "safety blocked"), the
+                    # condition is still PROCESSING.  Release the claim so the next
+                    # run_once() cycle can re-evaluate it.
+                    current = self.repo.get_condition(cid)
+                    if current and current.get("status") == ConditionStatus.PROCESSING.value:
+                        self.repo.update_condition_status(cid, ConditionStatus.ACTIVE.value)
             except Exception as exc:
                 error_count += 1
                 logger.exception("Failed to process condition %s", cid)
-                self.repo.update_condition_status(cid, "ERROR")
+                # Transition PROCESSING → ERROR so the condition is not silently lost.
+                self.repo.update_condition_status(cid, ConditionStatus.ERROR.value)
                 messages.append(f"condition_id={cid}: ERROR {exc}")
                 log_event(logger, "condition_error", run=run_id, condition_id=cid, error=str(exc))
                 if self.notifier:

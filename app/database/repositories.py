@@ -133,6 +133,24 @@ class Repository:
                 (status, condition_id),
             )
 
+    def atomic_claim_condition(self, condition_id: int) -> bool:
+        """Atomic Compare-And-Swap: ACTIVE → PROCESSING.
+
+        Returns True only if this caller claimed the condition (rowcount == 1).
+        Returns False if another caller already claimed or the condition is not ACTIVE.
+        SQLite serialises write transactions so exactly one concurrent caller wins.
+        """
+        with get_connection(self.db_path) as conn:
+            cur = conn.execute(
+                """
+                UPDATE trade_conditions
+                SET status = 'PROCESSING', updated_at = CURRENT_TIMESTAMP
+                WHERE id = ? AND status = 'ACTIVE'
+                """,
+                (condition_id,),
+            )
+            return cur.rowcount == 1
+
     def set_condition_cooldown(self, condition_id: int, cooldown_until: datetime) -> None:
         with get_connection(self.db_path) as conn:
             conn.execute(
