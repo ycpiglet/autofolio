@@ -41,11 +41,13 @@ export function KillSwitchButton({
           }
         />
         {disabledReason && (
-          <Tooltip.Positioner>
-            <Tooltip.Popup className="z-50 rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md">
-              {disabledReason}
-            </Tooltip.Popup>
-          </Tooltip.Positioner>
+          <Tooltip.Portal>
+            <Tooltip.Positioner>
+              <Tooltip.Popup className="z-50 rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md">
+                {disabledReason}
+              </Tooltip.Popup>
+            </Tooltip.Positioner>
+          </Tooltip.Portal>
         )}
       </Tooltip.Root>
     </Tooltip.Provider>

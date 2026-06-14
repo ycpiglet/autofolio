@@ -48,11 +48,13 @@ export function AutoTradingToggle({
             }
           />
           {phase1Disabled && (
-            <Tooltip.Positioner>
-              <Tooltip.Popup className="z-50 rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md">
-                Phase 3에서 활성화
-              </Tooltip.Popup>
-            </Tooltip.Positioner>
+            <Tooltip.Portal>
+              <Tooltip.Positioner>
+                <Tooltip.Popup className="z-50 rounded-md bg-foreground px-2 py-1 text-xs text-background shadow-md">
+                  Phase 3에서 활성화
+                </Tooltip.Popup>
+              </Tooltip.Positioner>
+            </Tooltip.Portal>
           )}
         </Tooltip.Root>
       </Tooltip.Provider>
