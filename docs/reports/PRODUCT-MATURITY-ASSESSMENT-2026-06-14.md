@@ -244,26 +244,29 @@ Beta 기준선     ███████░░░  7.0
 
 ### Priority × Impact Matrix
 
-| 우선순위 | 항목 | 영향도 | 난이도 | 담당 태스크 |
-|----------|------|--------|--------|------------|
-| **Critical** | LLM 컴플라이언스 fail-closed 전환 | 안전·규정 | 중 | TASK-051 |
-| **Critical** | 알림 루프 엔진 연결 | 핵심 기능 | 중 | TASK-052 |
-| **Critical** | `history.py` 조기 return 제거 | UX 차단 | 낮 | — |
-| **Critical** | `home.py` 제안 핸들러 연결 | 핵심 워크플로 | 중 | — |
-| **High** | UTC/KST 타임스탬프 정규화 | 데이터 무결성 | 중 | TASK-050 |
-| **High** | 서킷 브레이커 로직 수정 | 안전 | 중 | — |
-| **High** | `alerts.py` UI 저장 핸들러 추가 | 기능 완성 | 낮 | — |
-| **High** | `analysis.py` try/except 추가 | 안정성 | 낮 | — |
-| **High** | 안전 경로 테스트 36건 추가 | 품질 | 높 | — |
-| **Medium** | `order_flow.py` TOCTOU 수정 | 안전 | 높 | — |
-| **Medium** | 볼트 레이스 해소 (`auth`, `connections`) | 보안 | 중 | — |
-| **Medium** | `portfolio.py` 비중 컬럼 표시 | UX | 낮 | — |
-| **Medium** | WAL 적용 | 성능 | 낮 | — |
-| **Medium** | `duplicate_guard` 심볼 단위 전환 | 정확성 | 중 | — |
-| **Low** | 로그 로테이션 추가 | 운영 | 낮 | — |
-| **Low** | 휴일 캘린더 | 정확성 | 중 | — |
-| **Low** | `errors.py` 에러 코드 체계 | 유지보수 | 낮 | — |
-| **Low** | `agents.py` 스트리밍 + 실제 트리 | UX | 높 | — |
+| 우선순위 | 항목 | 영향도 | 난이도 | 담당 태스크 | 상태 |
+|----------|------|--------|--------|------------|------|
+| **Critical** | LLM 컴플라이언스 fail-closed 전환 | 안전·규정 | 중 | TASK-051 | **완료** |
+| **Critical** | 알림 루프 엔진 연결 | 핵심 기능 | 중 | TASK-052 | **완료** |
+| **Critical** | `history.py` 조기 return 제거 | UX 차단 | 낮 | TASK-058 | **완료** |
+| **Critical** | `home.py` 제안 핸들러 연결 | 핵심 워크플로 | 중 | TASK-055 | **완료** |
+| **High** | UTC/KST 타임스탬프 정규화 | 데이터 무결성 | 중 | TASK-050 | **완료** |
+| **High** | 서킷 브레이커 로직 수정 | 안전 | 중 | TASK-063 | **완료** |
+| **High** | `alerts.py` UI 저장 핸들러 추가 | 기능 완성 | 낮 | TASK-054 | **완료** |
+| **High** | `analysis.py` try/except 추가 | 안정성 | 낮 | TASK-067 | **완료** |
+| **High** | 안전 경로 테스트 36건 추가 | 품질 | 높 | TASK-066 | 대기 |
+| **High** | KPI 하드코딩(일손익률/누적손익률) 수정 | 기능 정확성 | 낮 | TASK-057 | **완료** |
+| **High** | logout() 세션 초기화 완전화 (security) | 보안 | 낮 | TASK-059 | **완료** |
+| **Medium** | `order_flow.py` TOCTOU 수정 | 안전 | 높 | TASK-064 | **완료** |
+| **Medium** | 볼트 레이스 해소 (`auth`, `connections`) | 보안 | 중 | — | 대기 |
+| **Medium** | `portfolio.py` 비중 컬럼 표시 | UX | 낮 | TASK-056 | **완료** |
+| **Medium** | WAL 적용 | 성능 | 낮 | TASK-060 | 대기 |
+| **Medium** | `duplicate_guard` 심볼 단위 전환 | 정확성 | 중 | — | 대기 |
+| **Medium** | 가격 알림 엔진 평가 루프 구현 | 기능 | 중 | TASK-061 | 대기 |
+| **Medium** | KRX 휴장일 캘린더 연동 | 안전 | 중 | TASK-062 | 대기 |
+| **Low** | 로그 로테이션 추가 | 운영 | 낮 | TASK-065 | 대기 |
+| **Low** | `errors.py` 에러 코드 체계 | 유지보수 | 낮 | — | 대기 |
+| **Low** | `agents.py` 스트리밍 + 실제 트리 | UX | 높 | — | 대기 |
 
 ---
 
@@ -273,13 +276,13 @@ Beta 기준선     ███████░░░  7.0
 
 ### 8.1 블로커 (차단 항목) — 전부 미완료 시 전환 금지
 
-- [ ] **TASK-050** — `repositories.py` UTC/KST 불일치 해소 및 마이그레이션 스크립트 검증
-- [ ] **TASK-051** — `trading.py` 컴플라이언스 fail-closed 전환 및 회귀 테스트 통과
-- [ ] **TASK-052** — 알림 평가 루프 엔진 연결 및 E2E 알림 발송 검증
-- [ ] `safety_checker.py` 일일 PnL 서킷 브레이커 로직 수정 + 경계값 테스트
-- [ ] `home.py` 제안 승인/거부 핸들러 연결
-- [ ] `history.py` 라인 41 조기 `return` 제거
-- [ ] `alerts.py` UI 저장 핸들러 구현
+- [x] **TASK-050** — `repositories.py` UTC/KST 불일치 해소 및 마이그레이션 스크립트 검증 *(완료)*
+- [x] **TASK-051** — `trading.py` 컴플라이언스 fail-closed 전환 및 회귀 테스트 통과 *(완료)*
+- [x] **TASK-052** — 알림 평가 루프 엔진 연결 및 E2E 알림 발송 검증 *(완료)*
+- [x] **TASK-063** — `safety_checker.py` 일일 PnL 서킷 브레이커 로직 수정 + 경계값 테스트 *(완료)*
+- [x] **TASK-055** — `home.py` 제안 승인/거부 핸들러 연결 *(완료)*
+- [x] **TASK-058** — `history.py` 라이브 모드 조기 `return` 제거 *(완료)*
+- [x] **TASK-054** — `alerts.py` UI 저장 핸들러 구현 *(완료)*
 
 ### 8.2 품질 게이트 (전환 전 달성 필수)
 
@@ -345,5 +348,40 @@ Beta 기준선     ███████░░░  7.0
 
 ---
 
+## 10. 개선 이행 현황 (2026-06-14 기준)
+
+### 10.1 TASK-053~067 완료 현황
+
+| TASK | 설명 | 상태 |
+|------|------|------|
+| TASK-053 | 제품 성숙도 평가 지표 문서 등록 | **완료** |
+| TASK-054 | fix: 알림 채널 토글/규칙 설정 미저장 (alerts.py) | **완료** |
+| TASK-055 | fix: 홈 화면 IC 제안 승인/거부 버튼 no-op | **완료** |
+| TASK-056 | fix: backend.allocation_gap() 미구현 → mock fallback | **완료** |
+| TASK-057 | fix: 일손익률/누적손익률 KPI 0.0 하드코딩 | **완료** |
+| TASK-058 | fix: history.py 라이브 모드 조기 return으로 탭 미렌더 | **완료** |
+| TASK-059 | fix: logout() 미완전 세션 상태 초기화 (security) | **완료** |
+| TASK-060 | SQLite WAL 모드 + FK 제약 적용 | 대기 |
+| TASK-061 | feat: 가격 알림 엔진 평가 루프 구현 | 대기 |
+| TASK-062 | feat: KRX 휴장일 캘린더 연동 (safety) | 대기 |
+| TASK-063 | fix: 서킷브레이커 일손실 기준 로직 오류 (안전 버그) | **완료** |
+| TASK-064 | fix: 주문 조건 TOCTOU 레이스 — 중복 주문 위험 (Critical) | **완료** |
+| TASK-065 | feat: 로그 로테이션 + 절대 경로 (ops) | 대기 |
+| TASK-066 | feat: 테스트 커버리지 60%+ — 누락 35개 케이스 구현 | 대기 |
+| TASK-067 | fix: 분석 탭 _intraday_section try/except 누락 크래시 | **완료** |
+
+**완료: 11건 / 대기: 5건 (TASK-060, 061, 062, 065, 066)**
+
+### 10.2 다음 평가 사이클
+
+| 이벤트 | 예정일 | 담당 | 추적 |
+|--------|--------|------|------|
+| 반기 재평가 (Semi-Annual Re-Assessment) | 2026-12-14 | Lead Engineer | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) |
+
+재평가 시 점검 항목: TASK-060·061·062·065·066 완료 여부, 테스트 커버리지 실측, 아키텍처 마이그레이션 진행률, 신규 버그 유입 여부.
+
+---
+
 *생성: Lead Engineer · 2026-06-14 · `feat/v1-migration-pilot` 브랜치 기준*
-*다음 재평가 예정: TASK-050·051·052 완료 후 또는 2026-07-14 중 빠른 시점*
+*TASK-053 완료(등록): 2026-06-14T14:54:50+09:00*
+*다음 반기 재평가: 2026-12-14 → TASK-069*

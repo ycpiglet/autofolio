@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-14T14:41:01+09:00`
+> 생성 시각: `2026-06-14T15:08:30+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -66,7 +66,8 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## #asset-class
 
@@ -567,7 +568,8 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## #moc
 
@@ -849,7 +851,8 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 대기 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
-| [TASK-053](TASK-053-product-maturity-assessment.md) | 대기 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
+| [TASK-053](TASK-053-product-maturity-assessment.md) | 완료 | High | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## #reports
 
@@ -944,6 +947,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 완료 | Medium | 낮 | 2 ph / ~15000 tok | Backend Engineer | bug,security,session,logout |
+
+## #semi-annual
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## #session
 
