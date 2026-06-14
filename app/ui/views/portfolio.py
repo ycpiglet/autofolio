@@ -93,3 +93,84 @@ def render() -> None:
                 st.dataframe(data.allocation_gap(), hide_index=True, width="stretch")
         else:
             st.dataframe(data.allocation_gap(), hide_index=True, width="stretch")
+
+    # ── 성과 리포트 (읽기전용 / TASK-040) ─────────────────────────
+    with st.expander("📊 성과 리포트 (읽기전용)", expanded=False):
+        _render_perf_report(df)
+
+
+def _render_perf_report(holdings_df: "pd.DataFrame") -> None:
+    """포트폴리오 성과/귀속/tax-lot 읽기전용 리포트 섹션.
+
+    순수 UI 렌더러 — 주문/리밸런싱 실행 없음.
+    데이터 없는 섹션은 솔직하게 '데이터 없음' 표시.
+    """
+    from app.services.perf_report import build_portfolio_report
+
+    # --- 데이터 수집 (backend 또는 mock) ---
+    if st.session_state.get("data_source") == "backend":
+        try:
+            from app.ui import backend
+            pnl_series = backend.daily_pnl_series()
+            kpis_data = backend.kpis()
+            repo, *_ = backend._ctx()
+            realized_pnl = repo.total_realized_pnl()
+        except Exception as exc:  # noqa: BLE001
+            st.warning(f"성과 데이터 라이브 조회 실패 — 데모 데이터로 대체합니다: {exc}")
+            from app.ui.mock import data as mock_data
+            pnl_series = mock_data.pnl_daily().rename(columns={"날짜": "date", "손익": "pnl"})
+            kpis_data = mock_data.kpis()
+            realized_pnl = 0.0
+    else:
+        from app.ui.mock import data as mock_data
+        pnl_series = mock_data.pnl_daily().rename(columns={"날짜": "date", "손익": "pnl"})
+        kpis_data = mock_data.kpis()
+        realized_pnl = 0.0
+
+    report = build_portfolio_report(
+        holdings=holdings_df,
+        pnl_series=pnl_series,
+        kpis=kpis_data,
+        realized_pnl=realized_pnl,
+    )
+
+    # ── 1. 실현/미실현 P&L 요약 ───────────────────────────────────
+    st.subheader("실현/미실현 손익")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("실현 손익", f"₩{report.realized_pnl:,.0f}")
+    c2.metric("미실현 평가손익", f"₩{report.unrealized_pnl:,.0f}")
+    c3.metric("합계", f"₩{report.realized_pnl + report.unrealized_pnl:,.0f}")
+
+    # ── 2. 현금흐름·수수료·턴오버 (데이터 없음 명시) ──────────────
+    st.subheader("현금흐름 / 수수료 / 턴오버")
+    st.info(report.cashflow_note)
+    st.info(report.fee_slippage_note)
+    st.info(report.turnover_note)
+
+    # ── 3. Attribution (자산군별 기여) ────────────────────────────
+    st.subheader("귀속 분석 (Attribution)")
+    st.caption(report.attribution_note)
+    if not report.attribution_df.empty:
+        st.dataframe(report.attribution_df, hide_index=True, width="stretch")
+        st.bar_chart(report.attribution_df.set_index("구분")["기여(만원)"], height=200)
+    else:
+        st.write("데이터 없음 — 보유 종목이 없습니다.")
+
+    # ── 4. Tax-lot placeholder ────────────────────────────────────
+    st.subheader("Tax-Lot 보기 (참고용 Placeholder)")
+    st.warning(report.tax_lot_disclaimer)
+    if not report.tax_lot_df.empty:
+        st.dataframe(
+            report.tax_lot_df,
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "수량": st.column_config.NumberColumn(format="%d"),
+                "평단": st.column_config.NumberColumn(format="%.0f"),
+                "현재가": st.column_config.NumberColumn(format="%.0f"),
+                "평가손익": st.column_config.NumberColumn(format="₩%d"),
+                "손익률": st.column_config.NumberColumn(format="%.1f%%"),
+            },
+        )
+    else:
+        st.write("보유 종목 없음.")
