@@ -79,6 +79,106 @@ SAMPLE_CB = {
     "today_pnl": 0.0,
 }
 
+# ── Phase 2 sample data ───────────────────────────────────────────────────────
+
+SAMPLE_CONDITIONS = pd.DataFrame(
+    [
+        {
+            "id": 1,
+            "symbol": "005930",
+            "side": "BUY",
+            "target_price": 70000.0,
+            "quantity": 10,
+            "order_type": "LIMIT",
+            "auto_enabled": False,
+            "created_by": "USER",
+        }
+    ]
+)
+
+SAMPLE_ORDER_LOGS = pd.DataFrame(
+    [
+        {
+            "id": 1,
+            "symbol": "005930",
+            "side": "BUY",
+            "quantity": 10,
+            "order_price": 70000.0,
+            "order_status": "FILLED",
+            "created_at": "2026-06-12 09:30:00",
+        }
+    ]
+)
+
+SAMPLE_ORDER_BOOK = pd.DataFrame(
+    [
+        {
+            "level": 1,
+            "ask_price": 75100,
+            "ask_quantity": 100,
+            "bid_price": 74900,
+            "bid_quantity": 200,
+        }
+    ]
+)
+
+SAMPLE_INTRADAY = pd.DataFrame(
+    [
+        {
+            "time": "0930",
+            "open": 74000,
+            "high": 75100,
+            "low": 73900,
+            "close": 75000,
+            "volume": 50000,
+        }
+    ]
+)
+
+SAMPLE_SECTORS = pd.DataFrame(
+    [
+        {
+            "name": "반도체",
+            "code": "WMD0700",
+            "price": 3200.0,
+            "change": 12.0,
+            "change_rate": 0.38,
+            "trading_value": 1_000_000_000,
+        }
+    ]
+)
+
+SAMPLE_DISCLOSURES = pd.DataFrame(
+    [
+        {
+            "date": "20260612",
+            "time": "0900",
+            "symbol": "005930",
+            "title": "사업보고서",
+            "category": "정기공시",
+            "severity": "LOW",
+            "block_order": False,
+            "source": "dart",
+            "serial": "abc123",
+        }
+    ]
+)
+
+SAMPLE_ATTRIBUTION = pd.DataFrame(
+    [{"구분": "주식", "기여(만원)": 5.0}]
+)
+
+SAMPLE_RETRO: dict[str, Any] = {
+    "승률": 75,
+    "평균R": 1.5,
+    "MDD": 0.0,
+    "규율": 95,
+}
+
+SAMPLE_DAILY_PNL = pd.DataFrame(
+    [{"date": "2026-06-12", "pnl": 50_000.0}]
+)
+
 
 # ── Cookie helpers ─────────────────────────────────────────────────────────────
 
@@ -126,6 +226,18 @@ def owner_client(app):
     return c
 
 
+@pytest.fixture()
+def error_client(app):
+    """TestClient with guest session that does NOT re-raise server exceptions.
+
+    Use this fixture specifically for fail-loud tests that expect the server
+    to return a non-200 HTTP error rather than propagating the exception.
+    """
+    c = TestClient(app, raise_server_exceptions=False)
+    c.cookies.set("af_session", encode_session({"role": "guest", "data_source": "demo"}))
+    return c
+
+
 # ── Backend mock fixture ───────────────────────────────────────────────────────
 
 @pytest.fixture()
@@ -146,5 +258,22 @@ def mock_backend(monkeypatch):
     monkeypatch.setattr(backend_mod, "circuit_breaker_status", lambda: SAMPLE_CB)
     monkeypatch.setattr(backend_mod, "env", lambda: "mock")
     monkeypatch.setattr(backend_mod, "get_flag", lambda key: False)
+
+    # Phase 2 additions
+    monkeypatch.setattr(backend_mod, "price", lambda symbol: 75_000.0)
+    monkeypatch.setattr(backend_mod, "fundamental", lambda symbol: {"per": 12.5, "pbr": 1.3})
+    monkeypatch.setattr(backend_mod, "order_book_df", lambda symbol, market="J": SAMPLE_ORDER_BOOK)
+    monkeypatch.setattr(
+        backend_mod,
+        "intraday_chart_df",
+        lambda symbol, time_unit="1", count=120: SAMPLE_INTRADAY,
+    )
+    monkeypatch.setattr(backend_mod, "sector_performance_df", lambda: SAMPLE_SECTORS)
+    monkeypatch.setattr(backend_mod, "disclosures_df", lambda symbol, days=1: SAMPLE_DISCLOSURES)
+    monkeypatch.setattr(backend_mod, "list_conditions", lambda: SAMPLE_CONDITIONS)
+    monkeypatch.setattr(backend_mod, "list_order_logs", lambda limit=200: SAMPLE_ORDER_LOGS)
+    monkeypatch.setattr(backend_mod, "attribution_df", lambda: SAMPLE_ATTRIBUTION)
+    monkeypatch.setattr(backend_mod, "retro_metrics", lambda: SAMPLE_RETRO)
+    monkeypatch.setattr(backend_mod, "daily_pnl_series", lambda: SAMPLE_DAILY_PNL)
 
     return backend_mod
