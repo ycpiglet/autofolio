@@ -34,6 +34,7 @@ router = APIRouter(prefix="/stream", tags=["stream"])
 _EVENTS_JSONL = Path(__file__).resolve().parents[3] / "logs" / "events.jsonl"
 _DEMO_TICKER_INTERVAL = 5.0  # seconds between demo price events
 _TAIL_POLL_INTERVAL = 0.5    # seconds between log file polls
+_MAX_EVENTS: int | None = None  # None = infinite (production); set to N in tests to auto-terminate
 
 
 @router.get("/events")
@@ -55,6 +56,7 @@ async def stream_events(
     async def _generate() -> AsyncGenerator[str, None]:
         last_tick = time.monotonic()
         offset = start_offset
+        events_emitted = 0
         try:
             while True:
                 if await request.is_disconnected():
@@ -82,6 +84,9 @@ async def stream_events(
                                 except json.JSONDecodeError:
                                     payload = {"raw": raw_line}
                                 yield f"event: engine\ndata: {json.dumps(payload)}\n\n"
+                                events_emitted += 1
+                                if _MAX_EVENTS is not None and events_emitted >= _MAX_EVENTS:
+                                    return
                         except OSError:
                             pass
 
@@ -96,6 +101,9 @@ async def stream_events(
                         "source": "demo",
                     }
                     yield f"event: price\ndata: {json.dumps(mock_price)}\n\n"
+                    events_emitted += 1
+                    if _MAX_EVENTS is not None and events_emitted >= _MAX_EVENTS:
+                        return
 
                 await asyncio.sleep(_TAIL_POLL_INTERVAL)
         finally:
