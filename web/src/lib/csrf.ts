@@ -26,14 +26,12 @@ export async function getCsrfToken(): Promise<string> {
       headers: { "Content-Type": "application/json" },
     });
     if (!res.ok) {
-      cached = "";
       return "";
     }
     const data: MeResponse = await res.json();
     cached = data.csrf_token ?? "";
     return cached;
   } catch {
-    cached = "";
     return "";
   }
 }
