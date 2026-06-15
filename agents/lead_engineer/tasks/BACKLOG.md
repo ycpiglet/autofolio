@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-15T13:17:30+09:00` · 열린 작업 12건
+> 생성 시각: `2026-06-15T17:11:16+09:00` · 열린 작업 11건
 
 ---
 
@@ -22,11 +22,11 @@
 
 | 지표 | 값 | 해석 |
 |------|----|------|
-| 열린 작업 | 12건 / 88 ph | frontmatter 기준 |
+| 열린 작업 | 11건 / 76 ph | frontmatter 기준 |
 | 진행 중 WIP | 0건 | WIP 적정 |
-| 대기 | 3건 | 최상위 자율 후보: TASK-069 (product maturity reassessment 2026 12) |
+| 대기 | 2건 | 최상위 자율 후보: TASK-069 (product maturity reassessment 2026 12) |
 | 보류 | 9건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 1 / REVIEW 2 / ASK 9 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 1 / REVIEW 1 / ASK 9 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
 **빠른 판단:** 새로 하나를 고른다면 **TASK-069**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
 
@@ -42,8 +42,7 @@
 
 | Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
 |------|------|------|------|--------|------|-----------|-----------|
-| 1 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) ui overhaul phase4 agents sse | REVIEW | 대기 | Medium / score 14 | XL · 12 ph | 중간 가치; gate: 선행 TASK-047 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 | R2 범위 진행, R3 전 확인 |
-| 2 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) ui overhaul phase5 analysis parity retire | REVIEW | 대기 | Medium / score 14 | XL · 16 ph | 중간 가치; gate: 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 | R2 범위 진행, R3 전 확인 |
+| 1 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) ui overhaul phase5 analysis parity retire | REVIEW | 대기 | Medium / score 14 | XL · 16 ph | 중간 가치; gate: 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 | R2 범위 진행, R3 전 확인 |
 
 ### ASK — Owner/외부 게이트
 
@@ -65,7 +64,6 @@
 
 | ID | 우선순위 | Owner | 예상 | 게이트 / 태그 |
 |----|----------|-------|------|----------------|
-| [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | Medium | Backend Engineer | 12 ph / ~90000 tok | 선행 TASK-047 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | Medium | Lead Engineer | 2 ph / ~15000 tok | - |
 

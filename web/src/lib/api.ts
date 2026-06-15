@@ -199,3 +199,70 @@ export function postCondition(payload: ConditionPayload): Promise<ConditionRespo
 export function putRiskLimits(payload: RiskLimitsPayload): Promise<unknown> {
   return apiPut("/api/settings/risk-limits", payload);
 }
+
+// ── Agent domain types ────────────────────────────────────────────────────
+
+export interface AgentInfo {
+  name: string;
+  role?: string;
+  description?: string;
+}
+
+export interface AgentsListResponse {
+  available: boolean;
+  message?: string;
+  agents: AgentInfo[];
+}
+
+export interface AgentAskResponse {
+  answer: string;
+}
+
+export interface IcRunResponse {
+  job_id: string;
+}
+
+export interface IcDecision {
+  id?: number;
+  topic: string;
+  decision?: string;
+  summary?: string;
+  created_at?: string;
+  [key: string]: unknown;
+}
+
+// ── Agent typed helpers ───────────────────────────────────────────────────
+
+/** GET /api/agents/list */
+export function apiAgentsList(): Promise<AgentsListResponse> {
+  return apiGet<AgentsListResponse>("/api/agents/list");
+}
+
+/** POST /api/agents/ask */
+export function apiAgentAsk(
+  agent: string,
+  question: string,
+  context?: string,
+): Promise<AgentAskResponse> {
+  return apiPost<AgentAskResponse>("/api/agents/ask", {
+    agent,
+    question,
+    ...(context ? { context } : {}),
+  });
+}
+
+/** POST /api/agents/ic/run */
+export function apiIcRun(
+  topic: string,
+  panel?: string[],
+): Promise<IcRunResponse> {
+  return apiPost<IcRunResponse>("/api/agents/ic/run", {
+    topic,
+    ...(panel ? { panel } : {}),
+  });
+}
+
+/** GET /api/agents/ic/decisions?limit= */
+export function apiIcDecisions(limit = 10): Promise<IcDecision[]> {
+  return apiGet<IcDecision[]>(`/api/agents/ic/decisions?limit=${limit}`);
+}
