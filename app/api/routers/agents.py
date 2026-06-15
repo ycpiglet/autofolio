@@ -115,7 +115,7 @@ async def ic_run(
     async def _run() -> None:
         from app.services.agents import run_ic
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             result = await loop.run_in_executor(
                 None,
