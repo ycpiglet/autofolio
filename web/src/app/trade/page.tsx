@@ -7,6 +7,7 @@ import { OrderForm } from "@/components/domain/OrderForm";
 import { OrderBookLadder } from "@/components/domain/OrderBookLadder";
 import { DataTable } from "@/components/domain/DataTable";
 import { Button } from "@/components/ui/button";
+import { ConfirmModal } from "@/components/safety/ConfirmModal";
 import { apiTable, postRunOnce, ApiError, type TableResponse } from "@/lib/api";
 
 type RunOnceStatus =
@@ -20,6 +21,7 @@ export default function TradePage() {
   const queryClient = useQueryClient();
   const [previewSymbol, setPreviewSymbol] = useState("");
   const [runOnceStatus, setRunOnceStatus] = useState<RunOnceStatus>({ kind: "idle" });
+  const [runOnceConfirmOpen, setRunOnceConfirmOpen] = useState(false);
 
   // Current active conditions
   const conditionsQuery = useQuery<TableResponse>({
@@ -55,12 +57,21 @@ export default function TradePage() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => void handleRunOnce()}
+              onClick={() => setRunOnceConfirmOpen(true)}
               disabled={runOnceStatus.kind === "running"}
               aria-label="엔진 1회 실행"
             >
               {runOnceStatus.kind === "running" ? "실행 중…" : "엔진 1회 실행"}
             </Button>
+            <ConfirmModal
+              open={runOnceConfirmOpen}
+              onOpenChange={setRunOnceConfirmOpen}
+              title="엔진을 1회 실행하시겠습니까?"
+              description="충족된 조건이 즉시 처리됩니다."
+              confirmLabel="실행"
+              cancelLabel="취소"
+              onConfirm={() => void handleRunOnce()}
+            />
             {runOnceStatus.kind === "busy" && (
               <span role="status" className="text-xs text-amber-600">이미 실행 중</span>
             )}

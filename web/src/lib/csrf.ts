@@ -16,27 +16,33 @@ interface MeResponse {
 
 let cached: string | null = null;
 
-/** Fetch (or return cached) CSRF token. Returns empty string on failure. */
+/**
+ * Fetch (or return cached) CSRF token.
+ * Throws if the token cannot be obtained — callers (apiPost/apiPut) will
+ * surface the error rather than silently sending a blank token.
+ * cached is only set to a non-empty, valid token.
+ */
 export async function getCsrfToken(): Promise<string> {
   if (cached !== null) return cached;
-  try {
-    const res = await fetch("/api/auth/me", {
-      method: "GET",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (!res.ok) {
-      return "";
-    }
-    const data: MeResponse = await res.json();
-    cached = data.csrf_token ?? "";
-    return cached;
-  } catch {
-    return "";
+  const res = await fetch("/api/auth/me", {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`CSRF fetch failed: ${res.status} ${res.statusText}`);
   }
+  const data: MeResponse = await res.json();
+  const token = data.csrf_token;
+  if (!token) {
+    throw new Error("CSRF token missing in /api/auth/me response");
+  }
+  cached = token;
+  return cached;
 }
 
 /** Call after logout / 401 to force a fresh fetch next time. */
 export function clearCsrfCache(): void {
   cached = null;
 }
+

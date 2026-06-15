@@ -25,14 +25,16 @@ export function KillSwitchButton({
 }: KillSwitchButtonProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pending, setPending] = useState(false);
+  const [postError, setPostError] = useState<string | null>(null);
 
   async function handleConfirm() {
     setPending(true);
+    setPostError(null);
     try {
       await postKillSwitch(true);
       onActivated?.();
-    } catch {
-      // error is surfaced to parent via onActivated absence; keep modal closed
+    } catch (err) {
+      setPostError(err instanceof Error ? err.message : "알 수 없는 오류");
     } finally {
       setPending(false);
     }
@@ -70,6 +72,12 @@ export function KillSwitchButton({
           )}
         </Tooltip.Root>
       </Tooltip.Provider>
+
+      {postError && (
+        <p role="alert" className="mt-1 text-xs text-destructive">
+          중단 실패 — 재시도: {postError}
+        </p>
+      )}
 
       <ConfirmModal
         open={confirmOpen}

@@ -123,10 +123,12 @@ test.describe("Phase 3 — Auto-trading ON gate", () => {
     await loginAsOwner(page);
 
     let postFired = false;
+    let capturedHeaders: Record<string, string> = {};
 
     await page.route(/\/api\/engine\/auto-trading/, (route) => {
       if (route.request().method() === "POST") {
         postFired = true;
+        capturedHeaders = route.request().headers();
         return route.fulfill({
           status: 200,
           contentType: "application/json",
@@ -148,6 +150,7 @@ test.describe("Phase 3 — Auto-trading ON gate", () => {
     await autoTradingResponse;
 
     expect(postFired).toBe(true);
+    expect(capturedHeaders["x-csrf-token"]).toBe(CSRF_TOKEN);
   });
 });
 
@@ -161,10 +164,12 @@ test.describe("Phase 3 — Condition CAUTION 2-step", () => {
 
     let callCount = 0;
     let secondBody: unknown = null;
+    let conditionsCsrfHeader = "";
 
     await page.route(/\/api\/trade\/conditions/, (route) => {
       if (route.request().method() === "POST") {
         callCount++;
+        conditionsCsrfHeader = route.request().headers()["x-csrf-token"] ?? "";
         if (callCount === 1) {
           return route.fulfill({
             status: 409,
@@ -205,12 +210,16 @@ test.describe("Phase 3 — Condition CAUTION 2-step", () => {
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText(VERDICT)).toBeVisible();
 
+    // callCount must be 1 BEFORE confirm — ack must not be auto-resubmitted
+    expect(callCount).toBe(1);
+
     await page.getByRole("button", { name: "확인 후 제출" }).click();
 
     await page.waitForResponse(/\/api\/trade\/conditions/, { timeout: 10_000 });
 
     expect(callCount).toBe(2);
     expect((secondBody as Record<string, unknown>).ack_token).toBe(ACK_TOKEN);
+    expect(conditionsCsrfHeader).toBe(CSRF_TOKEN);
 
     await expect(page.getByRole("status").filter({ hasText: /조건이 등록/ })).toBeVisible({ timeout: 5_000 });
   });
@@ -235,6 +244,12 @@ test.describe("Phase 3 — run-once 409", () => {
     await page.goto("/trade");
 
     await page.getByRole("button", { name: "엔진 1회 실행" }).click();
+
+    // Confirm modal must appear first
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText("엔진을 1회 실행하시겠습니까?")).toBeVisible();
+
+    await page.getByRole("button", { name: "실행" }).click();
 
     await expect(page.getByRole("status").filter({ hasText: "이미 실행 중" })).toBeVisible({
       timeout: 10_000,
