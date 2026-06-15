@@ -179,6 +179,13 @@ SAMPLE_DAILY_PNL = pd.DataFrame(
     [{"date": "2026-06-12", "pnl": 50_000.0}]
 )
 
+SAMPLE_WHITELIST = pd.DataFrame(
+    [
+        {"symbol": "005930", "name": "삼성전자", "market": "KRX", "role": "LARGE_CAP_TEST", "enabled": True},
+        {"symbol": "069500", "name": "KODEX 200", "market": "KRX", "role": "ETF_TEST", "enabled": True},
+    ]
+)
+
 
 # ── Cookie helpers ─────────────────────────────────────────────────────────────
 
@@ -275,5 +282,6 @@ def mock_backend(monkeypatch):
     monkeypatch.setattr(backend_mod, "attribution_df", lambda: SAMPLE_ATTRIBUTION)
     monkeypatch.setattr(backend_mod, "retro_metrics", lambda: SAMPLE_RETRO)
     monkeypatch.setattr(backend_mod, "daily_pnl_series", lambda: SAMPLE_DAILY_PNL)
+    monkeypatch.setattr(backend_mod, "list_whitelist", lambda: SAMPLE_WHITELIST)
 
     return backend_mod
