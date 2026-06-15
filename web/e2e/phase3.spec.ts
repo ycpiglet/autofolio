@@ -107,9 +107,10 @@ test.describe("Phase 3 — Kill switch gate", () => {
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText(/자동매매를 즉시 중단합니까/)).toBeVisible();
 
+    const killSwitchResponse = page.waitForResponse(/\/api\/engine\/kill-switch/, { timeout: 10_000 });
     await page.getByRole("button", { name: "중단" }).click();
 
-    await page.waitForResponse(/\/api\/engine\/kill-switch/, { timeout: 10_000 });
+    await killSwitchResponse;
 
     expect(capturedHeaders["x-csrf-token"]).toBe(CSRF_TOKEN);
     expect(capturedBody).toEqual({ active: true });
@@ -142,8 +143,9 @@ test.describe("Phase 3 — Auto-trading ON gate", () => {
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5_000 });
     expect(postFired).toBe(false);
 
+    const autoTradingResponse = page.waitForResponse(/\/api\/engine\/auto-trading/, { timeout: 10_000 });
     await page.getByRole("button", { name: "활성화" }).click();
-    await page.waitForResponse(/\/api\/engine\/auto-trading/, { timeout: 10_000 });
+    await autoTradingResponse;
 
     expect(postFired).toBe(true);
   });
