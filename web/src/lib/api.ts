@@ -113,18 +113,31 @@ export function apiGet<T>(path: string): Promise<T> {
 }
 
 /**
+ * Paths that establish or destroy the session — the server does not require
+ * CSRF protection on these because no session exists yet (login) or is being
+ * torn down (logout).  Fetching a CSRF token here would cause a chicken-and-egg
+ * failure: /api/auth/me returns 401 before login, so getCsrfToken() would throw
+ * and the login POST would never fire.
+ */
+const CSRF_EXEMPT_PATHS = new Set(["/api/auth/login", "/api/auth/logout"]);
+
+/**
  * HTTP POST with JSON body.
- * Fetches (cached) CSRF token from /api/auth/me and sends it as X-CSRF-Token.
+ * Fetches (cached) CSRF token from /api/auth/me and attaches it as
+ * X-CSRF-Token — except for auth entry-points (login/logout) which are
+ * CSRF-exempt on the server and must work before a session exists.
  */
 export async function apiPost<T>(path: string, data?: unknown): Promise<T> {
-  const csrfToken = await getCsrfToken();
+  const extraHeaders: Record<string, string> = {
+    "X-Requested-With": "XMLHttpRequest",
+  };
+  if (!CSRF_EXEMPT_PATHS.has(path)) {
+    extraHeaders["X-CSRF-Token"] = await getCsrfToken();
+  }
   return request<T>(path, {
     method: "POST",
     body: data !== undefined ? JSON.stringify(data) : undefined,
-    headers: {
-      "X-Requested-With": "XMLHttpRequest",
-      "X-CSRF-Token": csrfToken,
-    },
+    headers: extraHeaders,
   });
 }
 
