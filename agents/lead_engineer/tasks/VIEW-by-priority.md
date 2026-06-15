@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-15T17:11:16+09:00`
+> 생성 시각: `2026-06-15T18:29:27+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -67,7 +67,7 @@
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 완료 | Medium | 낮 | 2 ph / ~15000 tok | Backend Engineer | bug,security,session,logout |
 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 완료 | Medium | 중 | 3 ph / ~20000 tok | Backend Engineer | database,performance,integrity,sqlite |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 완료 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |

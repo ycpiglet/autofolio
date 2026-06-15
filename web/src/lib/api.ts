@@ -266,3 +266,89 @@ export function apiIcRun(
 export function apiIcDecisions(limit = 10): Promise<IcDecision[]> {
   return apiGet<IcDecision[]>(`/api/agents/ic/decisions?limit=${limit}`);
 }
+
+// ── Analysis domain types ─────────────────────────────────────────────────
+
+export interface BacktestResult {
+  symbol: string;
+  strategy: string;
+  start: string;
+  end: string;
+  total_return_pct: number;
+  trade_count: number;
+  win_rate_pct: number;
+  max_drawdown_pct: number;
+}
+
+export interface SimulationResult {
+  total_value: number;
+  n_simulations: number;
+  horizon_days: number;
+  var_95: number;
+  var_99: number;
+  cvar_95: number;
+  max_drawdown_pct: number;
+  note?: string;
+}
+
+// ── Analysis typed helpers ────────────────────────────────────────────────
+
+/** GET /api/market/intraday?symbol=&time_unit=&count= → TableResponse OHLC */
+export function apiIntraday(
+  symbol: string,
+  time_unit = 1,
+  count = 80,
+): Promise<TableResponse> {
+  const q = new URLSearchParams({
+    symbol,
+    time_unit: String(time_unit),
+    count: String(count),
+  });
+  return apiGet<TableResponse>(`/api/market/intraday?${q}`);
+}
+
+/** GET /api/analysis/backtest?symbol=&start=&end=&fast=&slow= */
+export function apiBacktest(params: {
+  symbol: string;
+  start: string;
+  end: string;
+  fast: number;
+  slow: number;
+}): Promise<BacktestResult> {
+  const q = new URLSearchParams({
+    symbol: params.symbol,
+    start: params.start,
+    end: params.end,
+    fast: String(params.fast),
+    slow: String(params.slow),
+  });
+  return apiGet<BacktestResult>(`/api/analysis/backtest?${q}`);
+}
+
+/** GET /api/analysis/var?horizon_days=&n_simulations= */
+export function apiVar(params: {
+  horizon_days: number;
+  n_simulations: number;
+}): Promise<SimulationResult> {
+  const q = new URLSearchParams({
+    horizon_days: String(params.horizon_days),
+    n_simulations: String(params.n_simulations),
+  });
+  return apiGet<SimulationResult>(`/api/analysis/var?${q}`);
+}
+
+/** GET /api/analysis/scenario → TableResponse */
+export function apiScenario(): Promise<TableResponse> {
+  return apiGet<TableResponse>("/api/analysis/scenario");
+}
+
+/** GET /api/analysis/whatif?symbol=&weight= → dict */
+export function apiWhatif(symbol: string, weight: number): Promise<Record<string, unknown>> {
+  const q = new URLSearchParams({ symbol, weight: String(weight) });
+  return apiGet<Record<string, unknown>>(`/api/analysis/whatif?${q}`);
+}
+
+/** GET /api/analysis/attribution → TableResponse */
+export function apiAttribution(): Promise<TableResponse> {
+  return apiGet<TableResponse>("/api/analysis/attribution");
+}

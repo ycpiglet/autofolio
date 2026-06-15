@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-15T17:11:16+09:00`
+> 생성 시각: `2026-06-15T18:29:27+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -52,7 +52,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 
 ## #approval-record
@@ -683,7 +683,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## #partial-fill
 
@@ -734,7 +734,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## #pilot
 
@@ -1031,7 +1031,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## #sync
 
@@ -1097,7 +1097,7 @@
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 완료 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## #ui-sync
 
