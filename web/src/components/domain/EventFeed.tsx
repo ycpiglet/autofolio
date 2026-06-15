@@ -62,7 +62,6 @@ interface EventFeedProps {
 export function EventFeed({ maxEvents = 100, className }: EventFeedProps) {
   const [state, setState] = useState<FeedState>({ kind: "connecting" });
   const esRef = useRef<EventSource | null>(null);
-  const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const connect = useCallback(() => {
     if (esRef.current) {
@@ -155,9 +154,6 @@ export function EventFeed({ maxEvents = 100, className }: EventFeedProps) {
   useEffect(() => {
     connect();
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      const retryId = retryRef.current;
-      if (retryId) clearTimeout(retryId);
       if (esRef.current) {
         esRef.current.close();
         esRef.current = null;

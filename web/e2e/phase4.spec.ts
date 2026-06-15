@@ -251,23 +251,9 @@ test.describe("Phase 4 — /agents page", () => {
   });
 
   test("unavailable agents → EmptyState shown", async ({ page }) => {
-    // Override agents/list with unavailable response
-    await page.route(/\/api\//, (route) => {
-      if (route.request().method() === "GET") {
-        return route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify(EMPTY_TABLE),
-        });
-      }
-      return route.continue();
-    });
-    await page.route(/\/api\/engine\/status/, (route) =>
-      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(ENGINE_STATUS) }),
-    );
-    await page.route(/\/api\/auth\/me/, (route) =>
-      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(OWNER_SESSION) }),
-    );
+    await mockBackground(page);
+
+    // Override agents/list AFTER mockBackground so this takes LIFO priority
     await page.route(/\/api\/agents\/list/, (route) =>
       route.fulfill({
         status: 200,
@@ -275,15 +261,8 @@ test.describe("Phase 4 — /agents page", () => {
         body: JSON.stringify({ available: false, message: "에이전트 오프라인", agents: [] }),
       }),
     );
-    await page.route(/\/api\/auth\/login/, (route) =>
-      route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(OWNER_SESSION) }),
-    );
 
-    await page.goto("/login");
-    await page.getByLabel("아이디").fill("admin");
-    await page.getByLabel("비밀번호").fill("secret");
-    await page.getByRole("button", { name: /^로그인$/ }).click();
-    await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
+    await loginAsOwner(page);
 
     await page.goto("/agents");
 
