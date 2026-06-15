@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-15T17:11:16+09:00` · 열린 작업 11건
+> 생성 시각: `2026-06-15T18:29:27+09:00` · 열린 작업 11건
 
 ---
 
@@ -24,9 +24,9 @@
 |------|----|------|
 | 열린 작업 | 11건 / 76 ph | frontmatter 기준 |
 | 진행 중 WIP | 0건 | WIP 적정 |
-| 대기 | 2건 | 최상위 자율 후보: TASK-069 (product maturity reassessment 2026 12) |
-| 보류 | 9건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 1 / REVIEW 1 / ASK 9 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 대기 | 1건 | 최상위 자율 후보: TASK-069 (product maturity reassessment 2026 12) |
+| 보류 | 10건 | Owner/외부 조건 또는 의도적 defer |
+| 실행성 | ACT 1 / REVIEW 0 / ASK 10 / DEFER 0 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
 **빠른 판단:** 새로 하나를 고른다면 **TASK-069**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
 
@@ -38,12 +38,6 @@
 |------|------|------|------|--------|------|-----------|-----------|
 | 1 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) product maturity reassessment 2026 12 | ACT | 대기 | Medium / score 30 | S · 2 ph | 중간 가치 | 바로 착수 후보 |
 
-### REVIEW — 자율 가능 + 경계 확인
-
-| Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
-|------|------|------|------|--------|------|-----------|-----------|
-| 1 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) ui overhaul phase5 analysis parity retire | REVIEW | 대기 | Medium / score 14 | XL · 16 ph | 중간 가치; gate: 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 | R2 범위 진행, R3 전 확인 |
-
 ### ASK — Owner/외부 게이트
 
 | Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
@@ -53,10 +47,11 @@
 | 3 | [TASK-026](TASK-026-krx-alternative-products-test-support.md) krx alternative products test support | ASK | 보류 | Medium / score 2 | L · 5 ph | 회귀 리스크 감소; gate: Owner approval required before any live broker/order-path support; mock ... | Owner/외부 조건 대기 |
 | 4 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) data quality corporate action tests | ASK | 보류 | Medium / score 2 | L · 5 ph | 회귀 리스크 감소; gate: no live orders; risk integration requires review | Owner/외부 조건 대기 |
 | 5 | [TASK-028](TASK-028-advanced-order-types-test-support.md) advanced order types test support | ASK | 보류 | Medium / score -1 | L · 8 ph | 회귀 리스크 감소; gate: Owner approval required before broker/order_flow changes that can affect... | Owner/외부 조건 대기 |
-| 6 | [TASK-021](TASK-021-kis-margin-short.md) kis margin short | ASK | 보류 | Low / score -9 | L · 6 ph | 낮은/위생; gate: 보류 상태 — 해제 조건은 TASK 본문 확인 | Owner/외부 조건 대기 |
-| 7 | [TASK-022](TASK-022-kis-overseas-order.md) kis overseas order | ASK | 보류 | Low / score -11 | L · 8 ph | 낮은/위생; gate: 보류 상태 — 해제 조건은 TASK 본문 확인 | Owner/외부 조건 대기 |
-| 8 | [TASK-030](TASK-030-block-basket-execution-tests.md) block basket execution tests | ASK | 보류 | Low / score -11 | L · 8 ph | 회귀 리스크 감소; gate: Owner approval required before actual block/basket venue or broker submi... | Owner/외부 조건 대기 |
-| 9 | [TASK-027](TASK-027-krx-derivatives-test-support.md) krx derivatives test support | ASK | 보류 | Low / score -13 | XL · 10 ph | 회귀 리스크 감소; gate: Owner approval required; derivatives order routing and risk policy are R... | Owner/외부 조건 대기 |
+| 6 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) ui overhaul phase5 analysis parity retire | ASK | 보류 | Medium / score -5 | XL · 16 ph | 중간 가치; gate: 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 | Owner/외부 조건 대기 |
+| 7 | [TASK-021](TASK-021-kis-margin-short.md) kis margin short | ASK | 보류 | Low / score -9 | L · 6 ph | 낮은/위생; gate: 보류 상태 — 해제 조건은 TASK 본문 확인 | Owner/외부 조건 대기 |
+| 8 | [TASK-022](TASK-022-kis-overseas-order.md) kis overseas order | ASK | 보류 | Low / score -11 | L · 8 ph | 낮은/위생; gate: 보류 상태 — 해제 조건은 TASK 본문 확인 | Owner/외부 조건 대기 |
+| 9 | [TASK-030](TASK-030-block-basket-execution-tests.md) block basket execution tests | ASK | 보류 | Low / score -11 | L · 8 ph | 회귀 리스크 감소; gate: Owner approval required before actual block/basket venue or broker submi... | Owner/외부 조건 대기 |
+| 10 | [TASK-027](TASK-027-krx-derivatives-test-support.md) krx derivatives test support | ASK | 보류 | Low / score -13 | XL · 10 ph | 회귀 리스크 감소; gate: Owner approval required; derivatives order routing and risk policy are R... | Owner/외부 조건 대기 |
 
 ## 흐름 보드
 
@@ -64,7 +59,6 @@
 
 | ID | 우선순위 | Owner | 예상 | 게이트 / 태그 |
 |----|----------|-------|------|----------------|
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | Medium | Lead Engineer | 2 ph / ~15000 tok | - |
 
 ### 보류 (게이트 — 외부/결정 대기)
@@ -76,6 +70,7 @@
 | [TASK-026](TASK-026-krx-alternative-products-test-support.md) | Medium | KIS API Engineer | 5 ph / ~50000 tok | Owner approval required before any live broker/order-path support; mock catalog tests may be drafted first |
 | [TASK-028](TASK-028-advanced-order-types-test-support.md) | Medium | Backend Engineer | 8 ph / ~70000 tok | Owner approval required before broker/order_flow changes that can affect live order behavior |
 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | Medium | Data Engineer | 5 ph / ~45000 tok | no live orders; risk integration requires review |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | Medium | UI/UX Designer | 16 ph / ~120000 tok | 선행 TASK-048 완료 전 착수 불가; 착수 전 선행 완료 확인 review 필요 |
 | [TASK-021](TASK-021-kis-margin-short.md) | Low | KIS API Engineer | 6 ph / ~50000 tok | kis,margin,short |
 | [TASK-022](TASK-022-kis-overseas-order.md) | Low | KIS API Engineer | 8 ph / ~50000 tok | kis,overseas,us-stocks |
 | [TASK-027](TASK-027-krx-derivatives-test-support.md) | Low | KIS API Engineer | 10 ph / ~80000 tok | Owner approval required; derivatives order routing and risk policy are R3 surfaces |
