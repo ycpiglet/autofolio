@@ -1,9 +1,9 @@
 """Pydantic request / response schemas for Autofolio API."""
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
@@ -76,9 +76,9 @@ class RunOnceResponse(BaseModel):
 
 class ConditionRequest(BaseModel):
     symbol: str
-    side: str          # "BUY" or "SELL"
-    target_price: float
-    quantity: int
+    side: Literal["BUY", "SELL"]
+    target_price: float = Field(..., gt=0)
+    quantity: int = Field(..., ge=1)
     auto: bool = False
     ack_token: str | None = None   # present only on re-submit after needs_acknowledgement
 

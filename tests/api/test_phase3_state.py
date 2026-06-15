@@ -2,12 +2,15 @@
 
 Coverage:
 - CSRF: all state-changing endpoints reject missing/wrong token; accept correct token
+- no session 401: all state-changing endpoints reject anonymous callers
 - guest 403: all state-changing endpoints reject guest
 - kill-switch: owner can toggle; DB updated
 - auto-trading: owner can toggle; DB updated
 - run-once single-flight: 409 when locked, 200 when unlocked
 - trade/conditions gate mapping: all GateResult variants → correct HTTP status
 - ack_token 2-step: valid ack→201, tampered→409, expired→409, payload mismatch→409
+- ConditionRequest schema: invalid side / zero quantity / non-positive price → 422
+- secure cookie guard: AUTOFOLIO_ENV=production → secure=True
 - NO POST /api/trade/orders: assert 404
 - /me returns csrf_token for authed session
 """
@@ -101,6 +104,18 @@ STATE_CHANGING_ENDPOINTS = [
     ("POST", "/api/trade/conditions", {"symbol": "005930", "side": "BUY", "target_price": 70000.0, "quantity": 1}),
     ("PUT", "/api/settings/risk-limits", {"max_order_amount": 100000.0}),
 ]
+
+
+class TestNoSessionBlocked:
+    """Anonymous callers (no session cookie at all) must get 401 on every state-changing endpoint."""
+
+    @pytest.mark.parametrize("method,path,body", STATE_CHANGING_ENDPOINTS)
+    def test_anon_gets_401(self, anon_client, method, path, body):
+        fn = getattr(anon_client, method.lower())
+        resp = fn(path, json=body, headers=owner_headers())
+        assert resp.status_code == 401, (
+            f"{method} {path}: expected 401 for anonymous caller, got {resp.status_code}"
+        )
 
 
 class TestGuestBlocked:
@@ -374,6 +389,104 @@ class TestConditionsPost:
         assert resp.status_code == 409
         call_kwargs = mock_gate.call_args
         assert call_kwargs.kwargs.get("caution_acknowledged") is False
+
+    def test_expired_ack_token_treated_as_no_ack(self, owner_client):
+        """An EXPIRED ack_token must fail closed → re-gated to 409, condition NOT saved.
+
+        Simulates expiry by patching decode_ack_token (as used in the router) to return
+        None — exactly what itsdangerous.SignatureExpired produces on a real expired token.
+        """
+        # A syntactically valid (but expired) token — content doesn't matter because
+        # decode_ack_token is patched to return None (= expired/invalid).
+        some_valid_looking_token = encode_ack_token({
+            "symbol": self._BODY["symbol"],
+            "side": self._BODY["side"],
+            "target_price": self._BODY["target_price"],
+            "quantity": self._BODY["quantity"],
+        })
+
+        gate_ack = GateResult(status="needs_acknowledgement", message="CAUTION: 주의")
+        # Patch decode_ack_token in the router's module namespace to simulate expiry
+        with patch("app.api.routers.trade.decode_ack_token", return_value=None), \
+             patch("app.services.trading.save_condition_with_gates", return_value=gate_ack) as mock_gate:
+            resp = owner_client.post(
+                "/api/trade/conditions",
+                json={**self._BODY, "ack_token": some_valid_looking_token},
+                headers=owner_headers(),
+            )
+
+        # Expired token must be treated as no acknowledgement → re-gated → 409
+        assert resp.status_code == 409
+        # Confirm condition was NOT saved (caution_acknowledged=False)
+        call_kwargs = mock_gate.call_args
+        assert call_kwargs.kwargs.get("caution_acknowledged") is False
+
+
+# ── ConditionRequest schema validation ───────────────────────────────────────
+
+class TestConditionRequestSchema:
+    """FastAPI/Pydantic should reject invalid payloads before reaching the service."""
+
+    def _post(self, client, body):
+        return client.post(
+            "/api/trade/conditions",
+            json=body,
+            headers=owner_headers(),
+        )
+
+    def test_invalid_side_returns_422(self, owner_client):
+        """side must be BUY or SELL — anything else is 422."""
+        body = {"symbol": "005930", "side": "HOLD", "target_price": 70000.0, "quantity": 1}
+        resp = self._post(owner_client, body)
+        assert resp.status_code == 422, f"Expected 422 for invalid side, got {resp.status_code}"
+
+    def test_zero_quantity_returns_422(self, owner_client):
+        """quantity must be >= 1."""
+        body = {"symbol": "005930", "side": "BUY", "target_price": 70000.0, "quantity": 0}
+        resp = self._post(owner_client, body)
+        assert resp.status_code == 422, f"Expected 422 for zero quantity, got {resp.status_code}"
+
+    def test_negative_quantity_returns_422(self, owner_client):
+        """quantity < 1 must be rejected."""
+        body = {"symbol": "005930", "side": "BUY", "target_price": 70000.0, "quantity": -5}
+        resp = self._post(owner_client, body)
+        assert resp.status_code == 422, f"Expected 422 for negative quantity, got {resp.status_code}"
+
+    def test_zero_target_price_returns_422(self, owner_client):
+        """target_price must be > 0."""
+        body = {"symbol": "005930", "side": "BUY", "target_price": 0.0, "quantity": 1}
+        resp = self._post(owner_client, body)
+        assert resp.status_code == 422, f"Expected 422 for zero target_price, got {resp.status_code}"
+
+    def test_negative_target_price_returns_422(self, owner_client):
+        """Negative target_price must be rejected."""
+        body = {"symbol": "005930", "side": "SELL", "target_price": -100.0, "quantity": 1}
+        resp = self._post(owner_client, body)
+        assert resp.status_code == 422, f"Expected 422 for negative target_price, got {resp.status_code}"
+
+
+# ── Secure cookie production guard ────────────────────────────────────────────
+
+class TestSecureCookieGuard:
+    def test_secure_false_by_default(self):
+        """Without AUTOFOLIO_ENV=production, COOKIE_KWARGS.secure must be False."""
+        import os
+        os.environ.pop("AUTOFOLIO_ENV", None)
+        import importlib
+        import app.api.security as sec_mod
+        importlib.reload(sec_mod)
+        assert sec_mod.COOKIE_KWARGS["secure"] is False
+
+    def test_secure_true_in_production(self, monkeypatch):
+        """With AUTOFOLIO_ENV=production, COOKIE_KWARGS.secure must be True."""
+        monkeypatch.setenv("AUTOFOLIO_ENV", "production")
+        import importlib
+        import app.api.security as sec_mod
+        importlib.reload(sec_mod)
+        assert sec_mod.COOKIE_KWARGS["secure"] is True
+        # Restore: reload without the env var so other tests aren't affected
+        monkeypatch.delenv("AUTOFOLIO_ENV", raising=False)
+        importlib.reload(sec_mod)
 
 
 # ── No direct order endpoint ──────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 """FastAPI dependency injectors for Autofolio API."""
 from __future__ import annotations
 
+import hmac
 from typing import Annotated, Any
 
 from fastapi import Cookie, Depends, Header, HTTPException, status
@@ -57,7 +58,7 @@ def require_csrf(
     before we bother checking CSRF.
     """
     expected = session.get("csrf_token")
-    if not expected or x_csrf_token != expected:
+    if not expected or not hmac.compare_digest(x_csrf_token or "", expected):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="CSRF token missing or invalid",

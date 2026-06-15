@@ -62,10 +62,11 @@ def decode_session(cookie_value: str) -> dict[str, Any] | None:
 
 
 COOKIE_NAME = _COOKIE_NAME
+_SECURE = os.environ.get("AUTOFOLIO_ENV") == "production"
 COOKIE_KWARGS: dict[str, Any] = {
     "httponly": True,
     "samesite": "lax",
-    "secure": False,  # localhost — set True in production
+    "secure": _SECURE,  # False for localhost; True when AUTOFOLIO_ENV=production
 }
 
 # ── Compliance acknowledgement tokens ────────────────────────────────────────
