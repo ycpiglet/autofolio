@@ -70,15 +70,17 @@ export function EventFeed({ maxEvents = 100, className }: EventFeedProps) {
       esRef.current = null;
     }
 
-    setState((prev) => {
-      // preserve existing events while reconnecting
-      const existingEvents =
-        prev.kind === "live" || prev.kind === "disconnected"
-          ? prev.events
-          : [];
-      return existingEvents.length > 0
-        ? { kind: "disconnected", events: existingEvents }
-        : { kind: "connecting" };
+    queueMicrotask(() => {
+      setState((prev) => {
+        // preserve existing events while reconnecting
+        const existingEvents =
+          prev.kind === "live" || prev.kind === "disconnected"
+            ? prev.events
+            : [];
+        return existingEvents.length > 0
+          ? { kind: "disconnected", events: existingEvents }
+          : { kind: "connecting" };
+      });
     });
 
     const es = new EventSource("/api/stream/events");
@@ -153,7 +155,9 @@ export function EventFeed({ maxEvents = 100, className }: EventFeedProps) {
   useEffect(() => {
     connect();
     return () => {
-      if (retryRef.current) clearTimeout(retryRef.current);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const retryId = retryRef.current;
+      if (retryId) clearTimeout(retryId);
       if (esRef.current) {
         esRef.current.close();
         esRef.current = null;

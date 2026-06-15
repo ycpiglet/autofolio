@@ -57,11 +57,11 @@ export function IcTranscript({ jobId, className }: IcTranscriptProps) {
     }
 
     if (!jobId) {
-      setState({ kind: "idle" });
+      queueMicrotask(() => setState({ kind: "idle" }));
       return;
     }
 
-    setState({ kind: "connecting" });
+    queueMicrotask(() => setState({ kind: "connecting" }));
 
     const es = new EventSource(`/api/agents/ic/stream/${jobId}`);
     esRef.current = es;
