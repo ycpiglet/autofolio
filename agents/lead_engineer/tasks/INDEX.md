@@ -49,7 +49,7 @@
 | [TASK-044](TASK-044-external-api-owner-setup-manual.md) | 완료 | Doc Steward | External app/API Owner setup manual |
 | [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | 완료 | Backend Engineer | UI 대개편 Phase 1 — FastAPI 기초 + 인증 + 읽기 API / Next.js 스캐폴드 + 로그인 → v1 |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | UI/UX Designer | UI 대개편 Phase 2 — 홈 + 포트폴리오 (읽기 화면) → v1 |
-| [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 보류 | Backend Engineer | UI 대개편 Phase 3 — 매매 + 내역 + 설정 (state-changing + 안전 게이트) ⚠ Owner 승인 필수 → v1 |
+| [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 완료 | Backend Engineer | UI 대개편 Phase 3 — 매매 + 내역 + 설정 (state-changing + 안전 게이트) ⚠ Owner 승인 필수 → v1 |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 대기 | Backend Engineer | UI 대개편 Phase 4 — 에이전트/IC + 알림 + SSE → v1 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 대기 | UI/UX Designer | UI 대개편 Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴 → v1 |
 | [TASK-050](TASK-050-fix-daily-limit-utc-localtime.md) | 완료 | Backend Engineer | fix: 일일 주문한도 UTC/KST 불일치 (안전 버그) → v1 |
