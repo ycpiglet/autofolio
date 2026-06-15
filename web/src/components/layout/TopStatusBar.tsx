@@ -24,7 +24,7 @@ interface TopStatusBarProps {
 }
 
 export function TopStatusBar({ className }: TopStatusBarProps) {
-  const { data: status } = useQuery<EngineStatus>({
+  const { data: status, refetch } = useQuery<EngineStatus>({
     queryKey: ["engine-status"],
     queryFn: () => apiGet<EngineStatus>("/api/engine/status"),
     staleTime: 30_000,
@@ -52,11 +52,11 @@ export function TopStatusBar({ className }: TopStatusBarProps) {
             <EnvBadge env={status.env} />
             <AutoTradingToggle
               enabled={status.auto_trading_enabled}
-              phase1Disabled={true}
+              onToggled={() => void refetch()}
             />
             <KillSwitchButton
               isActive={status.kill_switch_active}
-              phase1Disabled={true}
+              onActivated={() => void refetch()}
             />
           </>
         ) : (
