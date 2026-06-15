@@ -1,11 +1,14 @@
 """FastAPI dependency injectors for Autofolio API."""
 from __future__ import annotations
 
+import hmac
 from typing import Annotated, Any
 
-from fastapi import Cookie, Depends, HTTPException, status
+from fastapi import Cookie, Depends, Header, HTTPException, status
 
 from app.api.security import COOKIE_NAME, decode_session
+
+_CSRF_HEADER = "X-CSRF-Token"
 
 
 def get_session(
@@ -42,3 +45,26 @@ def require_owner(
             detail="Owner role required",
         )
     return session
+
+
+def require_csrf(
+    session: Annotated[dict[str, Any], Depends(require_owner)],
+    x_csrf_token: Annotated[str | None, Header(alias=_CSRF_HEADER)] = None,
+) -> dict[str, Any]:
+    """Validate X-CSRF-Token header against the session's csrf_token.
+
+    Raises 403 if header is missing, empty, or does not match.
+    Must be composed after require_owner so guests are already rejected
+    before we bother checking CSRF.
+    """
+    expected = session.get("csrf_token")
+    if not expected or not hmac.compare_digest(x_csrf_token or "", expected):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="CSRF token missing or invalid",
+        )
+    return session
+
+
+# Convenience alias — apply both owner gate and CSRF gate together
+require_owner_csrf = require_csrf

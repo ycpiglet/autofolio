@@ -5,7 +5,6 @@ Generated automatically on first run; never committed to git.
 """
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 from typing import Any
@@ -63,8 +62,29 @@ def decode_session(cookie_value: str) -> dict[str, Any] | None:
 
 
 COOKIE_NAME = _COOKIE_NAME
+_SECURE = os.environ.get("AUTOFOLIO_ENV") == "production"
 COOKIE_KWARGS: dict[str, Any] = {
     "httponly": True,
     "samesite": "lax",
-    "secure": False,  # localhost — set True in production
+    "secure": _SECURE,  # False for localhost; True when AUTOFOLIO_ENV=production
 }
+
+# ── Compliance acknowledgement tokens ────────────────────────────────────────
+
+_ACK_SALT = "autofolio-ack-token"
+_ACK_MAX_AGE = 300  # 5 minutes
+
+
+def encode_ack_token(payload: dict) -> str:
+    """Sign a compliance-acknowledgement payload (short-lived, 5 min)."""
+    return URLSafeTimedSerializer(_load_or_create_key(), salt=_ACK_SALT).dumps(payload)
+
+
+def decode_ack_token(token: str) -> dict | None:
+    """Verify and decode an ack_token. Returns None if expired/tampered."""
+    try:
+        return URLSafeTimedSerializer(
+            _load_or_create_key(), salt=_ACK_SALT
+        ).loads(token, max_age=_ACK_MAX_AGE)
+    except (BadSignature, SignatureExpired):
+        return None
