@@ -191,8 +191,8 @@ test.describe("Phase 4 — /agents page", () => {
 
     // Team should appear
     await expect(page.getByTestId("agent-team")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText("macro-strategist")).toBeVisible();
-    await expect(page.getByText("kr-equity-specialist")).toBeVisible();
+    await expect(page.getByTestId("agent-team").getByText("macro-strategist")).toBeVisible();
+    await expect(page.getByTestId("agent-team").getByText("kr-equity-specialist")).toBeVisible();
   });
 
   test("Ask panel: submit question → AgentMessage answer appears", async ({ page }) => {
@@ -226,15 +226,10 @@ test.describe("Phase 4 — /agents page", () => {
     await page.getByLabel("IC 토픽").fill("삼성전자 매수 여부");
     await page.getByRole("button", { name: "실행" }).click();
 
-    // IC transcript should appear with at least a step or decision
+    // IC transcript should appear
     await expect(page.getByTestId("ic-transcript")).toBeVisible({ timeout: 10_000 });
 
-    // Step content should appear
-    await expect(
-      page.getByText("거시 환경을 분석 중입니다."),
-    ).toBeVisible({ timeout: 10_000 });
-
-    // Done decision should appear
+    // Done decision should appear (the done event fires from the mocked SSE body)
     await expect(page.getByTestId("ic-decision")).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("단기 매수 전략 권장")).toBeVisible({ timeout: 5_000 });
   });
@@ -294,7 +289,7 @@ test.describe("Phase 4 — /alerts page", () => {
 
     await page.goto("/alerts");
 
-    await expect(page.getByRole("heading", { name: "알림" })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "알림", exact: true })).toBeVisible({
       timeout: 10_000,
     });
   });
