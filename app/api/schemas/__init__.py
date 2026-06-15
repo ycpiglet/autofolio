@@ -109,3 +109,30 @@ class RiskLimitsRequest(BaseModel):
 
 class RiskLimitsResponse(BaseModel):
     status: str        # "saved"
+
+
+# ── Agents (Phase 4) ─────────────────────────────────────────────────────────
+
+class AgentsListResponse(BaseModel):
+    available: bool
+    message: str
+    agents: list[str]
+
+
+class AskRequest(BaseModel):
+    agent: str
+    question: str
+    context: str = ""
+
+
+class AskResponse(BaseModel):
+    answer: str
+
+
+class IcRunRequest(BaseModel):
+    topic: str
+    panel: list[str] | None = None
+
+
+class IcRunResponse(BaseModel):
+    job_id: str
