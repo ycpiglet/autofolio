@@ -4,27 +4,37 @@ import { useState } from "react";
 import { Tooltip } from "@base-ui/react/tooltip";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "./ConfirmModal";
+import { postAutoTrading } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 interface AutoTradingToggleProps {
   /** Current auto-trading state from /api/engine/status */
   enabled?: boolean;
-  /** Phase 1: always disabled — no POST until Phase 3 */
+  /** Set to true only for Phase 1 placeholder mode */
   phase1Disabled?: boolean;
+  /** Called after successful POST so parent can refresh status */
+  onToggled?: () => void;
   className?: string;
 }
 
 export function AutoTradingToggle({
   enabled = false,
-  phase1Disabled = true,
+  phase1Disabled = false,
+  onToggled,
   className,
 }: AutoTradingToggleProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pending, setPending] = useState(false);
 
-  function handleToggleClick() {
-    // Only reachable in Phase 3+ when phase1Disabled = false
-    if (!phase1Disabled) {
-      setConfirmOpen(true);
+  async function handleConfirm() {
+    setPending(true);
+    try {
+      await postAutoTrading(!enabled);
+      onToggled?.();
+    } catch {
+      // error surfaced via missing onToggled call
+    } finally {
+      setPending(false);
     }
   }
 
@@ -37,10 +47,10 @@ export function AutoTradingToggle({
               <Button
                 variant={enabled ? "default" : "outline"}
                 size="sm"
-                disabled={phase1Disabled}
-                aria-disabled={phase1Disabled}
+                disabled={phase1Disabled || pending}
+                aria-disabled={phase1Disabled || pending}
                 aria-label={`자동매매 ${enabled ? "ON" : "OFF"}${phase1Disabled ? " (Phase 3에서 활성화)" : ""}`}
-                onClick={handleToggleClick}
+                onClick={() => !phase1Disabled && setConfirmOpen(true)}
                 className={cn("min-w-[90px]", className)}
               >
                 자동매매 {enabled ? "ON" : "OFF"}
@@ -66,12 +76,11 @@ export function AutoTradingToggle({
         description={
           enabled
             ? "자동매매를 중단합니다. 진행 중인 주문은 취소되지 않습니다."
-            : "자동매매를 활성화합니다. 설정된 조건에 따라 자동으로 주문이 실행됩니다."
+            : "⚠️ 경고: 자동매매를 활성화하면 설정된 조건에 따라 실제 주문이 자동 실행됩니다. 반드시 리스크 한도를 확인하세요."
         }
         confirmLabel={enabled ? "비활성화" : "활성화"}
-        onConfirm={() => {
-          // Phase 3: call POST /api/engine/auto-trading here
-        }}
+        cancelLabel="취소"
+        onConfirm={handleConfirm}
         dangerous={!enabled}
       />
     </>
