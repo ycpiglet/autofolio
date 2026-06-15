@@ -118,7 +118,7 @@ export function EquityChart({
   return (
     <div
       ref={containerRef}
-      className={cn("h-60 w-full rounded-xl overflow-hidden", className)}
+      className={cn("h-60 w-full rounded-xl overflow-visible", className)}
       aria-label="자산 추이 차트"
       data-testid="equity-chart"
     />

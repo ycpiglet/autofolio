@@ -61,18 +61,6 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen bg-page">
-      <style>{`
-        @keyframes fadeRise {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @media (prefers-reduced-motion: no-preference) {
-          .animate-fade-rise {
-            animation: fadeRise 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
-          }
-        }
-      `}</style>
-
       {/* Left brand zone — 55% */}
       <div className="animate-fade-rise hidden lg:flex lg:w-[55%] flex-col justify-center gap-8 bg-brand/5 px-12 py-16">
         <div className="flex flex-col gap-4 max-w-md">
