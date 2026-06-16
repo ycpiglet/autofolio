@@ -21,6 +21,17 @@ class SessionResponse(BaseModel):
     csrf_token: str | None = None  # only present when authenticated
 
 
+class SsoProviderInfo(BaseModel):
+    id: str
+    label: str
+    kind: str
+    enabled: bool
+
+
+class SsoProvidersResponse(BaseModel):
+    providers: list[SsoProviderInfo]
+
+
 # ── Account ────────────────────────────────────────────────────────────────────
 
 class AccountResponse(BaseModel):
@@ -134,10 +145,18 @@ class RiskLimitsResponse(BaseModel):
 
 # ── Agents (Phase 4) ─────────────────────────────────────────────────────────
 
+class AgentInfo(BaseModel):
+    name: str
+    role: str | None = None
+    category: str | None = None
+    description: str | None = None
+    expert: bool = False
+
+
 class AgentsListResponse(BaseModel):
     available: bool
     message: str
-    agents: list[str]
+    agents: list[AgentInfo]
 
 
 class AskRequest(BaseModel):
@@ -195,3 +214,13 @@ class AgentResearchResponse(BaseModel):
     disclosures: TableResponse
     disclosure_gate: DisclosureGateInfo
     proposal: ResearchProposal
+
+
+class PremarketSummaryResponse(BaseModel):
+    date: str
+    created_at: str
+    file: str
+    market_open_reference: str
+    content: str
+    highlights: list[str]
+    agents: list[AgentInfo]

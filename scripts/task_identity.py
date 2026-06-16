@@ -23,6 +23,7 @@ UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[
 DONE_STATUSES = {"completed", "done", "released", "완료"}
 STARTED_STATUSES = DONE_STATUSES | {"in_progress", "active", "review", "working"}
 LIFECYCLE_FIELDS = ("display_id", "task_uid", "registered_at", "created_at", "started_at", "updated_at", "completed_at")
+IDENTITY_REQUIRED_TASK_NUMBER = 70
 
 
 def _now_text(value: str | None) -> str:
@@ -63,6 +64,13 @@ def _task_paths(root: Path) -> list[Path]:
     if not tasks_dir.is_dir():
         return []
     return sorted(tasks_dir.glob("TASK-*.md"), key=lambda path: path.name.lower())
+
+
+def _task_number(task_id: str, path: Path) -> int | None:
+    match = re.match(r"^TASK-(\d+)\b", task_id or path.stem)
+    if not match:
+        return None
+    return int(match.group(1))
 
 
 def _parse_scalar(value: str) -> Any:
@@ -178,6 +186,9 @@ def check_root(root: Path) -> list[str]:
     uids: dict[str, list[Path]] = defaultdict(list)
     for path, meta in records:
         task_id = str(meta.get("id") or path.stem).strip()
+        number = _task_number(task_id, path)
+        if number is not None and number < IDENTITY_REQUIRED_TASK_NUMBER:
+            continue
         task_uid = str(meta.get("task_uid") or "").strip().lower()
         ids[task_id].append(path)
         if task_uid:

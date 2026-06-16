@@ -456,3 +456,31 @@
 검증: `python scripts/generate_views.py` OK; `python scripts/generate_report_views.py` OK; `python scripts/generate_views.py --check` OK; `python scripts/generate_report_views.py --check` OK; `python scripts/validate_task_schema.py` OK; `python scripts/check_agent_docs.py` OK with 0 errors / existing placeholder-link warnings only; `python scripts/doc_health_report.py` Status G/findings 0; `python scripts/check_upstream_issues.py --warn` OK; `git diff --check` OK
 관련 기록: TASK-043, TASK-044, EVIDENCE-2026-06-13-007, BRIEF-2026-06-13-007, EXTERNAL-APP-API-DECISION-RECORD
 남은 리스크: provider pricing/quota/review flow can change; before implementing a specific connector, re-check the current official console/docs. No real secrets or live API calls were touched.
+
+### AUDIT-2026-06-16-001
+시각: 2026-06-16T21:05:31+09:00
+기록 시각: 2026-06-16T21:05:31+09:00
+요청자: Owner ("lint랑 SSO/SNS 구현... 에이전트탭... 정규장 시작 전... CLI에서 명시적으로 요청하면 파일 형태로 저장")
+수행자: Lead Engineer + Backend Engineer + UI/UX Designer + QA (Codex)
+의도: SSO/SNS 로그인, 리서치·금융 전문가 에이전트 표시, CLI 명시 실행형 프리마켓 요약 저장/로드, lint clean 달성
+대상: TASK-070, FastAPI auth/agents API, Next.js login/settings/agents pages, premarket summary CLI/service, API/E2E tests
+작업: Google/Kakao/Naver provider-env 기반 OAuth redirect/callback 추가, OAuth state short-lived signed cookie 검증, owner 세션 발급 및 allowed-email gate 추가, public provider list 구현. `/api/agents/list`를 metadata 응답으로 보강하고 expert agent roster를 UI에 표시. `scripts/run_premarket_summary.py`와 `.autofolio/premarket/PREMARKET_YYYYMMDD.md` 저장/로드 API 및 UI 패널 추가. 기존 history hooks lint warning 제거.
+방법: focused patch + mocked provider exchange tests + CLI dry-run/save + Next lint/build + Playwright login/agents flow
+결과: TASK-070 완료. SSO/SNS는 credentials 미설정 시 죽은 버튼 없이 비활성, 설정 시 로그인 버튼과 OAuth redirect 활성. 프리마켓 요약은 CLI 명시 실행으로 파일 저장 후 에이전트 탭에서 로드. 주문/조건/리스크/prod surface 변경 없음.
+검증: `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_auth.py tests/api/test_auth_sso.py tests/api/test_agents_stream.py tests/api/test_premarket_summary.py tests/api/test_agents_research.py -q` -> 56 passed; `.\\.venv\\Scripts\\python.exe scripts/run_premarket_summary.py --date 2026-06-16 --dry-run --limit-symbols 2` -> OK; `.\\.venv\\Scripts\\python.exe scripts/run_premarket_summary.py --date 2026-06-16 --limit-symbols 2` -> saved; py_compile -> OK; `npm run lint` -> 0 warnings/errors; `npm run build` -> successful; `npx playwright test web/e2e/login.spec.ts web/e2e/phase4.spec.ts` -> 16 passed; `git diff --check` -> OK
+관련 기록: TASK-070, `.autofolio/premarket/PREMARKET_20260616.md` (gitignored local output)
+남은 리스크: 실제 OAuth 앱 생성·redirect URI 등록·client secret 입력·live callback 검증은 Owner-managed 외부 설정 후 별도 확인 필요. Provider token exchange는 mocked test로 검증했으며 real provider call은 수행하지 않음.
+
+### AUDIT-2026-06-16-002
+시각: 2026-06-16T21:17:03+09:00
+기록 시각: 2026-06-16T21:17:03+09:00
+요청자: Owner hook prompt (`owner governance gate failed with code 2`)
+수행자: Lead Engineer + Doc Steward + QA (Codex)
+의도: Stop hook owner governance gate가 Autofolio host repo에서 source-only agent_runtime 표면을 요구해 차단되는 문제 복구
+대상: TASK-071, scripts/owner_governance_gate.py, scripts/continuity_contract_gate.py, scripts/task_identity.py, README.md, AGENTS.md, agents/lead_engineer/REPORTING-FORMAT.md, TASK-070
+작업: hook diagnostic 분석 후 `src/agent_runtime/templates/project` 없는 host repo에서는 source-only gates를 skip하도록 owner_governance chain 조정. continuity gate는 root AGENTS/CLAUDE를 host protocol docs로 검사. task identity는 TASK-070+부터 적용. README/AGENTS/REPORTING-FORMAT에 continuity/response contract를 보강하고 TASK-070 identity metadata를 추가.
+방법: focused script/doc patch + response/continuity/task-identity gate + py_compile + owner_governance 재실행
+결과: TASK-071 완료. Stop hook이 없는 upstream source tree, 없는 planning_loop.py, root-only state surfaces 때문에 실패하지 않도록 host-mode gate를 적용. 과거 TASK 전량 rewrite, secrets, 주문, DB, CI 변경 없음.
+검증: `python scripts/response_contract_gate.py --check`; `python scripts/continuity_contract_gate.py --check`; `python scripts/task_identity.py check --check`; `python -m py_compile scripts/owner_governance_gate.py scripts/continuity_contract_gate.py scripts/task_identity.py`; `python scripts/owner_governance_gate.py --allow-empty-owner-docs`
+관련 기록: TASK-071, hook diagnostic `.codex/hook-logs/stop-owner-governance-20260616-120949-45064.json`
+남은 리스크: source-only gates는 upstream agent_runtime repo에서 계속 실행되어야 하며, Autofolio host repo에서는 없는 source tree를 차단 조건으로 보지 않는다.

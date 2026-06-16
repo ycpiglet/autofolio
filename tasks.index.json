@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 68,
+  "count": 70,
   "tasks": [
     {
       "type": "task",
@@ -1228,7 +1228,7 @@
     {
       "type": "task",
       "id": "TASK-047",
-      "status": "보류",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1260,7 +1260,7 @@
     {
       "type": "task",
       "id": "TASK-048",
-      "status": "대기",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -1290,7 +1290,7 @@
     {
       "type": "task",
       "id": "TASK-049",
-      "status": "대기",
+      "status": "보류",
       "owner": "UI/UX Designer",
       "assignees": [
         "UI/UX Designer",
@@ -1883,6 +1883,78 @@
       "updated_at": "2026-06-14T14:54:50+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-069-product-maturity-reassessment-2026-12.md",
       "_title": "product maturity reassessment 2026 12"
+    },
+    {
+      "type": "task",
+      "id": "TASK-070",
+      "display_id": "TASK-070",
+      "task_uid": "a9ce75b9-df26-4ec4-9ac2-637eae5870ee",
+      "registered_at": "2026-06-16T20:49:58+09:00",
+      "started_at": "2026-06-16T20:49:58+09:00",
+      "completed_at": "2026-06-16T21:05:31+09:00",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "Backend Engineer",
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중-상",
+      "est_hours": "5",
+      "est_tokens": "45000",
+      "tags": [
+        "authentication",
+        "sso",
+        "sns-login",
+        "agents",
+        "premarket",
+        "lint",
+        "ui-overhaul"
+      ],
+      "gate": "no secrets; no live orders; CLI-generated reports only; external OAuth providers require Owner-managed credentials",
+      "trigger_meeting": "Owner direct request 2026-06-16",
+      "audit_log": "AUDIT-2026-06-16-001",
+      "created": "2026-06-16",
+      "created_at": "2026-06-16T20:49:58+09:00",
+      "updated_at": "2026-06-16T21:05:31+09:00",
+      "_path": "agents/lead_engineer/tasks/TASK-070-sso-sns-premarket-agent-summary.md",
+      "_title": "sso sns premarket agent summary"
+    },
+    {
+      "type": "task",
+      "id": "TASK-071",
+      "display_id": "TASK-071",
+      "task_uid": "7fd25e14-d464-4986-8b5c-eb2e797702f7",
+      "registered_at": "2026-06-16T21:17:03+09:00",
+      "created_at": "2026-06-16T21:17:03+09:00",
+      "started_at": "2026-06-16T21:17:03+09:00",
+      "updated_at": "2026-06-16T21:17:03+09:00",
+      "completed_at": "2026-06-16T21:17:03+09:00",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "Doc Steward",
+        "QA"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "1",
+      "est_tokens": "12000",
+      "tags": [
+        "governance",
+        "hooks",
+        "owner-gate",
+        "host-mode"
+      ],
+      "gate": "Stop hook must pass without requiring agent_runtime source-only surfaces in this host repo",
+      "trigger_meeting": "Owner hook prompt stop:3",
+      "audit_log": "AUDIT-2026-06-16-002",
+      "created": "2026-06-16",
+      "_path": "agents/lead_engineer/tasks/TASK-071-stop-hook-owner-governance-host-mode.md",
+      "_title": "stop hook owner governance host mode"
     }
   ]
 }

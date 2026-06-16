@@ -1,7 +1,7 @@
 """Agents router — /api/agents/*
 
 Endpoints:
-  GET  /agents/list            (require_session) → available flag + agent names
+  GET  /agents/list            (require_session) → available flag + public agent metadata
   POST /agents/ask             (require_owner_csrf) → single-agent Q&A
   POST /agents/ic/run          (require_owner_csrf) → start IC job, return job_id (202)
   GET  /agents/ic/stream/{job_id} (require_session) → SSE progress + done event
@@ -33,6 +33,7 @@ from app.api.schemas import (
     IcRunRequest,
     IcRunResponse,
     ResearchProposal,
+    PremarketSummaryResponse,
 )
 from app.api.serializers import df_records
 
@@ -73,12 +74,42 @@ _jobs: dict[str, dict[str, Any]] = {}
 @router.get("/list", response_model=AgentsListResponse)
 def agents_list(
     _session: Annotated[dict[str, Any], Depends(require_session)],
+    experts_only: bool = Query(default=False),
 ) -> AgentsListResponse:
-    """Return available flag, message, and list of agent short names."""
-    from app.services.agents import available, list_agents
+    """Return available flag, message, and public agent metadata."""
+    from app.services.agents import available, list_agent_infos
 
     ok, msg = available()
-    return AgentsListResponse(available=ok, message=msg, agents=list_agents())
+    return AgentsListResponse(
+        available=ok,
+        message=msg,
+        agents=list_agent_infos(experts_only=experts_only),
+    )
+
+
+# ---------------------------------------------------------------------------
+# GET /agents/premarket/summary
+# ---------------------------------------------------------------------------
+
+@router.get("/premarket/summary", response_model=PremarketSummaryResponse)
+def premarket_summary(
+    _session: Annotated[dict[str, Any], Depends(require_session)],
+    date: str | None = Query(default=None, description="YYYY-MM-DD. Omit for latest saved summary."),
+) -> PremarketSummaryResponse:
+    """Load a CLI-generated pre-market summary markdown file.
+
+    This endpoint is read-only and never generates summaries itself. Generation
+    stays explicit via scripts/run_premarket_summary.py.
+    """
+    from app.services.premarket_summary import load_summary
+
+    summary = load_summary(date)
+    if summary is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No premarket summary file found",
+        )
+    return PremarketSummaryResponse(**summary)
 
 
 # ---------------------------------------------------------------------------

@@ -29,8 +29,20 @@ const EMPTY_TABLE = { columns: [], rows: [] };
 const AGENTS_LIST = {
   available: true,
   agents: [
-    { name: "macro-strategist", role: "거시 전략" },
-    { name: "kr-equity-specialist", role: "국내 주식" },
+    {
+      name: "macro-strategist",
+      role: "거시 전략",
+      category: "투자 리더십",
+      description: "Top-down macro view",
+      expert: true,
+    },
+    {
+      name: "kr-equity-specialist",
+      role: "국내 주식",
+      category: "국내 금융",
+      description: "Korean equity specialist",
+      expert: true,
+    },
   ],
 };
 
@@ -48,6 +60,16 @@ const IC_DECISIONS = [
     created_at: "2026-06-14T10:00:00Z",
   },
 ];
+
+const PREMARKET_SUMMARY = {
+  date: "2026-06-16",
+  created_at: "2026-06-16T08:30:00+09:00",
+  file: "PREMARKET_20260616.md",
+  market_open_reference: "09:00 KST regular session open",
+  content: "# 프리마켓 핵심 요약 — 2026-06-16\n\n## 핵심 요약\n- 정규장 시작 전 기준점은 09:00 KST regular session open이다.",
+  highlights: ["정규장 시작 전 기준점은 09:00 KST regular session open이다."],
+  agents: AGENTS_LIST.agents,
+};
 
 // Whitelist symbol map for the briefing symbol picker
 const SYMBOLS_MAP = {
@@ -143,6 +165,15 @@ async function mockBackground(page: Page) {
     }),
   );
 
+  // agents/premarket/summary (GET) — CLI-saved report loader
+  await page.route(/\/api\/agents\/premarket\/summary/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(PREMARKET_SUMMARY),
+    }),
+  );
+
   // market/symbols (whitelist code → name map) for the briefing picker
   await page.route(/\/api\/market\/symbols/, (route) =>
     route.fulfill({
@@ -232,6 +263,20 @@ async function loginAsOwner(page: Page) {
 // ── Tests ─────────────────────────────────────────────────────────────────
 
 test.describe("Phase 4 — /agents page (종목 전문가 브리핑)", () => {
+  test("expert roster and saved premarket summary render", async ({ page }) => {
+    await mockBackground(page);
+    await loginAsOwner(page);
+
+    await page.goto("/agents");
+
+    const panel = page.getByTestId("expert-agents-panel");
+    await expect(panel).toBeVisible({ timeout: 10_000 });
+    await expect(panel.getByText("macro-strategist")).toBeVisible();
+    await expect(panel.getByText("kr-equity-specialist")).toBeVisible();
+    await expect(page.getByTestId("premarket-summary-panel")).toBeVisible();
+    await expect(page.getByTestId("premarket-highlights")).toContainText("정규장 시작 전");
+  });
+
   test("honest gap banners + briefing section render", async ({ page }) => {
     await mockBackground(page);
     await loginAsOwner(page);

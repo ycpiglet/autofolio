@@ -49,12 +49,65 @@ DEFAULT_PANEL = [
     "kr-fixed-income-specialist",
 ]
 
+_EXPERT_AGENT_IDS = {
+    "macro-strategist",
+    "portfolio-manager",
+    "risk-manager",
+    "cio",
+    "devils-advocate",
+    "kr-equity-specialist",
+    "kr-etf-specialist",
+    "kr-fixed-income-specialist",
+    "kr-fund-specialist",
+    "us-equity-specialist",
+    "us-etf-specialist",
+    "us-fixed-income-specialist",
+    "fx-specialist",
+    "commodities-specialist",
+    "futures-specialist",
+    "options-specialist",
+    "research-agent",
+    "research",
+    "quant-researcher",
+    "performance-analyst",
+    "backtest-engineer",
+    "data-engineer",
+    "optimization-quant",
+}
+
+_ROLE_LABELS = {
+    "macro-strategist": "매크로 전략",
+    "portfolio-manager": "포트폴리오 매니저",
+    "risk-manager": "리스크 매니저",
+    "cio": "CIO",
+    "devils-advocate": "악마의 변호인",
+    "kr-equity-specialist": "국내 주식",
+    "kr-etf-specialist": "국내 ETF",
+    "kr-fixed-income-specialist": "국내 채권",
+    "kr-fund-specialist": "국내 펀드",
+    "us-equity-specialist": "미국 주식",
+    "us-etf-specialist": "미국 ETF",
+    "us-fixed-income-specialist": "미국 채권",
+    "fx-specialist": "FX",
+    "commodities-specialist": "원자재",
+    "futures-specialist": "선물",
+    "options-specialist": "옵션",
+    "research-agent": "리서치",
+    "research": "리서치",
+    "quant-researcher": "퀀트 리서치",
+    "performance-analyst": "성과 분석",
+    "backtest-engineer": "백테스트",
+    "data-engineer": "데이터",
+    "optimization-quant": "최적화 퀀트",
+}
+
 # ---------------------------------------------------------------------------
 # __all__
 # ---------------------------------------------------------------------------
 
 __all__ = [
     "list_agents",
+    "list_agent_infos",
     "available",
     "ask",
     "run_ic",
@@ -100,7 +153,14 @@ def _personas() -> dict:
         skill_body = ""
         if skill_name and (_SKILLS_DIR / skill_name / "SKILL.md").exists():
             _, skill_body = _parse_frontmatter((_SKILLS_DIR / skill_name / "SKILL.md").read_text(encoding="utf-8"))
-        out[short] = {"name": name, "system": body, "skill": skill_name, "skill_body": skill_body}
+        out[short] = {
+            "name": name,
+            "system": body,
+            "skill": skill_name,
+            "skill_body": skill_body,
+            "description": fm.get("description", ""),
+            "source": str(md.relative_to(_ROOT)),
+        }
 
     # agent_runtime 프레임워크 정본 개발팀: agents/<role>/SKILL.md (프론트매터 없음, name=폴더)
     fw = _ROOT / "agents"
@@ -114,12 +174,70 @@ def _personas() -> dict:
                 "system": skill.read_text(encoding="utf-8"),
                 "skill": "",
                 "skill_body": "",
+                "description": "",
+                "source": str(skill.relative_to(_ROOT)),
             }
     return out
 
 
 def list_agents() -> list[str]:
     return sorted(_personas().keys())
+
+
+def list_agent_infos(*, experts_only: bool = False) -> list[dict]:
+    """Return public agent metadata for UI/API consumers."""
+    items: list[dict] = []
+    for short, persona in sorted(_personas().items()):
+        source = str(persona.get("source", ""))
+        expert = _is_expert_agent(short, source)
+        if experts_only and not expert:
+            continue
+        items.append({
+            "name": short,
+            "role": _ROLE_LABELS.get(short) or _title_from_short(short),
+            "category": _category_for(short, source),
+            "description": _description_for(persona),
+            "expert": expert,
+        })
+    return items
+
+
+def _is_expert_agent(short: str, source: str) -> bool:
+    return short in _EXPERT_AGENT_IDS or ".claude/agents/asset-team" in source.replace("\\", "/")
+
+
+def _category_for(short: str, source: str) -> str:
+    normalized = source.replace("\\", "/")
+    if "asset-team/leadership" in normalized:
+        return "투자 리더십"
+    if "asset-team/korea-desk" in normalized:
+        return "국내 금융"
+    if "asset-team/us-desk" in normalized:
+        return "글로벌 금융"
+    if "asset-team/global-desk" in normalized:
+        return "글로벌 금융"
+    if "asset-team/governance" in normalized:
+        return "투자 거버넌스"
+    if short in {"research", "research-agent", "quant-researcher", "backtest-engineer", "data-engineer", "optimization-quant"}:
+        return "리서치"
+    if short == "performance-analyst":
+        return "성과/리스크"
+    return "운영"
+
+
+def _title_from_short(short: str) -> str:
+    return " ".join(part.capitalize() for part in short.split("-"))
+
+
+def _description_for(persona: dict) -> str:
+    desc = str(persona.get("description") or "").strip()
+    if desc:
+        return desc
+    for line in str(persona.get("system") or "").splitlines():
+        stripped = line.strip(" #")
+        if stripped and not stripped.startswith("---"):
+            return stripped[:180]
+    return ""
 
 
 def available() -> tuple[bool, str]:

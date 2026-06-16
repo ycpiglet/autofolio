@@ -16,6 +16,29 @@
 
 ---
 
+## 한국어
+
+이 저장소의 운영 정본은 `AGENTS.md`입니다. 도구별 안내는 `CLAUDE.md`,
+`GEMINI.md`, `CURSOR.md`를 보조로 보되 충돌하면 `AGENTS.md`와
+`agents/lead_engineer/`의 최신 기록을 우선합니다.
+
+다음 세션을 이어받을 때는 `agents/project/NEXT-SESSION-POINTER.yml`,
+`agents/project/`, `agents/lead_engineer/STATUS.md`,
+`agents/lead_engineer/tasks/BACKLOG.md`를 먼저 확인합니다.
+
+## English
+
+The repository operating protocol is `AGENTS.md`. Tool-specific files such as
+`CLAUDE.md`, `GEMINI.md`, and `CURSOR.md` are companion guidance; when they
+conflict, follow `AGENTS.md` and the latest records under
+`agents/lead_engineer/`.
+
+To resume work, start with `agents/project/NEXT-SESSION-POINTER.yml`,
+`agents/project/`, `agents/lead_engineer/STATUS.md`, and
+`agents/lead_engineer/tasks/BACKLOG.md`.
+
+---
+
 ## 빠른 시작
 
 ```powershell

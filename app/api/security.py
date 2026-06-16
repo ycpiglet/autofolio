@@ -73,6 +73,9 @@ COOKIE_KWARGS: dict[str, Any] = {
 
 _ACK_SALT = "autofolio-ack-token"
 _ACK_MAX_AGE = 300  # 5 minutes
+_OAUTH_STATE_SALT = "autofolio-oauth-state"
+_OAUTH_STATE_MAX_AGE = 600  # 10 minutes
+OAUTH_STATE_COOKIE = "af_oauth_state"
 
 
 def encode_ack_token(payload: dict) -> str:
@@ -86,5 +89,20 @@ def decode_ack_token(token: str) -> dict | None:
         return URLSafeTimedSerializer(
             _load_or_create_key(), salt=_ACK_SALT
         ).loads(token, max_age=_ACK_MAX_AGE)
+    except (BadSignature, SignatureExpired):
+        return None
+
+
+def encode_oauth_state(payload: dict) -> str:
+    """Sign an OAuth state payload for the short-lived state cookie."""
+    return URLSafeTimedSerializer(_load_or_create_key(), salt=_OAUTH_STATE_SALT).dumps(payload)
+
+
+def decode_oauth_state(token: str) -> dict | None:
+    """Verify an OAuth state cookie. Returns None if expired/tampered."""
+    try:
+        return URLSafeTimedSerializer(
+            _load_or_create_key(), salt=_OAUTH_STATE_SALT
+        ).loads(token, max_age=_OAUTH_STATE_MAX_AGE)
     except (BadSignature, SignatureExpired):
         return None

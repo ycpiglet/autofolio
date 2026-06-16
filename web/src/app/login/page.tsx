@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiPost, ApiError } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { apiPost, ApiError, getSsoProviders, type SsoProviderInfo } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +28,13 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [guestLoading, setGuestLoading] = useState(false);
+  const { data: ssoData } = useQuery({
+    queryKey: ["sso-providers"],
+    queryFn: getSsoProviders,
+    retry: false,
+    staleTime: 60_000,
+  });
+  const enabledProviders = (ssoData?.providers ?? []).filter((p) => p.enabled);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -57,6 +65,10 @@ export default function LoginPage() {
     } finally {
       setGuestLoading(false);
     }
+  }
+
+  function handleSso(provider: SsoProviderInfo) {
+    window.location.assign(`/api/auth/sso/${provider.id}/login`);
   }
 
   return (
@@ -141,6 +153,27 @@ export default function LoginPage() {
               <CardDescription>Autofolio 계정으로 로그인하세요.</CardDescription>
             </CardHeader>
             <CardContent>
+              {enabledProviders.length > 0 && (
+                <div className="mb-4 flex flex-col gap-2" aria-label="SSO SNS 로그인">
+                  {enabledProviders.map((provider) => (
+                    <Button
+                      key={provider.id}
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleSso(provider)}
+                    >
+                      {provider.label}로 계속하기
+                    </Button>
+                  ))}
+                  <div className="flex items-center gap-3 py-1" aria-hidden="true">
+                    <span className="h-px flex-1 bg-border" />
+                    <span className="text-xs text-muted-foreground">또는</span>
+                    <span className="h-px flex-1 bg-border" />
+                  </div>
+                </div>
+              )}
+
               <form onSubmit={handleLogin} noValidate className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="username">아이디</Label>

@@ -19,11 +19,14 @@ import {
   apiAgentsList,
   apiAgentAsk,
   apiAgentResearch,
+  apiPremarketSummary,
   apiIcRun,
   apiIcDecisions,
+  type AgentInfo,
   type AgentsListResponse,
   type AgentResearchResponse,
   type IcDecision,
+  type PremarketSummaryResponse,
 } from "@/lib/api";
 
 // ── Honest gap banner (shown above the briefing) ────────────────────────────
@@ -42,6 +45,101 @@ function HonestGapBanner() {
         <li>제안은 규칙 기반 예시이며, 조건/주문을 자동 저장하지 않습니다.</li>
       </ul>
     </div>
+  );
+}
+
+// ── Expert agent roster ────────────────────────────────────────────────────
+
+function ExpertAgentsPanel({ agents }: { agents: AgentInfo[] }) {
+  const expertAgents = agents.filter((agent) => agent.expert);
+  const grouped = expertAgents.reduce<Record<string, AgentInfo[]>>((acc, agent) => {
+    const category = agent.category || "기타";
+    acc[category] = [...(acc[category] ?? []), agent];
+    return acc;
+  }, {});
+
+  return (
+    <Card data-testid="expert-agents-panel">
+      <CardHeader>
+        <CardTitle>리서치·금융 전문가 에이전트</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {expertAgents.length === 0 ? (
+          <p className="text-sm text-muted-foreground">표시할 전문가 에이전트가 없습니다.</p>
+        ) : (
+          Object.entries(grouped).map(([category, items]) => (
+            <section key={category} aria-label={`${category} 에이전트`} className="space-y-2">
+              <h3 className="text-sm font-medium text-muted-foreground">{category}</h3>
+              <div className="divide-y divide-border rounded-lg border border-border">
+                {items.map((agent) => (
+                  <div
+                    key={agent.name}
+                    className="grid gap-1 px-3 py-2 text-sm sm:grid-cols-[180px_140px_1fr] sm:items-center"
+                  >
+                    <span className="font-medium text-foreground">{agent.name}</span>
+                    <span className="text-muted-foreground">{agent.role}</span>
+                    <span className="line-clamp-2 text-xs text-muted-foreground">
+                      {agent.description || "설명 없음"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ── Saved pre-market summary ───────────────────────────────────────────────
+
+function PremarketSummaryPanel() {
+  const { data, isPending, error } = useQuery<PremarketSummaryResponse>({
+    queryKey: ["premarket-summary"],
+    queryFn: () => apiPremarketSummary(),
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  return (
+    <Card data-testid="premarket-summary-panel">
+      <CardHeader>
+        <CardTitle>프리마켓 핵심 요약</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {isPending && (
+          <div className="h-24 animate-pulse rounded-xl bg-muted" role="status" aria-label="요약 로딩 중" />
+        )}
+        {error && (
+          <div className="rounded-lg border border-dashed border-border p-3 text-sm text-muted-foreground">
+            저장된 프리마켓 요약이 없습니다. CLI에서{" "}
+            <code className="rounded bg-muted px-1 py-0.5">python scripts/run_premarket_summary.py</code>
+            를 실행하면 여기에 표시됩니다.
+          </div>
+        )}
+        {data && (
+          <>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <span>{data.date}</span>
+              <span>{data.file}</span>
+              <span>{data.market_open_reference}</span>
+            </div>
+            <ul className="list-disc space-y-1 pl-4 text-sm" data-testid="premarket-highlights">
+              {data.highlights.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+            <details className="rounded-lg border border-border p-3 text-sm">
+              <summary className="cursor-pointer font-medium text-foreground">저장 파일 원문</summary>
+              <pre className="mt-3 max-h-96 overflow-auto whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground">
+                {data.content}
+              </pre>
+            </details>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -662,7 +760,8 @@ export default function AgentsPage() {
     );
   }
 
-  const agentNames = (data?.agents ?? []).map((a) => a.name).filter(Boolean);
+  const agents = data?.agents ?? [];
+  const agentNames = agents.map((a) => a.name).filter(Boolean);
   const llmAvailable = Boolean(data?.available);
 
   return (
@@ -675,7 +774,15 @@ export default function AgentsPage() {
           </p>
         </div>
 
-        {/* ── 1. 종목 전문가 브리핑 (primary) ── */}
+        <section aria-label="리서치 금융 전문가 에이전트">
+          <ExpertAgentsPanel agents={agents} />
+        </section>
+
+        <section aria-label="프리마켓 핵심 요약">
+          <PremarketSummaryPanel />
+        </section>
+
+        {/* ── 1. 종목 전문가 브리핑 (manual primary) ── */}
         <section aria-label="종목 전문가 브리핑">
           <BriefingSection
             agentNames={agentNames}

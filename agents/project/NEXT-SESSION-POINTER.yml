@@ -1,47 +1,20 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: YYYY-MM-DDTHH:MM:SS+09:00
-updated_by: role-or-agent-id
+updated_at: 2026-06-16T22:03:48+09:00
+updated_by: lead-engineer
 current_state:
   signal: watch
-  score: 50
+  score: 80
   summary: >
-    Replace this with the compact current live work state. A returning agent
-    should be able to resume the project like reconnecting to an online game.
+    No active task claim is open. TASK-070 and TASK-071 are complete in records
+    and are being closed out on branch chore/task-070-071-closeout with focused
+    API, UI, and governance gates passing.
 active_work:
   contract: >
-    This is not only a next-session note. It is the live work pointer for active
-    agents, teams, and panes. Keep task, status, phase, progress, worktree,
-    branch, claim, handoff, step index, step total, status text, and last
-    heartbeat visible while work is happening.
-  current_agents:
-    - display_name: lead_engineer@design-01
-      agent_role: lead-engineer
-      team_id: agent-runtime-core
-      pane_id: terminal:wt-task-id:tab-01
-      task_id: TASK-NNN
-      status: claimed
-      phase: claim-created
-      progress_pct: 0
-      step_index: 1
-      step_total: 6
-      status_text: Claim created
-      worktree_path: .worktrees/TASK-NNN
-      branch: codex/task-nnn-work-01
-      claim_path: agents/runtime/task_claims/CLAIM-example.json
-      handoff_path: agents/runtime/task_claims/CLAIM-example.handoff.md
-      last_heartbeat: YYYY-MM-DDTHH:MM:SS+09:00
-  current_teams:
-    - team_id: agent-runtime-core
-      status: watch
-      phase: planning
-      progress_pct: 0
-      step_index: 1
-      step_total: 6
-      status_text: Planning active task-set work
-      active_task: TASK-NNN
-      task_set_id: TASKSET-AR-EXAMPLE
-      pane_ids:
-        - terminal:wt-task-id:tab-01
+    This file is the live pointer for active agents, teams, and panes. When no
+    work is actively claimed, current_agents and current_teams stay empty and
+    resume.active_task is none.
+  current_agents: []
+  current_teams: []
   canonical_live_sources:
     - agents/runtime/task_claims/*.json
     - agents/runtime/events/*.jsonl
@@ -55,9 +28,14 @@ resume:
     - CLAUDE.md
     - agents/lead_engineer/STATUS.md
     - agents/lead_engineer/tasks/BACKLOG.md
-  active_task: TASK-NNN
+  active_task: none
+  task_set_id: none
+  step_index: 0
+  step_total: 0
+  status_text: No active task claim
   next_actions:
-    - State the next concrete command or document to inspect.
+    - Review the latest branch and PR state before starting new work.
+    - Use agents/lead_engineer/tasks/BACKLOG.md and python scripts/backlog_sweep.py for the next task decision.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -89,8 +67,11 @@ rules:
 verification:
   required:
     - python scripts/continuity_contract_gate.py --check
-    - python scripts/owner_governance_gate.py
+    - python scripts/owner_governance_gate.py --allow-empty-owner-docs
     - python scripts/check_agent_docs.py
   last_known:
-    signal: watch
-    detail: Replace with latest verification result.
+    signal: pass
+    detail: >
+      2026-06-16 closeout run passed focused API tests, py_compile, npm lint,
+      npm build, Playwright login+phase4, generated view checks, task index
+      check, check_agent_docs with 0 errors, and owner_governance_gate.

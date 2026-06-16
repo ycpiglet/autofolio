@@ -230,7 +230,8 @@ format. Keep it concise, visually scannable, and action-oriented.
 type: brief
 id: BRIEF-YYYY-MM-DD-NNN
 audience: owner|ceo|agent-team
-status: G|Y|R
+status: pass|watch|block
+score: 0-100
 priority: Critical|High|Medium|Low
 tags: [release, automation]
 actions: [approve, review, no-action]
@@ -245,7 +246,7 @@ Bottom Line: <one-line outcome and decision>.
 ## Signal
 | Item | State | Evidence |
 |------|-------|----------|
-| Work | G/Y/R | <evidence> |
+| Work | pass/watch/block | <evidence> |
 
 ## Insight
 1. <short interpretation>
@@ -259,7 +260,8 @@ Bottom Line: <one-line outcome and decision>.
 | <action> | <role> | <condition> |
 ```
 
-Use `G`, `Y`, and `R` for state. Do not use emoji.
+Use `pass`, `watch`, and `block` for state. Include `score: 0-100`
+when a report needs machine-sortable risk or health. Do not use emoji.
 
 ## 10. Time
 
@@ -403,4 +405,19 @@ python scripts/report_upstream_bug.py --evidence EVIDENCE-*.md --dry-run
 - Autofolio: 이 §17 + `scripts/report_upstream_bug.py`
 - agent_runtime: upstream PR을 통해 `AGENTS.md §N Downstream Bug Intake` 추가 요청
   (Autofolio가 발견한 버그를 upstream이 체계적으로 수신·처리하도록)
+
+## 18. Live Work Continuity And Improvement Loop
+
+활성 작업은 `agents/project/NEXT-SESSION-POINTER.yml`에 유지한다. 이 파일은
+단순 다음 세션 메모가 아니라 `active_work`, `pane_id`, `progress_pct`,
+`task_set_id`, `step_index`, `step_total`, `status_text`를 포함하는 라이브
+작업 포인터다.
+
+반복되는 요청이나 비판은 Repeated Request API 규칙으로 승격한다. 두 번 이상
+반복되는 수동 절차는 function/API, script, hook, gate, 또는 명시 TASK로
+바꾸고, 같은 실수는 Compound 자동 캡처 대상으로 기록한다.
+
+개선 루프는 `Evaluate -> Propose -> Verify -> Merge` 순서로 둔다. 오답,
+실패 사례, golden set, edge case는 검증 증거로 보존하고, 최종 기준과
+위험한 병합·승인은 Owner 권한을 유지한다.
 <!-- AUTOFOLIO-OVERLAY:end -->

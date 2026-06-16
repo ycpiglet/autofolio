@@ -20,6 +20,13 @@ const ENGINE_STATUS = {
 };
 
 const EMPTY_TABLE = { columns: [], rows: [] };
+const EMPTY_SSO_PROVIDERS = { providers: [] };
+const GOOGLE_SSO_PROVIDERS = {
+  providers: [
+    { id: "google", label: "Google", kind: "oidc", enabled: true },
+    { id: "kakao", label: "Kakao", kind: "sns", enabled: false },
+  ],
+};
 
 /**
  * Mock GET-only background APIs that the post-login pages call.
@@ -61,6 +68,16 @@ async function mockBackgroundApis(
   );
 }
 
+async function mockSsoProviders(page: Page, body = EMPTY_SSO_PROVIDERS) {
+  await page.route(/\/api\/auth\/sso\/providers/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(body),
+    }),
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -71,6 +88,7 @@ test.describe("Login flow", () => {
   }) => {
     // Background API mocks first (lower LIFO priority)
     await mockBackgroundApis(page, GUEST_SESSION);
+    await mockSsoProviders(page);
 
     // Login POST mock last — takes LIFO priority over catch-all
     await page.route(/\/api\/auth\/login/, (route) =>
@@ -100,6 +118,7 @@ test.describe("Login flow", () => {
     page,
   }) => {
     await mockBackgroundApis(page, OWNER_SESSION);
+    await mockSsoProviders(page);
 
     await page.route(/\/api\/auth\/login/, (route) =>
       route.fulfill({
@@ -129,6 +148,7 @@ test.describe("Login flow", () => {
   test("wrong credentials — shows inline error, stays on /login", async ({
     page,
   }) => {
+    await mockSsoProviders(page);
     // No background mocks needed — navigation to /home won't happen
     await page.route(/\/api\/auth\/login/, (route) =>
       route.fulfill({
@@ -152,5 +172,15 @@ test.describe("Login flow", () => {
 
     // URL must stay on /login
     await expect(page).toHaveURL(/\/login/);
+  });
+
+  test("configured SSO provider appears as a login button", async ({ page }) => {
+    await mockSsoProviders(page, GOOGLE_SSO_PROVIDERS);
+
+    await page.goto("/login");
+
+    const google = page.getByRole("button", { name: "Google로 계속하기" });
+    await expect(google).toBeVisible();
+    await expect(page.getByRole("button", { name: "Kakao로 계속하기" })).toHaveCount(0);
   });
 });
