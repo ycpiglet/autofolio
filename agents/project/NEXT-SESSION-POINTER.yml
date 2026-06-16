@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T01:33:00+09:00
+updated_at: 2026-06-17T01:38:22+09:00
 updated_by: lead-engineer
 current_state:
   signal: watch
@@ -83,5 +83,6 @@ verification:
       web build, Playwright phase3 + investor-profile E2E, focused survey API
       regression, anonymous browser check for /onboarding/investor-profile,
       generated view checks, check_agent_docs, owner_governance_gate, git diff
-      --check, and GitHub PR #91 CI before the latest bugfix push. auto_merge
-      remains ESCALATE because non-document diff is 2111 lines > cap 600.
+      --check, and GitHub PR #91 CI after the anonymous survey-load fix.
+      auto_merge remains ESCALATE because non-document diff is 2125 lines > cap
+      600.

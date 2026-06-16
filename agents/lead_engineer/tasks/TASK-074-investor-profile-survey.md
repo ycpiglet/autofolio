@@ -105,7 +105,7 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs` -> pass.
 - `git diff --check` -> OK. CRLF normalization warnings only.
 - GitHub PR #91 CI -> green (`pytest`, `owner-doc-format`, `Lint + Build + Playwright E2E` pass).
-- `python scripts/auto_merge.py 91` -> ESCALATE. Reason: non-document diff 2111 lines exceeds cap 600; automatic merge not performed.
+- `python scripts/auto_merge.py 91` -> ESCALATE. Reason: non-document diff 2125 lines exceeds cap 600; automatic merge not performed.
 
 ## 증거
 
