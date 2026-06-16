@@ -1,14 +1,15 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T23:38:49+09:00
+updated_at: 2026-06-17T00:25:23+09:00
 updated_by: lead-engineer
 current_state:
   signal: watch
-  score: 82
+  score: 84
   summary: >
-    No active task claim is open. TASK-073 corrected the live backlog so
-    future-dated TASK-069 is deferred until 2026-12-14 instead of appearing as
-    immediate ACT work. Remaining open work is scheduled or Owner/R3/external
-    gated.
+    TASK-074 investor profile survey implementation is complete on branch
+    feat/investor-profile-survey and is in PR/merge gate closeout. It adds
+    DB-backed personalization survey, profile gates, onboarding/settings UI,
+    and focused API/E2E tests. KIS, order_flow, app/risk, secrets, prod, and CI
+    workflow surfaces were not changed.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -33,9 +34,9 @@ resume:
   task_set_id: none
   step_index: 0
   step_total: 0
-  status_text: No active task claim
+  status_text: TASK-074 implemented; PR/merge gate closeout remains
   next_actions:
-    - Use agents/lead_engineer/tasks/BACKLOG.md and python scripts/backlog_sweep.py for the next task decision.
+    - Commit TASK-074, open/update PR, and merge/escalate according to auto_merge gate.
     - Do not start TASK-069 before 2026-12-14 unless Owner explicitly requests an early reassessment.
     - To try mock SSO locally, set AUTOFOLIO_SSO_MOCK_ENABLED=1 plus mock email/name env values and restart backend/frontend.
 roles:
@@ -74,6 +75,7 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-16 TASK-073 run confirmed TASK-069 is future scheduled work,
-      updated backlog metadata, regenerated views/task index, and passed
-      check_agent_docs plus owner_governance gates.
+      2026-06-17 TASK-074 run passed full API tests (274 passed), web lint,
+      web build, Playwright investor-profile E2E, generated view checks,
+      check_agent_docs, owner_governance_gate, and git diff --check in the same
+      branch.

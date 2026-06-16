@@ -71,6 +71,63 @@ export interface RiskLimitsPayload {
   [key: string]: number | undefined;
 }
 
+export interface InvestorProfileResponse {
+  username: string;
+  survey_version: string;
+  completed: boolean;
+  risk_type: string;
+  knowledge_level: string;
+  scores: Record<string, number>;
+  recommended_max_equity_pct: number;
+  recommended_autonomy_level: string;
+  needs_advanced_survey: boolean;
+  satisfaction_focus: string[];
+  last_checkin_at: string | null;
+  satisfaction_score: number | null;
+  confidence_score: number | null;
+  stress_score: number | null;
+  updated_at: string | null;
+  completed_at: string | null;
+}
+
+export interface SurveyOption {
+  value: string;
+  label: string;
+}
+
+export interface SurveyQuestion {
+  id: string;
+  title: string;
+  kind: "single" | "multi" | "acknowledgement";
+  required: boolean;
+  options: SurveyOption[];
+}
+
+export interface SurveyDefinitionResponse {
+  version: string;
+  questions: SurveyQuestion[];
+}
+
+export interface SurveySubmitResponse {
+  status: string;
+  profile: InvestorProfileResponse;
+}
+
+export interface ProfileCheckinPayload {
+  trigger_type: "monthly" | "drawdown" | "rebalance" | "override" | "manual";
+  satisfaction_score: number;
+  confidence_score: number;
+  stress_score: number;
+  automation_adjustment: "lower" | "same" | "raise";
+  notes?: string;
+}
+
+export interface ProfileCheckinResponse {
+  status: string;
+  id: number;
+  profile: InvestorProfileResponse;
+}
+
 // ── Internal helpers ───────────────────────────────────────────────────────
 
 async function parseResponse(res: Response): Promise<unknown> {
@@ -198,6 +255,30 @@ export function postCondition(payload: ConditionPayload): Promise<ConditionRespo
 /** PUT /api/settings/risk-limits — update risk limit settings */
 export function putRiskLimits(payload: RiskLimitsPayload): Promise<unknown> {
   return apiPut("/api/settings/risk-limits", payload);
+}
+
+/** GET /api/profile/investor — current investor profile/personalization state */
+export function getInvestorProfile(): Promise<InvestorProfileResponse> {
+  return apiGet<InvestorProfileResponse>("/api/profile/investor");
+}
+
+/** GET /api/profile/survey — active onboarding survey definition */
+export function getInvestorSurvey(): Promise<SurveyDefinitionResponse> {
+  return apiGet<SurveyDefinitionResponse>("/api/profile/survey");
+}
+
+/** POST /api/profile/survey — save survey answers and derive profile */
+export function postInvestorSurvey(
+  answers: Record<string, unknown>,
+): Promise<SurveySubmitResponse> {
+  return apiPost<SurveySubmitResponse>("/api/profile/survey", { answers });
+}
+
+/** POST /api/profile/checkin — monthly/event satisfaction feedback */
+export function postProfileCheckin(
+  payload: ProfileCheckinPayload,
+): Promise<ProfileCheckinResponse> {
+  return apiPost<ProfileCheckinResponse>("/api/profile/checkin", payload);
 }
 
 // ── Account (local account management) ──────────────────────────────────────

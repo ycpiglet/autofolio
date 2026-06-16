@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 72,
+  "count": 73,
   "tasks": [
     {
       "type": "task",
@@ -2026,6 +2026,44 @@
       "created": "2026-06-16",
       "_path": "agents/lead_engineer/tasks/TASK-073-defer-future-maturity-reassessment.md",
       "_title": "defer future maturity reassessment"
+    },
+    {
+      "type": "task",
+      "id": "TASK-074",
+      "display_id": "TASK-074",
+      "task_uid": "93c748b6-4d52-4a8b-b93e-cad9964dfc33",
+      "registered_at": "2026-06-17T00:25:23+09:00",
+      "created_at": "2026-06-17T00:25:23+09:00",
+      "started_at": "2026-06-17T00:25:23+09:00",
+      "updated_at": "2026-06-17T00:25:23+09:00",
+      "completed_at": "2026-06-17T00:25:23+09:00",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Backend Engineer",
+        "UI/UX Designer",
+        "QA",
+        "Doc Steward"
+      ],
+      "priority": "High",
+      "difficulty": "중",
+      "est_hours": "4",
+      "est_tokens": "80000",
+      "tags": [
+        "profile",
+        "survey",
+        "onboarding",
+        "personalization",
+        "database",
+        "ui",
+        "safety"
+      ],
+      "gate": "Owner direct request approved DB schema change; no KIS, live order, app/risk, secret, prod, or CI workflow changes",
+      "trigger_meeting": "Owner direct request 2026-06-17",
+      "audit_log": "AUDIT-2026-06-17-001",
+      "created": "2026-06-17",
+      "_path": "agents/lead_engineer/tasks/TASK-074-investor-profile-survey.md",
+      "_title": "investor profile survey"
     }
   ]
 }

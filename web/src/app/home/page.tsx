@@ -2,16 +2,25 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { apiGet, apiTable, ApiError, type TableResponse } from "@/lib/api";
+import {
+  apiGet,
+  apiTable,
+  getInvestorProfile,
+  ApiError,
+  type InvestorProfileResponse,
+  type TableResponse,
+} from "@/lib/api";
 import { fmtWon, fmtPct } from "@/lib/format";
 import { AppShell } from "@/components/layout/AppShell";
 import { EmptyState } from "@/components/safety/EmptyState";
 import { KpiCard } from "@/components/domain/KpiCard";
 import { HoldingsTable } from "@/components/domain/HoldingsTable";
 import { DataTable } from "@/components/domain/DataTable";
+import { Button } from "@/components/ui/button";
 
 // Dynamic imports — ssr: false prevents lightweight-charts / recharts DOM errors
 const EquityChart = dynamic(
@@ -82,6 +91,12 @@ export default function HomePage() {
     staleTime: 30_000,
   });
 
+  const profileQuery = useQuery<InvestorProfileResponse>({
+    queryKey: ["investor-profile"],
+    queryFn: getInvestorProfile,
+    staleTime: 60_000,
+  });
+
   // ── Loading / auth pending ───────────────────────────────────────────────
   if (isAuthPending) {
     return (
@@ -96,6 +111,23 @@ export default function HomePage() {
   return (
     <AppShell>
       <div className="space-y-6">
+        {profileQuery.data && !profileQuery.data.completed && (
+          <section
+            aria-label="투자 프로필 안내"
+            className="flex flex-col gap-3 rounded-lg border border-amber-400/40 bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-200 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <div className="font-medium">투자 프로필이 필요합니다.</div>
+              <p className="mt-1 text-amber-800 dark:text-amber-300">
+                조회는 가능하지만 조건 저장과 자동화 실행은 프로필 완료 후 사용할 수 있습니다.
+              </p>
+            </div>
+            <Button size="sm" render={<Link href="/onboarding/investor-profile" />}>
+              프로필 작성
+            </Button>
+          </section>
+        )}
+
         {/* ── KPI Row ─────────────────────────────────────────────────── */}
         <section aria-label="핵심 지표">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

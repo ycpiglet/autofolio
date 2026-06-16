@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Tooltip } from "@base-ui/react/tooltip";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "./ConfirmModal";
-import { postAutoTrading } from "@/lib/api";
+import { ApiError, postAutoTrading } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 interface AutoTradingToggleProps {
@@ -34,7 +34,12 @@ export function AutoTradingToggle({
       await postAutoTrading(!enabled);
       onToggled?.();
     } catch (err) {
-      setPostError(err instanceof Error ? err.message : "알 수 없는 오류");
+      if (err instanceof ApiError && err.status === 428) {
+        const detail = err.body as { detail?: { message?: string } } | undefined;
+        setPostError(detail?.detail?.message ?? "투자 프로필 설문 완료 후 사용할 수 있습니다.");
+      } else {
+        setPostError(err instanceof Error ? err.message : "알 수 없는 오류");
+      }
     } finally {
       setPending(false);
     }

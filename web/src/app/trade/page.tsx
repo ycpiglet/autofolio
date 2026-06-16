@@ -9,7 +9,14 @@ import { OrderBookLadder } from "@/components/domain/OrderBookLadder";
 import { DataTable } from "@/components/domain/DataTable";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/safety/ConfirmModal";
-import { apiTable, postRunOnce, ApiError, type TableResponse } from "@/lib/api";
+import {
+  apiTable,
+  getInvestorProfile,
+  postRunOnce,
+  ApiError,
+  type InvestorProfileResponse,
+  type TableResponse,
+} from "@/lib/api";
 import { useSymbols } from "@/hooks/useSymbols";
 
 type RunOnceStatus =
@@ -35,6 +42,13 @@ function TradePageInner() {
   const [runOnceStatus, setRunOnceStatus] = useState<RunOnceStatus>({ kind: "idle" });
   const [runOnceConfirmOpen, setRunOnceConfirmOpen] = useState(false);
 
+  const profileQuery = useQuery<InvestorProfileResponse>({
+    queryKey: ["investor-profile"],
+    queryFn: getInvestorProfile,
+    staleTime: 60_000,
+  });
+  const profileCompleted = profileQuery.data?.completed === true;
+
   // Current active conditions
   const conditionsQuery = useQuery<TableResponse>({
     queryKey: ["trade-conditions"],
@@ -51,6 +65,14 @@ function TradePageInner() {
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setRunOnceStatus({ kind: "busy" });
+        return;
+      }
+      if (err instanceof ApiError && err.status === 428) {
+        const detail = err.body as { detail?: { message?: string } } | undefined;
+        setRunOnceStatus({
+          kind: "error",
+          message: detail?.detail?.message ?? "투자 프로필 설문 완료 후 엔진을 실행할 수 있습니다.",
+        });
         return;
       }
       setRunOnceStatus({
@@ -70,7 +92,7 @@ function TradePageInner() {
               size="sm"
               variant="outline"
               onClick={() => setRunOnceConfirmOpen(true)}
-              disabled={runOnceStatus.kind === "running"}
+              disabled={runOnceStatus.kind === "running" || !profileCompleted}
               aria-label="엔진 1회 실행"
             >
               {runOnceStatus.kind === "running" ? "실행 중…" : "엔진 1회 실행"}
@@ -93,6 +115,9 @@ function TradePageInner() {
             {runOnceStatus.kind === "error" && (
               <span role="alert" className="text-xs text-destructive">{runOnceStatus.message}</span>
             )}
+            {!profileCompleted && (
+              <span role="status" className="text-xs text-muted-foreground">투자 프로필 필요</span>
+            )}
           </div>
         </div>
 
@@ -106,6 +131,7 @@ function TradePageInner() {
               initialSide={prefillSide}
               initialTargetPrice={prefillPrice}
               initialQuantity={prefillQty}
+              profileCompleted={profileCompleted}
               onCreated={() => {
                 void queryClient.invalidateQueries({ queryKey: ["trade-conditions"] });
               }}

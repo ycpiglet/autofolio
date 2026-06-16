@@ -23,6 +23,7 @@ from app.api.schemas import (
     KillSwitchResponse,
     RunOnceResponse,
 )
+from app.services.investor_profile import investor_profile_completed, username_from_session
 
 router = APIRouter(prefix="/engine", tags=["engine"])
 
@@ -68,10 +69,19 @@ def kill_switch(
 @router.post("/auto-trading", response_model=AutoTradingResponse)
 def auto_trading(
     body: AutoTradingRequest,
-    _session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+    session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
 ) -> AutoTradingResponse:
     """Set auto_trading_enabled flag in DB (DB-backed, reflected to engine + Streamlit)."""
     from app.ui import backend
+
+    if body.enabled and not investor_profile_completed(username_from_session(session)):
+        raise HTTPException(
+            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
+            detail={
+                "status": "profile_required",
+                "message": "투자 프로필 설문 완료 후 자동매매를 켤 수 있습니다.",
+            },
+        )
 
     backend.set_flag("auto_trading_enabled", body.enabled)
     return AutoTradingResponse(auto_trading_enabled=backend.get_flag("auto_trading_enabled"))
@@ -79,7 +89,7 @@ def auto_trading(
 
 @router.post("/run-once", response_model=RunOnceResponse)
 def run_once(
-    _session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+    session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
 ) -> RunOnceResponse:
     """Run the trading engine once (single-flight — 409 if already running).
 
@@ -87,6 +97,15 @@ def run_once(
     Does NOT change KIS_ENV or broker configuration.
     """
     from app.ui import backend
+
+    if not investor_profile_completed(username_from_session(session)):
+        raise HTTPException(
+            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
+            detail={
+                "status": "profile_required",
+                "message": "투자 프로필 설문 완료 후 엔진을 실행할 수 있습니다.",
+            },
+        )
 
     acquired = _run_once_lock.acquire(blocking=False)
     if not acquired:
