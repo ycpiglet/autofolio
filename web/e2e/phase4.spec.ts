@@ -49,6 +49,37 @@ const IC_DECISIONS = [
   },
 ];
 
+// Whitelist symbol map for the briefing symbol picker
+const SYMBOLS_MAP = {
+  "005930": "삼성전자",
+  "069500": "KODEX 200",
+};
+
+// Per-symbol research briefing (READ-ONLY)
+const RESEARCH_RESPONSE = {
+  symbol: "005930",
+  name: "삼성전자",
+  price: 75000,
+  fundamental: { per: 12.5, pbr: 1.3 },
+  disclosures: {
+    columns: ["date", "title", "category"],
+    rows: [
+      { date: "20260612", title: "사업보고서 제출", category: "정기공시" },
+    ],
+  },
+  disclosure_gate: { symbol: "005930", blocked: false, reason: "" },
+  proposal: {
+    symbol: "005930",
+    side: "BUY",
+    target_price: 74250,
+    quantity: 1,
+    order_type: "LIMIT",
+    allow_market_fallback: false,
+    rationale: "현재가보다 1% 낮은 보수적 매수 대기 조건 예시. 재무 지표: PER 12.5, PBR 1.3.",
+    risk_note: "가격이 목표가에 도달해도 추가 하락 가능성이 있음.",
+  },
+};
+
 // ── SSE mock bodies ────────────────────────────────────────────────────────
 
 // IC stream: one step event + one done event
@@ -109,6 +140,24 @@ async function mockBackground(page: Page) {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify(AGENTS_LIST),
+    }),
+  );
+
+  // market/symbols (whitelist code → name map) for the briefing picker
+  await page.route(/\/api\/market\/symbols/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(SYMBOLS_MAP),
+    }),
+  );
+
+  // agents/research (GET) — per-symbol READ-ONLY briefing
+  await page.route(/\/api\/agents\/research/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(RESEARCH_RESPONSE),
     }),
   );
 
@@ -182,17 +231,101 @@ async function loginAsOwner(page: Page) {
 
 // ── Tests ─────────────────────────────────────────────────────────────────
 
-test.describe("Phase 4 — /agents page", () => {
-  test("shows agent team list from /api/agents/list", async ({ page }) => {
+test.describe("Phase 4 — /agents page (종목 전문가 브리핑)", () => {
+  test("honest gap banners + briefing section render", async ({ page }) => {
     await mockBackground(page);
     await loginAsOwner(page);
 
     await page.goto("/agents");
 
-    // Team should appear
-    await expect(page.getByTestId("agent-team")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId("agent-team").getByText("macro-strategist")).toBeVisible();
-    await expect(page.getByTestId("agent-team").getByText("kr-equity-specialist")).toBeVisible();
+    // Primary section heading (CardTitle renders a div, not a heading role)
+    await expect(
+      page.getByText("종목 전문가 브리핑", { exact: true }),
+    ).toBeVisible({ timeout: 10_000 });
+
+    // Honest gap banner with the no-news + manual-trigger notes
+    const banner = page.getByTestId("honest-gap-banner");
+    await expect(banner).toBeVisible();
+    await expect(banner).toContainText("실시간 뉴스 연동은 미구현");
+    await expect(banner).toContainText("자동 트리거는 미가동");
+  });
+
+  test("리서치 실행 → briefing card with price, fundamental, disclosure, proposal", async ({ page }) => {
+    await mockBackground(page);
+    await loginAsOwner(page);
+
+    await page.goto("/agents");
+
+    await expect(page.getByTestId("run-research-btn")).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId("run-research-btn").click();
+
+    // Briefing card appears
+    await expect(page.getByTestId("briefing-card")).toBeVisible({ timeout: 10_000 });
+
+    // Current price
+    await expect(page.getByTestId("briefing-price")).toContainText("75,000");
+
+    // Fundamental metrics
+    await expect(page.getByTestId("fundamental-grid")).toContainText("PER");
+
+    // Disclosure (news-NOT, disclosure-based) + gate clear badge
+    await expect(page.getByTestId("disclosures-list")).toContainText("사업보고서 제출");
+    await expect(page.getByTestId("disclosure-gate-clear")).toBeVisible();
+
+    // Proposal direction / target
+    await expect(page.getByTestId("proposal-side")).toContainText("매수");
+    await expect(page.getByTestId("proposal-target")).toContainText("74,250");
+  });
+
+  test("\"이 제안으로 조건 만들기\" navigates to /trade with prefill (does not submit)", async ({ page }) => {
+    await mockBackground(page);
+    await loginAsOwner(page);
+
+    await page.goto("/agents");
+    await page.getByTestId("run-research-btn").click();
+    await expect(page.getByTestId("briefing-card")).toBeVisible({ timeout: 10_000 });
+
+    // Track POST /api/trade/conditions to PROVE no order/condition is created.
+    let conditionPosted = false;
+    await page.route(/\/api\/trade\/conditions/, (route) => {
+      if (route.request().method() === "POST") {
+        conditionPosted = true;
+      }
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(EMPTY_TABLE),
+      });
+    });
+
+    await page.getByTestId("make-condition-btn").click();
+
+    // Navigates to /trade with the proposal in the querystring (prefill, not submit)
+    await expect(page).toHaveURL(/\/trade\?.*symbol=005930/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/side=BUY/);
+    await expect(page).toHaveURL(/price=74250/);
+
+    // The OrderForm fields are PREFILLED — but nothing was submitted
+    await expect(page.getByLabel("종목 코드")).toHaveValue("005930");
+    await expect(page.getByLabel("목표가 (원)")).toHaveValue("74250");
+    expect(conditionPosted).toBe(false);
+  });
+
+  test("owner sees AI 인사이트 button; clicking returns an AgentMessage", async ({ page }) => {
+    await mockBackground(page);
+    await loginAsOwner(page);
+
+    await page.goto("/agents");
+    await page.getByTestId("run-research-btn").click();
+    await expect(page.getByTestId("briefing-card")).toBeVisible({ timeout: 10_000 });
+
+    const insight = page.getByTestId("ai-insight");
+    await expect(insight).toBeVisible();
+    await insight.getByRole("button", { name: "AI 인사이트 요청" }).click();
+
+    await expect(
+      page.getByText("삼성전자는 현재 매력적인 밸류에이션에 있습니다."),
+    ).toBeVisible({ timeout: 10_000 });
   });
 
   test("Ask panel: submit question → AgentMessage answer appears", async ({ page }) => {
@@ -201,14 +334,10 @@ test.describe("Phase 4 — /agents page", () => {
 
     await page.goto("/agents");
 
-    // Wait for agent panel to load
-    await expect(page.getByTestId("agent-team")).toBeVisible({ timeout: 10_000 });
-
-    // Fill question
-    await page.getByLabel("질문").fill("삼성전자 전망은?");
+    await expect(page.getByLabel("질문", { exact: true })).toBeVisible({ timeout: 10_000 });
+    await page.getByLabel("질문", { exact: true }).fill("삼성전자 전망은?");
     await page.getByRole("button", { name: "질문하기" }).click();
 
-    // Answer should appear
     await expect(
       page.getByText("삼성전자는 현재 매력적인 밸류에이션에 있습니다."),
     ).toBeVisible({ timeout: 10_000 });
@@ -220,21 +349,12 @@ test.describe("Phase 4 — /agents page", () => {
 
     await page.goto("/agents");
 
-    await expect(page.getByTestId("agent-team")).toBeVisible({ timeout: 10_000 });
-
-    // Fill topic and run
+    await expect(page.getByLabel("IC 토픽")).toBeVisible({ timeout: 10_000 });
     await page.getByLabel("IC 토픽").fill("삼성전자 매수 여부");
-    await page.getByRole("button", { name: "실행" }).click();
+    await page.getByRole("button", { name: "실행", exact: true }).click();
 
-    // IC transcript must appear — proves EventSource was opened and component mounted
     await expect(page.getByTestId("ic-transcript")).toBeVisible({ timeout: 10_000 });
-
-    // The transcript shows some state (connecting, streaming, done, or disconnected) —
-    // Playwright's static SSE mock closes the connection immediately so named events
-    // may not fire before onerror; the UI must be non-crashed regardless.
-    // Assert that the "실행" button is now disabled (job is in flight), confirming
-    // the run POST was accepted and IC state is active.
-    await expect(page.getByRole("button", { name: "실행" })).toBeDisabled({ timeout: 5_000 });
+    await expect(page.getByRole("button", { name: "실행", exact: true })).toBeDisabled({ timeout: 5_000 });
   });
 
   test("past decisions list appears", async ({ page }) => {
@@ -248,24 +368,26 @@ test.describe("Phase 4 — /agents page", () => {
     await expect(page.getByText("소량 매수 권장")).toBeVisible();
   });
 
-  test("unavailable agents → EmptyState shown", async ({ page }) => {
+  test("research API error shows visible error (no silent fallback)", async ({ page }) => {
     await mockBackground(page);
 
-    // Override agents/list AFTER mockBackground so this takes LIFO priority
-    await page.route(/\/api\/agents\/list/, (route) =>
+    // Override research with error AFTER mockBackground (LIFO priority)
+    await page.route(/\/api\/agents\/research/, (route) =>
       route.fulfill({
-        status: 200,
+        status: 500,
         contentType: "application/json",
-        body: JSON.stringify({ available: false, message: "에이전트 오프라인", agents: [] }),
+        body: JSON.stringify({ detail: "price feed down" }),
       }),
     );
 
     await loginAsOwner(page);
-
     await page.goto("/agents");
 
-    await expect(page.getByText("에이전트 사용 불가")).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByText("에이전트 오프라인")).toBeVisible();
+    await page.getByTestId("run-research-btn").click();
+
+    await expect(
+      page.getByRole("alert").filter({ hasText: /리서치 오류/ }),
+    ).toBeVisible({ timeout: 10_000 });
   });
 });
 
