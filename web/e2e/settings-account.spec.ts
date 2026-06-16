@@ -102,15 +102,16 @@ async function openAccountTab(page: Page) {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 test.describe("Settings — Account tab (owner)", () => {
-  test("shows account info and an honest SSO note", async ({ page }) => {
+  test("shows account info and SSO provider status", async ({ page }) => {
     await mockBackground(page, OWNER_SESSION, OWNER_ACCOUNT);
     await openAccountTab(page);
 
     await expect(page.getByText("계정 정보")).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText("alice")).toBeVisible();
     await expect(page.getByText("오너")).toBeVisible();
+    await expect(page.getByText("SSO/SNS 로그인")).toBeVisible();
     await expect(
-      page.getByText(/SSO·SNS 연동은 추후 지원 예정/),
+      page.getByText(/활성 provider가 없습니다/),
     ).toBeVisible();
   });
 

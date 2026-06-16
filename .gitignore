@@ -6,6 +6,8 @@
 *.sqlite3
 .agent_runtime/
 .autofolio/
+.codex/hook-logs/
+.coverage
 .env
 .env.*
 .pytest_cache/

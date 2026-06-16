@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-15T18:29:27+09:00`
+> 생성 시각: `2026-06-16T21:19:17+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -33,6 +33,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
+| [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 
 ## #alerts
 
@@ -86,6 +87,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | 완료 | High | 상 | 16 ph / ~120000 tok | Backend Engineer | ui-overhaul,fastapi,next-js,authentication,login,phase1 |
+| [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 
 ## #backend
 
@@ -415,6 +417,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-007](TASK-007-roles-due-alignment.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | roles,governance |
+| [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
 
 ## #halt
 
@@ -447,6 +450,18 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
+
+## #hooks
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
+
+## #host-mode
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
 
 ## #ic
 
@@ -521,6 +536,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
+
+## #lint
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 
 ## #localtime
 
@@ -657,6 +678,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
 
+## #owner-gate
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
+
 ## #owner-manual
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -763,6 +790,12 @@
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
+
+## #premarket
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 
 ## #price
 
@@ -984,6 +1017,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
 
+## #sns-login
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
+
 ## #soak
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -1001,6 +1040,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
+
+## #sso
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 
 ## #stale-data
 
@@ -1098,6 +1143,7 @@
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 완료 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 
 ## #ui-sync
 

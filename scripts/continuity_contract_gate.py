@@ -13,6 +13,8 @@ ROOT_DOCS = (
 )
 
 PROTOCOL_DOCS = (
+    "AGENTS.md",
+    "CLAUDE.md",
     "src/agent_runtime/templates/project/AGENTS.md",
     "src/agent_runtime/templates/project/CLAUDE.md",
 )
@@ -137,6 +139,8 @@ def _check_protocol_docs(root: Path, findings: list[ContinuityFinding]) -> None:
     for rel in PROTOCOL_DOCS:
         text = _read(root / rel)
         if not text:
+            if rel.startswith("src/agent_runtime/"):
+                continue
             findings.append(ContinuityFinding(rel, "continuity:protocol-doc-missing", "protocol doc is required"))
             continue
         docs.append((rel, text))

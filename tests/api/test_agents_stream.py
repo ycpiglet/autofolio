@@ -74,18 +74,38 @@ def anon_client(app):
 class TestAgentsList:
     def test_returns_200_for_guest(self, guest_client):
         with patch("app.services.agents.available", return_value=(False, "no key")), \
-             patch("app.services.agents.list_agents", return_value=["macro-strategist", "cio"]):
+             patch("app.services.agents.list_agent_infos", return_value=[
+                 {"name": "macro-strategist", "role": "매크로 전략", "category": "투자 리더십", "expert": True},
+                 {"name": "cio", "role": "CIO", "category": "투자 리더십", "expert": True},
+             ]):
             resp = guest_client.get("/api/agents/list")
         assert resp.status_code == 200
 
     def test_response_shape(self, guest_client):
         with patch("app.services.agents.available", return_value=(False, "demo")), \
-             patch("app.services.agents.list_agents", return_value=["cio", "risk-manager"]):
+             patch("app.services.agents.list_agent_infos", return_value=[
+                 {"name": "cio", "role": "CIO", "category": "투자 리더십", "expert": True},
+                 {"name": "risk-manager", "role": "리스크 매니저", "category": "투자 리더십", "expert": True},
+             ]):
             body = guest_client.get("/api/agents/list").json()
         assert body["available"] is False
         assert body["message"] == "demo"
-        assert "cio" in body["agents"]
-        assert "risk-manager" in body["agents"]
+        assert body["agents"][0]["name"] == "cio"
+        assert body["agents"][0]["expert"] is True
+        assert body["agents"][1]["name"] == "risk-manager"
+
+    def test_experts_only_forwarded(self, guest_client):
+        captured: dict[str, bool] = {}
+
+        def fake_infos(*, experts_only: bool = False) -> list[dict]:
+            captured["experts_only"] = experts_only
+            return []
+
+        with patch("app.services.agents.available", return_value=(False, "demo")), \
+             patch("app.services.agents.list_agent_infos", side_effect=fake_infos):
+            resp = guest_client.get("/api/agents/list?experts_only=true")
+        assert resp.status_code == 200
+        assert captured["experts_only"] is True
 
     def test_401_without_session(self, anon_client):
         resp = anon_client.get("/api/agents/list")

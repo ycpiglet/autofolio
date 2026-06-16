@@ -10,10 +10,20 @@ from __future__ import annotations
 import secrets
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Cookie, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, HTTPException, Query, Response, status
+from fastapi.responses import RedirectResponse
 
-from app.api.schemas import LoginRequest, SessionResponse
-from app.api.security import COOKIE_KWARGS, COOKIE_NAME, decode_session, encode_session
+from app.api.schemas import LoginRequest, SessionResponse, SsoProvidersResponse
+from app.api.security import (
+    COOKIE_KWARGS,
+    COOKIE_NAME,
+    OAUTH_STATE_COOKIE,
+    decode_oauth_state,
+    decode_session,
+    encode_oauth_state,
+    encode_session,
+)
+from app.services import sso
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -105,6 +115,100 @@ def me(
     )
 
 
+@router.get("/sso/providers", response_model=SsoProvidersResponse)
+def sso_providers() -> SsoProvidersResponse:
+    """Return public SSO/SNS provider availability.
+
+    The response intentionally excludes client secrets, OAuth tokens, and
+    provider endpoint URLs.
+    """
+    return SsoProvidersResponse(providers=sso.public_provider_list())
+
+
+@router.get("/sso/{provider_id}/login")
+def sso_login(
+    provider_id: str,
+    next_path: Annotated[str, Query(alias="next")] = "/home",
+) -> RedirectResponse:
+    """Start provider OAuth login with a short-lived signed state cookie."""
+    provider = sso.get_provider(provider_id)
+    if provider is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown SSO provider")
+    if not provider.enabled:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="SSO provider is not configured")
+
+    safe_next = next_path if next_path.startswith("/") else "/home"
+    state = secrets.token_urlsafe(32)
+    response = RedirectResponse(
+        sso.build_authorization_url(provider, state, next_path=safe_next),
+        status_code=status.HTTP_307_TEMPORARY_REDIRECT,
+    )
+    response.set_cookie(
+        key=OAUTH_STATE_COOKIE,
+        value=encode_oauth_state({"provider": provider.id, "state": state, "next": safe_next}),
+        max_age=600,
+        **COOKIE_KWARGS,
+    )
+    return response
+
+
+@router.get("/sso/{provider_id}/callback")
+async def sso_callback(
+    provider_id: str,
+    code: str,
+    state: str,
+    af_oauth_state: Annotated[str | None, Cookie(alias=OAUTH_STATE_COOKIE)] = None,
+) -> RedirectResponse:
+    """Complete OAuth login, issue Autofolio owner session, then return to /home."""
+    provider = sso.get_provider(provider_id)
+    if provider is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown SSO provider")
+    if not provider.enabled:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="SSO provider is not configured")
+    if af_oauth_state is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing OAuth state cookie")
+
+    state_payload = decode_oauth_state(af_oauth_state)
+    if (
+        state_payload is None
+        or state_payload.get("provider") != provider.id
+        or state_payload.get("state") != state
+    ):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid OAuth state")
+
+    try:
+        profile = await sso.exchange_code_for_profile(provider, code)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"OAuth exchange failed: {exc}") from exc
+
+    if not profile.subject:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="OAuth profile has no subject")
+    if not sso.email_allowed(profile.email):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="SSO email is not allowed")
+
+    csrf = secrets.token_hex(32)
+    redirect_to = _frontend_redirect_url(str(state_payload.get("next") or "/home"))
+    response = RedirectResponse(redirect_to, status_code=status.HTTP_303_SEE_OTHER)
+    _set_cookie(
+        response,
+        {
+            "role": "owner",
+            "username": profile.username,
+            "data_source": f"sso:{provider.id}",
+            "csrf_token": csrf,
+            "provider": provider.id,
+        },
+    )
+    response.delete_cookie(
+        OAUTH_STATE_COOKIE,
+        path=COOKIE_KWARGS.get("path", "/"),
+        samesite=COOKIE_KWARGS.get("samesite", "lax"),
+        httponly=COOKIE_KWARGS.get("httponly", True),
+        secure=COOKIE_KWARGS.get("secure", False),
+    )
+    return response
+
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 def _set_cookie(response: Response, session_data: dict[str, Any]) -> None:
@@ -113,3 +217,8 @@ def _set_cookie(response: Response, session_data: dict[str, Any]) -> None:
         value=encode_session(session_data),
         **COOKIE_KWARGS,
     )
+
+
+def _frontend_redirect_url(next_path: str) -> str:
+    safe_next = next_path if next_path.startswith("/") else "/home"
+    return f"{sso.public_base_url().rstrip('/')}{safe_next}"

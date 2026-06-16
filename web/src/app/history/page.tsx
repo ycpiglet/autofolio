@@ -71,8 +71,8 @@ function PaginatedTable({
   const [sideFilter, setSideFilter] = useState<string>("all");
 
   const koData = useMemo(() => applyKoHeaders(data), [data]);
-  const columns = koData?.columns ?? [];
-  const allRows = koData?.rows ?? [];
+  const columns = useMemo(() => koData?.columns ?? [], [koData]);
+  const allRows = useMemo(() => koData?.rows ?? [], [koData]);
 
   // Detect if we have a "구분" (side) column for filtering
   const hasSide = columns.includes("구분");

@@ -13,10 +13,12 @@ import { ConfirmModal } from "@/components/safety/ConfirmModal";
 import {
   putRiskLimits,
   getAccount,
+  getSsoProviders,
   postPasswordChange,
   postLogout,
   ApiError,
   type AccountResponse,
+  type SsoProviderInfo,
 } from "@/lib/api";
 import { clearCsrfCache } from "@/lib/csrf";
 import { cn } from "@/lib/utils";
@@ -327,9 +329,40 @@ function KisKeysSection() {
 }
 
 function SsoNote() {
+  const [providers, setProviders] = useState<SsoProviderInfo[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getSsoProviders()
+      .then((data) => {
+        if (!cancelled) setProviders(Array.isArray(data.providers) ? data.providers : []);
+      })
+      .catch(() => {
+        if (!cancelled) setProviders([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const enabled = providers.filter((p) => p.enabled);
+
   return (
-    <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-      Google · Kakao · Naver SSO·SNS 연동은 추후 지원 예정입니다.
+    <div className="rounded-lg border border-dashed border-border p-4 text-sm">
+      <div className="font-medium text-foreground">SSO/SNS 로그인</div>
+      {enabled.length > 0 ? (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {enabled.map((provider) => (
+            <Badge key={provider.id} variant="secondary">
+              {provider.label}
+            </Badge>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-1 text-muted-foreground">
+          활성 provider가 없습니다. 서버 환경변수 설정 후 로그인 화면에 표시됩니다.
+        </p>
+      )}
     </div>
   );
 }

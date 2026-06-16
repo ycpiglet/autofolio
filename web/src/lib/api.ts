@@ -210,6 +210,24 @@ export interface AccountResponse {
   is_owner: boolean;
 }
 
+// ── SSO / SNS login ────────────────────────────────────────────────────────
+
+export interface SsoProviderInfo {
+  id: string;
+  label: string;
+  kind: "oidc" | "sns" | string;
+  enabled: boolean;
+}
+
+export interface SsoProvidersResponse {
+  providers: SsoProviderInfo[];
+}
+
+/** GET /api/auth/sso/providers — public provider availability, no secrets */
+export function getSsoProviders(): Promise<SsoProvidersResponse> {
+  return apiGet<SsoProvidersResponse>("/api/auth/sso/providers");
+}
+
 /** GET /api/account — current account profile (no secrets) */
 export function getAccount(): Promise<AccountResponse> {
   return apiGet<AccountResponse>("/api/account");
@@ -241,7 +259,9 @@ export function postLogout(): Promise<{ status: string }> {
 export interface AgentInfo {
   name: string;
   role?: string;
+  category?: string;
   description?: string;
+  expert?: boolean;
 }
 
 export interface AgentsListResponse {
@@ -332,6 +352,16 @@ export interface AgentResearchResponse {
   proposal: ResearchProposal;
 }
 
+export interface PremarketSummaryResponse {
+  date: string;
+  created_at: string;
+  file: string;
+  market_open_reference: string;
+  content: string;
+  highlights: string[];
+  agents: AgentInfo[];
+}
+
 /** GET /api/agents/research?symbol=&days= — READ-ONLY per-symbol briefing */
 export function apiAgentResearch(
   symbol: string,
@@ -339,6 +369,12 @@ export function apiAgentResearch(
 ): Promise<AgentResearchResponse> {
   const q = new URLSearchParams({ symbol, days: String(days) });
   return apiGet<AgentResearchResponse>(`/api/agents/research?${q}`);
+}
+
+/** GET /api/agents/premarket/summary — latest or date-specific saved markdown */
+export function apiPremarketSummary(date?: string): Promise<PremarketSummaryResponse> {
+  const suffix = date ? `?${new URLSearchParams({ date })}` : "";
+  return apiGet<PremarketSummaryResponse>(`/api/agents/premarket/summary${suffix}`);
 }
 
 // ── Analysis domain types ─────────────────────────────────────────────────
