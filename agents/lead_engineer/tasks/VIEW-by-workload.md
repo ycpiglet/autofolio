@@ -1,7 +1,7 @@
 # VIEW — TASK by Workload (cost & concentration)
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-16T22:41:07+09:00`
+> 생성 시각: `2026-06-16T23:40:26+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -18,7 +18,7 @@
 | Backend Engineer | 17 | 117.0 ph | ~892K | 82.0 ph |
 | KIS API Engineer | 16 | 64.0 ph | ~830K | 13.0 ph |
 | UI/UX Designer | 8 | 44.0 ph | ~342K | 14.0 ph |
-| Lead Engineer | 14 | 22.0 ph | ~214K | 8.0 ph |
+| Lead Engineer | 15 | 22.5 ph | ~220K | 8.0 ph |
 | QA | 5 | 18.0 ph | ~190K | 18.0 ph |
 | Performance Analyst | 3 | 12.0 ph | ~110K | 0.0 ph |
 | Quant Researcher | 2 | 10.0 ph | ~100K | 0.0 ph |
@@ -35,11 +35,11 @@
 | Backend Engineer | 25 | 75.3 ph | ~579K |
 | KIS API Engineer | 23 | 63.3 ph | ~850K |
 | UI/UX Designer | 16 | 38.2 ph | ~314K |
-| Lead Engineer | 19 | 16.8 ph | ~172K |
+| Lead Engineer | 20 | 17.1 ph | ~175K |
 | Compliance Officer | 4 | 13.0 ph | ~103K |
 | Performance Analyst | 3 | 4.5 ph | ~40K |
 | Quant Researcher | 2 | 3.3 ph | ~33K |
-| Doc Steward | 4 | 2.8 ph | ~26K |
+| Doc Steward | 5 | 3.1 ph | ~30K |
 | Research Agent | 5 | 2.8 ph | ~46K |
 | Data Engineer | 1 | 2.5 ph | ~22K |
 | Backtest Engineer | 1 | 2.0 ph | ~18K |

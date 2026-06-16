@@ -1,18 +1,12 @@
 # VIEW — TASK by Status
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-16T22:41:07+09:00`
+> 생성 시각: `2026-06-16T23:40:26+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
 
 ---
-
-## 대기
-
-| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
-|----|------|----------|--------|-----------|-------|------|
-| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual |
 
 ## 보류
 
@@ -28,6 +22,7 @@
 | [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 | [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 보류 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual,deferred,scheduled |
 
 ## 완료
 
@@ -93,4 +88,5 @@
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | authentication,sso,mock,dev-mode,ui-overhaul |
+| [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Medium | 낮 | 0.5 ph / ~6000 tok | Lead Engineer | backlog,governance,deferred,scheduling |
 
