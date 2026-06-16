@@ -27,6 +27,12 @@ const GOOGLE_SSO_PROVIDERS = {
     { id: "kakao", label: "Kakao", kind: "sns", enabled: false },
   ],
 };
+const MOCK_SSO_PROVIDERS = {
+  providers: [
+    { id: "mock", label: "Mock SSO", kind: "mock", enabled: true },
+    { id: "google", label: "Google", kind: "oidc", enabled: false },
+  ],
+};
 
 /**
  * Mock GET-only background APIs that the post-login pages call.
@@ -182,5 +188,14 @@ test.describe("Login flow", () => {
     const google = page.getByRole("button", { name: "Google로 계속하기" });
     await expect(google).toBeVisible();
     await expect(page.getByRole("button", { name: "Kakao로 계속하기" })).toHaveCount(0);
+  });
+
+  test("enabled mock SSO provider appears as a login button", async ({ page }) => {
+    await mockSsoProviders(page, MOCK_SSO_PROVIDERS);
+
+    await page.goto("/login");
+
+    await expect(page.getByRole("button", { name: "Mock SSO로 계속하기" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Google로 계속하기" })).toHaveCount(0);
   });
 });

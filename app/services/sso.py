@@ -54,6 +54,18 @@ def _env(*names: str) -> str:
     return ""
 
 
+def _truthy_env(name: str) -> bool:
+    return (os.getenv(name) or "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def mock_sso_enabled() -> bool:
+    return _truthy_env("AUTOFOLIO_SSO_MOCK_ENABLED")
+
+
+def _mock_authorization_code() -> str:
+    return _env("AUTOFOLIO_SSO_MOCK_CODE") or "mock"
+
+
 def public_base_url() -> str:
     return _env("AUTOFOLIO_PUBLIC_BASE_URL", "NEXT_PUBLIC_BASE_URL") or "http://127.0.0.1:3000"
 
@@ -68,6 +80,18 @@ def frontend_login_url() -> str:
 
 def providers() -> dict[str, SsoProvider]:
     return {
+        "mock": SsoProvider(
+            id="mock",
+            label="Mock SSO",
+            kind="mock",
+            auth_url=redirect_uri("mock"),
+            token_url="",
+            userinfo_url="",
+            scope="",
+            client_id=(_env("AUTOFOLIO_SSO_MOCK_CLIENT_ID") or "mock-client") if mock_sso_enabled() else "",
+            client_secret="",
+            requires_secret=False,
+        ),
         "google": SsoProvider(
             id="google",
             label="Google",
@@ -126,6 +150,15 @@ def redirect_uri(provider_id: str) -> str:
 
 
 def build_authorization_url(provider: SsoProvider, state: str, *, next_path: str = "/home") -> str:
+    if provider.id == "mock":
+        query = {
+            "code": _mock_authorization_code(),
+            "state": state,
+        }
+        if next_path and next_path != "/home":
+            query["next"] = next_path
+        return f"{redirect_uri(provider.id)}?{urlencode(query)}"
+
     query: dict[str, str] = {
         "response_type": "code",
         "client_id": provider.client_id,
@@ -155,6 +188,9 @@ def email_allowed(email: str | None) -> bool:
 
 
 async def exchange_code_for_profile(provider: SsoProvider, code: str) -> SsoProfile:
+    if provider.id == "mock":
+        return mock_profile(code)
+
     data = {
         "grant_type": "authorization_code",
         "code": code,
@@ -185,6 +221,19 @@ async def exchange_code_for_profile(provider: SsoProvider, code: str) -> SsoProf
         )
         user_resp.raise_for_status()
         return normalize_profile(provider.id, user_resp.json())
+
+
+def mock_profile(code: str) -> SsoProfile:
+    if not mock_sso_enabled():
+        raise ValueError("Mock SSO is not enabled")
+    if code != _mock_authorization_code():
+        raise ValueError("Mock SSO code is invalid")
+    return SsoProfile(
+        provider="mock",
+        subject=_env("AUTOFOLIO_SSO_MOCK_SUBJECT") or "mock-owner",
+        email=_env("AUTOFOLIO_SSO_MOCK_EMAIL") or "mock-owner@autofolio.local",
+        name=_env("AUTOFOLIO_SSO_MOCK_NAME") or "Mock Owner",
+    )
 
 
 def normalize_profile(provider_id: str, payload: dict[str, Any]) -> SsoProfile:

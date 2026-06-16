@@ -1,8 +1,8 @@
 # External App/API Owner Setup Manual
 
 상태: 운영 매뉴얼
-최종 검토: 2026-06-13
-관련 기록: TASK-044, TASK-043, EXTERNAL-APP-API-DECISION-RECORD
+최종 검토: 2026-06-16
+관련 기록: TASK-044, TASK-043, TASK-072, EXTERNAL-APP-API-DECISION-RECORD
 
 이 문서는 Autofolio를 Telegram, Kakao, Google, X, Naver, Discord, Notion,
 Slack 같은 외부 앱/API와 연결하려면 Owner가 무엇을 직접 준비해야 하는지 정리한다.
@@ -66,6 +66,35 @@ Agent가 받을 수 있는 것은 "실제 secret 값" 자체보다 다음 형태
 | safe smoke test 실행 | secret 입력 후 같이 가능 | 수행 가능 |
 | 알림/리포트 어댑터 구현 | 승인 후 가능 | 수행 가능 |
 | 주문/취소/prod/risk 원격 명령 | R3 승인 필요 | 기본 구현 금지 |
+
+## 2.5 Development Mock SSO
+
+실제 Google/Kakao/Naver 개발자 콘솔과 secret을 준비하기 전에는 로컬 개발용
+mock SSO로 로그인 UI, state cookie, callback, owner session 발급 흐름을 검증할 수 있다.
+이 경로는 외부 API를 호출하지 않으며, 기본값은 OFF다.
+
+로컬 `.env`에 Owner 또는 개발자가 넣을 수 있는 값:
+
+```text
+AUTOFOLIO_SSO_MOCK_ENABLED=1
+AUTOFOLIO_SSO_MOCK_EMAIL=owner@example.com
+AUTOFOLIO_SSO_MOCK_NAME=Owner
+AUTOFOLIO_SSO_ALLOWED_EMAILS=owner@example.com
+```
+
+동작:
+
+- `AUTOFOLIO_SSO_MOCK_ENABLED=1`일 때 `/api/auth/sso/providers`에 `Mock SSO`가 enabled로 표시된다.
+- 로그인 화면은 enabled provider를 자동으로 버튼으로 표시한다.
+- `/api/auth/sso/mock/login`은 외부 provider 대신 내부 callback으로 redirect한다.
+- callback은 signed state cookie를 검증한 뒤 mock profile로 owner session을 발급한다.
+- `AUTOFOLIO_SSO_ALLOWED_EMAILS`가 설정되어 있으면 mock email도 allowlist에 포함되어야 한다.
+
+주의사항:
+
+- production/login 운영 수단이 아니라 local/dev 검증 수단이다.
+- secret, token, provider console 설정을 대체하지 않는다.
+- 실제 Google/Kakao/Naver OAuth app, redirect URI, consent, live callback은 Owner-managed 외부 설정 후 별도로 검증한다.
 
 ## 3. 우선순위별 준비 가이드
 
