@@ -71,7 +71,8 @@
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 완료 | QA | feat: 테스트 커버리지 60%+ — 안전-임계 실패모드 테스트 55개 추가 |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | UI/UX Designer | fix: 분석 탭 _intraday_section try/except 누락 크래시 → v1 |
 | [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 완료 | Performance Analyst | agent_runtime 평가 파일럿 — baseline vs wave 측정 → v1 |
-| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Lead Engineer | 제품 성숙도 반기 재평가 (2026-12-14) → v1 |
+| [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 보류 | Lead Engineer | 제품 성숙도 반기 재평가 (2026-12-14) → v1 |
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | Lead Engineer | SSO/SNS + 프리마켓 에이전트 요약 + lint gate |
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | Lead Engineer | Stop hook owner governance host-mode repair |
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Lead Engineer | Dev mock SSO provider |
+| [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Lead Engineer | Defer future maturity reassessment from ACT lane |

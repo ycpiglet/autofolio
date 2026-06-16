@@ -498,3 +498,17 @@
 검증: `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_auth_sso.py -q` -> 14 passed; py_compile auth/sso -> OK; `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_auth.py tests/api/test_auth_sso.py -q` -> 25 passed; `npm run lint` -> pass; `npm run build` -> successful; `npx playwright test web/e2e/login.spec.ts` -> 5 passed; validate_task_schema/build_task_index/generate_views/check_agent_docs/owner_governance_gate -> OK; `git diff --check` -> OK
 관련 기록: TASK-072, docs/EXTERNAL_APP_API_OWNER_MANUAL.md §2.5
 남은 리스크: Mock SSO는 local/dev 검증 수단이며 production SSO 대체물이 아니다. 실제 Google/Kakao/Naver live OAuth callback은 Owner-managed provider console/secret 설정 후 별도 검증 필요.
+
+### AUDIT-2026-06-16-004
+시각: 2026-06-16T23:38:49+09:00
+기록 시각: 2026-06-16T23:38:49+09:00
+요청자: Owner ("가능한 작업 진행")
+수행자: Lead Engineer + Doc Steward (Codex)
+의도: live backlog에서 즉시 자율 진행 가능한 작업을 고르되, 미래 due 작업이 ACT로 잘못 표시되어 조기 착수되는 것을 방지
+대상: TASK-069, TASK-073, generated BACKLOG/VIEW/task index, NEXT-SESSION-POINTER
+작업: TASK-069의 실제 trigger가 2026-12-14 반기 재평가임을 확인하고 `status: 보류`, `deferred/scheduled` 태그, 조기 착수 금지 gate를 추가. TASK-073 완료 기록을 생성하고 STATUS/AUDIT/포인터 및 generated views를 갱신.
+방법: backlog_sweep + TASK 본문 확인 + frontmatter correction + generated views/index regeneration + governance gates
+결과: TASK-073 완료. 현재 즉시 자율 착수 가능한 ACT는 없고, 열린 작업은 미래 scheduled TASK-069 또는 기존 R3/Owner/외부 조건 대기 작업만 남음. 제품 코드, 주문, 리스크, DB, CI 변경 없음.
+검증: `python scripts/backlog_sweep.py` -> open tasks all 보류, ACT 0; `python scripts/build_task_index.py` -> OK, 72 tasks; `python scripts/generate_views.py` -> OK, 6 views regenerated; `python scripts/validate_task_schema.py` -> OK; `python scripts/build_task_index.py --check` -> OK; `python scripts/generate_views.py --check` -> OK; `python scripts/check_agent_docs.py` -> OK, 0 errors / 121 warnings; `python scripts/task_identity.py check --check` -> pass; `python scripts/owner_governance_gate.py --allow-empty-owner-docs` -> pass; `git diff --check` -> OK with CRLF normalization warnings only.
+관련 기록: TASK-069, TASK-073, BACKLOG.md
+남은 리스크: TASK-069는 2026-12-14 도래 또는 Owner의 명시적인 조기 재평가 요청 전까지 보류. R3/외부 조건 작업은 기존 보류 유지.

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 71,
+  "count": 72,
   "tasks": [
     {
       "type": "task",
@@ -1859,7 +1859,7 @@
     {
       "type": "task",
       "id": "TASK-069",
-      "status": "대기",
+      "status": "보류",
       "owner": "Lead Engineer",
       "assignees": [
         "Lead Engineer",
@@ -1873,14 +1873,16 @@
         "assessment",
         "metrics",
         "reporting",
-        "semi-annual"
+        "semi-annual",
+        "deferred",
+        "scheduled"
       ],
-      "gate": "-",
+      "gate": "scheduled for 2026-12-14; do not start early unless Owner explicitly requests early reassessment",
       "trigger_meeting": "2026-12-14",
       "audit_log": "AUDIT-2026-06-14-003",
       "created": "2026-06-14",
       "created_at": "2026-06-14T14:54:50+09:00",
-      "updated_at": "2026-06-14T14:54:50+09:00",
+      "updated_at": "2026-06-16T23:38:49+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-069-product-maturity-reassessment-2026-12.md",
       "_title": "product maturity reassessment 2026 12"
     },
@@ -1991,6 +1993,39 @@
       "created": "2026-06-16",
       "_path": "agents/lead_engineer/tasks/TASK-072-dev-mock-sso-provider.md",
       "_title": "dev mock sso provider"
+    },
+    {
+      "type": "task",
+      "id": "TASK-073",
+      "display_id": "TASK-073",
+      "task_uid": "67acc779-c160-4ea4-9b7e-4964c71015dc",
+      "registered_at": "2026-06-16T23:38:49+09:00",
+      "created_at": "2026-06-16T23:38:49+09:00",
+      "started_at": "2026-06-16T23:38:49+09:00",
+      "updated_at": "2026-06-16T23:38:49+09:00",
+      "completed_at": "2026-06-16T23:38:49+09:00",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "Doc Steward"
+      ],
+      "priority": "Medium",
+      "difficulty": "낮",
+      "est_hours": "0.5",
+      "est_tokens": "6000",
+      "tags": [
+        "backlog",
+        "governance",
+        "deferred",
+        "scheduling"
+      ],
+      "gate": "no product code changes; fix generated backlog decision lane only",
+      "trigger_meeting": "Owner direct request 2026-06-16",
+      "audit_log": "AUDIT-2026-06-16-004",
+      "created": "2026-06-16",
+      "_path": "agents/lead_engineer/tasks/TASK-073-defer-future-maturity-reassessment.md",
+      "_title": "defer future maturity reassessment"
     }
   ]
 }

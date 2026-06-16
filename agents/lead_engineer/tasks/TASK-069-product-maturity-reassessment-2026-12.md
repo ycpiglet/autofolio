@@ -1,26 +1,26 @@
 ---
 type: task
 id: TASK-069
-status: 대기
+status: 보류
 owner: Lead Engineer
 assignees: [Lead Engineer, Doc Steward]
 priority: Medium
 difficulty: 중
 est_hours: 2
 est_tokens: 15000
-tags: [assessment, metrics, reporting, semi-annual]
-gate: -
+tags: [assessment, metrics, reporting, semi-annual, deferred, scheduled]
+gate: scheduled for 2026-12-14; do not start early unless Owner explicitly requests early reassessment
 trigger_meeting: 2026-12-14
 audit_log: AUDIT-2026-06-14-003
 created: 2026-06-14
 created_at: 2026-06-14T14:54:50+09:00
-updated_at: 2026-06-14T14:54:50+09:00
+updated_at: 2026-06-16T23:38:49+09:00
 ---
 
 # TASK-069: 제품 성숙도 반기 재평가 (2026-12-14)
 
 작업 ID: TASK-069
-상태: 대기
+상태: 보류
 Owner: Lead Engineer
 요청 시각: 2026-06-14T14:54:50+09:00
 기록 시각: 2026-06-14T14:54:50+09:00
@@ -37,6 +37,15 @@ Owner: Lead Engineer
 현재 미완료 개선 태스크: TASK-060, 061, 062, 065, 066.
 
 반기 재평가는 이 기준점 대비 진척을 정량화하고 Beta(7.0+) 진입 여부를 판단한다.
+
+## 2026-06-16 보류 정정
+
+Owner가 "가능한 작업 진행"을 요청했을 때 생성 보드가 이 TASK를 ACT 후보로 표시했지만,
+본문의 `trigger_meeting`과 산출물명은 2026-12-14 반기 재평가를 전제한다.
+2026-06-16 현재 미래 날짜 재평가 문서를 작성하면 기록 정확성이 깨지므로, 이 TASK는
+2026-12-14 도래 또는 Owner의 명시적인 조기 재평가 요청 전까지 `보류`/`deferred`로 둔다.
+
+정정 기록: TASK-073, AUDIT-2026-06-16-004.
 
 ## 작업 내용
 

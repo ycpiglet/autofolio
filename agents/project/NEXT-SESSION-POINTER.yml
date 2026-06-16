@@ -1,13 +1,14 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T22:48:03+09:00
+updated_at: 2026-06-16T23:38:49+09:00
 updated_by: lead-engineer
 current_state:
   signal: watch
-  score: 88
+  score: 82
   summary: >
-    No active task claim is open. TASK-072 dev-only mock SSO provider is complete
-    and merged to main through PR #88. Local main is aligned with origin/main at
-    25259b5.
+    No active task claim is open. TASK-073 corrected the live backlog so
+    future-dated TASK-069 is deferred until 2026-12-14 instead of appearing as
+    immediate ACT work. Remaining open work is scheduled or Owner/R3/external
+    gated.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -35,6 +36,7 @@ resume:
   status_text: No active task claim
   next_actions:
     - Use agents/lead_engineer/tasks/BACKLOG.md and python scripts/backlog_sweep.py for the next task decision.
+    - Do not start TASK-069 before 2026-12-14 unless Owner explicitly requests an early reassessment.
     - To try mock SSO locally, set AUTOFOLIO_SSO_MOCK_ENABLED=1 plus mock email/name env values and restart backend/frontend.
 roles:
   accountable: Lead Engineer
@@ -72,7 +74,6 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-16 TASK-072 run passed SSO API tests, auth+SSO API tests,
-      py_compile, npm lint, npm build, Playwright login, generated view checks,
-      task index check, check_agent_docs with 0 errors, owner_governance_gate,
-      GitHub checks, and auto_merge PR #88.
+      2026-06-16 TASK-073 run confirmed TASK-069 is future scheduled work,
+      updated backlog metadata, regenerated views/task index, and passed
+      check_agent_docs plus owner_governance gates.
