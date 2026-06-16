@@ -196,7 +196,7 @@ function ProfileTab() {
         <p className="text-sm text-muted-foreground">
           투자 프로필을 완료하면 제안과 자동화 경고가 성향에 맞게 조정됩니다.
         </p>
-        <Button render={<Link href="/onboarding/investor-profile" />}>
+        <Button nativeButton={false} render={<Link href="/onboarding/investor-profile" />}>
           투자 프로필 작성
         </Button>
       </div>
@@ -229,7 +229,7 @@ function ProfileTab() {
 
       <CheckinForm onSaved={(nextProfile) => setState({ kind: "ready", profile: nextProfile })} />
 
-      <Button variant="outline" render={<Link href="/onboarding/investor-profile" />}>
+      <Button variant="outline" nativeButton={false} render={<Link href="/onboarding/investor-profile" />}>
         설문 다시 작성
       </Button>
     </div>

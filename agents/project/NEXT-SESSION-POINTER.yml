@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T00:46:20+09:00
+updated_at: 2026-06-17T00:56:27+09:00
 updated_by: lead-engineer
 current_state:
   signal: watch
@@ -8,9 +8,9 @@ current_state:
     TASK-074 investor profile survey implementation is complete on branch
     feat/investor-profile-survey and PR #91 is CI-green but merge-escalated by
     auto_merge large-diff policy. It adds DB-backed personalization survey,
-    profile gates, onboarding/settings UI, and focused API/E2E tests. KIS,
-    order_flow, app/risk, secrets, prod, and CI workflow surfaces were not
-    changed.
+    profile gates, onboarding/settings UI, focused API/E2E tests, and a
+    dev-server browser verification pass. KIS, order_flow, app/risk, secrets,
+    prod, and CI workflow surfaces were not changed.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -38,6 +38,7 @@ resume:
   status_text: TASK-074 implemented; PR #91 CI green; auto_merge ESCALATE requires Owner/gate decision
   next_actions:
     - Review PR #91 and decide whether to merge despite auto_merge large-diff escalation.
+    - Local dev servers are running at API http://127.0.0.1:8000 and web http://127.0.0.1:3000 for immediate review.
     - Do not start TASK-069 before 2026-12-14 unless Owner explicitly requests an early reassessment.
     - To try mock SSO locally, set AUTOFOLIO_SSO_MOCK_ENABLED=1 plus mock email/name env values and restart backend/frontend.
 roles:
@@ -77,7 +78,8 @@ verification:
     signal: pass
     detail: >
       2026-06-17 TASK-074 run passed full API tests (274 passed), web lint,
-      web build, Playwright phase3 + investor-profile E2E, generated view
-      checks, check_agent_docs, owner_governance_gate, git diff --check, and
-      GitHub PR #91 CI. auto_merge remains ESCALATE because non-document diff is
-      2111 lines > cap 600.
+      web build, Playwright phase3 + investor-profile E2E, browser MCP checks
+      for /onboarding/investor-profile and /home, generated view checks,
+      check_agent_docs, owner_governance_gate, git diff --check, and GitHub PR
+      #91 CI. auto_merge remains ESCALATE because non-document diff is 2111
+      lines > cap 600.

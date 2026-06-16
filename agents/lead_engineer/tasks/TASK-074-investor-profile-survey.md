@@ -61,6 +61,7 @@ Owner: Lead Engineer
 - `/api/profile/investor`, `/api/profile/survey`, `/api/profile/override-ack`, `/api/profile/checkin`을 추가했다.
 - 조건 저장, 엔진 1회 실행, 자동매매 ON 전환에 프로필 완료 게이트를 추가했다.
 - `/onboarding/investor-profile` 화면, 홈 CTA, 상태바 프로필 배지, 매매 실행성 액션 guard, 설정의 투자 프로필/체크인 탭을 추가했다.
+- Link 렌더링 Button에 `nativeButton={false}`를 지정해 Base UI 접근성 오류를 제거했다.
 - API 테스트와 Playwright 온보딩 E2E를 추가했다.
 
 ## 변경 파일
@@ -91,6 +92,7 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 - `npm run lint` in `web/` -> pass, 0 warnings/errors.
 - `npm run build` in `web/` -> successful.
 - `npx playwright test e2e/phase3.spec.ts e2e/investor-profile.spec.ts` in `web/` -> 5 passed.
+- Playwright MCP browser check on local dev server -> `/onboarding/investor-profile` and `/home` load with content, no Next error overlay, and 0 console errors after guest login. Screenshot: `autofolio-investor-profile-verified.png`.
 - `python scripts/validate_task_schema.py` -> OK.
 - `python scripts/build_task_index.py --check` -> OK.
 - `python scripts/generate_views.py --check` -> OK.

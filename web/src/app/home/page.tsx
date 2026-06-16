@@ -122,7 +122,7 @@ export default function HomePage() {
                 조회는 가능하지만 조건 저장과 자동화 실행은 프로필 완료 후 사용할 수 있습니다.
               </p>
             </div>
-            <Button size="sm" render={<Link href="/onboarding/investor-profile" />}>
+            <Button size="sm" nativeButton={false} render={<Link href="/onboarding/investor-profile" />}>
               프로필 작성
             </Button>
           </section>

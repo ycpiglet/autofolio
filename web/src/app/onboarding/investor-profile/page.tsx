@@ -130,7 +130,7 @@ export default function InvestorProfileOnboardingPage() {
             >
               {status.kind === "saving" ? "저장 중…" : "프로필 저장"}
             </Button>
-            <Button variant="outline" render={<Link href="/home" />}>
+            <Button variant="outline" nativeButton={false} render={<Link href="/home" />}>
               홈으로
             </Button>
             {status.kind === "error" && (
