@@ -182,7 +182,8 @@ class TestKillSwitch:
 class TestAutoTrading:
     def test_auto_trading_enable(self, owner_client):
         with patch("app.ui.backend.set_flag") as mock_set, \
-             patch("app.ui.backend.get_flag", return_value=True):
+             patch("app.ui.backend.get_flag", return_value=True), \
+             patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp = owner_client.post(
                 "/api/engine/auto-trading",
                 json={"enabled": True},
@@ -208,7 +209,8 @@ class TestAutoTrading:
 
 class TestRunOnce:
     def test_run_once_200(self, owner_client):
-        with patch("app.ui.backend.run_engine_once", return_value=["BUY 005930 done"]):
+        with patch("app.ui.backend.run_engine_once", return_value=["BUY 005930 done"]), \
+             patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp = owner_client.post(
                 "/api/engine/run-once",
                 headers=owner_headers(),
@@ -225,10 +227,11 @@ class TestRunOnce:
         acquired = engine_mod._run_once_lock.acquire(blocking=False)
         assert acquired, "Lock should be free at test start"
         try:
-            resp = owner_client.post(
-                "/api/engine/run-once",
-                headers=owner_headers(),
-            )
+            with patch("app.api.routers.engine.investor_profile_completed", return_value=True):
+                resp = owner_client.post(
+                    "/api/engine/run-once",
+                    headers=owner_headers(),
+                )
             assert resp.status_code == 409
             assert "이미 실행 중" in resp.json()["detail"]
         finally:
@@ -236,7 +239,8 @@ class TestRunOnce:
 
     def test_run_once_lock_released_after_success(self, app, owner_client):
         """Lock must be released after run completes so a second call can proceed."""
-        with patch("app.ui.backend.run_engine_once", return_value=[]):
+        with patch("app.ui.backend.run_engine_once", return_value=[]), \
+             patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp1 = owner_client.post("/api/engine/run-once", headers=owner_headers())
             resp2 = owner_client.post("/api/engine/run-once", headers=owner_headers())
         assert resp1.status_code == 200
@@ -247,13 +251,15 @@ class TestRunOnce:
         err_client = TestClient(create_app(), raise_server_exceptions=False)
         err_client.cookies.set("af_session", _owner_session())
 
-        with patch("app.ui.backend.run_engine_once", side_effect=RuntimeError("boom")):
+        with patch("app.ui.backend.run_engine_once", side_effect=RuntimeError("boom")), \
+             patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp = err_client.post("/api/engine/run-once", headers=owner_headers())
         # Server returns 500 (fail-closed)
         assert resp.status_code == 500
 
         # Lock should be free now — a fresh call should work
-        with patch("app.ui.backend.run_engine_once", return_value=[]):
+        with patch("app.ui.backend.run_engine_once", return_value=[]), \
+             patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp2 = err_client.post("/api/engine/run-once", headers=owner_headers())
         assert resp2.status_code == 200
 
@@ -273,11 +279,12 @@ class TestConditionsPost:
     }
 
     def _post(self, client, body=None, headers=None):
-        return client.post(
-            "/api/trade/conditions",
-            json=body if body is not None else self._BODY,
-            headers=headers if headers is not None else owner_headers(),
-        )
+        with patch("app.api.routers.trade.investor_profile_completed", return_value=True):
+            return client.post(
+                "/api/trade/conditions",
+                json=body if body is not None else self._BODY,
+                headers=headers if headers is not None else owner_headers(),
+            )
 
     def test_saved_returns_201(self, owner_client):
         gate = GateResult(status="saved", message="저장됨", condition_id=42)
@@ -315,7 +322,8 @@ class TestConditionsPost:
         gate = GateResult(status="error", message="에이전트 오류")
         err_client = TestClient(create_app(), raise_server_exceptions=False)
         err_client.cookies.set("af_session", _owner_session())
-        with patch("app.services.trading.save_condition_with_gates", return_value=gate):
+        with patch("app.services.trading.save_condition_with_gates", return_value=gate), \
+             patch("app.api.routers.trade.investor_profile_completed", return_value=True):
             resp = err_client.post(
                 "/api/trade/conditions",
                 json=self._BODY,
@@ -344,7 +352,8 @@ class TestConditionsPost:
 
         # Step 2: re-submit with ack_token → should save
         gate_saved = GateResult(status="saved", message="저장됨", condition_id=1)
-        with patch("app.services.trading.save_condition_with_gates", return_value=gate_saved) as mock_gate:
+        with patch("app.services.trading.save_condition_with_gates", return_value=gate_saved) as mock_gate, \
+             patch("app.api.routers.trade.investor_profile_completed", return_value=True):
             body_with_ack = {**self._BODY, "ack_token": ack_token}
             resp2 = owner_client.post(
                 "/api/trade/conditions",
@@ -359,7 +368,8 @@ class TestConditionsPost:
     def test_tampered_ack_token_treated_as_no_ack(self, owner_client):
         """Tampered ack_token → fail-closed: re-run gate without caution_acknowledged."""
         gate_ack = GateResult(status="needs_acknowledgement", message="CAUTION: 주의")
-        with patch("app.services.trading.save_condition_with_gates", return_value=gate_ack) as mock_gate:
+        with patch("app.services.trading.save_condition_with_gates", return_value=gate_ack) as mock_gate, \
+             patch("app.api.routers.trade.investor_profile_completed", return_value=True):
             resp = owner_client.post(
                 "/api/trade/conditions",
                 json={**self._BODY, "ack_token": "tampered.garbage.token"},
@@ -380,7 +390,8 @@ class TestConditionsPost:
             "quantity": 1,
         })
         gate_ack = GateResult(status="needs_acknowledgement", message="CAUTION: 주의")
-        with patch("app.services.trading.save_condition_with_gates", return_value=gate_ack) as mock_gate:
+        with patch("app.services.trading.save_condition_with_gates", return_value=gate_ack) as mock_gate, \
+             patch("app.api.routers.trade.investor_profile_completed", return_value=True):
             resp = owner_client.post(
                 "/api/trade/conditions",
                 json={**self._BODY, "ack_token": wrong_token},
@@ -408,7 +419,8 @@ class TestConditionsPost:
         gate_ack = GateResult(status="needs_acknowledgement", message="CAUTION: 주의")
         # Patch decode_ack_token in the router's module namespace to simulate expiry
         with patch("app.api.routers.trade.decode_ack_token", return_value=None), \
-             patch("app.services.trading.save_condition_with_gates", return_value=gate_ack) as mock_gate:
+             patch("app.services.trading.save_condition_with_gates", return_value=gate_ack) as mock_gate, \
+             patch("app.api.routers.trade.investor_profile_completed", return_value=True):
             resp = owner_client.post(
                 "/api/trade/conditions",
                 json={**self._BODY, "ack_token": some_valid_looking_token},

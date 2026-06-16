@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +34,7 @@ interface OrderFormProps {
   initialSide?: "BUY" | "SELL";
   initialTargetPrice?: string;
   initialQuantity?: string;
+  profileCompleted?: boolean;
 }
 
 export function OrderForm({
@@ -42,6 +44,7 @@ export function OrderForm({
   initialSide = "BUY",
   initialTargetPrice = "",
   initialQuantity = "",
+  profileCompleted = true,
 }: OrderFormProps) {
   const [symbol, setSymbol] = useState(initialSymbol);
   const [side, setSide] = useState<"BUY" | "SELL">(initialSide);
@@ -64,6 +67,14 @@ export function OrderForm({
       onCreated?.();
     } catch (err) {
       if (err instanceof ApiError) {
+        if (err.status === 428) {
+          const body = err.body as { detail?: { message?: string } } | undefined;
+          setStatus({
+            kind: "rejected",
+            message: body?.detail?.message ?? "투자 프로필 설문 완료 후 조건을 저장할 수 있습니다.",
+          });
+          return;
+        }
         if (err.status === 409) {
           const body = err.body as NeedsAckResponse;
           // Show CAUTION modal — do not auto-acknowledge
@@ -89,6 +100,10 @@ export function OrderForm({
     e.preventDefault();
     const price = parseFloat(targetPrice);
     const qty = parseInt(quantity, 10);
+    if (!profileCompleted) {
+      setStatus({ kind: "rejected", message: "투자 프로필 설문 완료 후 조건을 저장할 수 있습니다." });
+      return;
+    }
     if (!symbol.trim() || isNaN(price) || isNaN(qty) || qty < 1) return;
 
     const payload: ConditionPayload = {
@@ -120,6 +135,14 @@ export function OrderForm({
         aria-label="매매 조건 등록"
       >
         <h2 className="text-sm font-medium text-foreground">조건 등록 (예약 주문)</h2>
+        {!profileCompleted && (
+          <div className="rounded-lg border border-amber-400/40 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+            투자 프로필이 필요합니다.{" "}
+            <Link className="font-medium underline" href="/onboarding/investor-profile">
+              프로필 작성
+            </Link>
+          </div>
+        )}
 
         {/* Symbol */}
         <div className="flex flex-col gap-1.5">
@@ -192,7 +215,7 @@ export function OrderForm({
         </div>
 
         {/* Submit */}
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button type="submit" disabled={isSubmitting || !profileCompleted} className="w-full">
           {isSubmitting ? "등록 중…" : "조건 등록"}
         </Button>
 

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { apiGet } from "@/lib/api";
+import { apiGet, getInvestorProfile, type InvestorProfileResponse } from "@/lib/api";
+import { Badge } from "@/components/ui/badge";
 import { EnvBadge } from "@/components/safety/EnvBadge";
 import { KillSwitchButton } from "@/components/safety/KillSwitchButton";
 import { AutoTradingToggle } from "@/components/safety/AutoTradingToggle";
@@ -30,6 +32,12 @@ export function TopStatusBar({ className }: TopStatusBarProps) {
     staleTime: 30_000,
     retry: 1,
   });
+  const { data: profile } = useQuery<InvestorProfileResponse>({
+    queryKey: ["investor-profile"],
+    queryFn: getInvestorProfile,
+    staleTime: 60_000,
+    retry: 1,
+  });
 
   return (
     <header
@@ -39,8 +47,19 @@ export function TopStatusBar({ className }: TopStatusBarProps) {
       )}
       aria-label="상태 표시줄"
     >
-      {/* Left spacer — title could go here in Phase 2 */}
-      <div className="flex-1" />
+      <div className="flex flex-1 items-center gap-2">
+        {profile && (
+          profile.completed ? (
+            <Badge variant="secondary">
+              {profile.risk_type}
+            </Badge>
+          ) : (
+            <Badge variant="outline" render={<Link href="/onboarding/investor-profile" />}>
+              프로필 작성
+            </Badge>
+          )
+        )}
+      </div>
 
       {/* StatusCluster */}
       <div

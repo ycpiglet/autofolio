@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -13,20 +14,25 @@ import { ConfirmModal } from "@/components/safety/ConfirmModal";
 import {
   putRiskLimits,
   getAccount,
+  getInvestorProfile,
   getSsoProviders,
+  postProfileCheckin,
   postPasswordChange,
   postLogout,
   ApiError,
   type AccountResponse,
+  type InvestorProfileResponse,
+  type ProfileCheckinPayload,
   type SsoProviderInfo,
 } from "@/lib/api";
 import { clearCsrfCache } from "@/lib/csrf";
 import { cn } from "@/lib/utils";
 
-type Tab = "risk" | "account" | "display" | "safety" | "about";
+type Tab = "risk" | "profile" | "account" | "display" | "safety" | "about";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "risk", label: "리스크 한도" },
+  { id: "profile", label: "투자 프로필" },
   { id: "account", label: "계정/연결" },
   { id: "display", label: "표시" },
   { id: "safety", label: "안전" },
@@ -133,6 +139,208 @@ function RiskTab() {
         confirmLabel="저장"
         onConfirm={() => { void handleSave(); }}
         dangerous
+      />
+    </div>
+  );
+}
+
+// ── Investor Profile Tab ─────────────────────────────────────────────────────
+
+type ProfileState =
+  | { kind: "loading" }
+  | { kind: "error"; message: string }
+  | { kind: "ready"; profile: InvestorProfileResponse };
+
+type CheckinStatus =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "saved" }
+  | { kind: "error"; message: string };
+
+function ProfileTab() {
+  const [state, setState] = useState<ProfileState>({ kind: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    getInvestorProfile()
+      .then((profile) => {
+        if (!cancelled) setState({ kind: "ready", profile });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setState({ kind: "error", message: "투자 프로필을 불러오지 못했습니다." });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (state.kind === "loading") {
+    return <div className="h-28 max-w-md animate-pulse rounded-lg bg-muted" />;
+  }
+
+  if (state.kind === "error") {
+    return (
+      <p role="alert" className="max-w-md text-sm text-destructive">
+        {state.message}
+      </p>
+    );
+  }
+
+  const { profile } = state;
+
+  if (!profile.completed) {
+    return (
+      <div className="space-y-4 max-w-md">
+        <p className="text-sm text-muted-foreground">
+          투자 프로필을 완료하면 제안과 자동화 경고가 성향에 맞게 조정됩니다.
+        </p>
+        <Button nativeButton={false} render={<Link href="/onboarding/investor-profile" />}>
+          투자 프로필 작성
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-xl">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <ProfileMetric label="성향" value={profile.risk_type} />
+        <ProfileMetric label="지식수준" value={profile.knowledge_level} />
+        <ProfileMetric label="권장 투자율 상한" value={`${profile.recommended_max_equity_pct}%`} />
+        <ProfileMetric label="권장 자동화" value={profile.recommended_autonomy_level} />
+      </div>
+
+      <div className="rounded-lg border border-border p-4">
+        <h2 className="mb-3 text-sm font-semibold text-foreground">만족 기준</h2>
+        <div className="flex flex-wrap gap-2">
+          {profile.satisfaction_focus.length > 0 ? (
+            profile.satisfaction_focus.map((item) => (
+              <Badge key={item} variant="secondary">
+                {item}
+              </Badge>
+            ))
+          ) : (
+            <span className="text-sm text-muted-foreground">기록 없음</span>
+          )}
+        </div>
+      </div>
+
+      <CheckinForm onSaved={(nextProfile) => setState({ kind: "ready", profile: nextProfile })} />
+
+      <Button variant="outline" nativeButton={false} render={<Link href="/onboarding/investor-profile" />}>
+        설문 다시 작성
+      </Button>
+    </div>
+  );
+}
+
+function ProfileMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-border p-3 text-sm">
+      <div className="text-muted-foreground">{label}</div>
+      <div className="mt-1 font-medium text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function CheckinForm({
+  onSaved,
+}: {
+  onSaved: (profile: InvestorProfileResponse) => void;
+}) {
+  const [satisfaction, setSatisfaction] = useState("4");
+  const [confidence, setConfidence] = useState("3");
+  const [stress, setStress] = useState("2");
+  const [automation, setAutomation] = useState<ProfileCheckinPayload["automation_adjustment"]>("same");
+  const [notes, setNotes] = useState("");
+  const [status, setStatus] = useState<CheckinStatus>({ kind: "idle" });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus({ kind: "saving" });
+    try {
+      const result = await postProfileCheckin({
+        trigger_type: "manual",
+        satisfaction_score: parseInt(satisfaction, 10),
+        confidence_score: parseInt(confidence, 10),
+        stress_score: parseInt(stress, 10),
+        automation_adjustment: automation,
+        notes: notes.trim() || undefined,
+      });
+      onSaved(result.profile);
+      setStatus({ kind: "saved" });
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "체크인을 저장하지 못했습니다.";
+      setStatus({ kind: "error", message });
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-border p-4">
+      <h2 className="text-sm font-semibold text-foreground">만족도 체크인</h2>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <ScoreInput id="satisfaction" label="만족도" value={satisfaction} onChange={setSatisfaction} />
+        <ScoreInput id="confidence" label="이해도" value={confidence} onChange={setConfidence} />
+        <ScoreInput id="stress" label="불안도" value={stress} onChange={setStress} />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="automation-adjustment">자동화 수준</Label>
+        <select
+          id="automation-adjustment"
+          className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          value={automation}
+          onChange={(event) => setAutomation(event.target.value as ProfileCheckinPayload["automation_adjustment"])}
+        >
+          <option value="lower">낮추기</option>
+          <option value="same">유지</option>
+          <option value="raise">올리기 검토</option>
+        </select>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="checkin-notes">메모</Label>
+        <Input
+          id="checkin-notes"
+          value={notes}
+          onChange={(event) => setNotes((event.target as HTMLInputElement).value)}
+          placeholder="예: 알림은 적당하지만 하락장 설명이 더 필요함"
+        />
+      </div>
+      <Button type="submit" disabled={status.kind === "saving"}>
+        {status.kind === "saving" ? "저장 중…" : "체크인 저장"}
+      </Button>
+      {status.kind === "saved" && (
+        <p role="status" className="text-sm text-muted-foreground">저장되었습니다.</p>
+      )}
+      {status.kind === "error" && (
+        <p role="alert" className="text-sm text-destructive">{status.message}</p>
+      )}
+    </form>
+  );
+}
+
+function ScoreInput({
+  id,
+  label,
+  value,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type="number"
+        min={1}
+        max={5}
+        value={value}
+        onChange={(event) => onChange((event.target as HTMLInputElement).value)}
       />
     </div>
   );
@@ -537,6 +745,7 @@ export default function SettingsPage() {
             {activeTab === id && (
               <>
                 {id === "risk" && <RiskTab />}
+                {id === "profile" && <ProfileTab />}
                 {id === "account" && <AccountTab />}
                 {id === "display" && <DisplayTab />}
                 {id === "safety" && <SafetyTab />}

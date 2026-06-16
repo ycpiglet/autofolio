@@ -97,3 +97,71 @@ CREATE TABLE IF NOT EXISTS trade_journal (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS investor_profiles (
+    username TEXT PRIMARY KEY,
+    survey_version TEXT NOT NULL,
+    completed INTEGER NOT NULL DEFAULT 0,
+    risk_type TEXT NOT NULL DEFAULT '미완료',
+    knowledge_level TEXT NOT NULL DEFAULT '미확인',
+    risk_capacity_score REAL NOT NULL DEFAULT 0,
+    risk_tolerance_score REAL NOT NULL DEFAULT 0,
+    knowledge_score REAL NOT NULL DEFAULT 0,
+    experience_score REAL NOT NULL DEFAULT 0,
+    time_horizon_score REAL NOT NULL DEFAULT 0,
+    automation_comfort_score REAL NOT NULL DEFAULT 0,
+    recommended_max_equity_pct INTEGER NOT NULL DEFAULT 0,
+    recommended_autonomy_level TEXT NOT NULL DEFAULT 'L0',
+    needs_advanced_survey INTEGER NOT NULL DEFAULT 0,
+    satisfaction_focus TEXT NOT NULL DEFAULT '[]',
+    last_checkin_at TEXT,
+    satisfaction_score INTEGER,
+    confidence_score INTEGER,
+    stress_score INTEGER,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS investor_survey_responses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    survey_version TEXT NOT NULL,
+    response_json TEXT NOT NULL,
+    scores_json TEXT NOT NULL,
+    profile_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_investor_survey_responses_user_created
+ON investor_survey_responses(username, created_at);
+
+CREATE TABLE IF NOT EXISTS investor_override_acknowledgements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    symbol TEXT,
+    action TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    acknowledgement_text TEXT NOT NULL,
+    profile_version TEXT NOT NULL,
+    profile_snapshot_json TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_investor_override_ack_user_created
+ON investor_override_acknowledgements(username, created_at);
+
+CREATE TABLE IF NOT EXISTS investor_checkins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    trigger_type TEXT NOT NULL,
+    satisfaction_score INTEGER NOT NULL,
+    confidence_score INTEGER NOT NULL,
+    stress_score INTEGER NOT NULL,
+    automation_adjustment TEXT NOT NULL,
+    notes TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_investor_checkins_user_created
+ON investor_checkins(username, created_at);

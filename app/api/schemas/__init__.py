@@ -143,6 +143,81 @@ class RiskLimitsResponse(BaseModel):
     status: str        # "saved"
 
 
+# ── Investor profile / survey ────────────────────────────────────────────────
+
+class SurveyOption(BaseModel):
+    value: str
+    label: str
+
+
+class SurveyQuestion(BaseModel):
+    id: str
+    title: str
+    kind: Literal["single", "multi", "acknowledgement"]
+    required: bool = True
+    options: list[SurveyOption]
+
+
+class SurveyDefinitionResponse(BaseModel):
+    version: str
+    questions: list[SurveyQuestion]
+
+
+class InvestorProfileResponse(BaseModel):
+    username: str
+    survey_version: str
+    completed: bool
+    risk_type: str
+    knowledge_level: str
+    scores: dict[str, float]
+    recommended_max_equity_pct: int
+    recommended_autonomy_level: str
+    needs_advanced_survey: bool
+    satisfaction_focus: list[str]
+    last_checkin_at: str | None = None
+    satisfaction_score: int | None = None
+    confidence_score: int | None = None
+    stress_score: int | None = None
+    updated_at: str | None = None
+    completed_at: str | None = None
+
+
+class SurveySubmitRequest(BaseModel):
+    answers: dict[str, Any]
+
+
+class SurveySubmitResponse(BaseModel):
+    status: str
+    profile: InvestorProfileResponse
+
+
+class OverrideAckRequest(BaseModel):
+    action: str
+    reason: str
+    acknowledgement_text: str
+    symbol: str | None = None
+
+
+class OverrideAckResponse(BaseModel):
+    id: int
+    status: str
+
+
+class ProfileCheckinRequest(BaseModel):
+    trigger_type: Literal["monthly", "drawdown", "rebalance", "override", "manual"] = "manual"
+    satisfaction_score: int = Field(..., ge=1, le=5)
+    confidence_score: int = Field(..., ge=1, le=5)
+    stress_score: int = Field(..., ge=1, le=5)
+    automation_adjustment: Literal["lower", "same", "raise"] = "same"
+    notes: str | None = None
+
+
+class ProfileCheckinResponse(BaseModel):
+    id: int
+    status: str
+    profile: InvestorProfileResponse
+
+
 # ── Agents (Phase 4) ─────────────────────────────────────────────────────────
 
 class AgentInfo(BaseModel):

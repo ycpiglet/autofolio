@@ -35,7 +35,10 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "시스템",
-    items: [{ label: "설정", href: "/settings", icon: "⚙️" }],
+    items: [
+      { label: "투자 프로필", href: "/onboarding/investor-profile", icon: "🧭" },
+      { label: "설정", href: "/settings", icon: "⚙️" },
+    ],
   },
 ];
 

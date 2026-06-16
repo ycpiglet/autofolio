@@ -22,6 +22,7 @@ from app.api.routers import (
     engine,
     market,
     portfolio,
+    profile,
     settings,
     stream,
     trade,
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
     app.include_router(account.router, prefix="/api")
     app.include_router(engine.router, prefix="/api")
     app.include_router(portfolio.router, prefix="/api")
+    app.include_router(profile.router, prefix="/api")
     app.include_router(market.router, prefix="/api")
     app.include_router(trade.router, prefix="/api")
     app.include_router(settings.router, prefix="/api")

@@ -25,6 +25,7 @@ from app.api.schemas import (
 )
 from app.api.serializers import df_records
 from app.api.security import decode_ack_token, encode_ack_token
+from app.services.investor_profile import investor_profile_completed, username_from_session
 
 router = APIRouter(prefix="/trade", tags=["trade"])
 
@@ -62,7 +63,7 @@ def orders(
 def create_condition(
     body: ConditionRequest,
     http_response: Response,
-    _session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+    session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
 ) -> Any:
     """Gate-checked condition save.
 
@@ -82,6 +83,15 @@ def create_condition(
         (fail-closed, re-runs gate, likely 409 again with a fresh token).
     """
     from app.services.trading import save_condition_with_gates
+
+    if not investor_profile_completed(username_from_session(session)):
+        raise HTTPException(
+            status_code=status.HTTP_428_PRECONDITION_REQUIRED,
+            detail={
+                "status": "profile_required",
+                "message": "투자 프로필 설문 완료 후 조건을 저장할 수 있습니다.",
+            },
+        )
 
     # Determine caution_acknowledged from ack_token (fail-closed on any anomaly)
     caution_acknowledged = False

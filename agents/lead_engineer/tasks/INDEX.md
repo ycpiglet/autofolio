@@ -76,3 +76,4 @@
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | Lead Engineer | Stop hook owner governance host-mode repair |
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Lead Engineer | Dev mock SSO provider |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Lead Engineer | Defer future maturity reassessment from ACT lane |
+| [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | Lead Engineer | Investor profile survey and satisfaction loop |
