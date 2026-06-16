@@ -97,16 +97,19 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 - `python scripts/check_agent_docs.py` -> OK, 0 errors / 121 warnings.
 - `python scripts/owner_governance_gate.py --allow-empty-owner-docs` -> pass.
 - `git diff --check` -> OK. CRLF normalization warnings only.
+- GitHub PR #91 CI -> green (`pytest`, `owner-doc-format`, `Lint + Build + Playwright E2E` pass).
+- `python scripts/auto_merge.py 91` -> ESCALATE. Reason: non-document diff 2111 lines exceeds cap 600; automatic merge not performed.
 
 ## 증거
 
 - `tests/api/test_profile_survey.py`: 프로필 미완료 shape, 설문 제출, final ack 필수, guest 차단, condition/run-once profile gate, check-in, override ack 검증.
 - `tests/api/test_phase3_state.py`: 기존 CSRF/compliance ack 계약 유지.
 - `web/e2e/phase3.spec.ts`, `web/e2e/investor-profile.spec.ts`: 기존 조건 등록/엔진 실행 confirmation 흐름과 온보딩 설문 저장 후 프로필 요약 렌더링 확인.
+- PR #91: https://github.com/ycpiglet/autofolio/pull/91
 
 ## 남은 이슈 / 한계
 
-- 신규 DB schema surface는 Owner direct request로 승인된 범위이며, production DB migration run은 별도 운영 절차가 필요하다.
+- 신규 DB schema surface는 Owner direct request로 승인된 구현 범위이며, production DB migration run과 PR #91 merge는 별도 gate/Owner 결정이 필요하다.
 - v1은 개인화 설문이며 법적 적합성 완료 시스템이 아니다.
 - 성향 초과 제안의 override 기록 API는 구현했지만 모든 제안 카드에 자동 연결하는 세부 정책은 후속 단계에서 확장 가능하다.
 - 심화 설문은 `needs_advanced_survey` 신호만 제공한다. 별도 심화 문항 세트는 후속 TASK로 분리 가능하다.
