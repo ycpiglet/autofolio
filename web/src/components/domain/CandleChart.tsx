@@ -93,16 +93,30 @@ export function CandleChart({ className }: CandleChartProps) {
     const closeCol =
       data.columns.find((c) => c === "close" || c === "종가") ?? data.columns[4];
 
+    // Convert time to lightweight-charts accepted format:
+    // "yyyy-mm-dd" strings stay as BusinessDay; everything else → UTCTimestamp (epoch seconds).
+    function toChartTime(raw: string): string | number {
+      if (raw.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+        return raw; // already YYYY-MM-DD — pass as BusinessDay string
+      }
+      // ISO datetime or "YYYY-MM-DD HH:mm" → epoch seconds (UTCTimestamp)
+      const ms = new Date(raw.replace(" ", "T")).getTime();
+      return Number.isFinite(ms) ? Math.floor(ms / 1000) : 0;
+    }
+
     const candles = data.rows
       .map((row) => ({
-        time: String(row[timeCol] ?? ""),
+        time: toChartTime(String(row[timeCol] ?? "")),
         open: Number(row[openCol] ?? 0),
         high: Number(row[highCol] ?? 0),
         low: Number(row[lowCol] ?? 0),
         close: Number(row[closeCol] ?? 0),
       }))
-      .filter((c) => c.time.length > 0)
-      .sort((a, b) => (a.time < b.time ? -1 : 1));
+      .filter((c) => c.time !== 0 && c.time !== "")
+      .sort((a, b) => {
+        // Both types (string or number) are comparable with < >
+        return a.time < b.time ? -1 : a.time > b.time ? 1 : 0;
+      });
 
     if (candles.length > 0) {
       series.setData(candles as Parameters<typeof series.setData>[0]);
@@ -162,7 +176,7 @@ export function CandleChart({ className }: CandleChartProps) {
       ) : (
         <div
           ref={containerRef}
-          className="h-[280px] w-full overflow-hidden rounded-xl"
+          className="h-[280px] w-full overflow-visible rounded-xl"
           aria-label="캔들차트"
           data-testid="candle-chart"
         />

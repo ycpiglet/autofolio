@@ -103,3 +103,14 @@ export function fmtTabular(value: number, decimals = 0): string {
 export function fmtPnlWon(value: number, pct: number): string {
   return `${fmtWon(value)} (${fmtPct(pct)})`;
 }
+
+// ── Symbol label ───────────────────────────────────────────────────────────
+
+/**
+ * Format a symbol code with its name from a symbol map.
+ * Returns "삼성전자 (005930)" if name exists, or "005930" if not in map.
+ */
+export function symbolLabel(code: string, map: Record<string, string>): string {
+  const name = map[code];
+  return name ? `${name} (${code})` : code;
+}

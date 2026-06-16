@@ -120,3 +120,16 @@ def disclosures(
 
     sym = _validate_symbol(symbol)
     return df_records(backend.disclosures_df(sym, days))
+
+
+@router.get("/symbols")
+def symbols(
+    _session: Annotated[dict[str, Any], Depends(require_session)],
+) -> dict[str, str]:
+    """Return {code: name} map for all whitelist symbols."""
+    from app.ui import backend
+
+    df = backend.list_whitelist()
+    if df.empty:
+        return {}
+    return {str(row["symbol"]): str(row["name"]) for _, row in df.iterrows()}

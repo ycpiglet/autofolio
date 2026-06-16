@@ -9,6 +9,7 @@ import { DataTable } from "@/components/domain/DataTable";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/safety/ConfirmModal";
 import { apiTable, postRunOnce, ApiError, type TableResponse } from "@/lib/api";
+import { useSymbols } from "@/hooks/useSymbols";
 
 type RunOnceStatus =
   | { kind: "idle" }
@@ -19,6 +20,7 @@ type RunOnceStatus =
 
 export default function TradePage() {
   const queryClient = useQueryClient();
+  const symbolMap = useSymbols();
   const [previewSymbol, setPreviewSymbol] = useState("");
   const [runOnceStatus, setRunOnceStatus] = useState<RunOnceStatus>({ kind: "idle" });
   const [runOnceConfirmOpen, setRunOnceConfirmOpen] = useState(false);
@@ -101,6 +103,7 @@ export default function TradePage() {
                 isLoading={conditionsQuery.isPending}
                 error={conditionsQuery.error as Error | null}
                 caption="활성 매매 조건 목록"
+                symbolMap={symbolMap}
               />
             </section>
           </div>
