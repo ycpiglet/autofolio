@@ -74,3 +74,4 @@
 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 대기 | Lead Engineer | 제품 성숙도 반기 재평가 (2026-12-14) → v1 |
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | Lead Engineer | SSO/SNS + 프리마켓 에이전트 요약 + lint gate |
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | Lead Engineer | Stop hook owner governance host-mode repair |
+| [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Lead Engineer | Dev mock SSO provider |

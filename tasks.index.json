@@ -1,7 +1,7 @@
 {
   "version": 1,
   "generated_from": "TASK frontmatter (derived; canonical=*.md)",
-  "count": 70,
+  "count": 71,
   "tasks": [
     {
       "type": "task",
@@ -1955,6 +1955,42 @@
       "created": "2026-06-16",
       "_path": "agents/lead_engineer/tasks/TASK-071-stop-hook-owner-governance-host-mode.md",
       "_title": "stop hook owner governance host mode"
+    },
+    {
+      "type": "task",
+      "id": "TASK-072",
+      "display_id": "TASK-072",
+      "task_uid": "623ec89c-153a-449b-87b6-b164ab04656d",
+      "registered_at": "2026-06-16T22:36:08+09:00",
+      "created_at": "2026-06-16T22:36:08+09:00",
+      "started_at": "2026-06-16T22:36:08+09:00",
+      "updated_at": "2026-06-16T22:38:52+09:00",
+      "completed_at": "2026-06-16T22:38:52+09:00",
+      "status": "완료",
+      "owner": "Lead Engineer",
+      "assignees": [
+        "Lead Engineer",
+        "Backend Engineer",
+        "UI/UX Designer",
+        "QA"
+      ],
+      "priority": "Medium",
+      "difficulty": "낮",
+      "est_hours": "1",
+      "est_tokens": "12000",
+      "tags": [
+        "authentication",
+        "sso",
+        "mock",
+        "dev-mode",
+        "ui-overhaul"
+      ],
+      "gate": "dev-only mock SSO; default off; no secrets; no external provider calls; no live orders or risk changes",
+      "trigger_meeting": "Owner direct request 2026-06-16",
+      "audit_log": "AUDIT-2026-06-16-003",
+      "created": "2026-06-16",
+      "_path": "agents/lead_engineer/tasks/TASK-072-dev-mock-sso-provider.md",
+      "_title": "dev mock sso provider"
     }
   ]
 }

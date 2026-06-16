@@ -484,3 +484,17 @@
 검증: `python scripts/response_contract_gate.py --check`; `python scripts/continuity_contract_gate.py --check`; `python scripts/task_identity.py check --check`; `python -m py_compile scripts/owner_governance_gate.py scripts/continuity_contract_gate.py scripts/task_identity.py`; `python scripts/owner_governance_gate.py --allow-empty-owner-docs`
 관련 기록: TASK-071, hook diagnostic `.codex/hook-logs/stop-owner-governance-20260616-120949-45064.json`
 남은 리스크: source-only gates는 upstream agent_runtime repo에서 계속 실행되어야 하며, Autofolio host repo에서는 없는 source tree를 차단 조건으로 보지 않는다.
+
+### AUDIT-2026-06-16-003
+시각: 2026-06-16T22:38:52+09:00
+기록 시각: 2026-06-16T22:38:52+09:00
+요청자: Owner ("SSO/SNS도 일단 목업으로 구현... 필요한 정보만 넣으면 동작하게")
+수행자: Lead Engineer + Backend Engineer + UI/UX Designer + QA (Codex)
+의도: 실제 외부 OAuth provider app/secret 준비 전에도 SSO/SNS 로그인 UI와 callback 세션 발급 흐름을 로컬에서 검증할 수 있게 dev-only mock provider를 추가
+대상: TASK-072, `app/services/sso.py`, SSO API tests, Next login E2E, external app/API owner manual
+작업: `AUTOFOLIO_SSO_MOCK_ENABLED=1`로만 활성화되는 `mock` provider 추가, mock login의 내부 callback redirect, signed state cookie 검증 후 env 기반 mock profile owner session 발급, allowed-email gate 적용, provider list/UI button 회귀 테스트와 매뉴얼 설정값 추가
+방법: focused auth service patch + API contract tests + Playwright login test + lint/doc record
+결과: TASK-072 완료. Mock SSO는 기본 OFF이며 secret/token/client secret을 만들거나 노출하지 않는다. 활성화 시 로그인 화면에 `Mock SSO로 계속하기`가 표시되고 외부 HTTP 없이 `/api/auth/sso/mock/callback`에서 owner session이 발급된다. 주문/조건/리스크/prod/DB schema/CI surface 변경 없음.
+검증: `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_auth_sso.py -q` -> 14 passed; py_compile auth/sso -> OK; `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_auth.py tests/api/test_auth_sso.py -q` -> 25 passed; `npm run lint` -> pass; `npm run build` -> successful; `npx playwright test web/e2e/login.spec.ts` -> 5 passed; validate_task_schema/build_task_index/generate_views/check_agent_docs/owner_governance_gate -> OK; `git diff --check` -> OK
+관련 기록: TASK-072, docs/EXTERNAL_APP_API_OWNER_MANUAL.md §2.5
+남은 리스크: Mock SSO는 local/dev 검증 수단이며 production SSO 대체물이 아니다. 실제 Google/Kakao/Naver live OAuth callback은 Owner-managed provider console/secret 설정 후 별도 검증 필요.
