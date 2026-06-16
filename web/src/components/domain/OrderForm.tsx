@@ -27,13 +27,26 @@ interface OrderFormProps {
   /** Called after successful condition creation so parent can refresh the list */
   onCreated?: () => void;
   className?: string;
+  /** Optional prefill (e.g. from an agent research proposal). Pre-fills the
+   *  form fields only — it does NOT auto-submit. */
+  initialSymbol?: string;
+  initialSide?: "BUY" | "SELL";
+  initialTargetPrice?: string;
+  initialQuantity?: string;
 }
 
-export function OrderForm({ onCreated, className }: OrderFormProps) {
-  const [symbol, setSymbol] = useState("");
-  const [side, setSide] = useState<"BUY" | "SELL">("BUY");
-  const [targetPrice, setTargetPrice] = useState("");
-  const [quantity, setQuantity] = useState("");
+export function OrderForm({
+  onCreated,
+  className,
+  initialSymbol = "",
+  initialSide = "BUY",
+  initialTargetPrice = "",
+  initialQuantity = "",
+}: OrderFormProps) {
+  const [symbol, setSymbol] = useState(initialSymbol);
+  const [side, setSide] = useState<"BUY" | "SELL">(initialSide);
+  const [targetPrice, setTargetPrice] = useState(initialTargetPrice);
+  const [quantity, setQuantity] = useState(initialQuantity);
   const [status, setStatus] = useState<FormStatus>({ kind: "idle" });
 
   // 2-step ack state

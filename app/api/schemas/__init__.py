@@ -136,3 +136,41 @@ class IcRunRequest(BaseModel):
 
 class IcRunResponse(BaseModel):
     job_id: str
+
+
+# ── Per-symbol expert briefing (READ-ONLY research) ──────────────────────────
+
+class ResearchProposal(BaseModel):
+    """Rule-based price-condition proposal. SUGGESTION ONLY — never persisted here."""
+
+    symbol: str
+    side: str
+    target_price: float
+    quantity: int
+    order_type: str
+    allow_market_fallback: bool
+    rationale: str
+    risk_note: str
+
+
+class DisclosureGateInfo(BaseModel):
+    symbol: str
+    blocked: bool
+    reason: str
+
+
+class AgentResearchResponse(BaseModel):
+    """종목 전문가 브리핑 — assembled from real read-only backend functions.
+
+    NOTE: contains NO live-news data (no news API exists) and is produced only
+    on manual trigger (no daemon/auto-scheduler). The proposal is a suggestion;
+    it is NOT saved as a trade condition by this endpoint.
+    """
+
+    symbol: str
+    name: str
+    price: float
+    fundamental: dict[str, Any]
+    disclosures: TableResponse
+    disclosure_gate: DisclosureGateInfo
+    proposal: ResearchProposal

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { OrderForm } from "@/components/domain/OrderForm";
@@ -18,10 +19,19 @@ type RunOnceStatus =
   | { kind: "done" }
   | { kind: "error"; message: string };
 
-export default function TradePage() {
+function TradePageInner() {
   const queryClient = useQueryClient();
   const symbolMap = useSymbols();
+  const searchParams = useSearchParams();
   const [previewSymbol, setPreviewSymbol] = useState("");
+
+  // Prefill from an agent research proposal (querystring). Pre-fills the
+  // OrderForm only — saving still goes through the Phase-3 gate.
+  const prefillSymbol = searchParams.get("symbol") ?? "";
+  const prefillSideRaw = (searchParams.get("side") ?? "").toUpperCase();
+  const prefillSide: "BUY" | "SELL" = prefillSideRaw === "SELL" ? "SELL" : "BUY";
+  const prefillPrice = searchParams.get("price") ?? "";
+  const prefillQty = searchParams.get("qty") ?? "";
   const [runOnceStatus, setRunOnceStatus] = useState<RunOnceStatus>({ kind: "idle" });
   const [runOnceConfirmOpen, setRunOnceConfirmOpen] = useState(false);
 
@@ -91,6 +101,11 @@ export default function TradePage() {
           {/* Left: OrderForm + conditions table */}
           <div className="space-y-6">
             <OrderForm
+              key={`${prefillSymbol}-${prefillSide}-${prefillPrice}-${prefillQty}`}
+              initialSymbol={prefillSymbol}
+              initialSide={prefillSide}
+              initialTargetPrice={prefillPrice}
+              initialQuantity={prefillQty}
               onCreated={() => {
                 void queryClient.invalidateQueries({ queryKey: ["trade-conditions"] });
               }}
@@ -127,5 +142,13 @@ export default function TradePage() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+export default function TradePage() {
+  return (
+    <Suspense fallback={<AppShell><div className="h-32 animate-pulse rounded-xl bg-muted" /></AppShell>}>
+      <TradePageInner />
+    </Suspense>
   );
 }

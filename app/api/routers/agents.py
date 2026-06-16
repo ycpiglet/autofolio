@@ -25,14 +25,31 @@ from fastapi.responses import StreamingResponse
 
 from app.api.deps import require_owner_csrf, require_session
 from app.api.schemas import (
+    AgentResearchResponse,
     AgentsListResponse,
     AskRequest,
     AskResponse,
+    DisclosureGateInfo,
     IcRunRequest,
     IcRunResponse,
+    ResearchProposal,
 )
+from app.api.serializers import df_records
 
 router = APIRouter(prefix="/agents", tags=["agents"])
+
+_SYMBOL_MAX_LEN = 20
+
+
+def _validate_symbol(symbol: str) -> str:
+    """Validate a whitelist-style symbol code (mirrors market router)."""
+    s = symbol.strip()
+    if not s or len(s) > _SYMBOL_MAX_LEN or not s.replace(".", "").isalnum():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid symbol: {symbol!r}",
+        )
+    return s
 
 # ---------------------------------------------------------------------------
 # In-memory IC job registry
@@ -62,6 +79,71 @@ def agents_list(
 
     ok, msg = available()
     return AgentsListResponse(available=ok, message=msg, agents=list_agents())
+
+
+# ---------------------------------------------------------------------------
+# GET /agents/research
+# ---------------------------------------------------------------------------
+
+@router.get("/research", response_model=AgentResearchResponse)
+def agents_research(
+    _session: Annotated[dict[str, Any], Depends(require_session)],
+    symbol: str = Query(..., description="종목 코드 (화이트리스트)"),
+    days: int = Query(default=7, ge=1, le=30, description="공시 조회 기간(일)"),
+) -> AgentResearchResponse:
+    """Per-symbol expert briefing — READ-ONLY.
+
+    Assembles a briefing from real backend functions: current price, fundamental
+    metrics, recent disclosures (+ disclosure gate), and a rule-based proposal.
+
+    READ-ONLY guarantee: backend.propose() only *suggests* a price condition; it
+    does NOT create or persist a trade condition. No LLM is called here (cost +
+    guest access). Fails loud — any backend error propagates as a non-200.
+
+    Honest gaps: there is NO live-news API (briefing is disclosure-based) and NO
+    auto-trigger (this runs only on a manual request).
+    """
+    from app.ui import backend
+
+    sym = _validate_symbol(symbol)
+
+    # Resolve display name from the whitelist (symbol_options is "code · name").
+    name = ""
+    df = backend.list_whitelist()
+    if not df.empty:
+        match = df[df["symbol"].astype(str) == sym]
+        if not match.empty:
+            name = str(match.iloc[0]["name"])
+
+    price = backend.price(sym)
+    fundamental = backend.fundamental(sym) or {}
+    disclosures = backend.disclosures_df(sym, days)
+    gate = backend.disclosure_gate_state(sym)
+    # propose() SUGGESTS only — it must NOT save a condition.
+    proposal = backend.propose(sym, side="BUY")
+
+    return AgentResearchResponse(
+        symbol=sym,
+        name=name,
+        price=float(price),
+        fundamental=fundamental,
+        disclosures=df_records(disclosures),
+        disclosure_gate=DisclosureGateInfo(
+            symbol=str(gate.get("symbol", sym)),
+            blocked=bool(gate.get("blocked", False)),
+            reason=str(gate.get("reason", "")),
+        ),
+        proposal=ResearchProposal(
+            symbol=proposal.symbol,
+            side=proposal.side,
+            target_price=float(proposal.target_price),
+            quantity=int(proposal.quantity),
+            order_type=proposal.order_type,
+            allow_market_fallback=bool(proposal.allow_market_fallback),
+            rationale=proposal.rationale,
+            risk_note=proposal.risk_note,
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------

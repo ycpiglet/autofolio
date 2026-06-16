@@ -267,6 +267,44 @@ export function apiIcDecisions(limit = 10): Promise<IcDecision[]> {
   return apiGet<IcDecision[]>(`/api/agents/ic/decisions?limit=${limit}`);
 }
 
+// ── Per-symbol research briefing ──────────────────────────────────────────
+
+export interface ResearchProposal {
+  symbol: string;
+  side: string;
+  target_price: number;
+  quantity: number;
+  order_type: string;
+  allow_market_fallback: boolean;
+  rationale: string;
+  risk_note: string;
+}
+
+export interface DisclosureGateInfo {
+  symbol: string;
+  blocked: boolean;
+  reason: string;
+}
+
+export interface AgentResearchResponse {
+  symbol: string;
+  name: string;
+  price: number;
+  fundamental: Record<string, unknown>;
+  disclosures: TableResponse;
+  disclosure_gate: DisclosureGateInfo;
+  proposal: ResearchProposal;
+}
+
+/** GET /api/agents/research?symbol=&days= — READ-ONLY per-symbol briefing */
+export function apiAgentResearch(
+  symbol: string,
+  days = 7,
+): Promise<AgentResearchResponse> {
+  const q = new URLSearchParams({ symbol, days: String(days) });
+  return apiGet<AgentResearchResponse>(`/api/agents/research?${q}`);
+}
+
 // ── Analysis domain types ─────────────────────────────────────────────────
 
 export interface BacktestResult {
