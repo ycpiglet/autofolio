@@ -1,13 +1,13 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-16T22:03:48+09:00
+updated_at: 2026-06-16T22:48:03+09:00
 updated_by: lead-engineer
 current_state:
   signal: watch
-  score: 80
+  score: 88
   summary: >
-    No active task claim is open. TASK-070 and TASK-071 are complete in records
-    and are being closed out on branch chore/task-070-071-closeout with focused
-    API, UI, and governance gates passing.
+    No active task claim is open. TASK-072 dev-only mock SSO provider is complete
+    and merged to main through PR #88. Local main is aligned with origin/main at
+    25259b5.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -34,8 +34,8 @@ resume:
   step_total: 0
   status_text: No active task claim
   next_actions:
-    - Review the latest branch and PR state before starting new work.
     - Use agents/lead_engineer/tasks/BACKLOG.md and python scripts/backlog_sweep.py for the next task decision.
+    - To try mock SSO locally, set AUTOFOLIO_SSO_MOCK_ENABLED=1 plus mock email/name env values and restart backend/frontend.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -72,6 +72,7 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-16 closeout run passed focused API tests, py_compile, npm lint,
-      npm build, Playwright login+phase4, generated view checks, task index
-      check, check_agent_docs with 0 errors, and owner_governance_gate.
+      2026-06-16 TASK-072 run passed SSO API tests, auth+SSO API tests,
+      py_compile, npm lint, npm build, Playwright login, generated view checks,
+      task index check, check_agent_docs with 0 errors, owner_governance_gate,
+      GitHub checks, and auto_merge PR #88.
