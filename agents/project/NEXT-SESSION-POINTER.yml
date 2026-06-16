@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T00:56:27+09:00
+updated_at: 2026-06-17T01:33:00+09:00
 updated_by: lead-engineer
 current_state:
   signal: watch
@@ -9,8 +9,10 @@ current_state:
     feat/investor-profile-survey and PR #91 is CI-green but merge-escalated by
     auto_merge large-diff policy. It adds DB-backed personalization survey,
     profile gates, onboarding/settings UI, focused API/E2E tests, and a
-    dev-server browser verification pass. KIS, order_flow, app/risk, secrets,
-    prod, and CI workflow surfaces were not changed.
+    dev-server browser verification pass. Owner-reported anonymous survey load
+    failure was fixed by making only GET /api/profile/survey public while
+    keeping save/profile/check-in/override gated. KIS, order_flow, app/risk,
+    secrets, prod, and CI workflow surfaces were not changed.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -37,7 +39,7 @@ resume:
   step_total: 0
   status_text: TASK-074 implemented; PR #91 CI green; auto_merge ESCALATE requires Owner/gate decision
   next_actions:
-    - Review PR #91 and decide whether to merge despite auto_merge large-diff escalation.
+    - Review PR #91 after the anonymous survey-load fix and decide whether to merge despite auto_merge large-diff escalation.
     - Local dev servers are running at API http://127.0.0.1:8000 and web http://127.0.0.1:3000 for immediate review.
     - Do not start TASK-069 before 2026-12-14 unless Owner explicitly requests an early reassessment.
     - To try mock SSO locally, set AUTOFOLIO_SSO_MOCK_ENABLED=1 plus mock email/name env values and restart backend/frontend.
@@ -78,8 +80,8 @@ verification:
     signal: pass
     detail: >
       2026-06-17 TASK-074 run passed full API tests (274 passed), web lint,
-      web build, Playwright phase3 + investor-profile E2E, browser MCP checks
-      for /onboarding/investor-profile and /home, generated view checks,
-      check_agent_docs, owner_governance_gate, git diff --check, and GitHub PR
-      #91 CI. auto_merge remains ESCALATE because non-document diff is 2111
-      lines > cap 600.
+      web build, Playwright phase3 + investor-profile E2E, focused survey API
+      regression, anonymous browser check for /onboarding/investor-profile,
+      generated view checks, check_agent_docs, owner_governance_gate, git diff
+      --check, and GitHub PR #91 CI before the latest bugfix push. auto_merge
+      remains ESCALATE because non-document diff is 2111 lines > cap 600.

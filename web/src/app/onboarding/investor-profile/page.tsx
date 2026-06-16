@@ -73,6 +73,8 @@ export default function InvestorProfileOnboardingPage() {
       if (err instanceof ApiError) {
         const detail = err.body as { detail?: string } | undefined;
         message = detail?.detail ?? err.message;
+      } else if (err instanceof Error && err.message.startsWith("CSRF fetch failed: 401")) {
+        message = "로그인 또는 게스트 시작 후 프로필을 저장할 수 있습니다.";
       }
       setStatus({ kind: "error", message });
     }

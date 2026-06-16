@@ -29,7 +29,7 @@ def _guest_session() -> str:
     )
 
 
-def _client(db_path, monkeypatch, *, owner: bool = True) -> TestClient:
+def _client(db_path, monkeypatch, *, owner: bool | None = True) -> TestClient:
     import app.config.settings as settings_mod
     import app.database.sqlite_db as sqlite_mod
 
@@ -38,7 +38,10 @@ def _client(db_path, monkeypatch, *, owner: bool = True) -> TestClient:
     monkeypatch.setattr(sqlite_mod, "settings", test_settings)
     initialize_database(db_path)
     c = TestClient(create_app(), raise_server_exceptions=True)
-    c.cookies.set("af_session", _owner_session() if owner else _guest_session())
+    if owner is True:
+        c.cookies.set("af_session", _owner_session())
+    elif owner is False:
+        c.cookies.set("af_session", _guest_session())
     return c
 
 
@@ -85,6 +88,13 @@ def test_get_survey_definition(tmp_path, monkeypatch):
     assert body["version"] == "investor-profile-v1"
     assert len(body["questions"]) >= 12
     assert body["questions"][0]["id"] == "investment_goal"
+
+
+def test_get_survey_definition_without_session(tmp_path, monkeypatch):
+    c = _client(tmp_path / "profile.db", monkeypatch, owner=None)
+    resp = c.get("/api/profile/survey")
+    assert resp.status_code == 200
+    assert resp.json()["version"] == "investor-profile-v1"
 
 
 def test_submit_survey_persists_profile(tmp_path, monkeypatch):

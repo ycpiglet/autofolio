@@ -526,3 +526,17 @@
 검증: `.\\.venv\\Scripts\\python.exe -m py_compile app/services/investor_profile.py app/api/routers/profile.py app/api/routers/trade.py app/api/routers/engine.py app/api/schemas/__init__.py app/api/main.py` -> OK; `.\\.venv\\Scripts\\python.exe -m pytest tests/api -q` -> 274 passed, 15 warnings; `npm run lint` -> pass; `npm run build` -> successful; `npx playwright test e2e/phase3.spec.ts e2e/investor-profile.spec.ts` -> 5 passed; Playwright MCP browser check on local dev server -> `/onboarding/investor-profile` and `/home` content present, no Next error overlay, 0 console errors after guest login; `python scripts/validate_task_schema.py` -> OK; `python scripts/build_task_index.py --check` -> OK; `python scripts/generate_views.py --check` -> OK; `python scripts/check_agent_docs.py` -> OK, 0 errors / 121 warnings; `python scripts/owner_governance_gate.py --allow-empty-owner-docs` -> pass; `git diff --check` -> OK with CRLF normalization warnings only; GitHub PR #91 CI -> green; `python scripts/auto_merge.py 91` -> ESCALATE, non-document diff 2111 lines > cap 600.
 관련 기록: TASK-074, proposed survey plan in Owner thread
 남은 리스크: DB schema 변경은 R3 surface라 production DB 적용과 PR #91 merge는 별도 gate/Owner 결정 필요. 심화 설문과 제안 카드별 자동 override policy는 후속 확장 가능. KIS/order/risk/prod는 미변경.
+
+### AUDIT-2026-06-17-002
+시각: 2026-06-17T01:33:00+09:00
+기록 시각: 2026-06-17T01:33:00+09:00
+요청자: Owner ("설문을 불러오지 못했다고 하네")
+수행자: Lead Engineer + QA (Codex)
+의도: 투자 프로필 온보딩에서 첫 사용자/비로그인 상태가 설문 정의를 읽지 못하는 회귀를 수정
+대상: TASK-074, PR #91, `app/api/routers/profile.py`, `tests/api/test_profile_survey.py`, `web/src/app/onboarding/investor-profile/page.tsx`, `agents/research_agent/notes/EVIDENCE-2026-06-17-001-investor-survey-public-load.md`
+작업: anonymous `GET /api/profile/survey`가 401을 반환해 UI에 `설문을 불러오지 못했습니다`가 표시되는 문제를 재현. 설문 정의 GET에서 `require_session`을 제거하고, 저장 POST/개인 프로필/check-in/override는 기존 session/owner+CSRF gate 유지. 비로그인 저장 시 메시지를 `로그인 또는 게스트 시작 후 프로필을 저장할 수 있습니다.`로 보강.
+방법: reproduce broken via Next proxy -> scoped auth relaxation for static survey definition -> regression test -> browser verification with cleared cookies
+결과: 세션 없이 `/api/profile/survey`가 200으로 응답하고 `/onboarding/investor-profile`에 문항이 렌더링됨. 실행성 액션과 저장성 API의 안전 gate는 유지.
+검증: broken reproduction before patch -> anonymous `GET /api/profile/survey` 401; fixed check -> anonymous `GET /api/profile/survey` 200; Playwright browser with cleared cookies -> `설문을 불러오지 못했습니다` 없음, `투자 목적` 렌더; `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_profile_survey.py -q` -> 10 passed, 2 warnings; `npm run lint` -> pass; `npm run build` -> successful; `npx playwright test e2e/investor-profile.spec.ts` -> 1 passed
+관련 기록: TASK-074, EVIDENCE-2026-06-17-001, PR #91
+남은 리스크: shared `AppShell` 상태바는 비로그인 상태에서 보호된 engine/profile 상태 조회 401을 devtools에 남길 수 있으나, 설문 정의 로드 실패와는 분리된 이슈. PR #91 merge는 여전히 auto_merge large-diff escalation 대상.

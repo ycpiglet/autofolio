@@ -62,6 +62,7 @@ Owner: Lead Engineer
 - 조건 저장, 엔진 1회 실행, 자동매매 ON 전환에 프로필 완료 게이트를 추가했다.
 - `/onboarding/investor-profile` 화면, 홈 CTA, 상태바 프로필 배지, 매매 실행성 액션 guard, 설정의 투자 프로필/체크인 탭을 추가했다.
 - Link 렌더링 Button에 `nativeButton={false}`를 지정해 Base UI 접근성 오류를 제거했다.
+- Owner 보고 버그(`설문을 불러오지 못했습니다`)를 재현하고, 설문 정의 GET을 공개로 전환했다. 저장 POST, 개인 프로필, 체크인, override API는 기존 owner/session gate를 유지한다.
 - API 테스트와 Playwright 온보딩 E2E를 추가했다.
 
 ## 변경 파일
@@ -93,6 +94,10 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 - `npm run build` in `web/` -> successful.
 - `npx playwright test e2e/phase3.spec.ts e2e/investor-profile.spec.ts` in `web/` -> 5 passed.
 - Playwright MCP browser check on local dev server -> `/onboarding/investor-profile` and `/home` load with content, no Next error overlay, and 0 console errors after guest login. Screenshot: `autofolio-investor-profile-verified.png`.
+- Broken reproduction for Owner-reported survey load bug: anonymous `GET /api/profile/survey` via Next proxy returned 401 before the patch.
+- Fixed reproduction: anonymous `GET /api/profile/survey` via Next proxy -> 200 OK; browser with cleared cookies rendered `투자 목적` and did not render `설문을 불러오지 못했습니다`.
+- `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_profile_survey.py -q` -> 10 passed, 2 warnings.
+- `npx playwright test e2e/investor-profile.spec.ts` in `web/` -> 1 passed after the public survey load fix.
 - `python scripts/validate_task_schema.py` -> OK.
 - `python scripts/build_task_index.py --check` -> OK.
 - `python scripts/generate_views.py --check` -> OK.
@@ -105,6 +110,7 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 ## 증거
 
 - `tests/api/test_profile_survey.py`: 프로필 미완료 shape, 설문 제출, final ack 필수, guest 차단, condition/run-once profile gate, check-in, override ack 검증.
+- `agents/research_agent/notes/EVIDENCE-2026-06-17-001-investor-survey-public-load.md`: anonymous survey load bug reproduction, fix, and verification.
 - `tests/api/test_phase3_state.py`: 기존 CSRF/compliance ack 계약 유지.
 - `web/e2e/phase3.spec.ts`, `web/e2e/investor-profile.spec.ts`: 기존 조건 등록/엔진 실행 confirmation 흐름과 온보딩 설문 저장 후 프로필 요약 렌더링 확인.
 - PR #91: https://github.com/ycpiglet/autofolio/pull/91

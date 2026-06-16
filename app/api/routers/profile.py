@@ -31,10 +31,12 @@ def investor_profile(
 
 
 @router.get("/survey", response_model=SurveyDefinitionResponse)
-def survey_definition(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
-) -> SurveyDefinitionResponse:
-    """Return the current onboarding survey definition."""
+def survey_definition() -> SurveyDefinitionResponse:
+    """Return the active onboarding survey definition.
+
+    The definition itself is public so first-time users can see the survey
+    before signing in. Saving answers still requires owner session + CSRF.
+    """
     return SurveyDefinitionResponse(**profiles.survey_definition())
 
 
