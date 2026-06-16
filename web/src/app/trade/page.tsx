@@ -47,7 +47,8 @@ function TradePageInner() {
     queryFn: getInvestorProfile,
     staleTime: 60_000,
   });
-  const profileCompleted = profileQuery.data?.completed === true;
+  const profileKnownIncomplete = profileQuery.isSuccess && profileQuery.data?.completed === false;
+  const profileCompleted = !profileKnownIncomplete;
 
   // Current active conditions
   const conditionsQuery = useQuery<TableResponse>({
@@ -92,7 +93,7 @@ function TradePageInner() {
               size="sm"
               variant="outline"
               onClick={() => setRunOnceConfirmOpen(true)}
-              disabled={runOnceStatus.kind === "running" || !profileCompleted}
+              disabled={runOnceStatus.kind === "running" || profileKnownIncomplete}
               aria-label="엔진 1회 실행"
             >
               {runOnceStatus.kind === "running" ? "실행 중…" : "엔진 1회 실행"}
@@ -115,7 +116,7 @@ function TradePageInner() {
             {runOnceStatus.kind === "error" && (
               <span role="alert" className="text-xs text-destructive">{runOnceStatus.message}</span>
             )}
-            {!profileCompleted && (
+            {profileKnownIncomplete && (
               <span role="status" className="text-xs text-muted-foreground">투자 프로필 필요</span>
             )}
           </div>

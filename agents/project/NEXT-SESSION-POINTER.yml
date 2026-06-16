@@ -1,5 +1,5 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T00:25:23+09:00
+updated_at: 2026-06-17T00:42:13+09:00
 updated_by: lead-engineer
 current_state:
   signal: watch
@@ -76,6 +76,6 @@ verification:
     signal: pass
     detail: >
       2026-06-17 TASK-074 run passed full API tests (274 passed), web lint,
-      web build, Playwright investor-profile E2E, generated view checks,
-      check_agent_docs, owner_governance_gate, and git diff --check in the same
-      branch.
+      web build, Playwright phase3 + investor-profile E2E, generated view
+      checks, check_agent_docs, owner_governance_gate, and git diff --check in
+      the same branch.

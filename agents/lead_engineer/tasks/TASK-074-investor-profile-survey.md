@@ -90,7 +90,7 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 - `.\\.venv\\Scripts\\python.exe -m pytest tests/api -q` -> 274 passed, 15 warnings.
 - `npm run lint` in `web/` -> pass, 0 warnings/errors.
 - `npm run build` in `web/` -> successful.
-- `npx playwright test e2e/investor-profile.spec.ts` in `web/` -> 1 passed.
+- `npx playwright test e2e/phase3.spec.ts e2e/investor-profile.spec.ts` in `web/` -> 5 passed.
 - `python scripts/validate_task_schema.py` -> OK.
 - `python scripts/build_task_index.py --check` -> OK.
 - `python scripts/generate_views.py --check` -> OK.
@@ -102,7 +102,7 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 
 - `tests/api/test_profile_survey.py`: 프로필 미완료 shape, 설문 제출, final ack 필수, guest 차단, condition/run-once profile gate, check-in, override ack 검증.
 - `tests/api/test_phase3_state.py`: 기존 CSRF/compliance ack 계약 유지.
-- `web/e2e/investor-profile.spec.ts`: 온보딩 설문 저장 후 프로필 요약 렌더링 확인.
+- `web/e2e/phase3.spec.ts`, `web/e2e/investor-profile.spec.ts`: 기존 조건 등록/엔진 실행 confirmation 흐름과 온보딩 설문 저장 후 프로필 요약 렌더링 확인.
 
 ## 남은 이슈 / 한계
 
@@ -129,4 +129,4 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 - KIS, live order, risk policy, secrets, CI workflow를 변경하지 않았다.
 - 프로필 미완료 상태에서 실행성 액션은 서버측 428로 fail-closed 된다.
 - 킬스위치와 조회는 프로필 없이 계속 가능해 안전 조작을 방해하지 않는다.
-- focused API tests, lint, build, Playwright onboarding E2E가 통과했다.
+- full API tests, lint, build, phase3 + onboarding Playwright E2E가 통과했다.
