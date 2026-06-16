@@ -21,6 +21,27 @@ class SessionResponse(BaseModel):
     csrf_token: str | None = None  # only present when authenticated
 
 
+# ── Account ────────────────────────────────────────────────────────────────────
+
+class AccountResponse(BaseModel):
+    """Read-only account profile. NEVER contains password/hash/salt/secret."""
+
+    username: str | None = None
+    role: str
+    data_source: str
+    is_owner: bool
+
+
+class PasswordChangeRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class PasswordChangeResponse(BaseModel):
+    status: str        # "changed"
+    message: str
+
+
 # ── Shared ────────────────────────────────────────────────────────────────────
 
 class TableResponse(BaseModel):

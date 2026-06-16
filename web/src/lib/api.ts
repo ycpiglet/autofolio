@@ -200,6 +200,42 @@ export function putRiskLimits(payload: RiskLimitsPayload): Promise<unknown> {
   return apiPut("/api/settings/risk-limits", payload);
 }
 
+// ── Account (local account management) ──────────────────────────────────────
+
+/** Read-only account profile — never contains a secret. */
+export interface AccountResponse {
+  username: string | null;
+  role: string;
+  data_source: string;
+  is_owner: boolean;
+}
+
+/** GET /api/account — current account profile (no secrets) */
+export function getAccount(): Promise<AccountResponse> {
+  return apiGet<AccountResponse>("/api/account");
+}
+
+/**
+ * POST /api/account/password — change the SESSION's own password.
+ * The server derives the username from the session, never the body.
+ * Throws ApiError(401) on wrong current password, ApiError(400) on a
+ * weak/invalid new password, ApiError(403) for guests.
+ */
+export function postPasswordChange(
+  oldPassword: string,
+  newPassword: string,
+): Promise<{ status: string; message: string }> {
+  return apiPost("/api/account/password", {
+    old_password: oldPassword,
+    new_password: newPassword,
+  });
+}
+
+/** POST /api/auth/logout — clear the session cookie (CSRF-exempt). */
+export function postLogout(): Promise<{ status: string }> {
+  return apiPost("/api/auth/logout");
+}
+
 // ── Agent domain types ────────────────────────────────────────────────────
 
 export interface AgentInfo {

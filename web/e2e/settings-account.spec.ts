@@ -1,0 +1,230 @@
+// web/e2e/settings-account.spec.ts
+import { test, expect, type Page } from "@playwright/test";
+
+// ── Fixtures ─────────────────────────────────────────────────────────────────
+
+const CSRF_TOKEN = "test-csrf-token-account";
+
+const OWNER_SESSION = {
+  role: "owner",
+  username: "alice",
+  data_source: "backend",
+  csrf_token: CSRF_TOKEN,
+};
+
+const GUEST_SESSION = {
+  role: "guest",
+  username: null,
+  data_source: "demo",
+  csrf_token: CSRF_TOKEN,
+};
+
+const OWNER_ACCOUNT = {
+  username: "alice",
+  role: "owner",
+  data_source: "backend",
+  is_owner: true,
+};
+
+const GUEST_ACCOUNT = {
+  username: null,
+  role: "guest",
+  data_source: "demo",
+  is_owner: false,
+};
+
+const ENGINE_STATUS = {
+  env: "paper",
+  auto_trading_enabled: false,
+  kill_switch_active: false,
+  circuit_breaker: {
+    triggered: false,
+    threshold_pct: 5,
+    consecutive_failures: 0,
+    today_pnl: 0,
+  },
+};
+
+const EMPTY_TABLE = { columns: [], rows: [] };
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+async function mockBackground(
+  page: Page,
+  session: typeof OWNER_SESSION | typeof GUEST_SESSION,
+  account: typeof OWNER_ACCOUNT | typeof GUEST_ACCOUNT,
+) {
+  // Catch-all: GET /api/** → empty table (lowest LIFO priority)
+  await page.route(/\/api\//, (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(EMPTY_TABLE),
+      });
+    }
+    return route.continue();
+  });
+
+  await page.route(/\/api\/engine\/status/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(ENGINE_STATUS),
+    }),
+  );
+
+  await page.route(/\/api\/auth\/me/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(session),
+    }),
+  );
+
+  await page.route(/\/api\/account(\?|$)/, (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(account),
+      });
+    }
+    return route.continue();
+  });
+}
+
+async function openAccountTab(page: Page) {
+  await page.goto("/settings");
+  await page.getByRole("tab", { name: "계정/연결" }).click();
+}
+
+// ── Tests ─────────────────────────────────────────────────────────────────────
+
+test.describe("Settings — Account tab (owner)", () => {
+  test("shows account info and an honest SSO note", async ({ page }) => {
+    await mockBackground(page, OWNER_SESSION, OWNER_ACCOUNT);
+    await openAccountTab(page);
+
+    await expect(page.getByText("계정 정보")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("alice")).toBeVisible();
+    await expect(page.getByText("오너")).toBeVisible();
+    await expect(
+      page.getByText(/SSO·SNS 연동은 추후 지원 예정/),
+    ).toBeVisible();
+  });
+
+  test("password change success → success status, body has session-derived target", async ({
+    page,
+  }) => {
+    await mockBackground(page, OWNER_SESSION, OWNER_ACCOUNT);
+
+    let capturedBody: Record<string, unknown> | null = null;
+    let capturedCsrf = "";
+    await page.route(/\/api\/account\/password/, (route) => {
+      if (route.request().method() === "POST") {
+        capturedBody = JSON.parse(route.request().postData() ?? "{}");
+        capturedCsrf = route.request().headers()["x-csrf-token"] ?? "";
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ status: "changed", message: "ok" }),
+        });
+      }
+      return route.continue();
+    });
+
+    await openAccountTab(page);
+
+    await page.getByLabel("현재 비밀번호").fill("currentpw1");
+    await page.getByLabel("새 비밀번호 (최소 8자)").fill("brandnew99");
+    await page.getByLabel("새 비밀번호 확인").fill("brandnew99");
+
+    const resp = page.waitForResponse(/\/api\/account\/password/, { timeout: 10_000 });
+    await page.getByRole("button", { name: "비밀번호 변경" }).click();
+    await resp;
+
+    await expect(
+      page.getByRole("status").filter({ hasText: /비밀번호가 변경/ }),
+    ).toBeVisible({ timeout: 5_000 });
+
+    expect(capturedCsrf).toBe(CSRF_TOKEN);
+    // Body carries only old/new — username comes from the session server-side.
+    expect(capturedBody).toEqual({
+      old_password: "currentpw1",
+      new_password: "brandnew99",
+    });
+  });
+
+  test("wrong current password → 401 inline error", async ({ page }) => {
+    await mockBackground(page, OWNER_SESSION, OWNER_ACCOUNT);
+
+    await page.route(/\/api\/account\/password/, (route) => {
+      if (route.request().method() === "POST") {
+        return route.fulfill({
+          status: 401,
+          contentType: "application/json",
+          body: JSON.stringify({ detail: "현재 비밀번호가 일치하지 않습니다." }),
+        });
+      }
+      return route.continue();
+    });
+
+    await openAccountTab(page);
+
+    await page.getByLabel("현재 비밀번호").fill("wrongpw12");
+    await page.getByLabel("새 비밀번호 (최소 8자)").fill("brandnew99");
+    await page.getByLabel("새 비밀번호 확인").fill("brandnew99");
+    await page.getByRole("button", { name: "비밀번호 변경" }).click();
+
+    await expect(
+      page.getByRole("alert").filter({ hasText: /현재 비밀번호가 일치하지 않습니다/ }),
+    ).toBeVisible({ timeout: 5_000 });
+  });
+
+  test("mismatched confirmation → client-side error, no request fired", async ({
+    page,
+  }) => {
+    await mockBackground(page, OWNER_SESSION, OWNER_ACCOUNT);
+
+    let fired = false;
+    await page.route(/\/api\/account\/password/, (route) => {
+      fired = true;
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ status: "changed", message: "ok" }),
+      });
+    });
+
+    await openAccountTab(page);
+    await page.getByLabel("현재 비밀번호").fill("currentpw1");
+    await page.getByLabel("새 비밀번호 (최소 8자)").fill("brandnew99");
+    await page.getByLabel("새 비밀번호 확인").fill("different9");
+    await page.getByRole("button", { name: "비밀번호 변경" }).click();
+
+    await expect(
+      page.getByRole("alert").filter({ hasText: /일치하지 않습니다/ }),
+    ).toBeVisible({ timeout: 5_000 });
+    expect(fired).toBe(false);
+  });
+});
+
+test.describe("Settings — Account tab (guest)", () => {
+  test("guest sees disabled password form with a note", async ({ page }) => {
+    await mockBackground(page, GUEST_SESSION, GUEST_ACCOUNT);
+    await openAccountTab(page);
+
+    await expect(page.getByText("게스트", { exact: true })).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(
+      page.getByText(/게스트 계정은 비밀번호를 변경할 수 없습니다/),
+    ).toBeVisible();
+
+    // The submit button is disabled for guests.
+    await expect(
+      page.getByRole("button", { name: "비밀번호 변경" }),
+    ).toBeDisabled();
+  });
+});
