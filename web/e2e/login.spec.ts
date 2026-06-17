@@ -187,7 +187,10 @@ test.describe("Login flow", () => {
 
     const google = page.getByRole("button", { name: "Google로 계속하기" });
     await expect(google).toBeVisible();
-    await expect(page.getByRole("button", { name: "Kakao로 계속하기" })).toHaveCount(0);
+    const kakao = page.getByRole("button", { name: /Kakao로 계속하기/ });
+    await expect(kakao).toBeVisible();
+    await kakao.click();
+    await expect(page.getByRole("dialog", { name: "Kakao 로그인 연동 설정" })).toBeVisible();
   });
 
   test("enabled mock SSO provider appears as a login button", async ({ page }) => {
@@ -195,7 +198,7 @@ test.describe("Login flow", () => {
 
     await page.goto("/login");
 
-    await expect(page.getByRole("button", { name: "Mock SSO로 계속하기" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Google로 계속하기" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Mock SSO.*개발용/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Google로 계속하기/ })).toBeVisible();
   });
 });
