@@ -249,11 +249,11 @@ def error_client(app):
 
 @pytest.fixture()
 def mock_backend(monkeypatch):
-    """Monkeypatch app.ui.backend with deterministic sample data.
+    """Monkeypatch app.services.backend with deterministic sample data.
 
     Returns the fake module so individual tests can override specific attrs.
     """
-    import app.ui.backend as backend_mod
+    import app.services.backend as backend_mod
 
     monkeypatch.setattr(backend_mod, "holdings_df", lambda **kw: SAMPLE_HOLDINGS)
     monkeypatch.setattr(backend_mod, "kpis", lambda: SAMPLE_KPIS)

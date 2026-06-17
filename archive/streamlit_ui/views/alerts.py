@@ -73,7 +73,7 @@ def render() -> None:
 def _disclosure_panel() -> None:
     st.subheader("뉴스/공시")
     try:
-        from app.ui import backend
+        from app.services import backend
 
         opts = backend.symbol_options()
         if not opts:
@@ -118,7 +118,7 @@ def _disclosure_panel() -> None:
 def _live_feed() -> None:
     """라이브: 최근 주문로그를 알림 피드 형식으로 표시."""
     try:
-        from app.ui import backend
+        from app.services import backend
 
         logs = backend.list_order_logs(limit=50)
         if logs.empty:

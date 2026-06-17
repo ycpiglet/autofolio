@@ -166,7 +166,7 @@ def render_summary(
 
 
 def _collect_snapshot(*, limit_symbols: int) -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     warnings: list[str] = []
 

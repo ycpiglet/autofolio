@@ -100,7 +100,7 @@ def build_portfolio_report(
     """포트폴리오 성과 리포트를 빌드한다 (순수 함수, 결정적).
 
     Args:
-        holdings: HOLDINGS_COLUMNS 스키마 DataFrame (app/ui/backend._build_holdings_df 반환값).
+        holdings: HOLDINGS_COLUMNS 스키마 DataFrame (app/services/backend._build_holdings_df 반환값).
         pnl_series: date/pnl 컬럼 DataFrame (backend.daily_pnl_series() 반환값).
         kpis: backend.kpis() 반환값 dict.
         realized_pnl: 실현 손익 합계 (원) — repository.total_realized_pnl() 권장.

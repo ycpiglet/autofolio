@@ -30,3 +30,21 @@ def is_within_trading_window(
     start = parse_hhmm(start_hhmm)
     end = parse_hhmm(end_hhmm)
     return start <= now.time() <= end
+
+
+ORDER_SESSION_WINDOWS = {
+    "PRE_OPEN_SINGLE": ("08:30", "09:00"),
+    "AFTER_CLOSE_SINGLE": ("15:40", "16:00"),
+    "AFTER_HOURS_SINGLE": ("16:00", "18:00"),
+}
+
+
+def is_within_order_session(session: str, now=None) -> bool:
+    """Return whether ``now`` is inside a supported non-regular KRX session."""
+    normalized = (session or "REGULAR").upper()
+    if normalized == "REGULAR":
+        return is_within_trading_window(now)
+    window = ORDER_SESSION_WINDOWS.get(normalized)
+    if window is None:
+        return False
+    return is_within_trading_window(now, window[0], window[1])

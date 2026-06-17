@@ -144,8 +144,8 @@ class TestCsrfRequired:
 
 class TestKillSwitch:
     def test_kill_switch_activate(self, owner_client):
-        with patch("app.ui.backend.set_flag") as mock_set, \
-             patch("app.ui.backend.get_flag", return_value=True):
+        with patch("app.services.backend.set_flag") as mock_set, \
+             patch("app.services.backend.get_flag", return_value=True):
             resp = owner_client.post(
                 "/api/engine/kill-switch",
                 json={"active": True},
@@ -157,8 +157,8 @@ class TestKillSwitch:
         mock_set.assert_called_once_with("kill_switch_active", True)
 
     def test_kill_switch_deactivate(self, owner_client):
-        with patch("app.ui.backend.set_flag") as mock_set, \
-             patch("app.ui.backend.get_flag", return_value=False):
+        with patch("app.services.backend.set_flag") as mock_set, \
+             patch("app.services.backend.get_flag", return_value=False):
             resp = owner_client.post(
                 "/api/engine/kill-switch",
                 json={"active": False},
@@ -181,8 +181,8 @@ class TestKillSwitch:
 
 class TestAutoTrading:
     def test_auto_trading_enable(self, owner_client):
-        with patch("app.ui.backend.set_flag") as mock_set, \
-             patch("app.ui.backend.get_flag", return_value=True), \
+        with patch("app.services.backend.set_flag") as mock_set, \
+             patch("app.services.backend.get_flag", return_value=True), \
              patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp = owner_client.post(
                 "/api/engine/auto-trading",
@@ -194,8 +194,8 @@ class TestAutoTrading:
         mock_set.assert_called_once_with("auto_trading_enabled", True)
 
     def test_auto_trading_disable(self, owner_client):
-        with patch("app.ui.backend.set_flag") as mock_set, \
-             patch("app.ui.backend.get_flag", return_value=False):
+        with patch("app.services.backend.set_flag") as mock_set, \
+             patch("app.services.backend.get_flag", return_value=False):
             resp = owner_client.post(
                 "/api/engine/auto-trading",
                 json={"enabled": False},
@@ -209,7 +209,7 @@ class TestAutoTrading:
 
 class TestRunOnce:
     def test_run_once_200(self, owner_client):
-        with patch("app.ui.backend.run_engine_once", return_value=["BUY 005930 done"]), \
+        with patch("app.services.backend.run_engine_once", return_value=["BUY 005930 done"]), \
              patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp = owner_client.post(
                 "/api/engine/run-once",
@@ -239,7 +239,7 @@ class TestRunOnce:
 
     def test_run_once_lock_released_after_success(self, app, owner_client):
         """Lock must be released after run completes so a second call can proceed."""
-        with patch("app.ui.backend.run_engine_once", return_value=[]), \
+        with patch("app.services.backend.run_engine_once", return_value=[]), \
              patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp1 = owner_client.post("/api/engine/run-once", headers=owner_headers())
             resp2 = owner_client.post("/api/engine/run-once", headers=owner_headers())
@@ -251,14 +251,14 @@ class TestRunOnce:
         err_client = TestClient(create_app(), raise_server_exceptions=False)
         err_client.cookies.set("af_session", _owner_session())
 
-        with patch("app.ui.backend.run_engine_once", side_effect=RuntimeError("boom")), \
+        with patch("app.services.backend.run_engine_once", side_effect=RuntimeError("boom")), \
              patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp = err_client.post("/api/engine/run-once", headers=owner_headers())
         # Server returns 500 (fail-closed)
         assert resp.status_code == 500
 
         # Lock should be free now — a fresh call should work
-        with patch("app.ui.backend.run_engine_once", return_value=[]), \
+        with patch("app.services.backend.run_engine_once", return_value=[]), \
              patch("app.api.routers.engine.investor_profile_completed", return_value=True):
             resp2 = err_client.post("/api/engine/run-once", headers=owner_headers())
         assert resp2.status_code == 200
@@ -513,7 +513,7 @@ class TestNoOrderEndpoint:
 
 class TestRiskLimits:
     def test_risk_limits_saves(self, owner_client):
-        with patch("app.ui.backend.set_risk_limits") as mock_set:
+        with patch("app.services.backend.set_risk_limits") as mock_set:
             resp = owner_client.put(
                 "/api/settings/risk-limits",
                 json={"max_order_amount": 100000.0, "max_daily_amount": 300000.0},
@@ -528,7 +528,7 @@ class TestRiskLimits:
 
     def test_risk_limits_partial_update(self, owner_client):
         """Only max_order_amount provided — max_daily_amount should be None."""
-        with patch("app.ui.backend.set_risk_limits") as mock_set:
+        with patch("app.services.backend.set_risk_limits") as mock_set:
             resp = owner_client.put(
                 "/api/settings/risk-limits",
                 json={"max_order_amount": 50000.0},

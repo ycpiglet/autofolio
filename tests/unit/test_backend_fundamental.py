@@ -3,7 +3,7 @@ from __future__ import annotations
 
 def test_fundamental_uses_kis_client(monkeypatch):
     from app.brokers.kis.kis_client import KisClient
-    from app.ui import backend
+    from app.services import backend
 
     class FakeKisClient(KisClient):
         def __init__(self):
@@ -23,7 +23,7 @@ def test_fundamental_uses_kis_client(monkeypatch):
 
 
 def test_fundamental_returns_empty_for_non_kis_client(monkeypatch):
-    from app.ui import backend
+    from app.services import backend
 
     monkeypatch.setattr(backend, "_ctx", lambda: (None, object(), None, None))
 
@@ -32,7 +32,7 @@ def test_fundamental_returns_empty_for_non_kis_client(monkeypatch):
 
 def test_backend_propose_passes_fundamental_to_research_agent(monkeypatch):
     from app.brokers.base import PriceQuote
-    from app.ui import backend
+    from app.services import backend
 
     class FakeBroker:
         def get_current_price(self, symbol: str) -> PriceQuote:

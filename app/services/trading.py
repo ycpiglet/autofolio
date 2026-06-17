@@ -1,6 +1,6 @@
 """app/services/trading — 조건·주문로그·체결·KIS 주문내역·엔진·AI 제안·화이트리스트.
 
-app/ui/backend 구현을 재-익스포트한다.
+app/services/backend 구현을 도메인별로 재-익스포트한다.
 propose() 는 app.agents.research_agent.ConditionProposal 을 반환한다.
 """
 from __future__ import annotations
@@ -9,7 +9,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Literal
 
-from app.ui.backend import (  # noqa: F401
+from app.services.backend import (  # noqa: F401
     add_condition,
     add_whitelist,
     kis_order_history,
@@ -70,13 +70,13 @@ def save_condition_with_gates(
        - CAUTION/주의 + caution_acknowledged=True → 저장 진행
     3. 통과 → add_condition 호출 → saved 반환
 
-    app.ui.backend (add_condition, disclosure_gate_state) 와
+    app.services.backend (add_condition, disclosure_gate_state) 와
     app.ui.agents_runtime (ask) 에서 임포트한다 — Phase 0 과도기 의존.
     """
     # Phase 0 transitional imports — will be replaced by HTTP gates in Phase 3
     from app.ui import agents_runtime as ar
-    from app.ui.backend import add_condition as _add_condition
-    from app.ui.backend import disclosure_gate_state
+    from app.services.backend import add_condition as _add_condition
+    from app.services.backend import disclosure_gate_state
 
     # 1. 공시 게이트 확인
     gate = disclosure_gate_state(symbol)

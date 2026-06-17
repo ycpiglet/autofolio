@@ -289,7 +289,7 @@
     {
       "type": "task",
       "id": "TASK-014",
-      "status": "보류",
+      "status": "완료",
       "owner": "KIS API Engineer",
       "assignees": [
         "KIS API Engineer"
@@ -306,8 +306,8 @@
       "trigger_meeting": "자가발생",
       "created": "2026-06-10",
       "created_at": "2026-06-10T23:39:38+09:00",
-      "updated_at": "2026-06-12T02:10:22+09:00",
-      "gate": "Owner approval required: changes app/brokers/kis place_order order path, app/risk safety gates, and after-hours order policy.",
+      "updated_at": "2026-06-17T09:03:57+09:00",
+      "gate": "Owner approval received 2026-06-17; prod order execution remains hardguarded",
       "_path": "agents/lead_engineer/tasks/TASK-014-kis-after-hours-order.md",
       "_title": "kis after hours order"
     },
@@ -455,7 +455,7 @@
     {
       "type": "task",
       "id": "TASK-021",
-      "status": "보류",
+      "status": "완료",
       "owner": "KIS API Engineer",
       "assignees": [
         "KIS API Engineer"
@@ -472,13 +472,14 @@
       "trigger_meeting": "자가발생",
       "created": "2026-06-10",
       "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-021-kis-margin-short.md",
       "_title": "kis margin short"
     },
     {
       "type": "task",
       "id": "TASK-022",
-      "status": "보류",
+      "status": "완료",
       "owner": "KIS API Engineer",
       "assignees": [
         "KIS API Engineer"
@@ -495,6 +496,7 @@
       "trigger_meeting": "자가발생",
       "created": "2026-06-10",
       "created_at": "2026-06-10T23:39:38+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-022-kis-overseas-order.md",
       "_title": "kis overseas order"
     },
@@ -587,7 +589,7 @@
     {
       "type": "task",
       "id": "TASK-026",
-      "status": "보류",
+      "status": "완료",
       "owner": "KIS API Engineer",
       "assignees": [
         "KIS API Engineer",
@@ -606,19 +608,19 @@
         "elw",
         "etn"
       ],
-      "gate": "Owner approval required before any live broker/order-path support; mock catalog tests may be drafted first",
+      "gate": "Owner approval received 2026-06-17; prod order execution remains hardguarded",
       "trigger_meeting": "Owner direct request",
       "audit_log": "AUDIT-2026-06-12-009",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-026-krx-alternative-products-test-support.md",
       "_title": "krx alternative products test support"
     },
     {
       "type": "task",
       "id": "TASK-027",
-      "status": "보류",
+      "status": "완료",
       "owner": "KIS API Engineer",
       "assignees": [
         "KIS API Engineer",
@@ -637,19 +639,19 @@
         "options",
         "fx-futures"
       ],
-      "gate": "Owner approval required; derivatives order routing and risk policy are R3 surfaces",
+      "gate": "Owner approval received 2026-06-17; prod order execution remains hardguarded",
       "trigger_meeting": "Owner direct request",
       "audit_log": "AUDIT-2026-06-12-009",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-027-krx-derivatives-test-support.md",
       "_title": "krx derivatives test support"
     },
     {
       "type": "task",
       "id": "TASK-028",
-      "status": "보류",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -670,12 +672,12 @@
         "moo",
         "moc"
       ],
-      "gate": "Owner approval required before broker/order_flow changes that can affect live order behavior",
+      "gate": "Owner approval received 2026-06-17; prod order execution remains hardguarded",
       "trigger_meeting": "Owner direct request",
       "audit_log": "AUDIT-2026-06-12-009",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-028-advanced-order-types-test-support.md",
       "_title": "advanced order types test support"
     },
@@ -711,7 +713,7 @@
     {
       "type": "task",
       "id": "TASK-030",
-      "status": "보류",
+      "status": "완료",
       "owner": "Backend Engineer",
       "assignees": [
         "Backend Engineer",
@@ -729,19 +731,19 @@
         "multi-leg",
         "execution"
       ],
-      "gate": "Owner approval required before actual block/basket venue or broker submission support",
+      "gate": "Owner approval received 2026-06-17; prod order execution remains hardguarded",
       "trigger_meeting": "Owner direct request",
       "audit_log": "AUDIT-2026-06-12-009",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-030-block-basket-execution-tests.md",
       "_title": "block basket execution tests"
     },
     {
       "type": "task",
       "id": "TASK-031",
-      "status": "보류",
+      "status": "완료",
       "owner": "Compliance Officer",
       "assignees": [
         "Compliance Officer",
@@ -760,19 +762,19 @@
         "vi",
         "disclosure"
       ],
-      "gate": "Owner approval required before app/risk or live order-blocking policy changes",
+      "gate": "Owner approval received 2026-06-17; prod order execution remains hardguarded",
       "trigger_meeting": "Owner direct request",
       "audit_log": "AUDIT-2026-06-12-009",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-12T12:27:28+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-031-market-halt-vi-risk-gates.md",
       "_title": "market halt vi risk gates"
     },
     {
       "type": "task",
       "id": "TASK-032",
-      "status": "보류",
+      "status": "완료",
       "owner": "Data Engineer",
       "assignees": [
         "Data Engineer",
@@ -789,12 +791,12 @@
         "holiday",
         "stale-data"
       ],
-      "gate": "no live orders; risk integration requires review",
+      "gate": "Owner approval received 2026-06-17; prod order execution remains hardguarded",
       "trigger_meeting": "Owner direct request",
       "audit_log": "AUDIT-2026-06-13-002",
       "created": "2026-06-12",
       "created_at": "2026-06-12T12:27:28+09:00",
-      "updated_at": "2026-06-13T00:14:24+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-032-data-quality-corporate-action-tests.md",
       "_title": "data quality corporate action tests"
     },
@@ -1290,7 +1292,7 @@
     {
       "type": "task",
       "id": "TASK-049",
-      "status": "보류",
+      "status": "완료",
       "owner": "UI/UX Designer",
       "assignees": [
         "UI/UX Designer",
@@ -1313,7 +1315,7 @@
       "audit_log": "AUDIT-2026-06-13-007",
       "created": "2026-06-13",
       "created_at": "2026-06-13T01:33:29+09:00",
-      "updated_at": "2026-06-13T01:33:29+09:00",
+      "updated_at": "2026-06-17T09:03:57+09:00",
       "_path": "agents/lead_engineer/tasks/TASK-049-ui-overhaul-phase5-analysis-parity-retire.md",
       "_title": "ui overhaul phase5 analysis parity retire"
     },

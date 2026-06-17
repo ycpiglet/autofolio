@@ -2,7 +2,7 @@
 
 **Autofolio** — 한국투자증권(KIS) Open API 기반 **에이전트 자동매매 OS (Agentic Quant Portfolio OS)**.
 
-멀티에이전트(자산팀·퀀트팀·거버넌스)가 협업하고, Streamlit UI + Telegram 봇으로 어디서든 관제·명령.
+멀티에이전트(자산팀·퀀트팀·거버넌스)가 협업하고, Next.js UI + FastAPI + Telegram 봇으로 어디서든 관제·명령.
 
 | | |
 |---|---|
@@ -10,7 +10,7 @@
 | **에이전트** | 40개 (개발·자산·퀀트·거버넌스) |
 | **언어** | Python 3.10+ |
 | **DB** | SQLite |
-| **UI** | Streamlit |
+| **UI** | Next.js + FastAPI |
 | **알림** | Telegram 봇 (`/status /pnl /positions /conditions /engine /propose`) |
 | **CI** | GitHub Actions (pytest + check_agent_docs) |
 
@@ -52,11 +52,11 @@ copy .env.example .env              # .env 편집: KIS_PAPER_APP_KEY 등
 # 3. DB 초기화
 python scripts/init_db.py
 
-# 4. 앱 실행 (신 멀티페이지 셸)
-run_ui.bat                           # 또는 streamlit run app/ui/autofolio_app.py
+# 4. 앱 실행
+run_ui.bat                           # FastAPI backend + Next.js frontend
 ```
 
-> **구 MVP 단일화면**: `streamlit run app/ui/streamlit_app.py` (레거시·참조용)
+> Streamlit UI는 TASK-049에서 은퇴되어 `archive/streamlit_ui/`로 이동했습니다.
 
 ---
 
@@ -101,7 +101,7 @@ run_ui.bat                           # 또는 streamlit run app/ui/autofolio_app
 ## 테스트
 
 ```powershell
-pytest                          # 128개 테스트
+pytest
 python scripts/check_agent_docs.py   # 0 error 게이트
 ```
 

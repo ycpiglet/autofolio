@@ -79,7 +79,7 @@ def _ic() -> None:
                     f"{cond['quantity']}주 @ {cond['target_price']:,.0f}"
                 )
                 if st.button("✅ 이 조건으로 매매 등록 (사람 확인)", key="ic_apply_cond"):
-                    from app.ui import backend
+                    from app.services import backend
                     cid = backend.add_condition(
                         symbol=cond["symbol"],
                         side=cond["side"],

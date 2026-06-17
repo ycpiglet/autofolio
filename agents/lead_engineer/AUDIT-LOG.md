@@ -540,3 +540,18 @@
 검증: broken reproduction before patch -> anonymous `GET /api/profile/survey` 401; fixed check -> anonymous `GET /api/profile/survey` 200; Playwright browser with cleared cookies -> `설문을 불러오지 못했습니다` 없음, `투자 목적` 렌더; `.\\.venv\\Scripts\\python.exe -m pytest tests/api/test_profile_survey.py -q` -> 10 passed, 2 warnings; `npm run lint` -> pass; `npm run build` -> successful; `npx playwright test e2e/investor-profile.spec.ts` -> 1 passed
 관련 기록: TASK-074, EVIDENCE-2026-06-17-001, PR #91
 남은 리스크: shared `AppShell` 상태바는 비로그인 상태에서 보호된 engine/profile 상태 조회 401을 devtools에 남길 수 있으나, 설문 정의 로드 실패와는 분리된 이슈. PR #91 merge는 여전히 auto_merge large-diff escalation 대상.
+
+### AUDIT-2026-06-17-003
+시각: 2026-06-17T09:03:57+09:00
+기록 시각: 2026-06-17T09:03:57+09:00
+요청자: Owner ("TASK-069 제외하고 모두 승인. 진행 및 마무리 후 워킹트리 정리.")
+수행자: Lead Engineer + Backend Engineer + UI/UX Designer + QA + Doc Steward (Codex)
+의도: TASK-069만 scheduled 보류로 남기고, 승인된 R3 주문·리스크 표면과 TASK-049 Streamlit 은퇴를 구현·검증·기록한다.
+대상: TASK-014/021/022/026/027/028/030/031/032, TASK-049, R3 order/risk code, FastAPI/Next runtime, task records, capability matrix
+작업: `app/risk/order_policy.py` 신설, `OrderRequest`/`Position` 메타데이터 확장, `SafetyChecker`/`OrderFlow` quote·session·product policy 연결, KIS domestic/overseas paper payload와 prod hardguard 추가, mock advanced order semantics, derivatives/basket mock model, overseas KRW holdings conversion 추가. Docker/run scripts를 FastAPI+Next로 전환, `app/ui/backend.py`를 `app/services/backend.py`로 실이동, Streamlit views/entrypoints/AppTest/verify_paper_ui_sync를 retire/archive, Next 8화면 demo walkthrough E2E 추가.
+방법: Owner-approved R3 closeout + focused/full regression + Streamlit retirement by archive (not irreversible purge) + generated record update
+결과: R3 9개 TASK와 TASK-049를 완료 기록으로 전환. TASK-069는 보류 유지. Prod 실주문은 활성화하지 않았고 R3 prod hardguard 유지.
+검증: `python -m py_compile` active app/scripts -> OK; R3 focused tests -> 15 passed; quant catalog -> 103 passed; KIS/safety/engine/paper selector -> 94 passed; backend holdings/portfolio selector -> 21 passed; services/API backend move selector -> 177 passed; full pytest -> 1111 passed; `npm run lint` -> pass; `npm run build` -> successful; `npm run test:e2e -- e2e/demo-walkthrough.spec.ts --reporter=line` -> 1 passed; Docker compose config -> pass; validate_task_schema/build_task_index/generate_views/check_agent_docs -> pass; owner_governance_gate -> pass.
+관련 기록: TASKSET-R3-ORDER-SURFACE, TASKSET-UI-OVERHAUL, TASK-014/021/022/026/027/028/030/031/032/049, docs/BROKER-CAPABILITY-PARITY-MATRIX.md, docs/UI_SPEC.md
+추가 closeout(2026-06-17T16:21:08+09:00): owner_governance stop-hook 실패 원인은 TASKSET resolution enum 불일치였고 `resolution: done`으로 수정해 재실행 pass. `web/src/app/login/page.tsx`는 TASK-070 SSO/SNS 보강으로 포함 판단: 미설정 Google/Kakao/Naver setup shell과 Owner setup 안내만 추가하며 secret/live OAuth/prod 주문은 활성화하지 않는다.
+남은 리스크: PR/merge packaging이 남아 있다. TASK-069는 2026-12-14 scheduled 보류 유지. R3 prod 실주문 활성화와 실제 외부 OAuth credential/live callback 검증은 별도 Owner-managed 단계다.

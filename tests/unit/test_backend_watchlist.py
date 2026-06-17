@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 def test_watchlist_uses_batch_price_cache(monkeypatch):
-    from app.ui import backend
+    from app.services import backend
 
     class Repo:
         def list_whitelist_symbols(self, enabled_only=False):

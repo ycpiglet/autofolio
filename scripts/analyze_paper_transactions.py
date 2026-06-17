@@ -129,7 +129,7 @@ def summarize_kis(
 
 
 def summarize_ui() -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     return {
         "holdings_rows": int(len(backend.holdings_df())),

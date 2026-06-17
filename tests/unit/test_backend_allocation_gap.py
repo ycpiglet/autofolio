@@ -14,8 +14,8 @@ from __future__ import annotations
 import pandas as pd
 
 from app.brokers.base import Position
-from app.ui import backend
-from app.ui.backend import _build_holdings_df
+from app.services import backend
+from app.services.backend import _build_holdings_df
 
 
 # ---------------------------------------------------------------------------

@@ -1,31 +1,31 @@
 # QA E2E Reference
 
-This project uses Streamlit AppTest and focused Python tests as the default
-local E2E path. Browser screenshots are useful evidence when a real browser is
-available, but they are not required when the environment blocks browser
-automation and AppTest covers the target behavior.
+This project uses Next.js Playwright specs and focused Python API/service tests
+as the default local E2E path. The Streamlit UI was retired in TASK-049 and is
+kept only under `archive/streamlit_ui/` for reference.
 
 ## Standard Commands
 
 ```powershell
-pytest tests/unit/test_beta_cycle001_ui_smoke.py
-pytest tests/unit/test_home_market_indices_view.py tests/unit/test_trade_order_book_view.py
-pytest tests/unit/test_analysis_intraday_view.py tests/unit/test_history_kis_view.py
-pytest tests/unit/test_alerts_disclosure_view.py tests/unit/test_portfolio_dividend_view.py
+cd web
+npm run test:e2e -- e2e/demo-walkthrough.spec.ts
+npm run test:e2e -- e2e/login.spec.ts e2e/phase3.spec.ts e2e/phase4.spec.ts e2e/analysis.spec.ts
 ```
 
 For local UI health:
 
 ```powershell
-streamlit run app/ui/autofolio_app.py --server.address=127.0.0.1 --server.port=8501
-Invoke-WebRequest -Uri http://127.0.0.1:8501/ -UseBasicParsing
+run_api.bat
+run_frontend.bat
+Invoke-WebRequest -Uri http://127.0.0.1:8000/api/health -UseBasicParsing
+Invoke-WebRequest -Uri http://127.0.0.1:3000/login -UseBasicParsing
 ```
 
 ## Evidence Rules
 
 - Record the command, result, and affected screen or API path.
-- If Browser/Playwright is unavailable, record the reason and use AppTest plus
-  HTTP/API checks.
+- If Browser/Playwright is unavailable, record the reason and use HTTP/API
+  checks plus focused service tests.
 - Do not click order execution controls in `paper` or `prod` unless the Owner
   explicitly approves that exact run.
 - For visual regressions, save before/after screenshots when the browser surface

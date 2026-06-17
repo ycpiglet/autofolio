@@ -9,6 +9,16 @@ class Side(str, Enum):
 class OrderType(str, Enum):
     LIMIT = "LIMIT"
     MARKET = "MARKET"
+    CONDITIONAL_LIMIT = "CONDITIONAL_LIMIT"
+    BEST_LIMIT = "BEST_LIMIT"
+    PRIORITY_LIMIT = "PRIORITY_LIMIT"
+    STOP = "STOP"
+    STOP_LIMIT = "STOP_LIMIT"
+    TRAILING_STOP = "TRAILING_STOP"
+    IOC = "IOC"
+    FOK = "FOK"
+    MOO = "MOO"
+    MOC = "MOC"
 
 
 class ConditionStatus(str, Enum):

@@ -9,7 +9,7 @@ from app.ui import state, theme
 def _circuit_breaker_info() -> dict | None:
     """서킷브레이커 상태를 조회한다. 백엔드 연결 실패 시 None 반환."""
     try:
-        from app.ui import backend  # 로컬 import — demo 모드에서도 조용히 실패
+        from app.services import backend  # 로컬 import — demo 모드에서도 조용히 실패
         return backend.circuit_breaker_status()
     except Exception:
         return None

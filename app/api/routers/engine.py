@@ -38,7 +38,7 @@ def engine_status(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> EngineStatusResponse:
     """Return composite engine health (circuit breaker, flags, env)."""
-    from app.ui import backend
+    from app.services import backend
 
     cb = backend.circuit_breaker_status()
     return EngineStatusResponse(
@@ -60,7 +60,7 @@ def kill_switch(
     _session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
 ) -> KillSwitchResponse:
     """Set kill_switch_active flag in DB (DB-backed, reflected to engine + Streamlit)."""
-    from app.ui import backend
+    from app.services import backend
 
     backend.set_flag("kill_switch_active", body.active)
     return KillSwitchResponse(kill_switch_active=backend.get_flag("kill_switch_active"))
@@ -72,7 +72,7 @@ def auto_trading(
     session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
 ) -> AutoTradingResponse:
     """Set auto_trading_enabled flag in DB (DB-backed, reflected to engine + Streamlit)."""
-    from app.ui import backend
+    from app.services import backend
 
     if body.enabled and not investor_profile_completed(username_from_session(session)):
         raise HTTPException(
@@ -96,7 +96,7 @@ def run_once(
     SAFETY: executes against the configured broker (mock by default).
     Does NOT change KIS_ENV or broker configuration.
     """
-    from app.ui import backend
+    from app.services import backend
 
     if not investor_profile_completed(username_from_session(session)):
         raise HTTPException(

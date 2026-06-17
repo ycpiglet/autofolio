@@ -85,7 +85,7 @@ def test_recent_fills_uses_execution_price_for_market_orders(tmp_path, monkeypat
     condition_id = _add_market_buy(repo, quantity=2)
     engine.run_once()
 
-    from app.ui import backend
+    from app.services import backend
 
     monkeypatch.setattr(backend, "_ctx", lambda: (repo, broker, engine, None))
     fills = backend.recent_fills(limit=5)
@@ -101,7 +101,7 @@ def test_recent_fills_uses_execution_price_for_market_orders(tmp_path, monkeypat
 
 
 def test_recent_fills_falls_back_to_order_price_for_legacy_frames(monkeypatch):
-    from app.ui import backend
+    from app.services import backend
 
     logs = pd.DataFrame(
         [

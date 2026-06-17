@@ -134,7 +134,7 @@ def agents_research(
     Honest gaps: there is NO live-news API (briefing is disclosure-based) and NO
     auto-trigger (this runs only on a manual request).
     """
-    from app.ui import backend
+    from app.services import backend
 
     sym = _validate_symbol(symbol)
 

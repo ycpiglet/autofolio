@@ -11,7 +11,7 @@ def render() -> None:
     st.header("📒 내역 · 손익")
 
     if st.session_state.get("data_source") == "backend":
-        from app.ui import backend
+        from app.services import backend
 
         st.caption("🟢 라이브 — 실제 주문로그(SQLite)")
         logs = backend.list_order_logs()

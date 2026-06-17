@@ -21,7 +21,7 @@ def risk_limits(
     _session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
 ) -> RiskLimitsResponse:
     """Persist risk limits to DB (SafetyChecker picks them up on next run)."""
-    from app.ui import backend
+    from app.services import backend
 
     backend.set_risk_limits(
         max_order_amount=body.max_order_amount,

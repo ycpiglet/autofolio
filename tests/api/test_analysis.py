@@ -27,7 +27,7 @@ class TestAttribution:
 
     def test_attribution_backend_error_surfaces(self, error_client, monkeypatch):
         """Backend exception must propagate as non-200 (fail-loud)."""
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         def _raise():
             raise RuntimeError("analysis failure")
@@ -56,7 +56,7 @@ class TestRetro:
 
     def test_retro_backend_error_surfaces(self, error_client, monkeypatch):
         """Backend exception must propagate as non-200 (fail-loud)."""
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         def _raise():
             raise RuntimeError("metrics error")
@@ -260,7 +260,7 @@ _SAMPLE_SUMMARY = {
 
 class TestVar:
     def _patch(self, monkeypatch, sim_result=None):
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
         import app.quant.risk_sim as rs_mod
 
         monkeypatch.setattr(bmod, "daily_pnl_series", lambda: _SAMPLE_PNL)
@@ -297,7 +297,7 @@ class TestVar:
         """n_simulations above cap must be clamped to 50_000, not rejected."""
         captured = {}
 
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
         import app.quant.risk_sim as rs_mod
 
         monkeypatch.setattr(bmod, "daily_pnl_series", lambda: _SAMPLE_PNL)
@@ -314,7 +314,7 @@ class TestVar:
 
     def test_var_empty_portfolio_returns_200_with_note(self, guest_client, monkeypatch):
         """Empty pnl / zero portfolio value → 200 with explicit note, not fabricated."""
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "daily_pnl_series", lambda: pd.DataFrame(columns=["date", "pnl"]))
         monkeypatch.setattr(bmod, "account_summary", lambda: {"tot_evlu_amt": 0.0})
@@ -326,7 +326,7 @@ class TestVar:
 
     def test_var_backend_error_surfaces(self, error_client, monkeypatch):
         """Backend exception must propagate as non-200 (fail-loud)."""
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         def _raise():
             raise RuntimeError("pnl failure")
@@ -371,14 +371,14 @@ _SAMPLE_SCENARIO = pd.DataFrame(
 
 class TestScenario:
     def test_scenario_guest_200(self, guest_client, monkeypatch):
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "scenario_analysis", lambda scenarios=None: _SAMPLE_SCENARIO)
         resp = guest_client.get("/api/analysis/scenario")
         assert resp.status_code == 200
 
     def test_scenario_shape(self, guest_client, monkeypatch):
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "scenario_analysis", lambda scenarios=None: _SAMPLE_SCENARIO)
         body = guest_client.get("/api/analysis/scenario").json()
@@ -393,7 +393,7 @@ class TestScenario:
         assert resp.status_code == 401
 
     def test_scenario_backend_error_surfaces(self, error_client, monkeypatch):
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         def _raise(scenarios=None):
             raise RuntimeError("scenario failure")
@@ -418,7 +418,7 @@ _SAMPLE_WHATIF = {
 
 class TestWhatif:
     def test_whatif_guest_200(self, guest_client, monkeypatch):
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "whatif_weight_change", lambda sym, w: _SAMPLE_WHATIF)
         resp = guest_client.get(
@@ -428,7 +428,7 @@ class TestWhatif:
         assert resp.status_code == 200
 
     def test_whatif_shape(self, guest_client, monkeypatch):
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "whatif_weight_change", lambda sym, w: _SAMPLE_WHATIF)
         body = guest_client.get(
@@ -471,7 +471,7 @@ class TestWhatif:
         assert resp.status_code == 422
 
     def test_whatif_backend_error_surfaces(self, error_client, monkeypatch):
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         def _raise(sym, w):
             raise RuntimeError("whatif failure")

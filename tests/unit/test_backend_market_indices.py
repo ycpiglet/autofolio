@@ -3,7 +3,7 @@ from __future__ import annotations
 
 def test_market_indices_df_uses_kis_client(monkeypatch):
     from app.brokers.kis.kis_client import KisClient
-    from app.ui import backend
+    from app.services import backend
 
     class FakeKisClient(KisClient):
         def __init__(self):

@@ -237,7 +237,7 @@ def _limit_cancel(
 
 
 def _ui_sync_summary() -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     holdings = backend.holdings_df()
     recent = backend.recent_fills(limit=10)

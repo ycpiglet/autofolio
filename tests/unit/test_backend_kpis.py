@@ -28,7 +28,7 @@ class TestKpis:
     """kpis() returns the correct structure and numeric values."""
 
     def _make_holdings_df(self, market_val: float, pnl: float) -> pd.DataFrame:
-        from app.ui.backend import HOLDINGS_COLUMNS
+        from app.services.backend import HOLDINGS_COLUMNS
 
         df = pd.DataFrame(
             [{"종목": "A", "티커": "000001", "자산군": "주식", "지역": "KR",
@@ -45,10 +45,10 @@ class TestKpis:
         """All five KPI keys are present in the returned dict."""
         df = self._make_holdings_df(1_000_000.0, 100_000.0)
         with (
-            patch("app.ui.backend.holdings_df", return_value=df),
-            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+            patch("app.services.backend.holdings_df", return_value=df),
+            patch("app.services.backend._ctx", return_value=self._no_cash_ctx()),
         ):
-            from app.ui import backend
+            from app.services import backend
             result = backend.kpis()
         assert set(result.keys()) == {"총자산", "일손익률", "누적손익률", "현금비중", "평가손익"}
 
@@ -57,10 +57,10 @@ class TestKpis:
         market = 5_000_000.0
         df = self._make_holdings_df(market, 500_000.0)
         with (
-            patch("app.ui.backend.holdings_df", return_value=df),
-            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+            patch("app.services.backend.holdings_df", return_value=df),
+            patch("app.services.backend._ctx", return_value=self._no_cash_ctx()),
         ):
-            from app.ui import backend
+            from app.services import backend
             result = backend.kpis()
         assert result["총자산"] == market
 
@@ -69,10 +69,10 @@ class TestKpis:
         pnl = 250_000.0
         df = self._make_holdings_df(3_000_000.0, pnl)
         with (
-            patch("app.ui.backend.holdings_df", return_value=df),
-            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+            patch("app.services.backend.holdings_df", return_value=df),
+            patch("app.services.backend._ctx", return_value=self._no_cash_ctx()),
         ):
-            from app.ui import backend
+            from app.services import backend
             result = backend.kpis()
         assert result["평가손익"] == pnl
 
@@ -80,10 +80,10 @@ class TestKpis:
         """현금비중 == 0.0 because the cash placeholder is 0."""
         df = self._make_holdings_df(2_000_000.0, 0.0)
         with (
-            patch("app.ui.backend.holdings_df", return_value=df),
-            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+            patch("app.services.backend.holdings_df", return_value=df),
+            patch("app.services.backend._ctx", return_value=self._no_cash_ctx()),
         ):
-            from app.ui import backend
+            from app.services import backend
             result = backend.kpis()
         assert result["현금비중"] == 0.0
 
@@ -92,24 +92,24 @@ class TestKpis:
         df = self._make_holdings_df(5_000_000.0, 500_000.0)
         fake_broker = SimpleNamespace(get_cash_balance=lambda: 2_000_000.0)
         with (
-            patch("app.ui.backend.holdings_df", return_value=df),
-            patch("app.ui.backend._ctx", return_value=(None, fake_broker, None, None)),
+            patch("app.services.backend.holdings_df", return_value=df),
+            patch("app.services.backend._ctx", return_value=(None, fake_broker, None, None)),
         ):
-            from app.ui import backend
+            from app.services import backend
             result = backend.kpis()
         assert result["총자산"] == 7_000_000.0
         assert round(result["현금비중"], 2) == 28.57
 
     def test_kpis_empty_holdings_returns_zero_totals(self):
         """When holdings are empty all numeric KPIs default to 0 / 0.0."""
-        from app.ui.backend import HOLDINGS_COLUMNS
+        from app.services.backend import HOLDINGS_COLUMNS
 
         empty_df = pd.DataFrame(columns=HOLDINGS_COLUMNS)
         with (
-            patch("app.ui.backend.holdings_df", return_value=empty_df),
-            patch("app.ui.backend._ctx", return_value=self._no_cash_ctx()),
+            patch("app.services.backend.holdings_df", return_value=empty_df),
+            patch("app.services.backend._ctx", return_value=self._no_cash_ctx()),
         ):
-            from app.ui import backend
+            from app.services import backend
             result = backend.kpis()
         assert result["총자산"] == 0.0
         assert result["평가손익"] == 0.0
@@ -135,10 +135,10 @@ class TestKpis:
             df = self._make_holdings_df(1_000_000.0, 50_000.0)
             fake_broker = SimpleNamespace(get_cash_balance=lambda: 0.0)
             with (
-                patch("app.ui.backend.holdings_df", return_value=df),
-                patch("app.ui.backend._ctx", return_value=(empty_repo, fake_broker, None, None)),
+                patch("app.services.backend.holdings_df", return_value=df),
+                patch("app.services.backend._ctx", return_value=(empty_repo, fake_broker, None, None)),
             ):
-                from app.ui import backend
+                from app.services import backend
                 result = backend.kpis()
         assert result["일손익률"] == 0.0
         assert result["누적손익률"] == 0.0
@@ -167,8 +167,8 @@ class TestRecentFills:
     def test_only_filled_rows_returned(self):
         """REQUESTED rows are excluded; only FILLED rows appear."""
         logs = self._make_logs()
-        with patch("app.ui.backend.list_order_logs", return_value=logs):
-            from app.ui import backend
+        with patch("app.services.backend.list_order_logs", return_value=logs):
+            from app.services import backend
             result = backend.recent_fills(limit=10)
         assert len(result) == 2
         assert set(result["종목"].tolist()) == {"005930", "360750"}
@@ -176,16 +176,16 @@ class TestRecentFills:
     def test_output_columns(self):
         """Returned DataFrame has exactly the five expected columns."""
         logs = self._make_logs()
-        with patch("app.ui.backend.list_order_logs", return_value=logs):
-            from app.ui import backend
+        with patch("app.services.backend.list_order_logs", return_value=logs):
+            from app.services import backend
             result = backend.recent_fills(limit=10)
         assert list(result.columns) == ["시각", "종목", "방향", "수량", "체결가"]
 
     def test_time_extraction_hh_mm(self):
         """시각 is extracted as HH:MM from created_at."""
         logs = self._make_logs()
-        with patch("app.ui.backend.list_order_logs", return_value=logs):
-            from app.ui import backend
+        with patch("app.services.backend.list_order_logs", return_value=logs):
+            from app.services import backend
             result = backend.recent_fills(limit=10)
         assert "09:12" in result["시각"].tolist()
         assert "13:02" in result["시각"].tolist()
@@ -199,15 +199,15 @@ class TestRecentFills:
             for i in range(5)
         ]
         logs = pd.DataFrame(rows)
-        with patch("app.ui.backend.list_order_logs", return_value=logs):
-            from app.ui import backend
+        with patch("app.services.backend.list_order_logs", return_value=logs):
+            from app.services import backend
             result = backend.recent_fills(limit=3)
         assert len(result) <= 3
 
     def test_empty_logs_returns_empty_df(self):
         """Empty order log returns an empty DataFrame with correct columns."""
-        with patch("app.ui.backend.list_order_logs", return_value=pd.DataFrame()):
-            from app.ui import backend
+        with patch("app.services.backend.list_order_logs", return_value=pd.DataFrame()):
+            from app.services import backend
             result = backend.recent_fills()
         assert result.empty
         assert list(result.columns) == ["시각", "종목", "방향", "수량", "체결가"]
@@ -219,8 +219,8 @@ class TestRecentFills:
              "order_price": 37_800.0, "order_status": "REQUESTED",
              "created_at": "2026-06-09 10:00:00"},
         ])
-        with patch("app.ui.backend.list_order_logs", return_value=logs):
-            from app.ui import backend
+        with patch("app.services.backend.list_order_logs", return_value=logs):
+            from app.services import backend
             result = backend.recent_fills()
         assert result.empty
         assert list(result.columns) == ["시각", "종목", "방향", "수량", "체결가"]
@@ -251,7 +251,7 @@ class TestKpisReturnRates:
         from app.brokers.base import Position
         from app.database.repositories import Repository, WhitelistSymbol
         from app.database.sqlite_db import initialize_database, get_connection
-        from app.ui import backend
+        from app.services import backend
 
         db_path = tmp_path / "kpi_test.db"
         initialize_database(db_path)
@@ -316,7 +316,7 @@ class TestKpisReturnRates:
 
         Current code returns 0.0 (FAIL before fix).
         """
-        from app.ui import backend
+        from app.services import backend
         result = backend.kpis()
         assert result["일손익률"] > 0.0, (
             f"Expected daily_return > 0 (got {result['일손익률']}). "
@@ -328,7 +328,7 @@ class TestKpisReturnRates:
 
         Current code returns 0.0 (FAIL before fix).
         """
-        from app.ui import backend
+        from app.services import backend
         result = backend.kpis()
         assert result["누적손익률"] > 0.0, (
             f"Expected total_return > 0 (got {result['누적손익률']}). "
@@ -344,7 +344,7 @@ class TestKpisReturnRates:
         daily holdings buy cost = 1 × 70_000 = 70_000.
         daily_return = 5_000 / 70_000 * 100 ≈ 7.14%.
         """
-        from app.ui import backend
+        from app.services import backend
         result = backend.kpis()
         assert result["누적손익률"] == pytest.approx(12000 / 140000 * 100, rel=0.01)
         assert result["일손익률"] == pytest.approx(5000 / 70000 * 100, rel=0.01)

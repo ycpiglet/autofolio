@@ -14,7 +14,7 @@ def _live() -> bool:
 def _attribution():
     if _live():
         try:
-            from app.ui import backend
+            from app.services import backend
             df = backend.attribution_df()
             if not df.empty:
                 return df
@@ -26,7 +26,7 @@ def _attribution():
 def _retro():
     if _live():
         try:
-            from app.ui import backend
+            from app.services import backend
             return backend.retro_metrics()
         except Exception:  # noqa: BLE001
             pass
@@ -36,7 +36,7 @@ def _retro():
 def _alloc_gap():
     if _live():
         try:
-            from app.ui import backend
+            from app.services import backend
             return backend.allocation_gap()
         except Exception as exc:  # noqa: BLE001
             st.warning(f"라이브 갭 조회 실패 — 데모 데이터로 대체합니다: {exc}")
@@ -49,7 +49,7 @@ def _sector_performance() -> None:
         st.caption("라이브 모드에서 사용할 수 있습니다.")
         return
     try:
-        from app.ui import backend
+        from app.services import backend
 
         df = backend.sector_performance_df()
     except Exception as exc:  # noqa: BLE001
@@ -97,7 +97,7 @@ def _fundamental_text(value, *, decimals: int = 2) -> str:
 
 def _fundamental_section() -> None:
     """KIS 종목 기본 재무 지표."""
-    from app.ui import backend
+    from app.services import backend
 
     wl = backend.list_whitelist()
     if wl.empty:
@@ -138,7 +138,7 @@ def _fundamental_section() -> None:
 def _backtest_section() -> None:
     """백테스트 UI — SMA 크로스오버 실행 섹션."""
     import datetime as dt
-    from app.ui import backend
+    from app.services import backend
 
     wl = backend.list_whitelist()
     if wl.empty:
@@ -227,7 +227,7 @@ def _backtest_section() -> None:
 
 def _intraday_section() -> None:
     """KIS 당일 분봉 차트."""
-    from app.ui import backend
+    from app.services import backend
 
     wl = backend.list_whitelist()
     if wl.empty:
@@ -327,7 +327,7 @@ def render() -> None:
         st.subheader("일별 손익 캘린더")
         if _live():
             try:
-                from app.ui import backend
+                from app.services import backend
                 pnl_df = backend.daily_pnl_series()
                 if not pnl_df.empty:
                     pnl_df["pnl_만원"] = (pnl_df["pnl"] / 10_000).round(1)
@@ -354,7 +354,7 @@ def render() -> None:
         st.subheader("📓 거래 저널")
         if _live():
             try:
-                from app.ui import backend
+                from app.services import backend
                 df = backend.list_journal_entries()
                 if df.empty:
                     st.info("저널 항목이 없습니다. 아래 폼으로 첫 항목을 추가하세요.")
@@ -378,7 +378,7 @@ def render() -> None:
             j_emotion = st.checkbox("감정적 요소가 있었나요?", value=False, key="j_emo")
             if st.button("💾 저널 저장", type="primary", key="j_save") and j_sym:
                 try:
-                    from app.ui import backend
+                    from app.services import backend
                     jid = backend.add_journal_entry(
                         symbol=j_sym.strip().upper(), side=j_side,
                         entry_reason=j_entry, exit_reason=j_exit,
@@ -395,7 +395,7 @@ def render() -> None:
         if _live():
             st.caption("🟢 라이브 — 보유 포트폴리오 기반 시나리오 영향 계산")
             try:
-                from app.ui import backend
+                from app.services import backend
                 scen_df = backend.scenario_analysis()
                 if scen_df.empty:
                     st.info("보유 종목이 없어 시나리오를 계산할 수 없습니다.")
@@ -443,7 +443,7 @@ def render() -> None:
             st.caption("🟢 종목 비중을 변경했을 때의 포트폴리오 영향을 계산합니다.")
             with st.expander("⚙️ What-if 비중 시뮬레이터 열기", expanded=False):
                 try:
-                    from app.ui import backend
+                    from app.services import backend
                     wl_df = backend.watchlist()
                     if wl_df.empty:
                         st.info("화이트리스트가 비어있습니다. 먼저 화이트리스트를 구성하세요.")
@@ -508,7 +508,7 @@ def render() -> None:
                 v_n = st.select_slider("시뮬레이션 횟수", [1000, 3000, 5000, 10000], value=5000, key="var_n")
                 if st.button("▶ 시뮬레이션 실행", key="var_run"):
                     try:
-                        from app.ui import backend
+                        from app.services import backend
                         from app.quant.risk_sim import simulate_portfolio_var
                         df = backend.holdings_df()
                         with st.spinner(f"{v_n:,}회 시뮬레이션 중…"):

@@ -1,13 +1,12 @@
-"""실제 백엔드 어댑터 (증권 키 불필요: Mock 브로커 + SQLite). — P1.1
+"""Shared backend adapter (Mock broker + SQLite by default). — P1.1
 
 KIS_ENV=mock(기본)이면 MockBrokerClient를 쓰므로 증권계좌/API 키 없이 동작한다.
-UI의 '라이브' 모드에서 이 어댑터로 화이트리스트/시세/조건/주문로그/엔진/리서치를 실연결한다.
+FastAPI/Next.js runtime은 이 어댑터로 화이트리스트/시세/조건/주문로그/엔진/리서치를 연결한다.
 
-Strangler Migration — Phase 0:
-  모든 구현은 이 모듈에 유지된다. app/services/ 도메인 모듈은 이 모듈을 재-익스포트해
-  Streamlit UI와 미래의 FastAPI 레이어가 동일한 코어를 공유한다.
-  Phase 0.2 이후 뷰가 app/services 를 직접 임포트하면 이 모듈이 thin shim으로 전환된다.
-  기존 테스트·뷰·호출부는 from app.ui import backend 경로를 그대로 사용할 수 있다.
+Strangler Migration — Phase 5:
+  Phase 0의 app.services.backend 원본을 서비스 레이어로 실이동했다.
+  Streamlit 뷰는 retired 상태이며 신규 production code는 app.services.backend 또는
+  app.services.<domain> 모듈을 사용한다.
 """
 from __future__ import annotations
 
@@ -127,7 +126,8 @@ _ROLE_TO_ASSET_CLASS = {"ETF_TEST": "ETF", "LARGE_CAP_TEST": "주식", "LONG_TER
 def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> pd.DataFrame:
     """포지션 + 현재가 + 화이트리스트 메타로 포트폴리오 표를 구성(순수 함수, 테스트 용이).
 
-    price_of(symbol)->float, meta_of(symbol)->dict(name/role 등). KRX 보유라 지역=KR.
+    price_of(symbol)->float, meta_of(symbol)->dict(name/role 등).
+    해외 포지션은 Position.currency/fx_rate/market 값이 있으면 원화 평가금액으로 환산한다.
     dividend_of(symbol)->dict(annual_cash_dividend/latest_dividend_rate) 는 선택.
     """
     if not positions_list:
@@ -136,9 +136,13 @@ def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> p
     rows = []
     for p in positions_list:
         meta = meta_of(p.symbol) or {}
-        cur = float(price_of(p.symbol))
-        avg = float(p.avg_price) if p.avg_price else 0.0
-        market = p.quantity * cur
+        cur_native = float(price_of(p.symbol))
+        avg_native = float(p.avg_price) if p.avg_price else 0.0
+        currency = str(getattr(p, "currency", "KRW") or "KRW").upper()
+        fx_rate = float(getattr(p, "fx_rate", None) or 1.0)
+        cur = cur_native * fx_rate if currency != "KRW" else cur_native
+        avg = avg_native * fx_rate if currency != "KRW" else avg_native
+        market_value = p.quantity * cur
         cost = p.quantity * avg
         dividend = dividend_lookup(p.symbol) or {}
         annual_per_share = float(dividend.get("annual_cash_dividend") or 0.0)
@@ -152,12 +156,12 @@ def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> p
             "종목": meta.get("name") or p.symbol,
             "티커": p.symbol,
             "자산군": _ROLE_TO_ASSET_CLASS.get(meta.get("role"), "주식"),
-            "지역": "KR",
+            "지역": _region_for_market(str(getattr(p, "market", None) or meta.get("market") or "KRX")),
             "수량": p.quantity,
             "평단": round(avg),
             "현재가": round(cur),
-            "평가금액": round(market),
-            "평가손익": round(market - cost),
+            "평가금액": round(market_value),
+            "평가손익": round(market_value - cost),
             "손익률": round((cur / avg - 1) * 100, 1) if avg else 0.0,
             "예상연배당": round(annual_income),
             "배당수익률": round(dividend_yield, 2),
@@ -166,6 +170,15 @@ def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> p
     total = df["평가금액"].sum()
     df["비중"] = (df["평가금액"] / total * 100).round(1) if total else 0.0
     return df
+
+
+def _region_for_market(market: str) -> str:
+    value = market.upper()
+    if value in {"NASD", "NYSE", "AMEX"}:
+        return "US"
+    if value == "SEHK":
+        return "HK"
+    return "KR"
 
 
 def holdings_df(*, include_dividends: bool = True) -> pd.DataFrame:

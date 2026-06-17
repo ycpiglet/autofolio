@@ -22,7 +22,7 @@ class _FakeNotifier:
 
 def test_disclosures_df_uses_kis_client(monkeypatch):
     from app.brokers.kis.kis_client import KisClient
-    from app.ui import backend
+    from app.services import backend
 
     class FakeKisClient(KisClient):
         def __init__(self):
@@ -66,7 +66,7 @@ def test_disclosures_df_uses_kis_client(monkeypatch):
 
 def test_refresh_disclosure_gate_sets_block_flag_and_notifies(monkeypatch):
     from app.brokers.kis.kis_client import KisClient
-    from app.ui import backend
+    from app.services import backend
 
     class FakeKisClient(KisClient):
         def __init__(self):
@@ -103,7 +103,7 @@ def test_refresh_disclosure_gate_sets_block_flag_and_notifies(monkeypatch):
 
 def test_refresh_disclosure_gate_clears_flag_when_no_blocking_rows(monkeypatch):
     from app.brokers.kis.kis_client import KisClient
-    from app.ui import backend
+    from app.services import backend
 
     class FakeKisClient(KisClient):
         def __init__(self):
@@ -135,7 +135,7 @@ def test_refresh_disclosure_gate_clears_flag_when_no_blocking_rows(monkeypatch):
 
 
 def test_disclosures_df_returns_empty_for_non_kis_client(monkeypatch):
-    from app.ui import backend
+    from app.services import backend
 
     monkeypatch.setattr(backend, "_ctx", lambda: (_FakeRepo(), object(), None, None))
 

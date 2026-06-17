@@ -10,7 +10,7 @@ from app.ui.mock import data
 def render() -> None:
     st.header("🧾 매매 / 주문")
     if st.session_state.get("data_source") == "backend":
-        from app.ui import backend as _be
+        from app.services import backend as _be
         env = _be.env()
         if env == "paper":
             st.caption("🟡 모의투자(paper) — KIS 모의투자 계좌로 실제 주문이 전송됩니다.")
@@ -25,7 +25,7 @@ def render() -> None:
 
 
 def _live() -> None:
-    from app.ui import backend
+    from app.services import backend
 
     cond_tab, run_tab, log_tab, kis_tab, check_tab = st.tabs(["목표가 조건", "엔진 실행 / 결과", "주문로그(SQLite)", "KIS 주문내역", "📋 장전 체크리스트"])
 
@@ -133,7 +133,7 @@ def _live() -> None:
         st.dataframe(backend.list_conditions(), hide_index=True, width="stretch")
 
     with run_tab:
-        from app.ui import backend as _be_run
+        from app.services import backend as _be_run
         _env_label = {"paper": "모의투자", "prod": "실전"}.get(_be_run.env(), "mock")
         if st.button(f"⚙️ 엔진 1회 실행 ({_env_label})", key="lv_run"):
             msgs = backend.run_engine_once()

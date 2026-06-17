@@ -156,14 +156,14 @@ def test_save_condition_compliance_agent_raises_blocks_save():
     mock_add = MagicMock()
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": False, "reason": ""},
         ),
         patch(
             "app.ui.agents_runtime.ask",
             side_effect=RuntimeError("agent unavailable"),
         ),
-        patch("app.ui.backend.add_condition", mock_add),
+        patch("app.services.backend.add_condition", mock_add),
     ):
         with pytest.raises(RuntimeError, match="agent unavailable"):
             save_condition_with_gates("005930", "BUY", 70_000.0, 1, False)
@@ -204,10 +204,10 @@ def test_safety_checker_disclosure_blocked_symbol_with_compliant_condition():
     mock_add = MagicMock()
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": True, "reason": "거래정지"},
         ),
-        patch("app.ui.backend.add_condition", mock_add),
+        patch("app.services.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates("005930", "BUY", 70_000.0, 1, False)
 
