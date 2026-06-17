@@ -306,12 +306,21 @@ class TestStreamEvents:
         event_data = {"event": "engine_run_start", "run": 1}
         lines: list[str] = []
 
-        def _write_after_delay() -> None:
-            time.sleep(0.1)
-            with fake_log.open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(event_data) + "\n")
+        # Append the event repeatedly until the stream picks it up. A single
+        # delayed write can land BEFORE the server captures the tail start-offset
+        # (race under CI load) → the event is never tailed → the generator never
+        # emits → iter_lines hangs until CI timeout. Continuous appends guarantee
+        # a post-offset line lands within one poll interval, making this
+        # deterministic regardless of scheduling.
+        stop = threading.Event()
 
-        thread = threading.Thread(target=_write_after_delay, daemon=True)
+        def _writer() -> None:
+            while not stop.is_set():
+                with fake_log.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(event_data) + "\n")
+                stop.wait(0.05)
+
+        thread = threading.Thread(target=_writer, daemon=True)
 
         with patch("app.api.routers.stream._EVENTS_JSONL", fake_log), \
              patch("app.api.routers.stream._TAIL_POLL_INTERVAL", 0.05), \
@@ -326,6 +335,7 @@ class TestStreamEvents:
                         lines.append(line)
                         break
 
+        stop.set()
         thread.join(timeout=2.0)
         assert len(lines) >= 1
         payload = json.loads(lines[0][len("data:"):].strip())
@@ -343,12 +353,17 @@ class TestStreamEvents:
         event_payload = {"event": "condition_processed", "symbol": "005930"}
         collected: list[str] = []
 
-        def _write_after_delay() -> None:
-            time.sleep(0.15)
-            with fake_log.open("a", encoding="utf-8") as fh:
-                fh.write(json.dumps(event_payload) + "\n")
+        # Continuous appends (see test_returns_200_for_guest) to avoid the
+        # connect-vs-write race that flakes/hangs under CI load.
+        stop = threading.Event()
 
-        thread = threading.Thread(target=_write_after_delay, daemon=True)
+        def _writer() -> None:
+            while not stop.is_set():
+                with fake_log.open("a", encoding="utf-8") as fh:
+                    fh.write(json.dumps(event_payload) + "\n")
+                stop.wait(0.05)
+
+        thread = threading.Thread(target=_writer, daemon=True)
 
         with patch("app.api.routers.stream._EVENTS_JSONL", fake_log), \
              patch("app.api.routers.stream._TAIL_POLL_INTERVAL", 0.05), \
@@ -361,6 +376,7 @@ class TestStreamEvents:
                         collected.append(line)
                         break
 
+        stop.set()
         thread.join(timeout=2.0)
         assert collected, "Expected at least one engine event"
         payload = json.loads(collected[0][len("data:"):].strip())
