@@ -1,17 +1,16 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T16:18:21+09:00
+updated_at: 2026-06-17T22:16:02+09:00
 updated_by: lead-engineer
 current_state:
   signal: pass
   score: 94
   summary: >
-    Approved closeout implementation and local verification passed on branch
-    feat/approved-r3-and-ui-closeout. TASK-014/021/022/026/027/028/030/031/032
+    Approved closeout is merged to main via PR #92. TASK-014/021/022/026/027/028/030/031/032
     R3 order/risk surfaces and TASK-049 Streamlit retirement are implemented
     and recorded. R3 production order execution remains hardguarded; no secret
-    or production data mutation was performed. Remaining local work is branch
-    packaging, PR handling, and preserving or separating the concurrent login
-    page change.
+    or production data mutation was performed. The refreshed backlog has one
+    open item: TASK-069, intentionally deferred until 2026-12-14 unless the
+    Owner explicitly requests early reassessment.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -36,12 +35,11 @@ resume:
   task_set_id: none
   step_index: 0
   step_total: 0
-  status_text: No persistent active task; approved closeout verified locally and awaiting branch/PR packaging
+  status_text: No persistent active task; PR #92 merged and backlog refreshed
   next_actions:
-    - Package scoped changes into a branch commit and PR.
-    - Merge the PR when configured checks permit automation.
     - Keep TASK-069 deferred until 2026-12-14 unless Owner explicitly requests early reassessment.
-    - Do not discard concurrent web/src/app/login/page.tsx changes unless Owner explicitly approves.
+    - Start only a new explicit Owner request or a newly registered ACT task.
+    - Treat production orders, secrets, production DB writes, and live OAuth callback validation as Owner-managed boundaries.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -78,9 +76,7 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-17 closeout checks passed: active app/scripts py_compile OK,
-      R3 focused tests 15 passed, quant catalog 103 passed, KIS/safety/engine
-      selector 94 passed, backend holdings/portfolio selector 21 passed,
-      services/API backend move selector 177 passed, full pytest 1111 passed,
-      npm lint/build passed, Next demo walkthrough E2E 1 passed, docker compose
-      config passed, check_agent_docs passed, and owner_governance_gate passed.
+      2026-06-17 backlog refresh passed: backlog_sweep shows only TASK-069 open
+      and deferred, build_task_index regenerated 73 tasks, generate_views
+      regenerated BACKLOG and 5 views, and prior closeout checks/CI for PR #92
+      passed before merge.
