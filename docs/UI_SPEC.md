@@ -5,28 +5,32 @@
 
 ---
 
-## UI 차세대 이행 안내 (2026-06-13 추가)
+## UI 차세대 이행 안내 (2026-06-17 갱신)
 
-현 Streamlit 8화면은 **유지·운영 중**(스트랭글러 패턴). 이 문서의 아래 내용(Streamlit 설계)은 계속 유효하다.
+현재 운영 UI는 **Next.js 16 + FastAPI**다. 기존 Streamlit 8화면은 TASK-049에서 은퇴했고,
+코드는 `archive/streamlit_ui/`에 보존한다. 이 문서의 아래 Streamlit 설계 내용은 제품
+초기 설계 기록으로 남기며, 신규 UI 구현의 기준은 Next.js 앱과 아래 이행 스펙이다.
 
 **차세대 Next.js 이행 설계**는 별도 스펙 문서를 참조:
 [`docs/superpowers/specs/2026-06-13-ui-overhaul-design.md`](superpowers/specs/2026-06-13-ui-overhaul-design.md)
 
-이행 방식: Owner 결정 — Next.js 16 + FastAPI 분리, 토스류 미니멀 라이트, 스트랭글러(Streamlit 병행), 5단계 페이즈드.
+이행 방식: Owner 결정 — Next.js 16 + FastAPI 분리, 토스류 미니멀 라이트, 5단계 페이즈드.
 
-**Phase 0 (services 추출) 완료** (2026-06-13): `app/services/` 레이어 신설, trade 게이트 로직 `services/trading.py`로 이동, shim 경로 유지(기존 테스트 무변경). TASK-045~052 등록됨.
+**Phase 5 retirement 완료** (2026-06-17): `app/services/backend.py`가 백엔드 어댑터 원본이며,
+Streamlit `app/ui/views`와 진입점은 archive로 이동했다. AppTest 스위트는 제거하고
+`web/e2e/demo-walkthrough.spec.ts`가 8개 주요 Next.js 화면 순회를 검증한다.
 
 ---
 
 ## 1. 원칙 — UI-First, Mock-First
 - UI를 **백엔드와 분리**해 **mock 데이터**로 먼저 완성한다. 실제 배포 앱처럼 동작·탐색 가능 → 이후 어댑터로 실데이터를 끼운다.
 - 사용자친화 최우선: 적은 클릭, 명확한 상태 배지, 한국어 카피, 모바일 친화, 실수 방지(확인 모달·빈 상태·로딩).
-- 무료·Python: **Streamlit** 기반. 추후 웹/PWA 확장 여지.
+- 현재 구현: **Next.js + FastAPI** 기반. 아래 Streamlit 설계는 archive된 레거시 기록이다.
 
 ## 2. 기술 스택 (무료·Python)
 | 용도 | 선택 | 비고 |
 |---|---|---|
-| 프레임워크 | **Streamlit** (multipage `pages/`) | 무료, Python only |
+| 프레임워크 | **Next.js 16 + FastAPI** | Streamlit 은퇴 완료 |
 | 로그인 SSO | `st.login()`(OIDC·Google) + `streamlit-oauth`(Kakao/Naver) | BLUEPRINT §5.5 |
 | 차트 | `plotly` / `st.line_chart`·`st.area_chart` | 캔들·자산곡선 |
 | 표 | `st.dataframe`(정렬·필터) | 보유·내역 |
@@ -140,20 +144,16 @@
 
 ## 8. 폴더 구조 제안
 ```
-app/ui/
-├── autofolio_app.py        # 진입(OIDC 동기화·로그인 게이트·st.navigation·상단바)
-├── streamlit_app.py        # (기존 MVP UI, 백엔드 연결 — 유지)
-├── theme.py · state.py     # 페이지설정·색 · 세션(모드·킬·종목별 모드·색 토글)
-├── auth.py                 # 로컬 ID/PW(PBKDF2) + Google OIDC + 게스트       ← P1.0c
-├── vault.py                # 로컬 암호화 보관함(Fernet)                       ← P1.0c
-├── store.py                # 연동 보관함(증권 다계좌/채널, vault 영속)        ← P1.0c
-├── backend.py              # 실 백엔드 어댑터(Mock 브로커+SQLite, 키 불필요)   ← P1.1a
-├── components/ui.py        # 상단바·KPI·배지·킬 확인 다이얼로그·빈 상태
-├── views/                  # login·home·portfolio·trade·history·analysis·agents·alerts·settings
-├── mock/data.py            # mock 데이터 레이어 (P1.0)
-└── services/connectors.py  # KIS 토큰/Telegram 테스트(실 API, best-effort)    ← P1.0c
+app/
+├── api/                    # FastAPI backend
+├── services/backend.py     # 실 백엔드 어댑터(Mock 브로커+SQLite, 키 불필요)
+├── services/               # 도메인 서비스 레이어
+└── ui/                     # vault/auth/state 등 일부 레거시 유틸만 잔존
+web/
+└── src/app/                # Next.js 8개 주요 화면 + 온보딩/로그인
+archive/streamlit_ui/       # 은퇴한 Streamlit 진입점과 views 보존
 ```
-> 페이지 폴더는 Streamlit `pages/` 자동 내비 충돌을 피해 `views/`(함수형 + `st.navigation`)를 사용. 실행: `run_ui.bat`.
+> 실행: `run_ui.bat` 또는 `run_api.bat` + `run_frontend.bat`.
 > 시크릿: `.streamlit/secrets.toml`(gitignore) — 양식은 `.streamlit/secrets.toml.example`. 자격증명은 `.autofolio/`(gitignore)에 Fernet 암호화 저장.
 
 ## 9. Sources

@@ -1,6 +1,6 @@
 """app/services 도메인 모듈 임포트 계약 검증.
 
-각 서비스 모듈의 __all__ 에 선언된 모든 이름이 app.ui.backend 의 동일 객체를
+각 서비스 모듈의 __all__ 에 선언된 모든 이름이 app.services.backend 의 동일 객체를
 가리키는지(identity test), 그리고 backend 의 모든 공개 함수·상수가 정확히
 하나의 서비스 모듈 __all__ 에 포함되는지(completeness test)를 파생적으로
 검증한다. 목록을 하드코딩하지 않으므로 backend 에 함수가 추가되거나 삭제되면
@@ -13,7 +13,7 @@ import inspect
 
 import pytest
 
-import app.ui.backend as backend
+import app.services.backend as backend
 
 # 검사 대상 서비스 모듈 이름 목록
 _SERVICE_MODULES = [
@@ -61,11 +61,11 @@ def test_services_all_identity(module_name: str) -> None:
 # ---------------------------------------------------------------------------
 
 def _backend_public_functions() -> set[str]:
-    """Top-level functions whose __module__ is app.ui.backend (not underscore-prefixed)."""
+    """Top-level functions whose __module__ is app.services.backend (not underscore-prefixed)."""
     return {
         name
         for name, obj in inspect.getmembers(backend, inspect.isfunction)
-        if obj.__module__ == "app.ui.backend" and not name.startswith("_")
+        if obj.__module__ == "app.services.backend" and not name.startswith("_")
     }
 
 

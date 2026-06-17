@@ -8,7 +8,7 @@
 ----
 - 명령 해석(`handle_text`)은 순수 함수 → 단위 테스트가 쉽다(네트워크 불필요).
 - 데이터는 `PortfolioProvider`(상태/손익/포지션/조건/엔진/제안/상태변경)로 주입 → `BackendProvider` 는
-  `app.ui.backend`(KIS_ENV 에 따라 mock/실 브로커)를 감싼다.
+  `app.services.backend`(KIS_ENV 에 따라 mock/실 브로커)를 감싼다.
 - 전송은 `send_fn(chat_id, text)` 주입 → 운영은 Telegram API, 테스트는 기록용 페이크.
 - **보안**: allowlist(허용 chat_id)에 있는 대화에만 응답한다(기본 전체 거부).
 
@@ -298,10 +298,10 @@ class TelegramCommandBot:
 
 
 class BackendProvider:
-    "`app.ui.backend` 를 감싼 라이브 provider. backend 는 KIS_ENV 로 mock/실 브로커 결정."
+    "`app.services.backend` 를 감싼 라이브 provider. backend 는 KIS_ENV 로 mock/실 브로커 결정."
 
     def status(self) -> dict:
-        from app.ui import backend
+        from app.services import backend
 
         wl = backend.list_whitelist()
         logs = backend.list_order_logs()
@@ -314,7 +314,7 @@ class BackendProvider:
         }
 
     def pnl(self) -> dict:
-        from app.ui import backend
+        from app.services import backend
 
         df = backend.holdings_df()
         if df is None or df.empty:
@@ -326,7 +326,7 @@ class BackendProvider:
         }
 
     def positions(self) -> list[dict]:
-        from app.ui import backend
+        from app.services import backend
 
         df = backend.positions()
         if df is None or df.empty:
@@ -334,7 +334,7 @@ class BackendProvider:
         return df.to_dict("records")
 
     def conditions(self) -> list[dict]:
-        from app.ui import backend
+        from app.services import backend
 
         df = backend.list_conditions()
         if df is None or df.empty:
@@ -345,12 +345,12 @@ class BackendProvider:
         return df.to_dict("records")
 
     def run_engine(self) -> list[str]:
-        from app.ui import backend
+        from app.services import backend
 
         return backend.run_engine_once()
 
     def propose(self, symbol: str, side: str) -> str:
-        from app.ui import backend
+        from app.services import backend
 
         proposal = backend.propose(symbol, side)
         target = proposal.target_price
@@ -363,16 +363,16 @@ class BackendProvider:
         )
 
     def set_auto_enabled(self, value: bool) -> None:
-        from app.ui import backend
+        from app.services import backend
 
         backend.set_flag("auto_trading_enabled", value)
 
     def set_kill_switch(self, value: bool) -> None:
-        from app.ui import backend
+        from app.services import backend
         backend.set_flag("kill_switch_active", value)
 
     def quote(self, symbol: str) -> float:
-        from app.ui import backend
+        from app.services import backend
         return backend.price(symbol)
 
     def ask_agent(self, agent: str, question: str) -> str:
@@ -380,11 +380,11 @@ class BackendProvider:
         return ar.ask(agent, question)
 
     def set_symbol_mode(self, symbol: str, mode: str) -> None:
-        from app.ui import backend
+        from app.services import backend
         backend.set_flag(f"symbol_mode_{symbol}", mode)
 
     def add_alert(self, symbol: str, price: float, direction: str) -> int:
-        from app.ui import backend
+        from app.services import backend
         return backend.add_price_alert(symbol, price, direction)
 
 

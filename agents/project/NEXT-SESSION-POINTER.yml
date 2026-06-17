@@ -1,18 +1,17 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T01:38:22+09:00
+updated_at: 2026-06-17T16:18:21+09:00
 updated_by: lead-engineer
 current_state:
-  signal: watch
-  score: 84
+  signal: pass
+  score: 94
   summary: >
-    TASK-074 investor profile survey implementation is complete on branch
-    feat/investor-profile-survey and PR #91 is CI-green but merge-escalated by
-    auto_merge large-diff policy. It adds DB-backed personalization survey,
-    profile gates, onboarding/settings UI, focused API/E2E tests, and a
-    dev-server browser verification pass. Owner-reported anonymous survey load
-    failure was fixed by making only GET /api/profile/survey public while
-    keeping save/profile/check-in/override gated. KIS, order_flow, app/risk,
-    secrets, prod, and CI workflow surfaces were not changed.
+    Approved closeout implementation and local verification passed on branch
+    feat/approved-r3-and-ui-closeout. TASK-014/021/022/026/027/028/030/031/032
+    R3 order/risk surfaces and TASK-049 Streamlit retirement are implemented
+    and recorded. R3 production order execution remains hardguarded; no secret
+    or production data mutation was performed. Remaining local work is branch
+    packaging, PR handling, and preserving or separating the concurrent login
+    page change.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -37,12 +36,12 @@ resume:
   task_set_id: none
   step_index: 0
   step_total: 0
-  status_text: TASK-074 implemented; PR #91 CI green; auto_merge ESCALATE requires Owner/gate decision
+  status_text: No persistent active task; approved closeout verified locally and awaiting branch/PR packaging
   next_actions:
-    - Review PR #91 after the anonymous survey-load fix and decide whether to merge despite auto_merge large-diff escalation.
-    - Local dev servers are running at API http://127.0.0.1:8000 and web http://127.0.0.1:3000 for immediate review.
-    - Do not start TASK-069 before 2026-12-14 unless Owner explicitly requests an early reassessment.
-    - To try mock SSO locally, set AUTOFOLIO_SSO_MOCK_ENABLED=1 plus mock email/name env values and restart backend/frontend.
+    - Package scoped changes into a branch commit and PR.
+    - Merge the PR when configured checks permit automation.
+    - Keep TASK-069 deferred until 2026-12-14 unless Owner explicitly requests early reassessment.
+    - Do not discard concurrent web/src/app/login/page.tsx changes unless Owner explicitly approves.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -79,10 +78,9 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-17 TASK-074 run passed full API tests (274 passed), web lint,
-      web build, Playwright phase3 + investor-profile E2E, focused survey API
-      regression, anonymous browser check for /onboarding/investor-profile,
-      generated view checks, check_agent_docs, owner_governance_gate, git diff
-      --check, and GitHub PR #91 CI after the anonymous survey-load fix.
-      auto_merge remains ESCALATE because non-document diff is 2125 lines > cap
-      600.
+      2026-06-17 closeout checks passed: active app/scripts py_compile OK,
+      R3 focused tests 15 passed, quant catalog 103 passed, KIS/safety/engine
+      selector 94 passed, backend holdings/portfolio selector 21 passed,
+      services/API backend move selector 177 passed, full pytest 1111 passed,
+      npm lint/build passed, Next demo walkthrough E2E 1 passed, docker compose
+      config passed, check_agent_docs passed, and owner_governance_gate passed.

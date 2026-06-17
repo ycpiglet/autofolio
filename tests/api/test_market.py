@@ -53,7 +53,7 @@ class TestSymbols:
 
     def test_symbols_empty_when_whitelist_empty(self, guest_client, monkeypatch):
         import pandas as pd
-        import app.ui.backend as backend_mod
+        import app.services.backend as backend_mod
         monkeypatch.setattr(backend_mod, "list_whitelist", lambda: pd.DataFrame())
         resp = guest_client.get("/api/market/symbols")
         assert resp.status_code == 200

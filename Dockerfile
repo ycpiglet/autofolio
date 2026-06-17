@@ -12,10 +12,9 @@ COPY . .
 # DB 초기화
 RUN python scripts/init_db.py
 
-EXPOSE 8501
+EXPOSE 8000
 
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
-ENTRYPOINT ["streamlit", "run", "app/ui/autofolio_app.py", \
-            "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]
+CMD ["uvicorn", "app.api.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]

@@ -44,7 +44,7 @@ def _validate_symbol(symbol: str) -> str:
 def attribution(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.attribution_df())
 
@@ -53,7 +53,7 @@ def attribution(
 def retro(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     return backend.retro_metrics()
 
@@ -62,7 +62,7 @@ def retro(
 def daily_pnl(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.daily_pnl_series())
 
@@ -129,7 +129,7 @@ def portfolio_var(
 ) -> dict[str, Any]:
     """포트폴리오 몬테카를로 VaR. READ-ONLY. n_simulations 상한 50,000."""
     from app.quant.risk_sim import compute_var
-    from app.ui import backend
+    from app.services import backend
 
     # Cap simulations to prevent abuse
     n_sim = min(n_simulations, _N_SIM_MAX)
@@ -164,7 +164,7 @@ def scenario(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
     """시나리오 분석 (Bull/Base/Bear). READ-ONLY."""
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.scenario_analysis())
 
@@ -176,7 +176,7 @@ def whatif(
     weight: Annotated[float, Query(ge=0.0, le=100.0, description="목표 비중 (%)")] = 0.0,
 ) -> dict[str, Any]:
     """종목 비중 변경 시 포트폴리오 영향 계산. READ-ONLY."""
-    from app.ui import backend
+    from app.services import backend
 
     sym = _validate_symbol(symbol)
     return backend.whatif_weight_change(sym, weight)

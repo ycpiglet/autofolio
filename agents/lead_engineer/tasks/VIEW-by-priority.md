@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T01:39:06+09:00`
+> 생성 시각: `2026-06-17T09:07:33+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -24,7 +24,7 @@
 | [TASK-024](TASK-024-paper-scenario-matrix-validation.md) | 완료 | High | 중 | 1 ph / ~20000 tok | QA | paper,qa,scenario-matrix,engine,risk,ui |
 | [TASK-025](TASK-025-quant-trading-scenario-catalog.md) | 완료 | High | 중 | 1 ph / ~25000 tok | QA | qa,quant,paper,scenario-catalog,engine |
 | [TASK-029](TASK-029-fix-style-order-lifecycle-tests.md) | 완료 | High | 중 | 4 ph / ~45000 tok | Backend Engineer | qa,order-lifecycle,partial-fill,fix,mock |
-| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | High | 중 | 2 ph / ~30000 tok | QA | qa,kis,ui,paper,market-hours,verification |
 | [TASK-036](TASK-036-paper-transaction-ui-sync-soak.md) | 완료 | High | 중 | 2 ph / ~35000 tok | QA | qa,kis,paper,transaction,ui-sync,soak |
 | [TASK-037](TASK-037-feature-landscape-research.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,feature-landscape,backlog,planning |
@@ -59,10 +59,10 @@
 | [TASK-004](TASK-004-runtime-update-gate.md) | 완료 | Medium | 중 | 1 ph / ~10000 tok | Lead Engineer | agent-runtime,sync |
 | [TASK-012](TASK-012-kis-long-term-order-history.md) | 완료 | Medium | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,history |
 | [TASK-013](TASK-013-kis-batch-price.md) | 완료 | Medium | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,price,performance |
-| [TASK-014](TASK-014-kis-after-hours-order.md) | 보류 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
-| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
+| [TASK-014](TASK-014-kis-after-hours-order.md) | 완료 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
 | [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 | [TASK-039](TASK-039-backtest-research-report-hardening.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Quant Researcher | feature-landscape,backtest,research,reports,qa |
@@ -70,7 +70,7 @@
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 완료 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-059](TASK-059-fix-logout-incomplete-state-reset.md) | 완료 | Medium | 낮 | 2 ph / ~15000 tok | Backend Engineer | bug,security,session,logout |
 | [TASK-060](TASK-060-sqlite-wal-fk-enforcement.md) | 완료 | Medium | 중 | 3 ph / ~20000 tok | Backend Engineer | database,performance,integrity,sqlite |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 완료 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |
@@ -95,9 +95,9 @@
 | [TASK-018](TASK-018-kis-order-book.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,orderbook,realtime |
 | [TASK-019](TASK-019-kis-sector-price.md) | 완료 | Low | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,sector |
 | [TASK-020](TASK-020-kis-disclosure.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,disclosure,compliance |
-| [TASK-021](TASK-021-kis-margin-short.md) | 보류 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
-| [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
-| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
-| [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+| [TASK-021](TASK-021-kis-margin-short.md) | 완료 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
+| [TASK-022](TASK-022-kis-overseas-order.md) | 완료 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
+| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 완료 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
+| [TASK-030](TASK-030-block-basket-execution-tests.md) | 완료 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
 | [TASK-052](TASK-052-fix-trade-ack-checkbox-loop.md) | 완료 | Low | 중 | 2 ph / ~15000 tok | UI/UX Designer | bug,ui,streamlit,trade,acknowledgement,checkbox |
 

@@ -13,10 +13,10 @@ def test_blocked_disclosure():
     mock_add = Mock()
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": True, "reason": "거래정지"},
         ),
-        patch("app.ui.backend.add_condition", mock_add),
+        patch("app.services.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates("005930", "BUY", 70000.0, 1, False)
     assert result.status == "blocked_disclosure"
@@ -29,14 +29,14 @@ def test_compliance_reject():
     mock_add = Mock()
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": False, "reason": ""},
         ),
         patch(
             "app.ui.agents_runtime.ask",
             return_value="REJECT: 위험",
         ),
-        patch("app.ui.backend.add_condition", mock_add),
+        patch("app.services.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates("005930", "BUY", 70000.0, 1, False)
     assert result.status == "rejected"
@@ -49,14 +49,14 @@ def test_compliance_caution_without_ack():
     mock_add = Mock()
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": False, "reason": ""},
         ),
         patch(
             "app.ui.agents_runtime.ask",
             return_value="CAUTION: 주의",
         ),
-        patch("app.ui.backend.add_condition", mock_add),
+        patch("app.services.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates(
             "005930", "BUY", 70000.0, 1, False, caution_acknowledged=False
@@ -70,7 +70,7 @@ def test_compliance_caution_with_ack():
     """CAUTION 반환 + caution_acknowledged=True → 저장 진행, saved 반환, compliance='caution_acked'."""
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": False, "reason": ""},
         ),
         patch(
@@ -78,7 +78,7 @@ def test_compliance_caution_with_ack():
             return_value="CAUTION: 주의",
         ),
         patch(
-            "app.ui.backend.add_condition",
+            "app.services.backend.add_condition",
             return_value=42,
         ),
     ):
@@ -95,12 +95,12 @@ def test_compliance_check_false():
     mock_ask = Mock()
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": False, "reason": ""},
         ),
         patch("app.ui.agents_runtime.ask", mock_ask),
         patch(
-            "app.ui.backend.add_condition",
+            "app.services.backend.add_condition",
             return_value=7,
         ),
     ):
@@ -117,7 +117,7 @@ def test_compliance_pass():
     """compliance-officer 가 REJECT/CAUTION 없이 통과 응답 → saved 반환, compliance='passed'."""
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": False, "reason": ""},
         ),
         patch(
@@ -125,7 +125,7 @@ def test_compliance_pass():
             return_value="통과합니다",
         ),
         patch(
-            "app.ui.backend.add_condition",
+            "app.services.backend.add_condition",
             return_value=1,
         ),
     ):
@@ -140,14 +140,14 @@ def test_compliance_agent_call_error_fail_closed():
     mock_add = Mock()
     with (
         patch(
-            "app.ui.backend.disclosure_gate_state",
+            "app.services.backend.disclosure_gate_state",
             return_value={"blocked": False, "reason": ""},
         ),
         patch(
             "app.ui.agents_runtime.ask",
             return_value="[compliance-officer] 호출 오류: timeout",
         ),
-        patch("app.ui.backend.add_condition", mock_add),
+        patch("app.services.backend.add_condition", mock_add),
     ):
         result = save_condition_with_gates("005930", "BUY", 70000.0, 1, False)
     assert result.status == "error", f"expected 'error', got '{result.status}'"

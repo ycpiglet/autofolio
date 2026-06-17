@@ -190,7 +190,7 @@ class TestPortfolioReportNumerics:
     def test_empty_holdings_returns_empty_df_fields(self):
         """build_portfolio_report handles empty holdings without crash."""
         from app.services.perf_report import build_portfolio_report
-        from app.ui.backend import HOLDINGS_COLUMNS
+        from app.services.backend import HOLDINGS_COLUMNS
         empty = pd.DataFrame(columns=HOLDINGS_COLUMNS)
         r = build_portfolio_report(
             holdings=empty,

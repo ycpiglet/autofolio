@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T01:39:06+09:00`
+> 생성 시각: `2026-06-17T09:07:33+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -18,7 +18,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-014](TASK-014-kis-after-hours-order.md) | 보류 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
+| [TASK-014](TASK-014-kis-after-hours-order.md) | 완료 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
 
 ## #agent-runtime
 
@@ -53,7 +53,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 완료 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 
 ## #approval-record
@@ -74,7 +74,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
 
 ## #asset-universe
 
@@ -117,7 +117,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+| [TASK-030](TASK-030-block-basket-execution-tests.md) | 완료 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
 
 ## #benchmark
 
@@ -129,13 +129,13 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+| [TASK-030](TASK-030-block-basket-execution-tests.md) | 완료 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
 
 ## #bond
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
 
 ## #broker-capability
 
@@ -202,7 +202,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-020](TASK-020-kis-disclosure.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,disclosure,compliance |
-| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
 
 ## #concentration
@@ -215,7 +215,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
+| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 
 ## #coverage
 
@@ -239,7 +239,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
+| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 
 ## #database
 
@@ -267,7 +267,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
+| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 완료 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
 
 ## #dev-mode
 
@@ -280,7 +280,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-020](TASK-020-kis-disclosure.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,disclosure,compliance |
-| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 
 ## #dividend
 
@@ -314,7 +314,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
 
 ## #engine
 
@@ -335,7 +335,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
 
 ## #eval
 
@@ -347,7 +347,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+| [TASK-030](TASK-030-block-basket-execution-tests.md) | 완료 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
 
 ## #external-api
 
@@ -402,7 +402,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
 ## #fundamental
 
@@ -414,13 +414,13 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
+| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 완료 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
 
 ## #fx-futures
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
+| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 완료 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
 
 ## #gate
 
@@ -440,7 +440,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 
 ## #history
 
@@ -453,7 +453,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
+| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 
 ## #holidays
 
@@ -522,7 +522,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
 ## #kis
 
@@ -533,18 +533,18 @@
 | [TASK-011](TASK-011-kis-intraday-chart.md) | 완료 | High | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,chart,intraday |
 | [TASK-012](TASK-012-kis-long-term-order-history.md) | 완료 | Medium | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,history |
 | [TASK-013](TASK-013-kis-batch-price.md) | 완료 | Medium | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,price,performance |
-| [TASK-014](TASK-014-kis-after-hours-order.md) | 보류 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
+| [TASK-014](TASK-014-kis-after-hours-order.md) | 완료 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
 | [TASK-015](TASK-015-kis-index-price.md) | 완료 | Low | 낮 | 1 ph / ~50000 tok | KIS API Engineer | kis,index |
 | [TASK-016](TASK-016-kis-fundamental-data.md) | 완료 | Low | 중 | 4 ph / ~50000 tok | KIS API Engineer | kis,fundamental,research |
 | [TASK-017](TASK-017-kis-dividend-info.md) | 완료 | Low | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,dividend |
 | [TASK-018](TASK-018-kis-order-book.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,orderbook,realtime |
 | [TASK-019](TASK-019-kis-sector-price.md) | 완료 | Low | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,sector |
 | [TASK-020](TASK-020-kis-disclosure.md) | 완료 | Low | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,disclosure,compliance |
-| [TASK-021](TASK-021-kis-margin-short.md) | 보류 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
-| [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
+| [TASK-021](TASK-021-kis-margin-short.md) | 완료 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
+| [TASK-022](TASK-022-kis-overseas-order.md) | 완료 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
 | [TASK-023](TASK-023-kis-engine-e2e-validation.md) | 완료 | High | 중 | 2 ph / ~50000 tok | KIS API Engineer | kis,engine,e2e,validation |
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
-| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 완료 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | High | 중 | 2 ph / ~30000 tok | QA | qa,kis,ui,paper,market-hours,verification |
 | [TASK-036](TASK-036-paper-transaction-ui-sync-soak.md) | 완료 | High | 중 | 2 ph / ~35000 tok | QA | qa,kis,paper,transaction,ui-sync,soak |
 
@@ -594,7 +594,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-021](TASK-021-kis-margin-short.md) | 보류 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
+| [TASK-021](TASK-021-kis-margin-short.md) | 완료 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
 
 ## #market-hours
 
@@ -613,7 +613,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
 ## #mock
 
@@ -626,13 +626,13 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
 ## #multi-leg
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+| [TASK-030](TASK-030-block-basket-execution-tests.md) | 완료 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
 
 ## #next-js
 
@@ -664,13 +664,13 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
+| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 완료 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
 
 ## #order
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-014](TASK-014-kis-after-hours-order.md) | 보류 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
+| [TASK-014](TASK-014-kis-after-hours-order.md) | 완료 | Medium | 중 | 3 ph / ~50000 tok | KIS API Engineer | kis,order,after-hours |
 
 ## #order-flow
 
@@ -688,7 +688,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
 ## #orderbook
 
@@ -700,7 +700,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
+| [TASK-022](TASK-022-kis-overseas-order.md) | 완료 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
 
 ## #owner-gate
 
@@ -734,7 +734,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 완료 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## #partial-fill
 
@@ -791,7 +791,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 완료 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## #pilot
 
@@ -851,13 +851,13 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-024](TASK-024-paper-scenario-matrix-validation.md) | 완료 | High | 중 | 1 ph / ~20000 tok | QA | paper,qa,scenario-matrix,engine,risk,ui |
 | [TASK-025](TASK-025-quant-trading-scenario-catalog.md) | 완료 | High | 중 | 1 ph / ~25000 tok | QA | qa,quant,paper,scenario-catalog,engine |
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
-| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 보류 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-027](TASK-027-krx-derivatives-test-support.md) | 완료 | Low | 상 | 10 ph / ~80000 tok | KIS API Engineer | kis,qa,derivatives,futures,options,fx-futures |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 | [TASK-029](TASK-029-fix-style-order-lifecycle-tests.md) | 완료 | High | 중 | 4 ph / ~45000 tok | Backend Engineer | qa,order-lifecycle,partial-fill,fix,mock |
-| [TASK-030](TASK-030-block-basket-execution-tests.md) | 보류 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
-| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
-| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
+| [TASK-030](TASK-030-block-basket-execution-tests.md) | 완료 | Low | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,basket,block-trade,multi-leg,execution |
+| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
 | [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | High | 중 | 2 ph / ~30000 tok | QA | qa,kis,ui,paper,market-hours,verification |
@@ -913,7 +913,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 보류 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+| [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
 
 ## #reporting
 
@@ -950,7 +950,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-024](TASK-024-paper-scenario-matrix-validation.md) | 완료 | High | 중 | 1 ph / ~20000 tok | QA | paper,qa,scenario-matrix,engine,risk,ui |
-| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 
 ## #roles
 
@@ -1058,7 +1058,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-021](TASK-021-kis-margin-short.md) | 보류 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
+| [TASK-021](TASK-021-kis-margin-short.md) | 완료 | Low | 상 | 6 ph / ~50000 tok | KIS API Engineer | kis,margin,short |
 
 ## #slippage
 
@@ -1101,13 +1101,13 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 보류 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
+| [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 
 ## #stop
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
 ## #strategy
 
@@ -1126,7 +1126,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 완료 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 
 ## #survey
 
@@ -1169,7 +1169,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 보류 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
+| [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
 ## #transaction
 
@@ -1199,7 +1199,7 @@
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 완료 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
-| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 보류 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
+| [TASK-049](TASK-049-ui-overhaul-phase5-analysis-parity-retire.md) | 완료 | Medium | 상 | 16 ph / ~120000 tok | UI/UX Designer | ui-overhaul,analysis,parity,streamlit-retire,phase5 |
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | authentication,sso,mock,dev-mode,ui-overhaul |
 
@@ -1213,7 +1213,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-022](TASK-022-kis-overseas-order.md) | 보류 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
+| [TASK-022](TASK-022-kis-overseas-order.md) | 완료 | Low | 상 | 8 ph / ~50000 tok | KIS API Engineer | kis,overseas,us-stocks |
 
 ## #utc
 
@@ -1237,7 +1237,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 보류 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 
 ## #volatility
 

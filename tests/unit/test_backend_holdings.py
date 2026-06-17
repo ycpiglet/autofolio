@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from app.brokers.base import Position
-from app.ui import backend
-from app.ui.backend import HOLDINGS_COLUMNS, _build_holdings_df
+from app.services import backend
+from app.services.backend import HOLDINGS_COLUMNS, _build_holdings_df
 
 
 def test_build_holdings_empty_returns_schema():
@@ -31,6 +31,30 @@ def test_build_holdings_computes_pnl_class_and_weight():
     assert df[df["티커"] == "069500"].iloc[0]["자산군"] == "ETF"
     # 비중 합은 ~100%
     assert abs(df["비중"].sum() - 100.0) < 0.5
+
+
+def test_build_holdings_converts_overseas_position_to_krw():
+    position = Position(
+        symbol="AAPL",
+        quantity=2,
+        avg_price=190.0,
+        market="NASD",
+        currency="USD",
+        fx_rate=1300.0,
+    )
+
+    df = _build_holdings_df(
+        [position],
+        lambda s: 200.0,
+        lambda s: {"name": "Apple", "role": "US_STOCK", "market": "NASD"},
+    )
+
+    row = df.iloc[0]
+    assert row["지역"] == "US"
+    assert row["평단"] == 247000
+    assert row["현재가"] == 260000
+    assert row["평가금액"] == 520000
+    assert row["평가손익"] == 26000
 
 
 def test_build_holdings_handles_missing_avg_and_name_fallback():

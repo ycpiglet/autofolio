@@ -15,7 +15,7 @@ def _holdings_df():
     """
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
 
             return backend.holdings_df(include_dividends=False)
         except Exception as exc:  # noqa: BLE001 — UI 폴백
@@ -86,7 +86,7 @@ def render() -> None:
         st.subheader("목표 대비 (리밸런싱 갭)")
         if st.session_state.get("data_source") == "backend":
             try:
-                from app.ui import backend
+                from app.services import backend
                 st.dataframe(backend.allocation_gap(), hide_index=True, width="stretch")
             except Exception as exc:  # noqa: BLE001
                 st.warning(f"라이브 갭 조회 실패 — 데모 데이터로 대체합니다: {exc}")
@@ -110,7 +110,7 @@ def _render_perf_report(holdings_df: "pd.DataFrame") -> None:
     # --- 데이터 수집 (backend 또는 mock) ---
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
             pnl_series = backend.daily_pnl_series()
             kpis_data = backend.kpis()
             repo, *_ = backend._ctx()

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Protocol
+from typing import Any, Mapping, Protocol
 
 from app.common.enums import OrderStatus, OrderType, Side
 
@@ -22,6 +22,12 @@ class OrderRequest:
     order_type: OrderType
     quantity: int
     price: float | None = None
+    order_session: str = "REGULAR"
+    sell_type: str = "01"
+    market: str = "KRX"
+    product_type: str = "EQUITY"
+    currency: str = "KRW"
+    metadata: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -38,6 +44,9 @@ class Position:
     symbol: str
     quantity: int
     avg_price: float | None = None
+    market: str = "KRX"
+    currency: str = "KRW"
+    fx_rate: float | None = None
 
 
 class BrokerClient(Protocol):

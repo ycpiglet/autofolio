@@ -134,7 +134,7 @@ def _modes() -> None:
     # 라이브 모드: auto_enabled 토글 변경 → DB 즉시 동기화
     if live and st.session_state.auto_enabled != prev_auto:
         try:
-            from app.ui import backend
+            from app.services import backend
             backend.set_flag("auto_trading_enabled", st.session_state.auto_enabled)
             st.toast(f"자동매매 {'ON' if st.session_state.auto_enabled else 'OFF'} — DB 저장됨")
         except Exception as exc:  # noqa: BLE001
@@ -143,7 +143,7 @@ def _modes() -> None:
     if live:
         # DB 실제 상태 표시
         try:
-            from app.ui import backend
+            from app.services import backend
             db_auto = backend.get_flag("auto_trading_enabled")
             db_kill = backend.get_flag("kill_switch_active")
             st.caption(
@@ -161,7 +161,7 @@ def _modes() -> None:
     st.markdown("**종목별 자율성**")
     if live:
         try:
-            from app.ui import backend
+            from app.services import backend
             wl = backend.list_whitelist()
             if not wl.empty:
                 wl = wl[["symbol", "name"]].rename(columns={"symbol": "티커", "name": "종목"})
@@ -197,7 +197,7 @@ def _risk() -> None:
 
     if live and st.button("💾 리스크 한도 저장", type="primary", key="risk_save"):
         try:
-            from app.ui import backend
+            from app.services import backend
             backend.set_risk_limits(
                 max_order_amount=float(order_limit),
                 max_daily_amount=float(daily),

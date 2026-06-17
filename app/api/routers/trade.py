@@ -35,7 +35,7 @@ def recent_fills(
     _session: Annotated[dict[str, Any], Depends(require_session)],
     limit: int = Query(default=10, ge=1, le=200),
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.recent_fills(limit))
 
@@ -44,7 +44,7 @@ def recent_fills(
 def conditions(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.list_conditions())
 
@@ -54,7 +54,7 @@ def orders(
     _session: Annotated[dict[str, Any], Depends(require_session)],
     limit: int = Query(default=200, ge=1, le=1000),
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.list_order_logs(limit))
 

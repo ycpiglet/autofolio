@@ -97,7 +97,7 @@ def _buy_one(
 
 
 def _ui_holdings_summary() -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     holdings = backend.holdings_df()
     symbols = sorted(str(value) for value in holdings.get("티커", [])) if not holdings.empty else []

@@ -4,10 +4,12 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from app.config.settings import settings
+from app.data.quality import validate_price_quote
 from app.database.repositories import Repository
 from app.data.krx_holidays import is_krx_holiday
+from app.risk.order_policy import validate_order_policy
 from app.risk.duplicate_guard import is_condition_executable
-from app.risk.trading_window import is_within_trading_window, now_kst
+from app.risk.trading_window import is_within_order_session, is_within_trading_window, now_kst
 
 
 @dataclass(frozen=True)
@@ -25,9 +27,15 @@ class SafetyChecker:
         *,
         condition: dict,
         current_price: float,
+        quote: object | None = None,
         now: datetime | None = None,
     ) -> SafetyResult:
         now = now or now_kst()
+
+        if quote is not None:
+            data_quality = validate_price_quote(quote, now=now)
+            if not data_quality.ok:
+                return SafetyResult(False, f"Market data rejected: {data_quality.reason}")
 
         if self.repo.get_system_state("kill_switch_active", "false") == "true":
             return SafetyResult(False, "Kill switch is active.")
@@ -47,6 +55,8 @@ class SafetyChecker:
                 False,
                 f"Autonomy level {symbol_mode} — manual approval required for {symbol}.",
             )
+        condition = dict(condition)
+        condition["symbol_mode"] = symbol_mode
 
         # --- Circuit breaker: consecutive order failures ---
         consecutive_failures_str = self.repo.get_system_state("consecutive_order_failures", "0")
@@ -91,16 +101,31 @@ class SafetyChecker:
         if not symbol_info:
             return SafetyResult(False, "Symbol is not enabled in whitelist.")
 
-        if not is_within_trading_window(
-            now,
-            settings.default_trading_start,
-            settings.default_trading_end,
-        ):
-            return SafetyResult(False, "Outside trading window.")
+        order_session = str(condition.get("order_session") or "REGULAR").upper()
+        if order_session == "REGULAR":
+            in_window = is_within_trading_window(
+                now,
+                settings.default_trading_start,
+                settings.default_trading_end,
+            )
+        else:
+            in_window = is_within_order_session(order_session, now)
+        if not in_window:
+            return SafetyResult(False, f"Outside {order_session.lower()} trading window.")
 
         # --- KRX 휴장일 차단 ---
         if is_krx_holiday(now.date()):
             return SafetyResult(False, "KRX 휴장일 — 오늘은 KRX 휴장일입니다.")
+
+        policy = validate_order_policy(
+            condition=condition,
+            current_price=current_price,
+            whitelist_symbol=symbol_info,
+            system_state=self._policy_state(condition["symbol"]),
+            kis_env=settings.kis_env,
+        )
+        if not policy.allowed:
+            return SafetyResult(False, policy.reason)
 
         if not is_condition_executable(
             condition["status"],
@@ -129,3 +154,17 @@ class SafetyChecker:
             return SafetyResult(False, "Daily order amount limit exceeded.")
 
         return SafetyResult(True, "Allowed.")
+
+    def _policy_state(self, symbol: str) -> dict[str, str]:
+        keys = (
+            "global_mode",
+            "market_wide_halt",
+            "derivatives_mock_enabled",
+            "basket_mock_enabled",
+            "overseas_paper_enabled",
+            f"symbol_mode_{symbol}",
+            f"market_halt_{symbol}",
+            f"vi_active_{symbol}",
+            f"disclosure_block_{symbol}",
+        )
+        return {key: self.repo.get_system_state(key, "false") for key in keys}

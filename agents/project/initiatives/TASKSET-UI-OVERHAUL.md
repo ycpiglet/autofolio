@@ -4,16 +4,19 @@ work_id: TASKSET-UI-OVERHAUL
 work_uid: bd041642-f44d-4d22-91f9-878b855f68ba
 kind: taskset
 parent_id: INIT-UI-OVERHAUL
-status: planned
+status: completed
 owner: Lead Engineer
 created_at: 2026-06-14T09:03:29+09:00
-updated_at: 2026-06-14T09:03:29+09:00
+updated_at: 2026-06-17T09:03:57+09:00
+completed_at: 2026-06-17T09:03:57+09:00
+resolution: done
+verification_status: passed
 origin_type: owner_request
 origin_ref: AUDIT-2026-06-13-007
 created_by: lead_engineer
 title: UI 대개편 태스크셋 (TASK-045~049)
-summary: Next.js + FastAPI 전환 5단계 — 순차 실행; TASK-047(Phase 3)는 Owner 승인 필수
-tags: [ui-overhaul, fastapi, next-js, migration, sequential, phase3-owner-gated]
+summary: Next.js + FastAPI 전환 5단계 완료; Streamlit runtime retired and archived
+tags: [ui-overhaul, fastapi, next-js, migration, completed, streamlit-retired]
 priority: P1
 ---
 
@@ -34,18 +37,18 @@ tasks:
 
 | work_id | 설명 | 상태 | 비고 |
 |---------|------|------|------|
-| TASK-045 | Phase 1 — FastAPI 기초 + 인증 + 읽기 API / Next.js 스캐폴드 + 로그인 | 대기 | - |
-| TASK-046 | Phase 2 — 홈 + 포트폴리오 (읽기 화면) | 대기 | - |
-| TASK-047 | Phase 3 — 매매 + 내역 + 설정 (state-changing + 안전 게이트) | 보류 | ⚠ Owner 승인 필수 |
-| TASK-048 | Phase 4 — 에이전트/IC + 알림 + SSE | 대기 | - |
-| TASK-049 | Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴 | 대기 | - |
+| TASK-045 | Phase 1 — FastAPI 기초 + 인증 + 읽기 API / Next.js 스캐폴드 + 로그인 | 완료 | - |
+| TASK-046 | Phase 2 — 홈 + 포트폴리오 (읽기 화면) | 완료 | - |
+| TASK-047 | Phase 3 — 매매 + 내역 + 설정 (state-changing + 안전 게이트) | 완료 | Owner 승인 후 완료 |
+| TASK-048 | Phase 4 — 에이전트/IC + 알림 + SSE | 완료 | - |
+| TASK-049 | Phase 5 — 분석 화면 + 패리티 감사 + Streamlit 은퇴 | 완료 | Streamlit archive 완료 |
 
 ## 순차 의존 관계
 
 TASK-045 → TASK-046 → (Owner 승인) → TASK-047 → TASK-048 → TASK-049
 
-TASK-047(Phase 3)은 Owner가 진행을 명시 승인하기 전까지 보류 상태를 유지하며
-코드 변경을 하지 않는다.
+모든 Phase 완료. 현재 운영 UI는 Next.js/FastAPI이고 은퇴한 Streamlit 코드는
+`archive/streamlit_ui/`에 보존한다.
 
 ## Wave 실행 계획
 

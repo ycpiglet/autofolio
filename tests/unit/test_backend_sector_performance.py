@@ -4,7 +4,7 @@ from __future__ import annotations
 def test_sector_performance_df_uses_kis_client(monkeypatch):
     from app.brokers.kis.constants import KIS_SECTOR_CODES
     from app.brokers.kis.kis_client import KisClient
-    from app.ui import backend
+    from app.services import backend
 
     class FakeKisClient(KisClient):
         def __init__(self):

@@ -23,7 +23,7 @@ router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 def holdings(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.holdings_df())
 
@@ -32,7 +32,7 @@ def holdings(
 def kpis(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     return backend.kpis()
 
@@ -42,7 +42,7 @@ def asset_curve(
     _session: Annotated[dict[str, Any], Depends(require_session)],
     days: int = Query(default=90, ge=1, le=3650),
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.asset_curve(days))
 
@@ -51,6 +51,6 @@ def asset_curve(
 def allocation_gap(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.allocation_gap())

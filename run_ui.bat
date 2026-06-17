@@ -1,3 +1,4 @@
 @echo off
-set PYTHONPATH=%CD%
-streamlit run app\ui\autofolio_app.py
+REM Retired Streamlit launcher. Start the FastAPI backend and Next.js frontend.
+start "Autofolio API" cmd /k "%~dp0run_api.bat"
+start "Autofolio Web" cmd /k "%~dp0run_frontend.bat"

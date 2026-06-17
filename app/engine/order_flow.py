@@ -49,7 +49,7 @@ class OrderFlow:
         if not triggered:
             return OrderFlowResult(False, "Condition is not triggered.")
 
-        safety = self.safety_checker.check(condition=condition, current_price=current_price)
+        safety = self.safety_checker.check(condition=condition, current_price=current_price, quote=quote)
         if not safety.allowed:
             return OrderFlowResult(False, f"Safety check rejected: {safety.reason}")
 
@@ -58,7 +58,15 @@ class OrderFlow:
         quantity = int(condition["quantity"])
 
         order_price = None
-        if order_type == OrderType.LIMIT:
+        if order_type in {
+            OrderType.LIMIT,
+            OrderType.CONDITIONAL_LIMIT,
+            OrderType.BEST_LIMIT,
+            OrderType.PRIORITY_LIMIT,
+            OrderType.STOP_LIMIT,
+            OrderType.IOC,
+            OrderType.FOK,
+        }:
             order_price = float(condition["target_price"])
 
         request = OrderRequest(
@@ -67,6 +75,16 @@ class OrderFlow:
             order_type=order_type,
             quantity=quantity,
             price=order_price,
+            order_session=str(condition.get("order_session") or "REGULAR"),
+            sell_type=str(condition.get("sell_type") or "01"),
+            market=str(condition.get("market") or "KRX"),
+            product_type=str(condition.get("product_type") or "EQUITY"),
+            currency=str(condition.get("currency") or "KRW"),
+            metadata={
+                key: condition[key]
+                for key in ("trigger_price", "trailing_pct", "venue", "reference_price")
+                if key in condition
+            },
         )
 
         result = self.broker.place_order(request)
@@ -159,6 +177,11 @@ class OrderFlow:
             order_type=OrderType.MARKET,
             quantity=int(condition["quantity"]),
             price=None,
+            order_session=str(condition.get("order_session") or "REGULAR"),
+            sell_type=str(condition.get("sell_type") or "01"),
+            market=str(condition.get("market") or "KRX"),
+            product_type=str(condition.get("product_type") or "EQUITY"),
+            currency=str(condition.get("currency") or "KRW"),
         )
         result = self.broker.place_order(request)
         order_log_id = self.repo.create_order_log(

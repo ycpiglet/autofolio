@@ -19,7 +19,7 @@ class TestConditions:
 
     def test_conditions_backend_error_surfaces(self, error_client, monkeypatch):
         """Backend exception must not produce a silent empty 200."""
-        import app.ui.backend as bmod
+        import app.services.backend as bmod
 
         def _raise():
             raise RuntimeError("DB error")

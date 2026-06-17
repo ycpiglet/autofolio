@@ -15,7 +15,7 @@ def _kpis() -> dict:
     """
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
 
             return backend.kpis()
         except Exception as exc:  # noqa: BLE001 — UI 폴백
@@ -30,7 +30,7 @@ def _recent_fills() -> "pd.DataFrame":  # type: ignore[name-defined]
     """
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
 
             return backend.recent_fills()
         except Exception as exc:  # noqa: BLE001 — UI 폴백
@@ -46,7 +46,7 @@ def _holdings_df() -> "pd.DataFrame":  # type: ignore[name-defined]
     """
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
 
             return backend.holdings_df(include_dividends=False)
         except Exception as exc:  # noqa: BLE001
@@ -57,7 +57,7 @@ def _holdings_df() -> "pd.DataFrame":  # type: ignore[name-defined]
 def _market_indices() -> "pd.DataFrame":  # type: ignore[name-defined]
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
 
             return backend.market_indices_df()
         except Exception as exc:  # noqa: BLE001
@@ -71,7 +71,7 @@ def _handle_approve(proposal_id: str, proposal_row) -> None:
     st.session_state.setdefault("handled_proposals", set()).add(proposal_id)
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
             # symbol: proposals from data.proposals() carry 종목(display name); 티커 used when available.
             cid = backend.add_condition(
                 symbol=str(proposal_row.get("티커") or proposal_row.get("종목", "")),
@@ -133,7 +133,7 @@ def render() -> None:
 
     if st.session_state.get("data_source") == "backend":
         try:
-            from app.ui import backend
+            from app.services import backend
             curve = backend.asset_curve()
             st.line_chart(curve["자산"], height=260)
         except Exception:  # noqa: BLE001
@@ -166,7 +166,7 @@ def render() -> None:
         st.subheader("와치리스트")
         if st.session_state.get("data_source") == "backend":
             try:
-                from app.ui import backend
+                from app.services import backend
                 wl = backend.watchlist()
                 if not wl.empty:
                     wl["현재가"] = wl["price"].apply(lambda p: f"{p:,.0f}" if p else "-")

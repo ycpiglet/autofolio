@@ -236,14 +236,14 @@ roles:
     required_inputs:
       - AGENTS.md
       - agents/uiux_designer/SKILL.md
-      - app/ui/autofolio_app.py
-      - app/ui/components/ui.py
-      - app/ui/views/
+      - web/src/app/
+      - web/src/components/
+      - app/api/
       - "관련 TASK 본문"
     forbidden_inputs: []
     output_contract:
       - "프런트엔드 코드 / 접근성 / 반응형 / 브라우저 검증"
-      - "Streamlit AppTest 통과 evidence (app/ui)"
+      - "Playwright/Next.js 브라우저 검증 evidence (web/)"
     audit_gate: false
     default_subagents: [implementer, reviewer]
     notes: |
@@ -275,7 +275,7 @@ roles:
       - AGENTS.md
       - agents/beta_tester/SKILL.md
       - agents/beta_tester/test_cases/INDEX.md
-      - app/ui/autofolio_app.py
+      - web/src/app/
     forbidden_inputs:
       - "기술 디테일·구현 추론 (사용자 관점 보존)"
     output_contract:

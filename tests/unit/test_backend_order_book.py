@@ -3,7 +3,7 @@ from __future__ import annotations
 
 def test_order_book_snapshot_and_df_use_kis_client(monkeypatch):
     from app.brokers.kis.kis_client import KisClient
-    from app.ui import backend
+    from app.services import backend
 
     class FakeKisClient(KisClient):
         def __init__(self):
@@ -39,7 +39,7 @@ def test_order_book_snapshot_and_df_use_kis_client(monkeypatch):
 
 
 def test_order_book_df_returns_empty_for_non_kis_client(monkeypatch):
-    from app.ui import backend
+    from app.services import backend
 
     class FakeBroker:
         pass

@@ -156,6 +156,13 @@ routing waiver: main-session scope. selected_model/policy_model telemetry는 Cod
 - 프리마켓 요약은 자동 스케줄이 아니라 CLI 명시 실행만 지원한다.
 - `.autofolio/premarket/PREMARKET_20260616.md`는 gitignored local runtime output이다.
 
+## 2026-06-17 보강 기록
+
+- 로그인 화면은 Google/Kakao/Naver provider가 미설정 상태여도 setup shell을 표시하고, 클릭 시 Owner가 준비해야 할 redirect URI와 `.env` 변수 안내를 보여준다.
+- 이 보강은 실제 외부 OAuth를 활성화하지 않는다. provider는 credential/env가 준비될 때까지 disabled 상태이며, secret 생성·저장·노출과 live token call은 수행하지 않는다.
+- mock provider는 기존 TASK-072 정책대로 `AUTOFOLIO_SSO_MOCK_ENABLED=1`일 때만 개발용 버튼으로 표시된다.
+- CI에서 기존 `login.spec.ts`가 "disabled provider는 숨김"을 기대해 실패한 것을 새 UX 계약에 맞게 갱신했다. 검증: `npm run lint`, `npm run build`, `npm run test:e2e -- e2e/login.spec.ts --reporter=line` -> 5 passed, Next demo walkthrough E2E, `check_agent_docs`, `owner_governance_gate`.
+
 ## 리뷰
 
 - Backend review: OAuth state는 short-lived signed cookie로 검증하고 provider secret/token은 응답에 포함하지 않았다. 미설정 provider는 503으로 fail-closed한다.

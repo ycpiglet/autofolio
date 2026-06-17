@@ -34,6 +34,7 @@ _PATH_NEWS_TITLE = "/uapi/domestic-stock/v1/quotations/news-title"
 _PATH_FINANCE_RATIO = "/uapi/domestic-stock/v1/ranking/finance-ratio"
 _PATH_BALANCE = "/uapi/domestic-stock/v1/trading/inquire-balance"
 _PATH_ORDER_CASH = "/uapi/domestic-stock/v1/trading/order-cash"
+_PATH_OVERSEAS_ORDER = "/uapi/overseas-stock/v1/trading/order"
 _PATH_RVSECNCL = "/uapi/domestic-stock/v1/trading/order-rvsecncl"
 _PATH_DAILY_CCLD = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"
 _PATH_PSBL_RVSECNCL = "/uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl"
@@ -53,6 +54,8 @@ _TR_INTRADAY = "FHKST03010200"  # 분봉, paper/prod 동일 (F* TR)
 _TR_BALANCE = "TTTC8434R"
 _TR_BUY = "TTTC0012U"
 _TR_SELL = "TTTC0011U"
+_TR_OVERSEAS_BUY = "TTTT1002U"
+_TR_OVERSEAS_SELL = "TTTT1006U"
 _TR_RVSECNCL = "TTTC0013U"
 _TR_DAILY_CCLD = "TTTC0081R"
 _TR_DAILY_CCLD_LONG = "CTSC9215R"
@@ -61,7 +64,16 @@ _TR_PSBL_ORDER = "TTTC8908R"
 
 _ORD_DVSN_LIMIT = "00"   # 지정가
 _ORD_DVSN_MARKET = "01"  # 시장가 (ORD_UNPR="0")
+_ORD_DVSN_CONDITIONAL_LIMIT = "02"
+_ORD_DVSN_BEST_LIMIT = "03"
+_ORD_DVSN_PRIORITY_LIMIT = "04"
+_ORD_DVSN_PRE_OPEN = "05"
+_ORD_DVSN_AFTER_CLOSE = "06"
+_ORD_DVSN_AFTER_HOURS_SINGLE = "07"
 _EXCG_KRX = "KRX"
+_NORMAL_SELL_TYPE = "01"
+_R3_SELL_TYPES = {"02", "05"}
+_OVERSEAS_MARKETS = {"NASD", "NYSE", "AMEX", "SEHK"}
 _RVSE_CNCL_MODIFY = "01"  # 정정
 _RVSE_CNCL_CANCEL = "02"  # 취소
 
@@ -1215,17 +1227,12 @@ class KisClient(BrokerClient):
     def place_order(self, request: OrderRequest) -> OrderResult:
         cano, acnt = self._account()
         is_buy = request.side == Side.BUY
-        is_market = request.order_type == OrderType.MARKET
         prod_tr = _TR_BUY if is_buy else _TR_SELL
-
-        if is_market:
-            ord_dvsn = _ORD_DVSN_MARKET
-            ord_unpr = "0"
-        else:
-            if request.price is None:
-                raise BrokerError("Limit order requires a price.")
-            ord_dvsn = _ORD_DVSN_LIMIT
-            ord_unpr = str(int(round(request.price)))  # KRX 주식 호가는 정수
+        self._enforce_r3_prod_guard(request)
+        ord_dvsn, ord_unpr = self._domestic_order_price_fields(request)
+        sell_type = "" if is_buy else str(request.sell_type or _NORMAL_SELL_TYPE)
+        if sell_type not in {"", _NORMAL_SELL_TYPE, *_R3_SELL_TYPES}:
+            raise BrokerError(f"Unsupported SLL_TYPE: {sell_type}")
 
         body = {
             "CANO": cano,
@@ -1234,8 +1241,8 @@ class KisClient(BrokerClient):
             "ORD_DVSN": ord_dvsn,
             "ORD_QTY": str(int(request.quantity)),
             "ORD_UNPR": ord_unpr,
-            "EXCG_ID_DVSN_CD": _EXCG_KRX,
-            "SLL_TYPE": "" if is_buy else "01",
+            "EXCG_ID_DVSN_CD": str(request.market or _EXCG_KRX).upper(),
+            "SLL_TYPE": sell_type,
             "CNDT_PRIC": "",
         }
         data, _ = self._request("POST", _PATH_ORDER_CASH, prod_tr, json_body=body)
@@ -1253,6 +1260,110 @@ class KisClient(BrokerClient):
             status=OrderStatus.PENDING,
             message=f"KIS order accepted: {data.get('msg1')}",
         )
+
+    def place_overseas_order(
+        self,
+        *,
+        symbol: str,
+        market: str,
+        side: Side,
+        quantity: int,
+        price: float,
+        currency: str = "USD",
+        allow_prod_r3_order: bool = False,
+    ) -> OrderResult:
+        """Place a paper-gated overseas stock order.
+
+        The method builds the KIS overseas order payload but refuses prod by
+        default. Actual prod activation requires a separate hardguard review.
+        """
+        if not self._paper and not allow_prod_r3_order:
+            raise BrokerError("Overseas stock prod order requires explicit R3 hardguard review.")
+        market = market.upper()
+        if market not in _OVERSEAS_MARKETS:
+            raise BrokerError(f"Unsupported overseas market: {market}")
+        if quantity <= 0:
+            raise BrokerError("Overseas order quantity must be positive.")
+        if price <= 0:
+            raise BrokerError("Overseas order price must be positive.")
+
+        cano, acnt = self._account()
+        prod_tr = _TR_OVERSEAS_BUY if side == Side.BUY else _TR_OVERSEAS_SELL
+        body = {
+            "CANO": cano,
+            "ACNT_PRDT_CD": acnt,
+            "OVRS_EXCG_CD": market,
+            "PDNO": symbol,
+            "ORD_DVSN": _ORD_DVSN_LIMIT,
+            "ORD_QTY": str(int(quantity)),
+            "OVRS_ORD_UNPR": f"{float(price):.2f}",
+            "ORD_SVR_DVSN_CD": "0",
+            "ORD_CRNCY_CD": currency.upper(),
+        }
+        data, _ = self._request("POST", _PATH_OVERSEAS_ORDER, prod_tr, json_body=body)
+        output = data.get("output") or {}
+        odno = output.get("ODNO") or output.get("odno")
+        if not odno:
+            raise BrokerError(f"KIS overseas order accepted but ODNO missing: {data}")
+        self._orders[odno] = {
+            "org_no": output.get("KRX_FWDG_ORD_ORGNO"),
+            "ord_dvsn": _ORD_DVSN_LIMIT,
+            "quantity": int(quantity),
+            "market": market,
+            "currency": currency.upper(),
+        }
+        return OrderResult(
+            broker_order_id=odno,
+            status=OrderStatus.PENDING,
+            message=f"KIS overseas order accepted: {data.get('msg1')}",
+        )
+
+    def _domestic_order_price_fields(self, request: OrderRequest) -> tuple[str, str]:
+        session = str(request.order_session or "REGULAR").upper()
+        if session == "PRE_OPEN_SINGLE" or request.order_type == OrderType.MOO:
+            return _ORD_DVSN_PRE_OPEN, "0"
+        if session == "AFTER_CLOSE_SINGLE" or request.order_type == OrderType.MOC:
+            return _ORD_DVSN_AFTER_CLOSE, "0"
+        if session == "AFTER_HOURS_SINGLE":
+            return _ORD_DVSN_AFTER_HOURS_SINGLE, "0"
+        if request.order_type == OrderType.MARKET:
+            return _ORD_DVSN_MARKET, "0"
+        if request.order_type == OrderType.CONDITIONAL_LIMIT:
+            if request.price is None:
+                raise BrokerError("Conditional limit order requires a price.")
+            return _ORD_DVSN_CONDITIONAL_LIMIT, str(int(round(request.price)))
+        if request.order_type == OrderType.BEST_LIMIT:
+            if request.price is None:
+                raise BrokerError("Best limit order requires a price.")
+            return _ORD_DVSN_BEST_LIMIT, str(int(round(request.price)))
+        if request.order_type == OrderType.PRIORITY_LIMIT:
+            if request.price is None:
+                raise BrokerError("Priority limit order requires a price.")
+            return _ORD_DVSN_PRIORITY_LIMIT, str(int(round(request.price)))
+        if request.order_type not in {OrderType.LIMIT, OrderType.IOC, OrderType.FOK, OrderType.STOP_LIMIT}:
+            raise BrokerError(f"KIS domestic cash order type is not supported: {request.order_type.value}")
+        if request.price is None:
+            raise BrokerError("Limit order requires a price.")
+        return _ORD_DVSN_LIMIT, str(int(round(request.price)))
+
+    def _enforce_r3_prod_guard(self, request: OrderRequest) -> None:
+        if self._paper:
+            return
+        if bool(request.metadata.get("allow_prod_r3_order")):
+            return
+        r3_surface = (
+            str(request.order_session or "REGULAR").upper() != "REGULAR"
+            or str(request.sell_type or _NORMAL_SELL_TYPE) in _R3_SELL_TYPES
+            or request.order_type
+            not in {
+                OrderType.LIMIT,
+                OrderType.MARKET,
+            }
+            or str(request.product_type or "EQUITY").upper()
+            not in {"EQUITY", "ETF", "ETN", "REIT"}
+        )
+        if r3_surface:
+            raise BrokerError("R3 domestic order option requires explicit prod hardguard review.")
 
     def cancel_order(self, broker_order_id: str) -> OrderResult:
         cano, acnt = self._account()

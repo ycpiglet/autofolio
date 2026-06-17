@@ -405,7 +405,7 @@ def test_ui_backend_reflects_filled_scenario(monkeypatch):
     )
     engine.run_once()
 
-    from app.ui import backend
+    from app.services import backend
 
     monkeypatch.setattr(backend, "_ctx", lambda: (repo, broker, engine, None))
     holdings = backend.holdings_df()

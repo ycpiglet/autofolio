@@ -1,10 +1,8 @@
-version: "3.9"
-
 services:
-  autofolio:
+  api:
     build: .
     ports:
-      - "8501:8501"
+      - "8000:8000"
     volumes:
       - ./.env:/app/.env:ro          # 시크릿은 bind-mount (이미지에 포함 금지)
       - autofolio_data:/app/data     # DB 영속성
@@ -15,10 +13,23 @@ services:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=5).read()"]
       interval: 30s
       timeout: 10s
       retries: 3
+
+  web:
+    build:
+      context: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      - API_INTERNAL_URL=http://api:8000
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
 
   paper-scheduler:
     build: .
@@ -31,7 +42,8 @@ services:
       - PYTHONPATH=/app
     restart: unless-stopped
     depends_on:
-      - autofolio
+      api:
+        condition: service_healthy
     profiles:
       - scheduler  # docker compose --profile scheduler up
 

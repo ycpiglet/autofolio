@@ -39,7 +39,7 @@ def _validate_symbol(symbol: str) -> str:
 def indices(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.market_indices_df())
 
@@ -48,7 +48,7 @@ def indices(
 def watchlist(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.watchlist())
 
@@ -58,7 +58,7 @@ def price(
     _session: Annotated[dict[str, Any], Depends(require_session)],
     symbol: str = Query(..., description="종목 코드"),
 ) -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     sym = _validate_symbol(symbol)
     p = backend.price(sym)
@@ -70,7 +70,7 @@ def fundamental(
     _session: Annotated[dict[str, Any], Depends(require_session)],
     symbol: str = Query(..., description="종목 코드"),
 ) -> dict[str, Any]:
-    from app.ui import backend
+    from app.services import backend
 
     sym = _validate_symbol(symbol)
     return backend.fundamental(sym)
@@ -82,7 +82,7 @@ def order_book(
     symbol: str = Query(..., description="종목 코드"),
     market: str = Query(default="J", description="시장 구분 (J=KRX)"),
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     sym = _validate_symbol(symbol)
     return df_records(backend.order_book_df(sym, market))
@@ -95,7 +95,7 @@ def intraday(
     time_unit: str = Query(default="1", description="분봉 단위 (1/3/5/10/30/60)"),
     count: int = Query(default=120, ge=1, le=400),
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     sym = _validate_symbol(symbol)
     return df_records(backend.intraday_chart_df(sym, time_unit=time_unit, count=count))
@@ -105,7 +105,7 @@ def intraday(
 def sectors(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     return df_records(backend.sector_performance_df())
 
@@ -116,7 +116,7 @@ def disclosures(
     symbol: str = Query(..., description="종목 코드"),
     days: int = Query(default=1, ge=1, le=30),
 ) -> TableResponse:
-    from app.ui import backend
+    from app.services import backend
 
     sym = _validate_symbol(symbol)
     return df_records(backend.disclosures_df(sym, days))
@@ -127,7 +127,7 @@ def symbols(
     _session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> dict[str, str]:
     """Return {code: name} map for all whitelist symbols."""
-    from app.ui import backend
+    from app.services import backend
 
     df = backend.list_whitelist()
     if df.empty:

@@ -9,6 +9,18 @@ from app.brokers.base import BrokerClient, OrderRequest, OrderResult, Position, 
 from app.common.enums import OrderStatus, OrderType, Side
 
 
+_MARKET_LIKE_TYPES = {OrderType.MARKET, OrderType.MOO, OrderType.MOC, OrderType.STOP, OrderType.TRAILING_STOP}
+_LIMIT_LIKE_TYPES = {
+    OrderType.LIMIT,
+    OrderType.CONDITIONAL_LIMIT,
+    OrderType.BEST_LIMIT,
+    OrderType.PRIORITY_LIMIT,
+    OrderType.STOP_LIMIT,
+    OrderType.IOC,
+    OrderType.FOK,
+}
+
+
 @dataclass
 class MockBrokerClient(BrokerClient):
     prices: Dict[str, float] = field(default_factory=lambda: {
@@ -39,7 +51,7 @@ class MockBrokerClient(BrokerClient):
         broker_order_id = f"MOCK-{next(self._order_seq):06d}"
         current_price = self.get_current_price(request.symbol).price
 
-        if request.order_type == OrderType.MARKET:
+        if request.order_type in _MARKET_LIKE_TYPES:
             filled_price = self._execution_price(request.side, current_price)
             rejection = self._portfolio_rejection(request, filled_price)
             if rejection:
@@ -55,13 +67,30 @@ class MockBrokerClient(BrokerClient):
                 status=OrderStatus.FILLED,
                 filled_price=filled_price,
                 filled_quantity=request.quantity,
-                message="Mock market order filled.",
+                message=f"Mock {request.order_type.value.lower()} order filled.",
             )
             self._apply_fill(request, filled_price)
             self._orders[broker_order_id] = result
             return result
 
+        if request.order_type not in _LIMIT_LIKE_TYPES:
+            result = OrderResult(
+                broker_order_id=broker_order_id,
+                status=OrderStatus.FAILED,
+                message=f"Mock broker does not support order type {request.order_type.value}.",
+            )
+            self._orders[broker_order_id] = result
+            return result
+
         if not self.fill_limit_orders:
+            if request.order_type in {OrderType.IOC, OrderType.FOK}:
+                result = OrderResult(
+                    broker_order_id=broker_order_id,
+                    status=OrderStatus.CANCELED,
+                    message=f"Mock {request.order_type.value} order canceled: immediate fill unavailable.",
+                )
+                self._orders[broker_order_id] = result
+                return result
             result = OrderResult(
                 broker_order_id=broker_order_id,
                 status=OrderStatus.PENDING,
@@ -71,6 +100,16 @@ class MockBrokerClient(BrokerClient):
             return result
 
         assert request.price is not None
+        available_quantity = int(request.metadata.get("available_quantity", request.quantity))
+        if request.order_type == OrderType.FOK and available_quantity < request.quantity:
+            result = OrderResult(
+                broker_order_id=broker_order_id,
+                status=OrderStatus.CANCELED,
+                message="Mock FOK order canceled: insufficient immediate quantity.",
+            )
+            self._orders[broker_order_id] = result
+            return result
+
         fill = False
         if request.side == Side.BUY and request.price >= current_price:
             fill = True
@@ -93,9 +132,21 @@ class MockBrokerClient(BrokerClient):
                 status=OrderStatus.FILLED,
                 filled_price=filled_price,
                 filled_quantity=request.quantity,
-                message="Mock limit order filled.",
+                message=f"Mock {request.order_type.value.lower()} order filled.",
             )
             self._apply_fill(request, filled_price)
+        elif request.order_type == OrderType.IOC:
+            result = OrderResult(
+                broker_order_id=broker_order_id,
+                status=OrderStatus.CANCELED,
+                message="Mock IOC order canceled: no immediate fill.",
+            )
+        elif request.order_type == OrderType.FOK:
+            result = OrderResult(
+                broker_order_id=broker_order_id,
+                status=OrderStatus.CANCELED,
+                message="Mock FOK order canceled: full fill unavailable.",
+            )
         else:
             result = OrderResult(
                 broker_order_id=broker_order_id,

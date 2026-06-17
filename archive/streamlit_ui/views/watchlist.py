@@ -29,7 +29,7 @@ def _live() -> bool:
 def _whitelist_symbols() -> list[str]:
     """Return a list of ticker symbols from the whitelist (fallback: empty)."""
     try:
-        from app.ui import backend
+        from app.services import backend
 
         wl = backend.list_whitelist()
         if not wl.empty:
@@ -42,7 +42,7 @@ def _whitelist_symbols() -> list[str]:
 def _whitelist_options() -> dict[str, str]:
     """Return {label: symbol} dict from the whitelist."""
     try:
-        from app.ui import backend
+        from app.services import backend
 
         return backend.symbol_options()
     except Exception:  # noqa: BLE001
@@ -131,7 +131,7 @@ def _tab_watchlists() -> None:
 
 def _build_candidates(held_symbols: set[str]) -> list[dict]:
     """Build candidate list from whitelist + prices + fundamentals (live only)."""
-    from app.ui import backend
+    from app.services import backend
 
     wl = backend.list_whitelist()
     if wl.empty:
@@ -288,7 +288,7 @@ def _tab_screener() -> None:
             st.session_state.setdefault("_screener_results", [])
         else:
             try:
-                from app.ui import backend
+                from app.services import backend
 
                 pos_df = backend.positions()
                 held_symbols: set[str] = set()
@@ -421,7 +421,7 @@ def _tab_alert_preview() -> None:
 
         symbols_needed = {r["symbol"] for r in rules}
         if _live():
-            from app.ui import backend
+            from app.services import backend
 
             pos_df = backend.positions()
             total_market = 0.0
