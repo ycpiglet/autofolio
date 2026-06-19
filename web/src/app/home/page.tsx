@@ -15,10 +15,12 @@ import {
   type TableResponse,
 } from "@/lib/api";
 import { fmtWon, fmtPct } from "@/lib/format";
+import { holdingsToTreemapItems } from "@/lib/holdings-treemap";
 import { AppShell } from "@/components/layout/AppShell";
 import { EmptyState } from "@/components/safety/EmptyState";
 import { KpiCard } from "@/components/domain/KpiCard";
 import { HoldingsTable } from "@/components/domain/HoldingsTable";
+import { AllocationTreemap } from "@/components/domain/AllocationTreemap";
 import { DataTable } from "@/components/domain/DataTable";
 import { Button } from "@/components/ui/button";
 
@@ -190,6 +192,17 @@ export default function HomePage() {
             maxRows={5}
           />
         </section>
+
+        {/* ── Concentration Treemap (additive; hidden when no usable data) ── */}
+        {(() => {
+          const items = holdingsToTreemapItems(holdingsQuery.data);
+          return items.length > 0 ? (
+            <section aria-label="종목 집중도">
+              <h2 className="mb-2 text-sm font-medium text-muted-foreground">종목 집중도</h2>
+              <AllocationTreemap items={items} className="w-full" />
+            </section>
+          ) : null;
+        })()}
 
         {/* ── Recent Fills ─────────────────────────────────────────────── */}
         <section aria-label="최근 체결">
