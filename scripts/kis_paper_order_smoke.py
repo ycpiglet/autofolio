@@ -68,6 +68,41 @@ def _below_market_limit_price(current_price: float) -> int:
     return max(tick, (target // tick) * tick)
 
 
+def _smoke_int(value) -> int:
+    try:
+        text = str(value if value is not None else "").replace(",", "").strip()
+        return int(float(text)) if text else 0
+    except (TypeError, ValueError):
+        return 0
+
+
+def _is_open_like_order(row: dict) -> bool:
+    """True if a KIS today-order row is still open/pending.
+
+    Mirrors ``KisClient.get_order_status`` semantics: a canceled row
+    (``cncl_yn == 'Y'``) or a fully-filled row (``rmn_qty == 0``) is terminal,
+    not open. Anything with remaining quantity is treated as open-like.
+    """
+    if str(row.get("cncl_yn", "")).strip().upper() == "Y":
+        return False
+    ord_qty = _smoke_int(row.get("ord_qty"))
+    ccld_qty = _smoke_int(row.get("tot_ccld_qty"))
+    rmn_raw = row.get("rmn_qty")
+    rmn_qty = _smoke_int(rmn_raw) if rmn_raw not in (None, "") else (ord_qty - ccld_qty)
+    return rmn_qty > 0
+
+
+def _mask_account(account_no: str, product_code: str = "") -> str:
+    """Redact an account number for safe smoke output (keep only the last 2 digits)."""
+    acct = str(account_no or "").strip()
+    if not acct:
+        return ""
+    tail = acct[-2:] if len(acct) >= 2 else acct
+    masked = ("*" * max(len(acct) - 2, 0)) + tail
+    pc = str(product_code or "").strip()
+    return f"{masked}-{pc}" if pc else masked
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="KIS 모의(paper) 전용 주문 생애주기 스모크")
     ap.add_argument("--symbol", default="005930")

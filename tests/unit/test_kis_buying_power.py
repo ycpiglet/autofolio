@@ -41,6 +41,23 @@ def test_get_buying_power_returns_dict(monkeypatch):
     assert result["available_cash"] == 3_500_000.0
 
 
+def test_get_buying_power_falls_back_when_psbl_qty_absent(monkeypatch):
+    # 모의(paper) 응답에는 psbl_qty가 없고 nrcvb_buy_qty/max_buy_qty만 온다.
+    c = _make_client()
+    body = {
+        "rt_cd": "0", "msg_cd": "MAAP0", "msg1": "ok",
+        "output": {
+            "nrcvb_buy_qty": "4064",
+            "max_buy_qty": "4085",
+            "ord_psbl_cash": "3068951",
+        }
+    }
+    monkeypatch.setattr("requests.request", lambda *a, **kw: _resp(body))
+    result = c.get_buying_power("145270", price=755.0)
+    assert result["max_quantity"] == 4064
+    assert result["available_cash"] == 3_068_951.0
+
+
 def test_get_buying_power_returns_zeros_on_error(monkeypatch):
     c = _make_client()
     body = {"rt_cd": "1", "msg_cd": "ERR", "msg1": "fail"}
