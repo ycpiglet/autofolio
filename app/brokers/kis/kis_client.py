@@ -1151,8 +1151,17 @@ class KisClient(BrokerClient):
         try:
             data, _ = self._request("GET", _PATH_PSBL_ORDER, _TR_PSBL_ORDER, params=params)
             output = data.get("output") or {}
+            # KIS는 환경/계좌에 따라 매수가능수량을 psbl_qty 대신
+            # nrcvb_buy_qty(미수 없는 매수가능수량) / max_buy_qty 로만 채워주기도 한다.
+            # 모의(paper) inquire-psbl-order 응답에는 psbl_qty 자체가 없어서
+            # psbl_qty만 보면 항상 0이 되어 매수가 막힌다 → 보수적 순서로 fallback.
+            max_quantity = (
+                _as_int(output.get("psbl_qty"))
+                or _as_int(output.get("nrcvb_buy_qty"))
+                or _as_int(output.get("max_buy_qty"))
+            )
             return {
-                "max_quantity": int(output.get("psbl_qty") or 0),
+                "max_quantity": max_quantity,
                 "available_cash": float(output.get("ord_psbl_cash") or 0),
             }
         except BrokerError as exc:
