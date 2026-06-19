@@ -74,7 +74,7 @@ export function CandleChart({ className }: CandleChartProps) {
           aria-label="차트 로딩 중"
         />
       ) : (
-        <div aria-label="캔들차트" data-testid="candle-chart">
+        <div data-testid="candle-chart">
           <CandleChartKline
             candles={tableToCandles(data)}
             height={280}
