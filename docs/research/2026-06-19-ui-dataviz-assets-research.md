@@ -10,6 +10,8 @@
 3. [`asset-curation-matrix.md`](./asset-curation-matrix.md) — 아이콘/일러스트/브랜드/타이포 에셋 **라이선스 검증** 매트릭스.
 4. [`ui-improvement-backlog.md`](./ui-improvement-backlog.md) — 우선순위 개선 백로그(TASK 후보).
 
+> **후속 확장 리서치(2026-06-19):** 그래프·이미지·캐릭터를 필수로 훨씬 넓게 확장한 묶음 → [`2026-06-19-open-source-visual-assets-expanded.md`](./2026-06-19-open-source-visual-assets-expanded.md)(개요) 및 토픽별 5개 문서.
+
 ## Executive Summary
 - Autofolio의 **캔들·KPI·PnL 색 관습은 이미 한국 best-practice와 일치**(상승=빨강 `#F04452` / 하락=파랑 `#3182F6`, Western 토글). 즉 "방향성"은 맞다.
 - 진짜 갭은 **상호작용과 일관성**: ① `EquityChart`에 **기간 선택기(1D/1W/1M/3M/1Y/ALL)와 기준선 컬러링 없음** — 모든 레퍼런스 제품의 공통 기본기. ② 숫자 포맷이 컴포넌트마다 제각각(`format.ts`로 일원화 필요, 만/억 단축 추가). ③ 모바일 스크럽·배분 드릴다운·보유 스파크라인 등 인터랙션 부재.
