@@ -1,7 +1,7 @@
 # VIEW — TASK by Workload (cost & concentration)
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T22:14:31+09:00`
+> 생성 시각: `2026-06-19T22:18:00+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -17,7 +17,7 @@
 |-------|-------|-------|--------|---------------------|
 | Backend Engineer | 17 | 117.0 ph | ~892K | 82.0 ph |
 | KIS API Engineer | 16 | 64.0 ph | ~830K | 13.0 ph |
-| UI/UX Designer | 8 | 44.0 ph | ~342K | 14.0 ph |
+| UI/UX Designer | 9 | 60.0 ph | ~522K | 30.0 ph |
 | Lead Engineer | 16 | 26.5 ph | ~300K | 12.0 ph |
 | QA | 5 | 18.0 ph | ~190K | 18.0 ph |
 | Performance Analyst | 3 | 12.0 ph | ~110K | 0.0 ph |
@@ -31,11 +31,11 @@
 
 | Assignee | TASKs | Hours (share) | Tokens (share) |
 |----------|-------|---------------|----------------|
-| QA | 44 | 81.3 ph | ~708K |
+| QA | 45 | 86.7 ph | ~768K |
 | Backend Engineer | 26 | 76.3 ph | ~599K |
 | KIS API Engineer | 23 | 63.3 ph | ~850K |
-| UI/UX Designer | 17 | 39.2 ph | ~334K |
-| Lead Engineer | 20 | 17.1 ph | ~175K |
+| UI/UX Designer | 18 | 44.5 ph | ~394K |
+| Lead Engineer | 21 | 22.4 ph | ~235K |
 | Compliance Officer | 4 | 13.0 ph | ~103K |
 | Performance Analyst | 3 | 4.5 ph | ~40K |
 | Doc Steward | 6 | 4.1 ph | ~50K |

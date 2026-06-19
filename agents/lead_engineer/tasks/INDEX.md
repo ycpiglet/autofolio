@@ -77,3 +77,4 @@
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Lead Engineer | Dev mock SSO provider |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Lead Engineer | Defer future maturity reassessment from ACT lane |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | Lead Engineer | Investor profile survey and satisfaction loop |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | UI/UX Designer | UI 비주얼 에셋(그래프·이미지·캐릭터) 확장 채택 |
