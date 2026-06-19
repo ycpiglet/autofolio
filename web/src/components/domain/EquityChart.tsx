@@ -18,9 +18,10 @@ interface EquityChartProps {
  *
  * Renders via the self-hosted uPlot engine (EquityChartUplot) internally; the
  * line/area is colored by the period's sign per KR convention (up=빨강, down=
- * 파랑, flat=회색). Public API, error/loading states, and the outer
- * aria-label / data-testid are unchanged from the prior lightweight-charts
- * implementation, so importing pages keep working untouched.
+ * 파랑, flat=회색). Public API and error/loading states are unchanged from the
+ * prior lightweight-charts implementation; the accessible label now comes from
+ * EquityChartUplot (the success wrapper keeps data-testid="equity-chart"), so
+ * importing pages keep working untouched.
  *
  * Expects TableResponse with columns: ["date", "자산"] (or superset).
  * date: "YYYY-MM-DD" string, 자산: numeric value.
@@ -58,7 +59,7 @@ export function EquityChart({
   }
 
   return (
-    <div aria-label="자산 추이 차트" data-testid="equity-chart">
+    <div data-testid="equity-chart">
       <EquityChartUplot
         points={tableToEquityPoints(data)}
         height={240}
