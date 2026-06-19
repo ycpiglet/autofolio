@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T22:14:31+09:00`
+> 생성 시각: `2026-06-19T22:18:00+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -135,4 +135,5 @@
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 완료 | High | 낮 | 1 ph / ~10000 tok | UI/UX Designer | bug,ui,history,pnl |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 

@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T22:14:31+09:00`
+> 생성 시각: `2026-06-19T22:18:00+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -82,6 +82,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
 
+## #assets
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+
 ## #authentication
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -89,6 +95,12 @@
 | [TASK-045](TASK-045-ui-overhaul-phase1-api-foundation-login.md) | 완료 | High | 상 | 16 ph / ~120000 tok | Backend Engineer | ui-overhaul,fastapi,next-js,authentication,login,phase1 |
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | authentication,sso,mock,dev-mode,ui-overhaul |
+
+## #avatar
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 
 ## #backend
 
@@ -250,6 +262,12 @@
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
 
+## #dataviz
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+
 ## #dca
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -404,6 +422,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-028](TASK-028-advanced-order-types-test-support.md) | 완료 | Medium | 상 | 8 ph / ~70000 tok | Backend Engineer | qa,order-types,stop,trailing,ioc,fok,moo,moc |
 
+## #fonts
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+
 ## #fundamental
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -487,6 +511,18 @@
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
 
+## #icons
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+
+## #illustration
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+
 ## #import
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -553,6 +589,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
+
+## #license
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 
 ## #lint
 
@@ -653,6 +695,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
+
+## #opensource
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 
 ## #ops
 
@@ -1190,6 +1238,7 @@
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 완료 | High | 낮 | 1 ph / ~10000 tok | UI/UX Designer | bug,ui,history,pnl |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 
 ## #ui-overhaul
 

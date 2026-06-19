@@ -1,12 +1,18 @@
 # VIEW — TASK by Status
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T22:14:31+09:00`
+> 생성 시각: `2026-06-19T22:18:00+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
 
 ---
+
+## 대기
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 
 ## 보류
 
