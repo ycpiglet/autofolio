@@ -27,3 +27,25 @@
 - KR PnL 관습(상승=빨강/하락=파랑) + Western 토글 유지.
 - 에셋은 자체호스팅(런타임 CDN 0), 라이선스 채택 전 재확인(특히 unDraw 팩-재배포 금지·Remix 비표준).
 - 검증: `docs/design-system.md` 규칙 위반 0, `scripts/design_system_gate.py --check` 경고 감소, prod 모드 E2E(CI=1).
+
+## 확장 리서치 추가 후보 (2026-06-19b) — Top 12
+
+> 출처: [확장 리서치 개요](./2026-06-19-open-source-visual-assets-expanded.md) 및 토픽 5문서. 전부 퍼미시브(MIT/Apache/ISC/CC0/OFL)·자체호스팅(런타임 CDN 0) 검증(2026-06-19).
+> **정식 TASK 승격 상태:** 보류 — 등록 시점에 동시 세션이 TASK 레지스트리(INDEX/AUDIT-LOG, TASK-115~119)를 작업 중이라 번호·파일 충돌 위험. **레지스트리 비경합 시점에 TASK-120+ 로 승격**(COMPOUND-032: 열린 작업은 TASK 로 존재 — 본 목록이 그 중간 보관소).
+
+| # | 후보 | 영역 | 대표 자원(라이선스) | 대상 파일 | 우선도 | 충돌 위험 |
+|---|---|---|---|---|---|---|
+| E1 | 자산곡선·KPI 미니차트 경량화 | 그래프 | uPlot (MIT) + uplot-react | `EquityChart.tsx`·`KpiCard.tsx`(+데이터) | P1 | 중(EquityChart 동시수정 여부 확인) |
+| E2 | 캔들 전용 엔진 + 내장 지표 | 그래프 | KLineChart (Apache-2.0) | `CandleChart.tsx` | P1 | 중 |
+| E3 | 테이블 셀 스파크라인 | 그래프 | @mui/x-charts SparkLineChart(MIT) 또는 @fnando/sparkline(MIT) | `HoldingsTable.tsx` | P2 | 높음(동시수정 중) |
+| E4 | 히트맵·KR PnL diverging 팔레트 | 컬러 | ColorBrewer RdBu(귀속) | `design-tokens.ts`·신규 히트맵 | P1 | 높음(design-tokens untracked) |
+| E5 | 트리맵(집중도) sequential 팔레트 | 컬러 | Viridis/Cividis (CC0) | `design-tokens.ts`·`AllocationChart.tsx` | P2 | 높음 |
+| E6 | dark-mode `#3182F6` 토큰 | 컬러 | Radix Colors (MIT) | `design-tokens.ts`·`globals.css` | P2 | 높음 |
+| E7 | 숫자 포맷 만/억 단축 + tabular 일원화 | 포맷 | (자체) `fmtWonShort` | `format.ts`(+테이블) | **P1** | **낮음(format.ts clean)** ← 우선 착수 |
+| E8 | Lucide 보완 + ₩·candlestick 글리프 | 아이콘 | MingCute(Apache)·Tabler `currency-won`(MIT) | `SidebarNav.tsx`·아이콘 매핑 | P2 | 높음(SidebarNav 동시수정) |
+| E9 | 국기(FX·멀티마켓) | 아이콘 | circle-flags + flag-icons (MIT) | 통화 피커·계좌행(신규) | P2 | 낮음(신규) |
+| E10 | 계정·AI 에이전트 아바타 | 캐릭터 | DiceBear Notionists/Bottts(CC0/무료)·Boring Avatars(MIT) | 계정·에이전트 탭(신규 모듈) | P2 | 낮음(신규) |
+| E11 | 빈/에러/온보딩 일러스트 + 마스코트 | 이미지 | Open Doodles/IRA Design·unDraw | `web/public/illustrations/`(신규) | P2 | 낮음(신규 에셋) |
+| E12 | 금융 대시보드 컴포넌트 채택 평가 | 컴포넌트 | shadcn/ui(MIT) + Tremor(Apache) | 평가 문서 → 점진 도입 | P3 | 낮음(평가 우선) |
+
+**자율 착수 순서(충돌 낮은 것부터):** E7(format.ts) → E9/E10/E11(신규 모듈·에셋) → 동시 세션 web 변경 정리 후 E1~E6·E8(기존 컴포넌트 수정).
