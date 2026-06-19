@@ -30,6 +30,42 @@ export function fmtUsd(value: number, decimals = 2): string {
   })}`;
 }
 
+/**
+ * Format a KRW amount in Korean short form (Toss-style 만/억):
+ *   ₩1.2만 · ₩1,234.6만 · ₩1.2억 · ₩12.3억
+ * Unit boundary is literal: ≥ 1억 (1e8) → 억, ≥ 1만 (1e4) → 만, else plain won.
+ * Uses ko-KR grouping so large 만 values stay comma-separated ("1,234.6만").
+ * Negative values render as "₩-9.9만" (₩, then sign), matching fmtWon.
+ * @param value    — KRW amount
+ * @param decimals — max fraction digits in the 만/억 part (default 1)
+ */
+export function fmtWonShort(value: number, decimals = 1): string {
+  const n = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  let core: string;
+  if (n >= 1e8) {
+    core = `${(n / 1e8).toLocaleString("ko-KR", { maximumFractionDigits: decimals })}억`;
+  } else if (n >= 1e4) {
+    core = `${(n / 1e4).toLocaleString("ko-KR", { maximumFractionDigits: decimals })}만`;
+  } else {
+    core = Math.round(n).toLocaleString("ko-KR");
+  }
+  return `₩${sign}${core}`;
+}
+
+/**
+ * Like fmtWonShort but with an explicit leading sign for nonzero values,
+ * reading as a signed delta: "+₩1.2억", "-₩9.9만", "₩0".
+ * (Sign BEFORE the ₩, unlike fmtWonShort.)
+ * @param value    — KRW delta
+ * @param decimals — max fraction digits in the 만/억 part (default 1)
+ */
+export function fmtWonShortSigned(value: number, decimals = 1): string {
+  if (value === 0) return "₩0";
+  const sign = value > 0 ? "+" : "-";
+  return `${sign}${fmtWonShort(Math.abs(value), decimals)}`;
+}
+
 // ── Percentage ─────────────────────────────────────────────────────────────
 
 /**
