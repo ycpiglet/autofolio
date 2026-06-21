@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { apiIntraday } from "@/lib/api";
 import type { TableResponse } from "@/lib/api";
+import { lightweightChartTheme, candleSeriesColors } from "@/lib/design-tokens";
 
 const SYMBOLS = [
   { label: "삼성전자", value: "005930" },
@@ -60,23 +61,23 @@ export function CandleChart({ className }: CandleChartProps) {
         textColor: "#8B95A1",
       },
       grid: {
-        vertLines: { color: "#DDE1E7" },
-        horzLines: { color: "#DDE1E7" },
+        vertLines: { color: lightweightChartTheme.gridColor },
+        horzLines: { color: lightweightChartTheme.gridColor },
       },
-      rightPriceScale: { borderColor: "#DDE1E7" },
-      timeScale: { borderColor: "#DDE1E7", timeVisible: true },
+      rightPriceScale: { borderColor: lightweightChartTheme.borderColor },
+      timeScale: { borderColor: lightweightChartTheme.borderColor, timeVisible: true },
       width: el.clientWidth,
       height: 280,
     });
     chartRef.current = chart;
 
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: "#F04452",
-      downColor: "#3182F6",
-      borderUpColor: "#F04452",
-      borderDownColor: "#3182F6",
-      wickUpColor: "#F04452",
-      wickDownColor: "#3182F6",
+      upColor: candleSeriesColors.up,
+      downColor: candleSeriesColors.down,
+      borderUpColor: candleSeriesColors.up,
+      borderDownColor: candleSeriesColors.down,
+      wickUpColor: candleSeriesColors.up,
+      wickDownColor: candleSeriesColors.down,
     });
 
     // Map TableResponse rows to lightweight-charts candlestick format
