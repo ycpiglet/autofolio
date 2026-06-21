@@ -1,0 +1,246 @@
+{
+  "$schema": "autofolio.membership-engine-safety-contract/v1",
+  "contract_version": 1,
+  "status": "draft_contract_not_applied",
+  "updated_at": "2026-06-19T19:46:50+09:00",
+  "owner": "Lead Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-108",
+    "TASK-109",
+    "TASK-113",
+    "TASK-114"
+  ],
+  "purpose": "Define the per-user engine, queue, kill-switch, risk-limit, and order-intent safety contract required before external members can use live-readiness features.",
+  "non_goals": [
+    "No app/engine/order_flow.py, app/risk/**, KIS broker, production DB, deployment, or live execution behavior is changed by this contract.",
+    "No order path, risk gate, kill switch, auto-trading flag, or KIS credential is enabled for external users.",
+    "No schema migration or Supabase project mutation is applied.",
+    "No secret, provider token, bank/payment API, or real customer record is read or written."
+  ],
+  "boundaries": {
+    "not_applied_to_runtime": true,
+    "no_order_path_change": true,
+    "no_risk_gate_change": true,
+    "no_kis_broker_change": true,
+    "no_schema_migration": true,
+    "no_secret_values": true,
+    "keeps_can_launch_false": true
+  },
+  "runtime_surfaces": [
+    {
+      "id": "engine_state",
+      "current_local_state": "global system_state flags such as auto_trading_enabled, kill_switch_active, global_mode, and consecutive_order_failures",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "global_owner_oriented",
+      "member_policy": "select own engine state where auth.uid() = user_id; request mode changes only through backend validation",
+      "worker_policy": "engine worker receives an explicit user_id context and reads only that user's state",
+      "admin_policy": "server-audited owner support override only",
+      "live_execution_allowed": false
+    },
+    {
+      "id": "engine_run_queue",
+      "current_local_state": "single process run_once scans all active conditions and uses a process lock plus condition CAS",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "global_owner_oriented",
+      "member_policy": "member can request own queued dry run only after profile and safety preconditions",
+      "worker_policy": "queue claim key includes user_id and queue item id; one user's run cannot claim another user's item",
+      "admin_policy": "server-audited owner support run only",
+      "live_execution_allowed": false
+    },
+    {
+      "id": "trade_conditions",
+      "current_local_state": "trade_conditions table lacks user_id and is processed globally",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "blocked_until_schema",
+      "member_policy": "select/write own conditions where auth.uid() = user_id through backend validation",
+      "worker_policy": "engine loads only active conditions for the current user_id context",
+      "admin_policy": "server-audited support read only",
+      "live_execution_allowed": false
+    },
+    {
+      "id": "safety_flags",
+      "current_local_state": "kill switch, auto trading, autonomy mode, market halt, VI, and disclosure flags live in global system_state keys",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "global_owner_oriented",
+      "member_policy": "select own flags and request permitted own flags through backend validation",
+      "worker_policy": "SafetyChecker reads user-scoped flags first and has no cross-user fallback for live execution",
+      "admin_policy": "server-audited owner support override only",
+      "live_execution_allowed": false
+    },
+    {
+      "id": "risk_limits",
+      "current_local_state": "risk_limits has a GLOBAL scope and SafetyChecker reads get_global_risk_limit()",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "global_owner_oriented",
+      "member_policy": "select own risk limits and request constrained own limit changes through backend validation",
+      "worker_policy": "SafetyChecker uses the current user's risk limit for every order intent",
+      "admin_policy": "server-audited support override only",
+      "live_execution_allowed": false
+    },
+    {
+      "id": "circuit_breakers",
+      "current_local_state": "consecutive_order_failures and daily realized PnL checks are global state/log derived",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "global_owner_oriented",
+      "member_policy": "select own circuit-breaker status only",
+      "worker_policy": "failure counters and daily loss calculations are per user and disable only that user's auto trading",
+      "admin_policy": "server-audited reset only",
+      "live_execution_allowed": false
+    },
+    {
+      "id": "order_intents",
+      "current_local_state": "order request is built directly from a condition inside OrderFlow",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "not_implemented",
+      "member_policy": "append own intent only through backend risk gate; select own intent/audit status",
+      "worker_policy": "broker order can be placed only from a validated user-owned append-only intent",
+      "admin_policy": "server-audited support read only; no silent mutation",
+      "append_only": true,
+      "live_execution_allowed": false
+    },
+    {
+      "id": "order_logs",
+      "current_local_state": "order_logs reference condition_id but lack user_id",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "blocked_until_schema",
+      "member_policy": "select own logs where auth.uid() = user_id",
+      "worker_policy": "every order log includes user_id and order_intent_id before any broker call",
+      "admin_policy": "server-audited support read only",
+      "append_only": true,
+      "live_execution_allowed": false
+    },
+    {
+      "id": "execution_logs",
+      "current_local_state": "execution_logs join order_logs and inherit global owner-oriented scope",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "blocked_until_schema",
+      "member_policy": "select own executions where auth.uid() = user_id",
+      "worker_policy": "every execution log inherits user_id from its order log and broker account context",
+      "admin_policy": "server-audited support read only",
+      "append_only": true,
+      "live_execution_allowed": false
+    },
+    {
+      "id": "notifications",
+      "current_local_state": "Notifier messages can be process/global and include condition/order summaries",
+      "production_owner_field": "user_id",
+      "tenant_owned": true,
+      "current_status": "global_owner_oriented",
+      "member_policy": "receive only own notification destination and own event summary",
+      "worker_policy": "notifier destination is derived from the user-owned integration metadata for the same user_id",
+      "admin_policy": "server-audited support replay only",
+      "live_execution_allowed": false
+    }
+  ],
+  "safety_invariants": [
+    {
+      "id": "user_id_required_on_runtime_rows",
+      "statement": "Every production engine state, queue, condition, risk, order intent, order log, execution log, circuit breaker, and notification row must include user_id."
+    },
+    {
+      "id": "no_global_auto_for_members",
+      "statement": "External members cannot share a single global auto_trading_enabled flag; auto trading is per user and fail-closed by default."
+    },
+    {
+      "id": "per_user_kill_switch",
+      "statement": "Kill switch state is per user, and an Owner global emergency stop may only add a broader stop, never bypass a user's stop."
+    },
+    {
+      "id": "per_user_risk_limits",
+      "statement": "Max order amount, daily amount, circuit-breaker threshold, and one-share exception are user-scoped before external members can trade."
+    },
+    {
+      "id": "per_user_engine_queue",
+      "statement": "Engine worker queue claims include user_id so one user's run cannot claim or mutate another user's condition."
+    },
+    {
+      "id": "order_intent_append_only",
+      "statement": "Production order intents are append-only records created after backend validation and before any broker order call."
+    },
+    {
+      "id": "order_flow_requires_user_context",
+      "statement": "OrderFlow and SafetyChecker receive a user_id or equivalent tenant context before processing any production order intent."
+    },
+    {
+      "id": "kis_credentials_user_scoped",
+      "statement": "KIS app key, app secret, access token, account reference, and broker client context are scoped to the same user_id as the order intent."
+    },
+    {
+      "id": "safety_checker_reads_user_scope",
+      "statement": "SafetyChecker reads user-scoped flags, limits, holdings/log aggregates, and market blocks before allowing a production order."
+    },
+    {
+      "id": "circuit_breaker_user_scoped",
+      "statement": "Consecutive failure and daily loss circuit breakers disable only the affected user's auto trading, unless an audited global emergency stop is active."
+    },
+    {
+      "id": "audit_events_for_admin_override",
+      "statement": "Owner/admin overrides of engine, risk, queue, or order-intent state are server-side and audited with actor_user_id and target_user_id."
+    },
+    {
+      "id": "no_live_execution_before_r3",
+      "statement": "This contract does not authorize live execution; live/member execution remains blocked until production schema, RLS, KIS terms, and Owner approval exist."
+    }
+  ],
+  "worker_contract": {
+    "required_context_fields": [
+      "user_id",
+      "broker_context_id",
+      "risk_profile_id",
+      "engine_queue_item_id",
+      "order_intent_id",
+      "audit_event_id"
+    ],
+    "forbidden_fallbacks": [
+      "implicit owner user",
+      "global auto flag for member execution",
+      "global risk limit for member execution",
+      "global KIS credential for member execution",
+      "request body user_id as authority",
+      "client-side tenant filter as security boundary"
+    ],
+    "failure_behavior": [
+      "missing user_id blocks execution",
+      "missing user-owned KIS credential blocks execution",
+      "missing per-user risk limit blocks execution",
+      "missing append-only order intent blocks execution",
+      "any cross-user mismatch blocks execution and creates audit evidence"
+    ]
+  },
+  "launch_gates": [
+    "contract_gate_passes",
+    "production_schema_user_id_fields",
+    "per_user_engine_queue_tests_pass",
+    "member_cannot_run_other_user_engine",
+    "per_user_kill_switch_tests_pass",
+    "risk_limit_isolation_tests_pass",
+    "order_intent_append_only_tests_pass",
+    "kis_credentials_user_scoped",
+    "live_execution_r3_approval_recorded",
+    "staging_engine_dry_run_smoke_passed"
+  ],
+  "verification": {
+    "local_contract_gate": "python scripts/membership_engine_safety_gate.py --check",
+    "readiness_api_test": ".venv\\Scripts\\python.exe -m pytest tests/api/test_membership.py -q",
+    "forbidden_actions": [
+      "OrderFlow behavior change",
+      "SafetyChecker behavior change",
+      "KIS broker change",
+      "risk gate relaxation",
+      "production DB migration",
+      "external deploy",
+      "live order execution",
+      "secret read/write"
+    ]
+  }
+}

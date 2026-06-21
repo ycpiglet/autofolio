@@ -1,0 +1,193 @@
+{
+  "$schema": "autofolio.membership-kis-commercial-terms-review-packet/v1",
+  "status": "review_packet_only_not_clearance",
+  "created_at": "2026-06-19T22:16:54+09:00",
+  "updated_at": "2026-06-19T22:16:54+09:00",
+  "owner": "Compliance Officer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-125"
+  ],
+  "boundaries": {
+    "review_packet_only": true,
+    "not_legal_advice": true,
+    "not_kis_clearance": true,
+    "no_kis_login": true,
+    "no_kis_account_access": true,
+    "no_kis_credential_collection": true,
+    "no_external_contact": true,
+    "no_order_path_change": true,
+    "no_real_market_data_redistribution": true,
+    "no_production_kis_activation": true,
+    "keeps_kis_env_mock_for_external_staging": true,
+    "keeps_can_launch_false": true
+  },
+  "source_basis": [
+    {
+      "id": "kis_developers_provider_guide",
+      "authority": "Korea Investment & Securities KIS Developers",
+      "type": "official_documentation",
+      "url": "https://apiportal.koreainvestment.com/provider",
+      "checked_at": "2026-06-19T22:16:54+09:00",
+      "finding": "The provider guide treats use of KIS Developers Open API to provide services to third parties as a partnership surface and warns about capital-markets business scope, market data agreements, and order API process differences."
+    },
+    {
+      "id": "kis_developers_provider_api_start",
+      "authority": "Korea Investment & Securities KIS Developers",
+      "type": "official_documentation",
+      "url": "https://apiportal.koreainvestment.com/provider-doc1",
+      "checked_at": "2026-06-19T22:16:54+09:00",
+      "finding": "The partner API flow uses user account authentication, authorization code delivery, access/refresh token issuance, and partner-side membership handling."
+    },
+    {
+      "id": "kis_open_api_affiliate_user_terms_pdf",
+      "authority": "Korea Investment & Securities",
+      "type": "official_terms_pdf",
+      "url": "https://file.koreainvestment.com/updata/namo/09101613%EC%98%A4%ED%94%88API%EC%84%9C%EB%B9%84%EC%8A%A4%EC%9D%B4%EC%9A%A9%EC%95%BD%EA%B4%80_%EC%A0%84%EB%AC%B8.pdf",
+      "checked_at": "2026-06-19T22:16:54+09:00",
+      "finding": "The 2025-06-04 affiliate institution user terms define 이용기관 as a company approved under an Open API use contract, define linked financial service through the user's Open API permission, require user consent/authentication, and allow suspension for load or regulatory reasons."
+    },
+    {
+      "id": "kis_open_api_terms_revision_notice",
+      "authority": "Korea Investment & Securities",
+      "type": "official_notice",
+      "url": "https://m.koreainvestment.com/main/customer/notice/Notice.jsp?cmd=TF04ga000002&num=44503",
+      "checked_at": "2026-06-19T22:16:54+09:00",
+      "finding": "The notice announces the 2025-06-04 revision of Open API service terms for affiliate institution users and points to the full terms and comparison document."
+    },
+    {
+      "id": "efriend_expert_open_api_service",
+      "authority": "Korea Investment & Securities",
+      "type": "official_documentation",
+      "url": "https://securities.koreainvestment.com/main/customer/systemdown/OpenAPI.jsp",
+      "checked_at": "2026-06-19T22:16:54+09:00",
+      "finding": "The eFriend Expert Open API page frames non-partner use as a customer directly connecting to KIS servers to receive market data, send orders, and query balances for the customer's own algorithm/program."
+    },
+    {
+      "id": "fsc_robo_advisor_interpretation",
+      "authority": "FSC/FSS Legal Interpretation Portal",
+      "type": "official_interpretation",
+      "url": "https://better.fsc.go.kr/fsc_new/replyCase/LawreqDetail.do?lawreqIdx=3790&muGpNo=75&muNo=85&stNo=11",
+      "checked_at": "2026-06-19T22:16:54+09:00",
+      "finding": "The interpretation is useful context for no-separate-fee ancillary advice, but it is not a blanket clearance for Autofolio's paid membership, recommendation, or order surfaces."
+    }
+  ],
+  "classification": {
+    "autofolio_current_v1_position": "user_controlled_software_membership",
+    "official_source_risk_level": "high_watch",
+    "commercial_clearance": "missing",
+    "third_party_service_clearance": "missing",
+    "market_data_redistribution_clearance": "missing",
+    "order_api_clearance": "missing",
+    "professional_review_required": true
+  },
+  "findings": [
+    {
+      "id": "self_owned_account_open_api_is_not_third_party_clearance",
+      "state": "watch",
+      "summary": "KIS self-directed Open API material supports customer-owned algorithm/program use, but that does not prove a hosted paid multi-user membership service is allowed.",
+      "autofolio_impact": "Do not treat personal API availability as launch clearance for paid members."
+    },
+    {
+      "id": "third_party_service_points_to_partner_surface",
+      "state": "block_launch",
+      "summary": "Official KIS Developers provider guidance describes third-party service provision as a partnership surface and calls out institutional finance/business-scope checks.",
+      "autofolio_impact": "A paid hosted service where users connect KIS accounts needs Owner/KIS/legal confirmation before external launch."
+    },
+    {
+      "id": "market_data_contract_required_for_partner_brand_use",
+      "state": "block_launch",
+      "summary": "KIS provider guidance warns that KRX and overseas exchange market-data information-use agreements may be required for partner-branded service screens.",
+      "autofolio_impact": "Do not display real KIS/market data to external members in a hosted staging/public service until market-data rights are confirmed."
+    },
+    {
+      "id": "order_api_requires_regulatory_process_review",
+      "state": "block_launch",
+      "summary": "KIS provider guidance asks parties wanting order API usage to check institutional finance/investment-discretionary status and warns non-institution workflows are difficult.",
+      "autofolio_impact": "Keep member-facing order execution disabled or mock-only until KIS/legal confirms the exact order-flow model."
+    },
+    {
+      "id": "affiliate_user_terms_assume_approved_institution",
+      "state": "block_launch",
+      "summary": "The affiliate user terms define an 이용기관 as a company with an Open API use contract and KIS approval.",
+      "autofolio_impact": "Autofolio cannot claim affiliate-style KIS integration without a verified contract/approval path."
+    },
+    {
+      "id": "load_and_service_suspension_terms_affect_operations",
+      "state": "watch",
+      "summary": "KIS terms and service pages allow service suspension for server load or operational reasons.",
+      "autofolio_impact": "Future staging/prod design needs rate/load controls and a user-facing outage fallback."
+    }
+  ],
+  "owner_kis_legal_question_set": [
+    {
+      "id": "third_party_service_boundary",
+      "question": "Does Autofolio's paid hosted membership service, where each user connects their own KIS account or key, count as a third-party service requiring KIS partnership or approval?",
+      "required_reviewer": "KIS or legal professional"
+    },
+    {
+      "id": "software_only_vs_hosted_service",
+      "question": "Is the answer different if Autofolio is distributed as user-run local software instead of a hosted Vercel/Railway service?",
+      "required_reviewer": "KIS or legal professional"
+    },
+    {
+      "id": "market_data_display_rights",
+      "question": "Can Autofolio display KIS-provided market data inside a paid member screen, and what KRX/overseas exchange information-use agreements are required?",
+      "required_reviewer": "KIS or exchange-data/legal professional"
+    },
+    {
+      "id": "order_api_user_approval_model",
+      "question": "Can a user-controlled workflow submit orders through each user's own KIS authority if all decisions, approvals, limits, and kill switches remain under the user?",
+      "required_reviewer": "KIS or financial-regulatory legal professional"
+    },
+    {
+      "id": "credential_storage_and_token_handling",
+      "question": "What storage, refresh, revocation, password-omission, consent, and audit requirements apply if Autofolio stores user-owned KIS tokens or credentials?",
+      "required_reviewer": "KIS, security, and legal professional"
+    },
+    {
+      "id": "investment_advice_and_discretionary_boundary",
+      "question": "Which Autofolio recommendation, signal, automation, or default-setting behaviors would turn the service into investment advice, paid signal, or discretionary management?",
+      "required_reviewer": "financial-regulatory legal professional"
+    },
+    {
+      "id": "rate_limit_and_load_controls",
+      "question": "What call-rate, load, market-hours, retry, and emergency fallback controls are required for a multi-user service?",
+      "required_reviewer": "KIS technical support or partnership reviewer"
+    },
+    {
+      "id": "terms_revision_monitoring",
+      "question": "Which KIS terms, notices, and portal pages must Autofolio monitor before and after launch?",
+      "required_reviewer": "Owner and Compliance Officer"
+    }
+  ],
+  "launch_policy": {
+    "external_member_staging": "KIS_ENV must remain mock; no real KIS credential activation or market-data redistribution.",
+    "marketing_claims": "Do not claim paid KIS production integration, market-data rights, or order API support until KIS/legal confirmation exists.",
+    "implementation": "No app/brokers/kis production credential flow, user KIS secret storage, order path activation, or external deploy until Owner/R3 review.",
+    "readiness": "can_launch remains false while KIS commercial/multi-user clearance is missing."
+  },
+  "required_next_evidence": [
+    "owner_kis_terms_review_completed",
+    "kis_or_legal_answer_on_third_party_service_boundary",
+    "market_data_rights_answer",
+    "order_api_user_approval_model_answer",
+    "credential_storage_requirements_answer",
+    "investment_advice_boundary_answer",
+    "rate_limit_and_service_suspension_controls"
+  ],
+  "forbidden_actions": [
+    "Do not log into KIS or KIS Developers.",
+    "Do not contact KIS or submit a partnership proposal in this task.",
+    "Do not collect, read, write, rotate, validate, or store KIS credentials.",
+    "Do not activate KIS paper or production for external members.",
+    "Do not change app/brokers/kis, OrderFlow, SafetyChecker, risk gates, or production deploy settings.",
+    "Do not present this packet as legal, KIS, market-data, or launch clearance.",
+    "Do not mark can_launch true."
+  ],
+  "verification": {
+    "local_gate": "python scripts/membership_kis_terms_review_gate.py --check",
+    "json_parse": "python -m json.tool agents/project/MEMBERSHIP-KIS-COMMERCIAL-TERMS-REVIEW-PACKET.json",
+    "focused_tests": "python -m pytest tests/unit/test_membership_kis_terms_review_gate.py -q"
+  }
+}

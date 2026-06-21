@@ -1,0 +1,249 @@
+{
+  "$schema": "autofolio.membership-payment-recognition-decision-packet/v1",
+  "status": "draft_decision_packet_not_applied",
+  "updated_at": "2026-06-19T20:47:06+09:00",
+  "owner": "Regulatory Admin",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-111",
+    "TASK-117"
+  ],
+  "boundaries": {
+    "not_applied_to_production": true,
+    "no_bank_account_setup": true,
+    "no_bank_login": true,
+    "no_api_credential": true,
+    "no_payment_provider_action": true,
+    "no_real_payment_data": true,
+    "no_raw_bank_statement_persisted": true,
+    "no_legal_tax_accounting_final_advice": true,
+    "keeps_can_launch_false": true
+  },
+  "source_basis": [
+    {
+      "id": "financial_services_commission_open_banking_current_status",
+      "authority": "Financial Services Commission",
+      "type": "official_government",
+      "url": "https://www.fsc.go.kr/no010101/83750?curPage=&srchBeginDt=&srchCtgry=&srchEndDt=&srchKey=&srchText=",
+      "note": "Open Banking is public financial infrastructure operated through KFTC participation; it is not a simple local-only feature."
+    },
+    {
+      "id": "kftc_open_banking_portal_api_scope",
+      "authority": "Korea Financial Telecommunications and Clearings Institute",
+      "type": "official_operator",
+      "url": "https://www.openbanking.or.kr/",
+      "note": "Open Banking provides standardized service APIs plus authentication and management APIs to participating institutions and fintech companies."
+    },
+    {
+      "id": "financial_services_commission_open_banking_security_approval",
+      "authority": "Financial Services Commission",
+      "type": "official_government",
+      "url": "https://www.fsc.go.kr/no010101/74024?curPage=344&srchBeginDt=2022-12-&srchCtgry=&srchEndDt=&srchKey=sj&srchText=",
+      "note": "Open Banking participation has suitability, functional-test, security-check, and consumer-protection requirements; this makes direct API use an R3 approval lane."
+    },
+    {
+      "id": "hometax_cash_receipt_service",
+      "authority": "National Tax Service Hometax",
+      "type": "official_government",
+      "url": "https://hometax.go.kr/websquare/websquare.html?tm2lIdx=4606010000&tm3lIdx=4606010600&tmIdx=46&w2xPath=%2Fui%2Fpp%2Findex_pp.xml",
+      "note": "Cash receipt issuance and merchant registration must be reviewed before commercial launch; this packet is not tax advice."
+    },
+    {
+      "id": "personal_information_protection_commission_consent_guide",
+      "authority": "Personal Information Protection Commission",
+      "type": "official_government",
+      "url": "https://www.privacy.go.kr/front/bbs/bbsView.do?bbsNo=BBSMSTR_000000000049&bbscttNo=13156",
+      "note": "Payment evidence handling must stay minimal and purpose-bound; raw statements and unnecessary private identifiers remain outside repository storage."
+    },
+    {
+      "id": "toss_payments_virtual_account_webhook",
+      "authority": "Toss Payments",
+      "type": "provider_primary_documentation",
+      "url": "https://docs.tosspayments.com/blog/virtual-account-webhook",
+      "note": "Virtual account deposit recognition depends on provider webhook delivery and status handling, including delayed or corrected notification scenarios."
+    },
+    {
+      "id": "portone_virtual_account_notification",
+      "authority": "PortOne",
+      "type": "provider_primary_documentation",
+      "url": "https://developers.portone.io/opi/ko/integration/virtual-account/readme?v=v2",
+      "note": "PG virtual-account notification requires provider-side setup and webhook integration before automation."
+    },
+    {
+      "id": "kg_inicis_noti_service",
+      "authority": "KG Inicis",
+      "type": "provider_primary_documentation",
+      "url": "https://manual.inicis.com/pay/etc-noti.html",
+      "note": "Provider notification handling requires source verification, OK response behavior, retry/log handling, and provider-specific status mapping."
+    }
+  ],
+  "decision_summary": {
+    "mvp_method": "manual_bank_app_check_plus_code_assisted_deposit_match",
+    "mvp_rationale": "The current verified-signup MVP has low payment volume and can be operated by the Owner without external bank, Open Banking, or PG setup. It preserves minimal masked evidence under TASK-111 and keeps account activation as an explicit privileged action.",
+    "near_term_upgrade": "csv_import_review_after_retention_and_redaction_tests",
+    "scale_upgrade": "pg_virtual_account_webhook_after_owner_approval_contracts_and_staging_tests",
+    "not_now": "direct_open_banking_transaction_inquiry",
+    "not_now_rationale": "Open Banking requires external participation, approval/security/function checks, API credentials, consent, and operational controls. That crosses the Owner/R3 boundary for TASK-117."
+  },
+  "options": [
+    {
+      "id": "manual_bank_app_check",
+      "decision": "selected_mvp",
+      "external_action_required": false,
+      "owner_only_action_required": true,
+      "automation_level": "none",
+      "cost_profile": "lowest",
+      "operational_burden": "manual_per_payment",
+      "privacy_risk": "low_if_only_masked_evidence_is_recorded",
+      "audit_strength": "adequate_for_low_volume_when_actor_and_request_are_logged",
+      "refund_receipt_tax_boundary": "watch_professional_review_before_commercial_launch",
+      "retained_evidence_type": "manual_bank_app_check",
+      "raw_source_persisted": false,
+      "stores_real_payment_data": false,
+      "implementation_status": "local_process_selected_not_externalized"
+    },
+    {
+      "id": "code_assisted_deposit_match",
+      "decision": "selected_mvp_helper",
+      "external_action_required": false,
+      "owner_only_action_required": true,
+      "automation_level": "advisory_match_only",
+      "cost_profile": "lowest",
+      "operational_burden": "owner_pastes_bank_app_or_csv_text_for_match_review",
+      "privacy_risk": "medium_if_raw_text_is_mishandled_low_if_stateless_and_masked",
+      "audit_strength": "adequate_when_match_result_is advisory and activation is explicit",
+      "refund_receipt_tax_boundary": "watch_professional_review_before_commercial_launch",
+      "retained_evidence_type": "code_assisted_deposit_match",
+      "raw_source_persisted": false,
+      "stores_real_payment_data": false,
+      "implementation_status": "local_helper_exists_under_task_103"
+    },
+    {
+      "id": "csv_import_review",
+      "decision": "near_term_staff_tool_candidate",
+      "external_action_required": false,
+      "owner_only_action_required": true,
+      "automation_level": "batch_advisory_match_only",
+      "cost_profile": "low",
+      "operational_burden": "medium_batch_review",
+      "privacy_risk": "medium_until_delete_redaction_tests_pass",
+      "audit_strength": "stronger_batch_reconciliation_if_raw_files_are_not_persisted",
+      "refund_receipt_tax_boundary": "watch_professional_review_before_commercial_launch",
+      "retained_evidence_type": "csv_import_review",
+      "raw_source_persisted": false,
+      "stores_real_payment_data": false,
+      "implementation_status": "candidate_after_retention_delete_redaction_tests"
+    },
+    {
+      "id": "provider_receipt_reference",
+      "decision": "scale_upgrade_candidate",
+      "external_action_required": true,
+      "owner_only_action_required": true,
+      "automation_level": "provider_reference_reconciliation",
+      "cost_profile": "provider_contract_or_fee_dependent",
+      "operational_burden": "lower_after_provider_setup",
+      "privacy_risk": "medium_due_to_provider_identifiers_and_webhook_payloads",
+      "audit_strength": "stronger_if_provider_events_are_verified_and_idempotent",
+      "refund_receipt_tax_boundary": "requires_receipt_refund_tax_review_before_use",
+      "retained_evidence_type": "provider_receipt_reference",
+      "raw_source_persisted": false,
+      "stores_real_payment_data": false,
+      "implementation_status": "blocked_until_provider_setup_and_staging_tests"
+    },
+    {
+      "id": "pg_virtual_account_webhook",
+      "decision": "scale_upgrade_after_owner_approval",
+      "external_action_required": true,
+      "owner_only_action_required": true,
+      "automation_level": "automated_provider_deposit_notification",
+      "cost_profile": "pg_contract_and_fee_dependent",
+      "operational_burden": "lower_after_contract_webhook_and_retry_monitoring",
+      "privacy_risk": "medium_due_to_webhook_payloads_provider_references_and_refunds",
+      "audit_strength": "strong_if_signature_or_source_verification_idempotency_and_retries_are_implemented",
+      "refund_receipt_tax_boundary": "requires_receipt_refund_tax_review_before_use",
+      "retained_evidence_type": "provider_receipt_reference",
+      "raw_source_persisted": false,
+      "stores_real_payment_data": false,
+      "implementation_status": "blocked_until_pg_contract_credentials_webhook_tests_and_owner_approval"
+    },
+    {
+      "id": "open_banking_transaction_inquiry",
+      "decision": "blocked_r3_not_mvp",
+      "external_action_required": true,
+      "owner_only_action_required": true,
+      "automation_level": "bank_transaction_api_inquiry",
+      "cost_profile": "onboarding_security_operations_and_compliance_dependent",
+      "operational_burden": "high_until_participation_approval_and_controls_exist",
+      "privacy_risk": "high_due_to_bank_transaction_data_and_consent_scope",
+      "audit_strength": "strong_only_after_approval_consent_security_and_logging_controls",
+      "refund_receipt_tax_boundary": "requires_legal_tax_privacy_review_before_use",
+      "retained_evidence_type": "provider_receipt_reference",
+      "raw_source_persisted": false,
+      "stores_real_payment_data": false,
+      "implementation_status": "not_selected_for_mvp_requires_open_banking_participation_approval_security_function_tests_credentials_and_consent"
+    }
+  ],
+  "selected_mvp": {
+    "method": "manual_bank_app_check_plus_code_assisted_deposit_match",
+    "activation_rule": "No account becomes active from payment recognition alone; Owner/admin must explicitly activate the request.",
+    "evidence_policy": "Use MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.json retained fields only.",
+    "operating_note": "Owner checks bank app outside the system, or uses stateless pasted text matching as an advisory aid. Raw statements, full account numbers, and private identifiers are not stored."
+  },
+  "owner_only_actions": [
+    "Choose the live operating bank account outside repository files.",
+    "Check actual deposit in the bank app or bank website outside Autofolio.",
+    "Confirm whether cash receipt, refund, tax, and accounting processes are required before commercial launch.",
+    "Approve any PG, virtual account, or Open Banking contract and credential setup.",
+    "Approve any future production data retention policy for payment evidence."
+  ],
+  "forbidden_actions": [
+    "Do not create or log into bank, Open Banking, or PG accounts for this task.",
+    "Do not request, store, or validate payment provider credentials.",
+    "Do not call bank, Open Banking, or PG APIs.",
+    "Do not store raw bank statements, full account numbers, unredacted private identifiers, provider webhook payloads, or real customer payment records in repository files.",
+    "Do not mark commercial launch ready from this decision packet.",
+    "Do not treat this packet as legal, tax, accounting, or securities advice."
+  ],
+  "retained_fields": [
+    "membership_request_id",
+    "target_user_id",
+    "actor_user_id",
+    "approval_event_id",
+    "evidence_type",
+    "deposit_code",
+    "amount_krw",
+    "currency",
+    "source_type",
+    "source_reference",
+    "masked_excerpt",
+    "confidence",
+    "recorded_at"
+  ],
+  "required_staging_tests": [
+    "public_lookup_hides_payment_evidence",
+    "raw_bank_statement_not_persisted",
+    "code_assisted_match_requires_owner_activation",
+    "csv_import_discards_raw_after_review",
+    "provider_webhook_requires_signature_or_ip_verification",
+    "provider_webhook_is_idempotent",
+    "provider_webhook_handles_delayed_or_corrected_notification",
+    "open_banking_disabled_without_approval",
+    "refund_receipt_tax_boundary_marked_watch"
+  ],
+  "launch_gates": [
+    "decision_packet_gate_passes",
+    "payment_evidence_policy_gate_passes",
+    "payment_method_selected_for_stage",
+    "retention_period_and_delete_path_reviewed",
+    "refund_receipt_tax_boundary_professional_review",
+    "privacy_notice_and_consent_reviewed",
+    "pg_contract_or_open_banking_approval_if_used",
+    "staging_non_disclosure_tests_pass",
+    "can_launch_remains_false_until_r3_evidence"
+  ],
+  "verification": {
+    "local_decision_gate": "python scripts/membership_payment_recognition_decision_gate.py --check",
+    "json_parse": "python -m json.tool agents/project/MEMBERSHIP-PAYMENT-RECOGNITION-DECISION-PACKET.json",
+    "unit_tests": "python -m pytest tests/unit/test_membership_payment_recognition_decision_gate.py -q"
+  }
+}
