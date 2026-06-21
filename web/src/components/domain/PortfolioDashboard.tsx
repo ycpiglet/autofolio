@@ -1201,8 +1201,11 @@ function kpiNumber(value: unknown): number {
 }
 
 function portfolioPnlColorClass(value: number): string {
-  if (value > 0) return "text-brand";
-  if (value < 0) return "text-destructive";
+  // KR-aware PnL coloring (text-pnl-up/down) — consistent with the rest of the
+  // app and the data-pnl KR/Western toggle. (Was text-brand/destructive =
+  // Western-only, which disagreed with the app's default KR convention.)
+  if (value > 0) return "text-pnl-up";
+  if (value < 0) return "text-pnl-down";
   return "text-muted-foreground";
 }
 
