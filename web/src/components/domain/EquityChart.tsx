@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { createChart, ColorType, AreaSeries, type IChartApi } from "lightweight-charts";
 import { cn } from "@/lib/utils";
 import type { TableResponse } from "@/lib/api";
+import { lightweightChartTheme, equityAreaColors } from "@/lib/design-tokens";
 
 interface EquityChartProps {
   data?: TableResponse;
@@ -42,20 +43,20 @@ export function EquityChart({
         textColor: "#8B95A1",
       },
       grid: {
-        vertLines: { color: "#DDE1E7" },
-        horzLines: { color: "#DDE1E7" },
+        vertLines: { color: lightweightChartTheme.gridColor },
+        horzLines: { color: lightweightChartTheme.gridColor },
       },
-      rightPriceScale: { borderColor: "#DDE1E7" },
-      timeScale: { borderColor: "#DDE1E7" },
+      rightPriceScale: { borderColor: lightweightChartTheme.borderColor },
+      timeScale: { borderColor: lightweightChartTheme.borderColor },
       width: el.clientWidth,
       height: 240,
     });
     chartRef.current = chart;
 
     const series = chart.addSeries(AreaSeries, {
-      lineColor: "#3182F6",
-      topColor: "rgba(49, 130, 246, 0.3)",
-      bottomColor: "rgba(49, 130, 246, 0.0)",
+      lineColor: equityAreaColors.line,
+      topColor: equityAreaColors.topFill,
+      bottomColor: equityAreaColors.bottomFill,
       lineWidth: 2,
     });
 

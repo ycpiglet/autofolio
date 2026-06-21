@@ -13,15 +13,9 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import type { TableResponse } from "@/lib/api";
+import { compactChartSeriesPalette } from "@/lib/design-tokens";
 
-const CHART_COLORS = [
-  "#3182F6",
-  "#F04452",
-  "#34C759",
-  "#FF9500",
-  "#AF52DE",
-  "#5AC8FA",
-];
+const CHART_COLORS = compactChartSeriesPalette;
 
 interface AttributionSankeyProps {
   data?: TableResponse;

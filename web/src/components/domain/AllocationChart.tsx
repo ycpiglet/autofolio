@@ -11,17 +11,9 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import type { TableResponse } from "@/lib/api";
+import { chartSeriesPalette } from "@/lib/design-tokens";
 
-const CHART_COLORS = [
-  "#3182F6",
-  "#F04452",
-  "#34C759",
-  "#FF9500",
-  "#8E8E93",
-  "#AF52DE",
-  "#5AC8FA",
-  "#FFCC00",
-];
+const CHART_COLORS = chartSeriesPalette;
 
 interface AllocationChartProps {
   data?: TableResponse;
