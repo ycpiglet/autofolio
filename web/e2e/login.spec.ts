@@ -19,14 +19,18 @@ const ENGINE_STATUS = {
 };
 
 const EMPTY_TABLE = { columns: [], rows: [] };
-const EMPTY_SSO_PROVIDERS = { providers: [] };
-const GOOGLE_SSO_PROVIDERS = {
+
+type SsoProvider = { id: string; label: string; kind: string; enabled: boolean };
+type SsoProvidersBody = { providers: SsoProvider[] };
+
+const EMPTY_SSO_PROVIDERS: SsoProvidersBody = { providers: [] };
+const GOOGLE_SSO_PROVIDERS: SsoProvidersBody = {
   providers: [
     { id: "google", label: "Google", kind: "oidc", enabled: true },
     { id: "kakao", label: "Kakao", kind: "sns", enabled: false },
   ],
 };
-const MOCK_SSO_PROVIDERS = {
+const MOCK_SSO_PROVIDERS: SsoProvidersBody = {
   providers: [
     { id: "mock", label: "Mock SSO", kind: "mock", enabled: true },
     { id: "google", label: "Google", kind: "oidc", enabled: false },
@@ -73,7 +77,7 @@ async function mockBackgroundApis(
   );
 }
 
-async function mockSsoProviders(page: Page, body = EMPTY_SSO_PROVIDERS) {
+async function mockSsoProviders(page: Page, body: SsoProvidersBody = EMPTY_SSO_PROVIDERS) {
   await page.route(/\/api\/auth\/sso\/providers/, (route) =>
     route.fulfill({
       status: 200,
