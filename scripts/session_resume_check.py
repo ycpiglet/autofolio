@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
+import re as _re
 import sys
 from pathlib import Path
 
@@ -313,6 +314,89 @@ def check_ralph_consistency(ralph_path: Path, pointer: dict, now: float) -> dict
     return result
 
 
+# --- sub-step checkpoints (per-task append-only progress log) ---
+
+def _checkpoint_file(checkpoints_dir: Path, task: str) -> Path:
+    """Return the per-task checkpoint JSONL path with a sanitized filename.
+
+    Keeps only ``[A-Za-z0-9._-]``; any run of other characters collapses to a
+    single ``_``; leading/trailing ``_`` are stripped. An empty result falls
+    back to ``task`` so we never produce a hidden or empty filename.
+    """
+    safe = _re.sub(r"[^A-Za-z0-9._-]+", "_", str(task)).strip("_")
+    if not safe:
+        safe = "task"
+    return checkpoints_dir / f"{safe}.jsonl"
+
+
+def append_checkpoint(checkpoints_dir: Path, *, task: str, step: str,
+                      status: str = "started", next_action: str = "",
+                      agent: str = "", now_iso: str) -> Path:
+    """Append ONE checkpoint JSON line for ``task`` and return the file path.
+
+    This is the only new mutating action; it must only run from the
+    ``checkpoint`` subcommand and never from the audit path.
+    """
+    checkpoints_dir.mkdir(parents=True, exist_ok=True)
+    path = _checkpoint_file(checkpoints_dir, task)
+    record = {
+        "ts": now_iso,
+        "task": task,
+        "step": step,
+        "status": status,
+        "next": next_action,
+        "agent": agent,
+    }
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return path
+
+
+_CLOSED_STATUSES = {"done", "complete", "completed", "closed"}
+
+
+def read_latest_checkpoints(checkpoints_dir: Path) -> list[dict]:
+    """Return the LAST record per ``*.jsonl`` file in ``checkpoints_dir``.
+
+    Each returned dict gains a computed ``open`` field (True unless its status
+    is one of done/complete/completed/closed). Dotfiles, non-files and a
+    missing dir are skipped; files with no parseable line are dropped. The list
+    is sorted by ``ts`` string descending, with records lacking ``ts`` last.
+    """
+    out: list[dict] = []
+    if not checkpoints_dir.is_dir():
+        return out
+    for path in sorted(checkpoints_dir.iterdir()):
+        if not path.is_file() or path.suffix != ".jsonl" or path.name.startswith("."):
+            continue
+        latest: dict | None = None
+        try:
+            lines = path.read_text(encoding="utf-8").splitlines()
+        except Exception:
+            continue
+        for raw in lines:
+            text = raw.strip()
+            if not text:
+                continue
+            try:
+                rec = json.loads(text)
+            except Exception:
+                continue
+            if isinstance(rec, dict):
+                latest = rec
+        if latest is None:
+            continue
+        status = str(latest.get("status", "")).strip().lower()
+        latest["open"] = status not in _CLOSED_STATUSES
+        out.append(latest)
+    # Sort by ts string descending; records without ts go last. We sort in two
+    # passes so the "missing ts last" rule is independent of the descending ts
+    # order (a single reverse=True would otherwise float missing-ts to the top).
+    out.sort(key=lambda r: r.get("ts") or "", reverse=True)
+    out.sort(key=lambda r: r.get("ts") is None)
+    return out
+
+
 # --- STATUS.md head ---
 
 def _status_head(status_path: Path) -> str | None:
@@ -348,6 +432,7 @@ def build_report(root: Path, now_epoch: float, now_iso: str,
     pointer_path = root / "agents" / "project" / "NEXT-SESSION-POINTER.yml"
     status_path = root / "agents" / "lead_engineer" / "STATUS.md"
     ralph_path = root / ".claude" / "ralph-loop.local.md"
+    checkpoints_dir = root / "agents" / "runtime" / "checkpoints"
 
     stale_claims = scan_stale_claims(claims_dir, now_epoch)
     claimed_stale = scan_claimed_stale_messages(inbox_dir, claims_dir, now_epoch)
@@ -357,6 +442,10 @@ def build_report(root: Path, now_epoch: float, now_iso: str,
     pointer = check_pointer_freshness(pointer_path, now_iso, pointer_max_age_hours)
     status_head = _status_head(status_path)
     ralph = check_ralph_consistency(ralph_path, pointer, now_epoch)
+    # In-flight sub-step checkpoints are normal (not anomalies): surface only the
+    # OPEN ones for resume context, and never let them affect `clean`/warnings.
+    open_checkpoints = [c for c in read_latest_checkpoints(checkpoints_dir)
+                        if c.get("open")]
 
     warnings: list[str] = []
     if not pointer["exists"]:
@@ -390,6 +479,7 @@ def build_report(root: Path, now_epoch: float, now_iso: str,
             "pointer": pointer,
             "status_head": status_head,
             "ralph": ralph,
+            "checkpoints": open_checkpoints,
         },
         "crash_scan": {
             "stale_claims": stale_claims,
@@ -423,6 +513,14 @@ def render_report(report: dict) -> str:
     lines.append(
         f"  ralph-loop: active={ralph.get('active')} "
         f"iteration={ralph.get('iteration')}")
+    checkpoints = resume.get("checkpoints", []) if isinstance(resume, dict) else []
+    for cp in checkpoints:
+        if not isinstance(cp, dict):
+            continue
+        lines.append(
+            f"  IN-FLIGHT: {cp.get('task', '?')} — step "
+            f"'{cp.get('step', '?')}' ({cp.get('status', '?')}); next: "
+            f"'{cp.get('next', '')}' @ {cp.get('ts', '?')}")
     lines.append(
         "CRASH SCAN: "
         f"stale_claims={len(scan.get('stale_claims', []))} "
@@ -442,11 +540,21 @@ def render_report(report: dict) -> str:
 # --- CLI ---
 
 def main(argv: list[str] | None = None) -> int:
+    # Shared parent parser so BOTH the audit path and the checkpoint subcommand
+    # accept --root identically.
+    root_parent = argparse.ArgumentParser(add_help=False)
+    # default=SUPPRESS so the checkpoint subparser does NOT clobber a --root
+    # given before the subcommand (argparse would otherwise re-apply the
+    # subparser's default and silently discard `--root X checkpoint ...`).
+    # Both `--root X checkpoint ...` and `checkpoint --root X ...` now work.
+    root_parent.add_argument("--root", default=argparse.SUPPRESS,
+                             help="repo root (default: message_queue.REPO_ROOT)")
+
     parser = argparse.ArgumentParser(
+        parents=[root_parent],
         description="Crash-recovery + session-resume auditor (report-only, "
                     "non-blocking; always exits 0 unless --strict).")
-    parser.add_argument("--root", default=str(mq.REPO_ROOT),
-                        help="repo root (default: message_queue.REPO_ROOT)")
+    # Audit-only flags live on the top-level parser.
     parser.add_argument("--json", action="store_true",
                         help="print the report dict as JSON instead of text")
     parser.add_argument("--fix", action="store_true",
@@ -459,10 +567,41 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--strict", action="store_true",
                         help="exit 1 if any warnings (default always exits 0 so "
                              "it never blocks a SessionStart hook)")
+
+    # Optional subcommand. When omitted, behave EXACTLY as the audit CLI.
+    sub = parser.add_subparsers(dest="command", required=False)
+    cp = sub.add_parser(
+        "checkpoint", parents=[root_parent],
+        help="record a sub-step progress checkpoint for a long task "
+             "(append-only; never runs the audit)")
+    cp.add_argument("--task", required=True, help="task id (e.g. TASK-123)")
+    cp.add_argument("--step", required=True,
+                    help="what sub-step was just done/started")
+    cp.add_argument("--status", choices=["started", "done", "blocked"],
+                    default="started", help="checkpoint status")
+    cp.add_argument("--next", default="", help="the next action to take")
+    cp.add_argument("--agent", default="", help="agent/role recording this")
+
     args = parser.parse_args(argv)
 
     try:
-        root = Path(args.root).resolve()
+        root = Path(getattr(args, "root", None) or str(mq.REPO_ROOT)).resolve()
+
+        if getattr(args, "command", None) == "checkpoint":
+            checkpoints_dir = root / "agents" / "runtime" / "checkpoints"
+            path = append_checkpoint(
+                checkpoints_dir,
+                task=args.task,
+                step=args.step,
+                status=args.status,
+                next_action=args.next,
+                agent=args.agent,
+                now_iso=_local_iso(),
+            )
+            print(f"checkpoint recorded: {path} (step='{args.step}', "
+                  f"status={args.status})")
+            return 0
+
         now_iso = _local_iso()
         now_epoch = mq._now_epoch()
         report = build_report(

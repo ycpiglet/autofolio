@@ -25,6 +25,18 @@ records under `agents/lead_engineer/`, follow the shared protocol.
 6. Read the relevant role `SKILL.md`.
 7. Read the active task or backlog item.
 
+### Long-task checkpoints (crash recovery)
+
+다단계·장시간 작업은 서브스텝마다 진행을 기록한다. 그러면 PC가 갑자기 꺼져도
+`session_resume_check.py`가 중단된 정확한 서브스텝과 다음 행동을 즉시 보여준다.
+
+```
+python scripts/session_resume_check.py checkpoint --task TASK-XXX --step "무엇을 끝냈는가" --status started|done|blocked --next "다음 행동"
+```
+
+기록은 `agents/runtime/checkpoints/<TASK>.jsonl`(append-only)에 쌓이고, 다음 세션의
+Start Checklist step 0에서 자동 노출된다.
+
 ## Collaboration
 
 Use the repository role model instead of answering every question as a single

@@ -355,3 +355,225 @@ def test_parse_iso_epoch_strips_surrounding_quotes():
 def test_parse_iso_epoch_returns_none_for_bad_input(value):
     # None (no exception) for unparseable / empty / non-str inputs.
     assert src._parse_iso_epoch(value) is None
+
+
+# --- sub-step checkpoints ---
+
+def test_append_checkpoint_then_read_round_trips(tmp_path):
+    cps = tmp_path / "checkpoints"
+    src.append_checkpoint(cps, task="TASK-1", step="write tests",
+                          status="started", next_action="implement",
+                          agent="lead-engineer",
+                          now_iso="2026-06-21T10:00:00+09:00")
+    latest = src.read_latest_checkpoints(cps)
+    assert len(latest) == 1
+    rec = latest[0]
+    assert rec["task"] == "TASK-1"
+    assert rec["step"] == "write tests"
+    assert rec["status"] == "started"
+    assert rec["next"] == "implement"
+    assert rec["agent"] == "lead-engineer"
+    assert rec["ts"] == "2026-06-21T10:00:00+09:00"
+    assert rec["open"] is True
+
+
+def test_read_latest_checkpoints_last_line_wins(tmp_path):
+    cps = tmp_path / "checkpoints"
+    src.append_checkpoint(cps, task="TASK-2", step="step one",
+                          status="started", now_iso="2026-06-21T10:00:00+09:00")
+    src.append_checkpoint(cps, task="TASK-2", step="step two",
+                          status="started", now_iso="2026-06-21T11:00:00+09:00")
+    src.append_checkpoint(cps, task="TASK-2", step="step three",
+                          status="done", now_iso="2026-06-21T12:00:00+09:00")
+    latest = src.read_latest_checkpoints(cps)
+    assert len(latest) == 1
+    assert latest[0]["step"] == "step three"
+    assert latest[0]["status"] == "done"
+    assert latest[0]["open"] is False
+
+
+@pytest.mark.parametrize("status,expected_open", [
+    ("started", True),
+    ("blocked", True),
+    ("done", False),
+    ("closed", False),
+    ("completed", False),
+])
+def test_read_latest_checkpoints_open_flag(tmp_path, status, expected_open):
+    cps = tmp_path / "checkpoints"
+    src.append_checkpoint(cps, task="TASK-open", step="x", status=status,
+                          now_iso="2026-06-21T10:00:00+09:00")
+    latest = src.read_latest_checkpoints(cps)
+    assert len(latest) == 1
+    assert latest[0]["open"] is expected_open
+
+
+def test_checkpoint_file_sanitizes_messy_task_id(tmp_path):
+    cps = tmp_path / "checkpoints"
+    path = src._checkpoint_file(cps, "TASK 9/abc:x")
+    # No path separators leaked into the filename, single safe stem, .jsonl.
+    assert path.parent == cps
+    assert path.suffix == ".jsonl"
+    name = path.name
+    assert "/" not in name and "\\" not in name and ":" not in name
+    assert " " not in name
+    assert name == "TASK_9_abc_x.jsonl"
+
+
+def test_checkpoint_file_empty_falls_back_to_task(tmp_path):
+    cps = tmp_path / "checkpoints"
+    path = src._checkpoint_file(cps, "///")
+    assert path.name == "task.jsonl"
+
+
+def test_read_latest_checkpoints_missing_dir_returns_empty(tmp_path):
+    assert src.read_latest_checkpoints(tmp_path / "nope") == []
+
+
+def test_read_latest_checkpoints_skips_empty_and_unparseable(tmp_path):
+    cps = tmp_path / "checkpoints"
+    cps.mkdir(parents=True, exist_ok=True)
+    # A file with only blank/garbage lines yields no record.
+    (cps / "GARBAGE.jsonl").write_text("\n\nnot json\n\n", encoding="utf-8")
+    # A dotfile is ignored.
+    (cps / ".hidden.jsonl").write_text(
+        '{"task":"H","status":"started"}\n', encoding="utf-8")
+    assert src.read_latest_checkpoints(cps) == []
+
+
+def _write_checkpoint_line(cps: Path, task: str, *, status: str,
+                           ts="2026-06-21T10:00:00+09:00") -> None:
+    cps.mkdir(parents=True, exist_ok=True)
+    rec = {"ts": ts, "task": task, "step": "s", "status": status,
+           "next": "n", "agent": "a"}
+    (cps / f"{task}.jsonl").write_text(
+        json.dumps(rec, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def _make_root_with_checkpoints(tmp_path):
+    cps = tmp_path / "agents" / "runtime" / "checkpoints"
+    _write_checkpoint_line(cps, "TASK-OPEN", status="started")
+    _write_checkpoint_line(cps, "TASK-DONE", status="done")
+    return tmp_path
+
+
+def test_build_report_includes_only_open_checkpoints(tmp_path):
+    root = _make_root_with_checkpoints(tmp_path)
+    report = src.build_report(
+        root, now_epoch=1_781_000_000.0,
+        now_iso="2026-06-21T11:00:00+09:00",
+        max_session_age_seconds=3600.0, pointer_max_age_hours=24.0)
+    cps = report["resume"]["checkpoints"]
+    tasks = [c["task"] for c in cps]
+    assert tasks == ["TASK-OPEN"]
+    assert all(c["open"] for c in cps)
+
+
+def test_build_report_no_checkpoints_dir_empty_list(tmp_path):
+    report = src.build_report(
+        tmp_path, now_epoch=1_781_000_000.0,
+        now_iso="2026-06-21T11:00:00+09:00",
+        max_session_age_seconds=3600.0, pointer_max_age_hours=24.0)
+    assert report["resume"]["checkpoints"] == []
+
+
+def test_render_report_contains_in_flight_line_when_open():
+    report = {
+        "resume": {
+            "summary_head": "x",
+            "pointer": {"updated_at": "x", "age_hours": 1.0, "signal": "pass",
+                        "score": "95"},
+            "status_head": "s",
+            "ralph": {"active": False, "iteration": 0},
+            "checkpoints": [{
+                "ts": "2026-06-21T10:00:00+09:00", "task": "TASK-7",
+                "step": "build", "status": "started", "next": "test",
+                "open": True,
+            }],
+        },
+        "crash_scan": {
+            "stale_claims": [], "claimed_stale_messages": [],
+            "candidate_dead_sessions": [],
+        },
+        "warnings": [],
+        "clean": True,
+    }
+    text = src.render_report(report)
+    assert "IN-FLIGHT:" in text
+    assert "TASK-7" in text
+    assert "step 'build'" in text
+
+
+def test_render_report_no_in_flight_when_no_checkpoints():
+    report = {
+        "resume": {
+            "summary_head": "x",
+            "pointer": {"updated_at": "x", "age_hours": 1.0, "signal": "pass",
+                        "score": "95"},
+            "status_head": "s",
+            "ralph": {"active": False, "iteration": 0},
+            "checkpoints": [],
+        },
+        "crash_scan": {
+            "stale_claims": [], "claimed_stale_messages": [],
+            "candidate_dead_sessions": [],
+        },
+        "warnings": [],
+        "clean": True,
+    }
+    text = src.render_report(report)
+    assert "IN-FLIGHT:" not in text
+
+
+def test_checkpoints_do_not_make_clean_report_unclean(tmp_path):
+    # An in-flight checkpoint is normal, not an anomaly: a report that is clean
+    # WITHOUT a checkpoint must stay clean=True once an open checkpoint is added.
+    # Set up an otherwise-clean root (a fresh pointer so there is no
+    # pointer-missing/stale warning, and no claims/sessions to flag).
+    pointer = tmp_path / "agents" / "project" / "NEXT-SESSION-POINTER.yml"
+    _write_pointer(pointer, updated_at="2026-06-21T10:30:00+09:00")
+    kwargs = dict(now_epoch=1_781_000_000.0,
+                  now_iso="2026-06-21T11:00:00+09:00",
+                  max_session_age_seconds=3600.0, pointer_max_age_hours=24.0)
+
+    baseline = src.build_report(tmp_path, **kwargs)
+    assert baseline["clean"] is True, "fixture root should be clean to start"
+
+    cps = tmp_path / "agents" / "runtime" / "checkpoints"
+    _write_checkpoint_line(cps, "TASK-INFLIGHT", status="started")
+    report = src.build_report(tmp_path, **kwargs)
+    assert report["resume"]["checkpoints"], "expected the open checkpoint"
+    assert report["clean"] is True
+    assert report["warnings"] == []
+
+
+def test_main_checkpoint_subcommand_writes_file_and_returns_zero(tmp_path, capsys):
+    rc = src.main(["checkpoint", "--root", str(tmp_path), "--task", "TASK-X",
+                   "--step", "build", "--status", "started"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "checkpoint recorded" in out
+    jsonl = tmp_path / "agents" / "runtime" / "checkpoints" / "TASK-X.jsonl"
+    assert jsonl.is_file()
+    latest = src.read_latest_checkpoints(jsonl.parent)
+    assert latest and latest[0]["task"] == "TASK-X"
+    assert latest[0]["step"] == "build"
+
+
+def test_main_checkpoint_root_before_subcommand_writes_to_that_root(tmp_path):
+    # Regression: `--root X checkpoint ...` (root BEFORE the subcommand) must
+    # write under X, not the default repo root. argparse SUPPRESS keeps the
+    # top-level --root from being clobbered by the subparser default.
+    rc = src.main(["--root", str(tmp_path), "checkpoint", "--task", "TASK-Y",
+                   "--step", "scope", "--status", "started"])
+    assert rc == 0
+    jsonl = tmp_path / "agents" / "runtime" / "checkpoints" / "TASK-Y.jsonl"
+    assert jsonl.is_file(), "checkpoint must honor --root placed before the subcommand"
+
+
+def test_main_audit_still_works_without_subcommand(tmp_path, capsys):
+    # No subcommand -> audit path, prints the RESUME CHECK block, exits 0.
+    rc = src.main(["--root", str(tmp_path)])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "SESSION RESUME CHECK" in out
