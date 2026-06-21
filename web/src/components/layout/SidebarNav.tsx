@@ -38,6 +38,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "성향 진단", href: "/onboarding/investor-profile", icon: "🧭" },
       { label: "설정", href: "/settings", icon: "⚙️" },
+      { label: "매뉴얼", href: "/manuals", icon: "📖" },
     ],
   },
 ];
