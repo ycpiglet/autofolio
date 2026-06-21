@@ -2,7 +2,7 @@ project: autofolio
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.2.0
+  ref: v0.3.0
 sync:
   mode: check-diff-apply
   allow_silent_overwrite: false
@@ -17,3 +17,13 @@ sync:
     - agents/project/SKILL-GOVERNANCE.md
     - CLAUDE.md
     - scripts/doc_steward_due.py
+    # --- v0.3.0 sync (issue #101): 호스트 소유 시임 ---
+    # autofolio 세션 상태(데이터) — 업스트림은 placeholder 템플릿
+    - agents/project/NEXT-SESSION-POINTER.yml
+    # 호스트 리서치 노트(autofolio 컨텍스트) — 업스트림은 example
+    - agents/research_agent/notes/EVIDENCE-2026-06-03-001-requirement-elicitation.md
+    # 소비자 프로젝트에서 게이트 동작에 필요한 호스트 패치(업스트림 버그, 업스트림 이슈로 기여 예정)
+    - scripts/continuity_contract_gate.py
+    - scripts/owner_governance_gate.py
+    # autofolio 고유: TASK-070 미만 identity grandfather
+    - scripts/task_identity.py
