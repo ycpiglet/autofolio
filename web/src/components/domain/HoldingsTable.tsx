@@ -26,6 +26,18 @@ function isNumericColumn(col: string): boolean {
   return NUMERIC_COLUMN_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
+function SkeletonRow({ colCount }: { colCount: number }) {
+  return (
+    <tr aria-hidden>
+      {Array.from({ length: colCount }).map((_, i) => (
+        <td key={i} className="px-3 py-2">
+          <div className="h-4 animate-pulse rounded bg-muted" />
+        </td>
+      ))}
+    </tr>
+  );
+}
+
 function Cell({ col, value, pnlClassName, emphasizeValues = false }: CellProps) {
   if (isPnlColumn(col)) {
     const num = typeof value === "number" ? value : parseFloat(String(value ?? ""));
@@ -106,18 +118,6 @@ export function HoldingsTable({
     : [];
   const colCount = columns.length || 5;
 
-  function SkeletonRow() {
-    return (
-      <tr aria-hidden>
-        {Array.from({ length: colCount }).map((_, i) => (
-          <td key={i} className="px-3 py-2">
-            <div className="h-4 animate-pulse rounded bg-muted" />
-          </td>
-        ))}
-      </tr>
-    );
-  }
-
   return (
     <div
       className={cn("overflow-x-auto rounded-xl border border-border", className)}
@@ -147,7 +147,9 @@ export function HoldingsTable({
         </thead>
         <tbody>
           {isLoading ? (
-            Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+            Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonRow key={i} colCount={colCount} />
+                ))
           ) : rows.length === 0 ? (
             <tr>
               <td
