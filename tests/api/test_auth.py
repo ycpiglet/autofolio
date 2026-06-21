@@ -1,7 +1,7 @@
 """Auth router contract and gate tests.
 
 Covers:
-- POST /api/auth/login  guest → 200 + cookie set
+- POST /api/auth/login  guest → 403 by default; 200 only with dev opt-in
 - POST /api/auth/login  local (mocked) → 200 + cookie
 - POST /api/auth/login  local fail → 401
 - POST /api/auth/logout → 200, cookie cleared
@@ -16,16 +16,17 @@ from unittest.mock import patch
 # ── Guest login ────────────────────────────────────────────────────────────────
 
 class TestGuestLogin:
-    def test_guest_login_returns_200(self, client):
+    def test_guest_login_disabled_by_default(self, client, monkeypatch):
+        monkeypatch.delenv("AUTOFOLIO_GUEST_DEMO_ENABLED", raising=False)
+        resp = client.post("/api/auth/login", json={"guest": True})
+        assert resp.status_code == 403
+        assert "비활성화" in resp.json()["detail"]
+
+    def test_guest_login_requires_explicit_dev_opt_in(self, client, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_GUEST_DEMO_ENABLED", "1")
         resp = client.post("/api/auth/login", json={"guest": True})
         assert resp.status_code == 200
-
-    def test_guest_login_sets_cookie(self, client):
-        resp = client.post("/api/auth/login", json={"guest": True})
         assert "af_session" in resp.cookies
-
-    def test_guest_login_returns_guest_role(self, client):
-        resp = client.post("/api/auth/login", json={"guest": True})
         body = resp.json()
         assert body["role"] == "guest"
         assert body["data_source"] == "demo"
@@ -62,6 +63,26 @@ class TestLocalLogin:
     def test_local_login_missing_fields_returns_422(self, client):
         resp = client.post("/api/auth/login", json={"username": "", "password": ""})
         assert resp.status_code == 422
+
+    def test_unknown_local_account_requires_approval(self, client, tmp_path, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_HOME", str(tmp_path))
+        monkeypatch.delenv("AUTOFOLIO_LOCAL_AUTO_REGISTER", raising=False)
+
+        import importlib
+
+        from app.services import auth_service as auth_mod
+        from app.ui import vault as vault_mod
+
+        importlib.reload(vault_mod)
+        importlib.reload(auth_mod)
+
+        resp = client.post(
+            "/api/auth/login",
+            json={"username": "new-user", "password": "secret123"},
+        )
+        assert resp.status_code == 401
+        assert "승인된 계정" in resp.json()["detail"]
+        assert vault_mod.load().get("users", {}) == {}
 
 
 # ── Logout ────────────────────────────────────────────────────────────────────

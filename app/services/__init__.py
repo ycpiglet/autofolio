@@ -19,7 +19,9 @@ Streamlit views는 TASK-049에서 은퇴되어 archive로 이동했다.
   alerts         — add_price_alert, disclosure_gate_state, refresh_disclosure_gate
   connections    — get, brokers_public, add_broker, remove_broker, set_default_broker,
                    connect_channel, disconnect_channel (REAL move from app.ui.store)
-  auth_service   — login_or_register (SPLIT: pure auth; oidc_* stays in app.ui.auth)
+  auth_service   — approved local login; auto-register only with explicit local/dev opt-in
+  integrations   — approved-user LLM/SNS token registry with redacted responses
+  membership_readiness — Owner-only local production-readiness checklist
   agents         — ask, available, list_agents, run_ic, list_decisions,
                    extract_condition_from_ic, DEFAULT_PANEL, MODEL, EFFORT
                    (REAL move from app.ui.agents_runtime + app.ui.ic)

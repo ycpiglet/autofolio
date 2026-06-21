@@ -1,8 +1,8 @@
 """Account router — /api/account/*
 
 Local account management (no external OAuth/SSO). Endpoints:
-  GET  /account           — current account profile (require_session)
-  POST /account/password  — change the SESSION's own password (require_owner + CSRF)
+  GET  /account           — current account profile (require_app_user)
+  POST /account/password  — change the SESSION's own password (require_app_user + CSRF)
 
 SAFETY invariants:
   - Responses NEVER contain a password, hash, salt, or any secret.
@@ -16,7 +16,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import require_owner_csrf, require_session
+from app.api.deps import require_app_user, require_app_user_csrf
 from app.api.schemas import (
     AccountResponse,
     PasswordChangeRequest,
@@ -28,7 +28,7 @@ router = APIRouter(prefix="/account", tags=["account"])
 
 @router.get("", response_model=AccountResponse)
 def get_account(
-    session: Annotated[dict[str, Any], Depends(require_session)],
+    session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> AccountResponse:
     """Return the current account profile. No secrets are ever included."""
     role = session.get("role", "guest")
@@ -43,13 +43,13 @@ def get_account(
 @router.post("/password", response_model=PasswordChangeResponse)
 def change_account_password(
     body: PasswordChangeRequest,
-    session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+    session: Annotated[dict[str, Any], Depends(require_app_user_csrf)],
 ) -> PasswordChangeResponse:
     """Change the password of the SESSION's own account.
 
     The username is taken from the verified session — NOT the request body —
     so a caller can never change another account. Guests are rejected by
-    require_owner_csrf (403) before this body runs.
+    require_app_user_csrf (403) before this body runs.
     """
     from app.services.auth_service import change_password
 

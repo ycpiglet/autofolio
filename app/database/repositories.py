@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+import json
 from typing import Any
+from uuid import uuid4
 
 from app.database.sqlite_db import get_connection
 
@@ -443,6 +445,137 @@ class Repository:
     def reset_consecutive_failures(self) -> None:
         """연속 주문 실패 카운터를 0으로 초기화한다."""
         self.set_system_state("consecutive_order_failures", "0")
+
+    def _load_json_state(self, key: str, default: Any) -> Any:
+        raw = self.get_system_state(key)
+        if raw is None:
+            return default
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return default
+
+    def _save_json_state(self, key: str, value: Any) -> None:
+        self.set_system_state(key, json.dumps(value, ensure_ascii=False, sort_keys=True))
+
+    @staticmethod
+    def _dedupe_symbols(symbols: list[str]) -> list[str]:
+        result: list[str] = []
+        seen: set[str] = set()
+        for symbol in symbols:
+            normalized = str(symbol).strip().upper()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            result.append(normalized)
+        return result
+
+    def list_portfolio_groups(self) -> list[dict[str, Any]]:
+        groups = self._load_json_state("portfolio_groups", [])
+        if not isinstance(groups, list):
+            return []
+        return sorted(groups, key=lambda row: (row.get("sort_order", 0), row.get("name", "")))
+
+    def create_portfolio_group(
+        self,
+        *,
+        name: str,
+        symbols: list[str],
+        description: str | None = None,
+        color: str = "#3182F6",
+        sort_order: int = 0,
+    ) -> dict[str, Any]:
+        groups = self.list_portfolio_groups()
+        now = datetime.utcnow().isoformat(timespec="seconds")
+        group = {
+            "group_id": f"pg_{uuid4().hex[:12]}",
+            "name": name.strip(),
+            "description": description or "",
+            "color": color,
+            "sort_order": int(sort_order),
+            "symbols": self._dedupe_symbols(symbols),
+            "created_at": now,
+            "updated_at": now,
+        }
+        groups.append(group)
+        self._save_json_state("portfolio_groups", groups)
+        return group
+
+    def update_portfolio_group(
+        self,
+        group_id: str,
+        *,
+        name: str | None = None,
+        symbols: list[str] | None = None,
+        description: str | None = None,
+        color: str | None = None,
+        sort_order: int | None = None,
+    ) -> dict[str, Any] | None:
+        groups = self.list_portfolio_groups()
+        updated: dict[str, Any] | None = None
+        for group in groups:
+            if group.get("group_id") != group_id:
+                continue
+            if name is not None:
+                group["name"] = name.strip()
+            if symbols is not None:
+                group["symbols"] = self._dedupe_symbols(symbols)
+            if description is not None:
+                group["description"] = description
+            if color is not None:
+                group["color"] = color
+            if sort_order is not None:
+                group["sort_order"] = int(sort_order)
+            group["updated_at"] = datetime.utcnow().isoformat(timespec="seconds")
+            updated = group
+            break
+        if updated is None:
+            return None
+        self._save_json_state("portfolio_groups", groups)
+        return updated
+
+    def delete_portfolio_group(self, group_id: str) -> bool:
+        groups = self.list_portfolio_groups()
+        next_groups = [group for group in groups if group.get("group_id") != group_id]
+        if len(next_groups) == len(groups):
+            return False
+        self._save_json_state("portfolio_groups", next_groups)
+        return True
+
+    def list_portfolio_symbol_aliases(self) -> list[dict[str, Any]]:
+        aliases = self._load_json_state("portfolio_symbol_aliases", {})
+        if not isinstance(aliases, dict):
+            return []
+        return sorted(aliases.values(), key=lambda row: row.get("symbol", ""))
+
+    def upsert_portfolio_symbol_alias(
+        self,
+        *,
+        symbol: str,
+        name: str,
+        asset_class: str | None = None,
+        region: str | None = None,
+        sector: str | None = None,
+        strategy: str | None = None,
+        risk_bucket: str | None = None,
+    ) -> dict[str, Any]:
+        aliases = self._load_json_state("portfolio_symbol_aliases", {})
+        if not isinstance(aliases, dict):
+            aliases = {}
+        normalized = symbol.strip().upper()
+        row = {
+            "symbol": normalized,
+            "name": name.strip(),
+            "asset_class": asset_class,
+            "region": region,
+            "sector": sector,
+            "strategy": strategy,
+            "risk_bucket": risk_bucket,
+            "updated_at": datetime.utcnow().isoformat(timespec="seconds"),
+        }
+        aliases[normalized] = row
+        self._save_json_state("portfolio_symbol_aliases", aliases)
+        return row
     # ---- price alerts ----
     def add_price_alert(self, symbol: str, target_price: float, direction: str) -> int:
         with get_connection(self.db_path) as conn:

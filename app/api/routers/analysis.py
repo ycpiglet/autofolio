@@ -1,6 +1,6 @@
 """Analysis router — /api/analysis/*
 
-Endpoints (all require_session; guest allowed):
+Endpoints (all require_app_user):
   GET /analysis/attribution
   GET /analysis/retro
   GET /analysis/daily-pnl
@@ -20,7 +20,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.api.deps import require_session
+from app.api.deps import require_app_user
 from app.api.schemas import TableResponse
 from app.api.serializers import df_records
 
@@ -42,7 +42,7 @@ def _validate_symbol(symbol: str) -> str:
 
 @router.get("/attribution", response_model=TableResponse)
 def attribution(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> TableResponse:
     from app.services import backend
 
@@ -51,7 +51,7 @@ def attribution(
 
 @router.get("/retro")
 def retro(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> dict[str, Any]:
     from app.services import backend
 
@@ -60,7 +60,7 @@ def retro(
 
 @router.get("/daily-pnl", response_model=TableResponse)
 def daily_pnl(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> TableResponse:
     from app.services import backend
 
@@ -69,7 +69,7 @@ def daily_pnl(
 
 @router.get("/backtest")
 def backtest(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: Annotated[str, Query(description="종목 코드")] = "",
     start: Annotated[str, Query(description="시작일 YYYY-MM-DD")] = "",
     end: Annotated[str, Query(description="종료일 YYYY-MM-DD")] = "",
@@ -123,7 +123,7 @@ def backtest(
 
 @router.get("/var")
 def portfolio_var(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     horizon_days: Annotated[int, Query(ge=1, le=252, description="VaR 기간(일)")] = 10,
     n_simulations: Annotated[int, Query(ge=100, description="시뮬레이션 횟수")] = 10_000,
 ) -> dict[str, Any]:
@@ -161,7 +161,7 @@ def portfolio_var(
 
 @router.get("/scenario", response_model=TableResponse)
 def scenario(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> TableResponse:
     """시나리오 분석 (Bull/Base/Bear). READ-ONLY."""
     from app.services import backend
@@ -171,7 +171,7 @@ def scenario(
 
 @router.get("/whatif")
 def whatif(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: Annotated[str, Query(description="종목 코드")] = "",
     weight: Annotated[float, Query(ge=0.0, le=100.0, description="목표 비중 (%)")] = 0.0,
 ) -> dict[str, Any]:
