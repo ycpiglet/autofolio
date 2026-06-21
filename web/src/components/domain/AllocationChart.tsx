@@ -94,7 +94,7 @@ export function AllocationChart({
       aria-label="자산 배분 차트"
       data-testid="allocation-chart"
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={240}>
         <PieChart>
           <Pie
             data={chartData}

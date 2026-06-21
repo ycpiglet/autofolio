@@ -135,7 +135,7 @@ export function AttributionSankey({
         aria-label="자산 기여도 Sankey 차트"
         data-testid="attribution-sankey"
       >
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={240}>
           <Sankey
             data={sankeyData}
             nodePadding={10}
@@ -168,7 +168,7 @@ export function AttributionSankey({
       aria-label="자산 기여도 차트"
       data-testid="attribution-sankey"
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={240}>
         <BarChart data={barData} layout="vertical" margin={{ left: 80, right: 20 }}>
           <XAxis type="number" tick={{ fontSize: 11 }} />
           <YAxis
