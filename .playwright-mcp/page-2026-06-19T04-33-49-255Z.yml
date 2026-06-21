@@ -1,0 +1,80 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation "사이드바 내비게이션" [ref=e3]:
+      - link "Autofolio 홈으로" [ref=e5] [cursor=pointer]:
+        - /url: /home
+        - text: Autofolio
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - paragraph [ref=e8]: 운용
+          - list [ref=e9]:
+            - listitem [ref=e10]:
+              - link "홈" [ref=e11] [cursor=pointer]:
+                - /url: /home
+                - generic [ref=e12]: 🏠
+                - text: 홈
+            - listitem [ref=e13]:
+              - link "포트폴리오" [ref=e14] [cursor=pointer]:
+                - /url: /portfolio
+                - generic [ref=e15]: 📊
+                - text: 포트폴리오
+            - listitem [ref=e16]:
+              - link "매매" [ref=e17] [cursor=pointer]:
+                - /url: /trade
+                - generic [ref=e18]: 💱
+                - text: 매매
+            - listitem [ref=e19]:
+              - link "내역" [ref=e20] [cursor=pointer]:
+                - /url: /history
+                - generic [ref=e21]: 📋
+                - text: 내역
+        - generic [ref=e22]:
+          - paragraph [ref=e23]: 인텔리전스
+          - list [ref=e24]:
+            - listitem [ref=e25]:
+              - link "분석" [ref=e26] [cursor=pointer]:
+                - /url: /analysis
+                - generic [ref=e27]: 🔍
+                - text: 분석
+            - listitem [ref=e28]:
+              - link "에이전트" [ref=e29] [cursor=pointer]:
+                - /url: /agents
+                - generic [ref=e30]: 🤖
+                - text: 에이전트
+            - listitem [ref=e31]:
+              - link "알림" [ref=e32] [cursor=pointer]:
+                - /url: /alerts
+                - generic [ref=e33]: 🔔
+                - text: 알림
+        - generic [ref=e34]:
+          - paragraph [ref=e35]: 시스템
+          - list [ref=e36]:
+            - listitem [ref=e37]:
+              - link "성향 진단" [ref=e38] [cursor=pointer]:
+                - /url: /onboarding/investor-profile
+                - generic [ref=e39]: 🧭
+                - text: 성향 진단
+            - listitem [ref=e40]:
+              - link "설정" [ref=e41] [cursor=pointer]:
+                - /url: /settings
+                - generic [ref=e42]: ⚙️
+                - text: 설정
+    - generic [ref=e43]:
+      - banner "상태 표시줄" [ref=e44]:
+        - generic "상태 클러스터" [ref=e45]:
+          - button "로그아웃" [ref=e49]
+      - main [ref=e50]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - heading "투자자 성향 진단" [level=1] [ref=e54]
+            - generic [ref=e55]: 미완료
+          - paragraph [ref=e56]: 투자 목표·위험성향·투자지식·경험·자동화 선호를 차례로 진단하고, 마지막에 확인·동의를 거쳐 제안과 경고를 개인화합니다.
+        - generic [ref=e57]:
+          - generic [ref=e60]:
+            - button "진단 저장" [disabled]
+            - button "홈으로" [ref=e61] [cursor=pointer]
+          - complementary [ref=e62]:
+            - generic [ref=e65]:
+              - generic [ref=e66]: 진행률
+              - generic [ref=e67]: 0% 완료
+  - alert [ref=e70]

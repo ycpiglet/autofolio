@@ -1,0 +1,133 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation "사이드바 내비게이션" [ref=e3]:
+      - link "Autofolio 홈으로" [ref=e5] [cursor=pointer]:
+        - /url: /home
+        - text: Autofolio
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - paragraph [ref=e8]: 운용
+          - list [ref=e9]:
+            - listitem [ref=e10]:
+              - link "홈" [ref=e11] [cursor=pointer]:
+                - /url: /home
+                - generic [ref=e12]: 🏠
+                - text: 홈
+            - listitem [ref=e13]:
+              - link "포트폴리오" [ref=e14] [cursor=pointer]:
+                - /url: /portfolio
+                - generic [ref=e15]: 📊
+                - text: 포트폴리오
+            - listitem [ref=e16]:
+              - link "매매" [ref=e17] [cursor=pointer]:
+                - /url: /trade
+                - generic [ref=e18]: 💱
+                - text: 매매
+            - listitem [ref=e19]:
+              - link "내역" [ref=e20] [cursor=pointer]:
+                - /url: /history
+                - generic [ref=e21]: 📋
+                - text: 내역
+        - generic [ref=e22]:
+          - paragraph [ref=e23]: 인텔리전스
+          - list [ref=e24]:
+            - listitem [ref=e25]:
+              - link "분석" [ref=e26] [cursor=pointer]:
+                - /url: /analysis
+                - generic [ref=e27]: 🔍
+                - text: 분석
+            - listitem [ref=e28]:
+              - link "에이전트" [ref=e29] [cursor=pointer]:
+                - /url: /agents
+                - generic [ref=e30]: 🤖
+                - text: 에이전트
+            - listitem [ref=e31]:
+              - link "알림" [ref=e32] [cursor=pointer]:
+                - /url: /alerts
+                - generic [ref=e33]: 🔔
+                - text: 알림
+        - generic [ref=e34]:
+          - paragraph [ref=e35]: 시스템
+          - list [ref=e36]:
+            - listitem [ref=e37]:
+              - link "성향 진단" [ref=e38] [cursor=pointer]:
+                - /url: /onboarding/investor-profile
+                - generic [ref=e39]: 🧭
+                - text: 성향 진단
+            - listitem [ref=e40]:
+              - link "설정" [ref=e41] [cursor=pointer]:
+                - /url: /settings
+                - generic [ref=e42]: ⚙️
+                - text: 설정
+    - generic [ref=e43]:
+      - banner "상태 표시줄" [ref=e44]:
+        - generic "상태 클러스터" [ref=e45]:
+          - button "로그아웃" [ref=e49]
+      - main [ref=e50]:
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - heading "매매" [level=1] [ref=e53]
+            - button "엔진 1회 실행" [ref=e55]
+          - generic [ref=e56]:
+            - generic [ref=e57]:
+              - form "매매 조건 등록" [ref=e58]:
+                - heading "조건 등록 (예약 주문)" [level=2] [ref=e59]
+                - generic [ref=e60]:
+                  - generic [ref=e61]: 종목 코드
+                  - textbox "종목 코드" [ref=e62]:
+                    - /placeholder: "예: 005930"
+                - generic [ref=e63]:
+                  - generic [ref=e64]: 매수/매도
+                  - generic [ref=e65]:
+                    - button "매수" [pressed] [ref=e66]
+                    - button "매도" [ref=e67]
+                - generic [ref=e68]:
+                  - generic [ref=e69]: 목표가 (원)
+                  - spinbutton "목표가 (원)" [ref=e70]
+                - generic [ref=e71]:
+                  - generic [ref=e72]: 수량 (주)
+                  - spinbutton "수량 (주)" [ref=e73]
+                - button "조건 등록" [ref=e74]
+              - region "등록된 조건" [ref=e75]:
+                - heading "등록된 조건" [level=2] [ref=e76]
+                - table "활성 매매 조건 목록" [ref=e79]:
+                  - caption [ref=e80]: 활성 매매 조건 목록
+                  - rowgroup [ref=e81]:
+                    - row [ref=e82]:
+                      - columnheader [ref=e83]
+                      - columnheader [ref=e85]
+                      - columnheader [ref=e87]
+                      - columnheader [ref=e89]
+                  - rowgroup [ref=e91]:
+                    - row [ref=e92]:
+                      - cell [ref=e93]
+                      - cell [ref=e95]
+                      - cell [ref=e97]
+                      - cell [ref=e99]
+                    - row [ref=e101]:
+                      - cell [ref=e102]
+                      - cell [ref=e104]
+                      - cell [ref=e106]
+                      - cell [ref=e108]
+                    - row [ref=e110]:
+                      - cell [ref=e111]
+                      - cell [ref=e113]
+                      - cell [ref=e115]
+                      - cell [ref=e117]
+                    - row [ref=e119]:
+                      - cell [ref=e120]
+                      - cell [ref=e122]
+                      - cell [ref=e124]
+                      - cell [ref=e126]
+                    - row [ref=e128]:
+                      - cell [ref=e129]
+                      - cell [ref=e131]
+                      - cell [ref=e133]
+                      - cell [ref=e135]
+            - generic [ref=e137]:
+              - generic [ref=e138]:
+                - generic [ref=e139]: 호가 조회 종목
+                - textbox "호가 조회 종목" [ref=e140]:
+                  - /placeholder: 종목 코드
+              - generic [ref=e141]: 종목 코드를 입력하면 호가가 표시됩니다.
+  - alert [ref=e142]

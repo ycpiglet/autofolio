@@ -77,3 +77,101 @@
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Lead Engineer | Dev mock SSO provider |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Lead Engineer | Defer future maturity reassessment from ACT lane |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | Lead Engineer | Investor profile survey and satisfaction loop |
+| [TASK-075](TASK-075-live-kis-beta-test-round.md) | 완료 | QA | Live KIS beta test round |
+| [TASK-076](TASK-076-ui-design-system-maturity.md) | 완료 | Lead Engineer | UI design system maturity and Lead Designer governance |
+| [TASK-077](TASK-077-ui-chart-token-bridge.md) | 완료 | UI/UX Designer | UI chart token bridge refactor |
+| [TASK-078](TASK-078-kis-capability-smoke-closeout.md) | 완료 | QA | KIS capability smoke closeout |
+| [TASK-079](TASK-079-prod-minimal-risk-order-test-candidates.md) | 완료 | Research Agent | Prod minimal-risk order test candidates |
+| [TASK-080](TASK-080-prod-minimal-live-smoke.md) | 완료 | Lead Engineer | Prod minimal live smoke |
+| [TASK-081](TASK-081-tomorrow-kis-minimal-smoke-scripts.md) | 완료 | Lead Engineer | Tomorrow KIS minimal smoke scripts |
+| [TASK-082](TASK-082-inapp-manual-risk-audit-safety.md) | 완료 | Lead Engineer | In-app manual, risk acknowledgement, and order audit safety |
+| [TASK-083](TASK-083-portfolio-diagnosis-hub-rebuild.md) | 완료 | Lead Engineer | Portfolio diagnosis hub rebuild |
+| [TASK-084](TASK-084-portfolio-readability-interaction-polish.md) | 완료 | UI/UX Designer | Portfolio readability and interaction polish |
+| [TASK-085](TASK-085-portfolio-visual-overview-refinement.md) | 완료 | UI/UX Designer | Portfolio visual overview refinement |
+| [TASK-086](TASK-086-investor-profile-ack-signature-ux.md) | 완료 | UI/UX Designer | Investor profile acknowledgement and signature UX |
+| [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | Lead Engineer | 웹 배포 + 구매자 한정 회원제 |
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | Compliance Officer | 판매 전 금융규제 클리어런스 |
+| [TASK-091](TASK-091-profile-confirmation-portfolio-kpi-polish.md) | 완료 | UI/UX Designer | Profile confirmation and portfolio KPI polish |
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | Lead Engineer | Business plan agent lane |
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | Business Planner | Business Plan v1 |
+| [TASK-094](TASK-094-admin-document-packet-hwpx-prototype.md) | 보류 | Regulatory Admin | Admin document packet HWPX prototype |
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | Marketing Growth | Marketing Materials v1 |
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Marketing Growth | Promotion Publishing Pipeline |
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Business Planner | Sales/Revenue Lane Decision |
+| [TASK-098](TASK-098-membership-access-manual-deposit-plan.md) | 완료 | Lead Engineer | Membership access manual deposit plan |
+| [TASK-099](TASK-099-membership-local-autoregister-fail-closed.md) | 완료 | Backend Engineer | Membership local auto-register fail-closed |
+| [TASK-100](TASK-100-membership-local-request-approval-prototype.md) | 완료 | Backend Engineer | Membership local request approval prototype |
+| [TASK-101](TASK-101-membership-admin-settings-tab.md) | 완료 | UI/UX Designer | Membership admin settings tab |
+| [TASK-102](TASK-102-membership-local-account-grant.md) | 완료 | Backend Engineer | Membership local account grant |
+| [TASK-103](TASK-103-membership-local-deposit-recognition.md) | 완료 | Backend Engineer | Membership local deposit recognition |
+| [TASK-104](TASK-104-membership-member-admin-boundary.md) | 완료 | Backend Engineer | Membership member admin boundary |
+| [TASK-105](TASK-105-membership-guest-demo-fail-closed.md) | 완료 | Backend Engineer | Membership guest demo fail-closed |
+| [TASK-106](TASK-106-membership-app-user-read-boundary.md) | 완료 | Backend Engineer | Membership app-user read boundary |
+| [TASK-107](TASK-107-user-owned-integration-token-harness.md) | 완료 | Backend Engineer | User-owned integration token harness |
+| [TASK-108](TASK-108-membership-production-readiness-gate.md) | 완료 | Backend Engineer | Membership production readiness gate |
+| [TASK-109](TASK-109-membership-supabase-rls-contract.md) | 완료 | Backend Engineer | Membership Supabase RLS production contract |
+| [TASK-110](TASK-110-membership-applicant-deposit-status-lookup.md) | 완료 | Backend Engineer | Membership applicant deposit status lookup |
+| [TASK-111](TASK-111-membership-payment-evidence-policy.md) | 완료 | Backend Engineer | Membership payment evidence policy gate |
+| [TASK-112](TASK-112-membership-production-secret-policy.md) | 완료 | Backend Engineer | Membership production secret policy |
+| [TASK-113](TASK-113-membership-per-user-engine-safety-contract.md) | 완료 | Lead Engineer | Membership per-user engine safety contract |
+| [TASK-114](TASK-114-membership-tenant-isolation-matrix.md) | 완료 | Backend Engineer | Membership tenant isolation matrix |
+| [TASK-115](TASK-115-membership-production-implementation-plan.md) | 완료 | Lead Engineer | Membership production implementation plan |
+| [TASK-116](TASK-116-membership-supabase-staging-schema-field-map.md) | 완료 | Backend Engineer | Membership Supabase staging schema/RLS field map |
+| [TASK-117](TASK-117-membership-payment-recognition-decision-packet.md) | 완료 | Regulatory Admin | Membership payment recognition decision packet |
+| [TASK-118](TASK-118-membership-production-secret-store-implementation-plan.md) | 완료 | Backend Engineer | Membership production secret store implementation plan |
+| [TASK-119](TASK-119-membership-staging-deploy-preflight-checklist.md) | 완료 | CI/CD Engineer | Membership staging deploy preflight checklist |
+| [TASK-120](TASK-120-membership-staging-env-inventory-template.md) | 완료 | CI/CD Engineer | Membership staging env inventory template |
+| [TASK-121](TASK-121-membership-railway-port-healthcheck-readiness.md) | 완료 | Backend Engineer | Membership Railway port and healthcheck readiness |
+| [TASK-122](TASK-122-membership-staging-persistent-storage-decision.md) | 완료 | Backend Engineer | Membership staging persistent storage decision |
+| [TASK-123](TASK-123-membership-supabase-staging-migration-rls-review-packet.md) | 완료 | Backend Engineer | Membership Supabase staging migration/RLS review packet |
+| [TASK-124](TASK-124-membership-supabase-backup-apply-evidence-checklist.md) | 완료 | Backend Engineer | Membership Supabase backup/apply evidence checklist |
+| [TASK-125](TASK-125-membership-kis-commercial-terms-review-packet.md) | 완료 | Compliance Officer | Membership KIS commercial terms review packet |
+| [TASK-126](TASK-126-membership-readiness-surface-sync.md) | 완료 | Lead Engineer | Membership readiness surface sync |
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Regulatory Admin | Business admin document packet schema |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | Lead Engineer | Compliance business routing alignment |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Marketing Growth | Promotion channel policy matrix |
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Marketing Growth | Promotion publishing state machine contract |
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Backend Engineer | Promotion dry-run audit preview |
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Marketing Growth | Promotion asset rendering contract |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Marketing Growth | Promotion asset preview manifest |
+| [TASK-134](TASK-134-promotion-asset-claim-review-matrix.md) | 완료 | Compliance Officer | Promotion asset claim review matrix |
+| [TASK-135](TASK-135-promotion-asset-review-queue-contract.md) | 완료 | Compliance Officer | Promotion asset review queue contract |
+| [TASK-136](TASK-136-promotion-asset-review-queue-audit-preview.md) | 완료 | QA | Promotion asset review queue audit preview |
+| [TASK-137](TASK-137-promotion-asset-owner-review-packet.md) | 완료 | Compliance Officer | Promotion asset Owner review packet |
+| [TASK-138](TASK-138-promotion-asset-owner-decision-queue-contract.md) | 완료 | Compliance Officer | Promotion asset Owner decision queue contract |
+| [TASK-139](TASK-139-promotion-asset-owner-decision-queue-audit-preview.md) | 완료 | QA | Promotion asset Owner decision queue audit preview |
+| [TASK-140](TASK-140-promotion-asset-owner-decision-evidence-checklist-contract.md) | 완료 | Doc Steward | Promotion asset Owner decision evidence checklist contract |
+| [TASK-141](TASK-141-promotion-asset-owner-decision-evidence-checklist-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence checklist audit preview |
+| [TASK-142](TASK-142-promotion-asset-owner-decision-evidence-freshness-contract.md) | 완료 | Doc Steward | Promotion asset Owner decision evidence freshness contract |
+| [TASK-143](TASK-143-promotion-asset-owner-decision-evidence-freshness-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence freshness audit preview |
+| [TASK-144](TASK-144-promotion-asset-owner-decision-evidence-refresh-queue-contract.md) | 완료 | Doc Steward | Promotion asset Owner decision evidence refresh queue contract |
+| [TASK-145](TASK-145-promotion-asset-owner-decision-evidence-refresh-queue-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh queue audit preview |
+| [TASK-146](TASK-146-promotion-asset-owner-decision-evidence-refresh-work-order-contract.md) | 완료 | Doc Steward | Promotion asset Owner decision evidence refresh work-order contract |
+| [TASK-147](TASK-147-promotion-asset-owner-decision-evidence-refresh-work-order-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh work-order audit preview |
+| [TASK-148](TASK-148-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-candidate.md) | 완료 | Compliance Officer | Promotion asset Owner decision evidence refresh Owner/R3 packet candidate contract |
+| [TASK-149](TASK-149-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-candidate-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh Owner/R3 packet candidate audit preview |
+| [TASK-150](TASK-150-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-queue-contract.md) | 완료 | Compliance Officer | Promotion asset Owner decision evidence refresh Owner/R3 packet review queue contract |
+| [TASK-151](TASK-151-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-queue-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh Owner/R3 packet review queue audit preview |
+| [TASK-152](TASK-152-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-preflight-contract.md) | 완료 | Compliance Officer | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission preflight contract |
+| [TASK-153](TASK-153-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-preflight-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission preflight audit preview |
+| [TASK-154](TASK-154-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate.md) | 완료 | Compliance Officer | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate |
+| [TASK-155](TASK-155-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate audit preview |
+| [TASK-156](TASK-156-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest.md) | 완료 | Doc Steward | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate archive rollback manifest |
+| [TASK-157](TASK-157-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate archive rollback manifest audit preview |
+| [TASK-158](TASK-158-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index.md) | 완료 | Compliance Officer | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate archive rollback manifest audit preview readiness index |
+| [TASK-159](TASK-159-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate archive rollback manifest audit preview readiness index audit preview |
+| [TASK-160](TASK-160-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index-audit-preview-source-trace.md) | 완료 | Doc Steward | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate archive rollback manifest audit preview readiness index audit preview source trace |
+| [TASK-161](TASK-161-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index-audit-preview-source-trace-audit-preview.md) | 완료 | QA | Promotion asset Owner decision evidence refresh Owner/R3 packet review submission handoff packet candidate archive rollback manifest audit preview readiness index audit preview source trace audit preview |
+| [TASK-162](TASK-162-source-trace-audit-preview-readiness-index.md) | 완료 | Compliance Officer | Source trace audit preview readiness index |
+| [TASK-163](TASK-163-source-trace-audit-preview-readiness-index-audit-preview.md) | 완료 | QA | Source trace audit preview readiness index audit preview |
+| [TASK-164](TASK-164-source-trace-audit-preview-readiness-index-audit-preview-source-trace.md) | 완료 | Doc Steward | Source trace audit preview readiness index audit preview source trace |
+| [TASK-165](TASK-165-source-trace-audit-preview-readiness-index-audit-preview-source-trace-audit-preview.md) | 완료 | QA | Source trace audit preview readiness index audit preview source trace audit preview |
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | Lead Engineer | Marketing team operating model |
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | Marketing Growth | Promotion campaign backlog and content calendar v1 |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Doc Steward | Promotion asset generator readiness map |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Backend Engineer | SNS publishing automation readiness backlog |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Business Planner | Sales handoff readiness checklist |
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | Finance Accounting | Finance Accounting Planning Support Lane |
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | Finance Accounting | Finance Scenario Input Contract And Sample Fixture |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Backend Engineer | Portfolio Goal-Gap Read Model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | UI/UX Designer | Finance Roadmap UI Preview |

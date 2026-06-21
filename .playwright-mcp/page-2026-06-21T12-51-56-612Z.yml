@@ -1,0 +1,513 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation "사이드바 내비게이션" [ref=e3]:
+      - link "Autofolio 홈으로" [ref=e5] [cursor=pointer]:
+        - /url: /home
+        - text: Autofolio
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - paragraph [ref=e8]: 운용
+          - list [ref=e9]:
+            - listitem [ref=e10]:
+              - link "홈" [ref=e11] [cursor=pointer]:
+                - /url: /home
+                - generic [ref=e12]: 🏠
+                - text: 홈
+            - listitem [ref=e13]:
+              - link "포트폴리오" [ref=e14] [cursor=pointer]:
+                - /url: /portfolio
+                - generic [ref=e15]: 📊
+                - text: 포트폴리오
+            - listitem [ref=e16]:
+              - link "매매" [ref=e17] [cursor=pointer]:
+                - /url: /trade
+                - generic [ref=e18]: 💱
+                - text: 매매
+            - listitem [ref=e19]:
+              - link "내역" [ref=e20] [cursor=pointer]:
+                - /url: /history
+                - generic [ref=e21]: 📋
+                - text: 내역
+        - generic [ref=e22]:
+          - paragraph [ref=e23]: 인텔리전스
+          - list [ref=e24]:
+            - listitem [ref=e25]:
+              - link "분석" [ref=e26] [cursor=pointer]:
+                - /url: /analysis
+                - generic [ref=e27]: 🔍
+                - text: 분석
+            - listitem [ref=e28]:
+              - link "에이전트" [ref=e29] [cursor=pointer]:
+                - /url: /agents
+                - generic [ref=e30]: 🤖
+                - text: 에이전트
+            - listitem [ref=e31]:
+              - link "알림" [ref=e32] [cursor=pointer]:
+                - /url: /alerts
+                - generic [ref=e33]: 🔔
+                - text: 알림
+        - generic [ref=e34]:
+          - paragraph [ref=e35]: 시스템
+          - list [ref=e36]:
+            - listitem [ref=e37]:
+              - link "성향 진단" [ref=e38] [cursor=pointer]:
+                - /url: /onboarding/investor-profile
+                - generic [ref=e39]: 🧭
+                - text: 성향 진단
+            - listitem [ref=e40]:
+              - link "설정" [ref=e41] [cursor=pointer]:
+                - /url: /settings
+                - generic [ref=e42]: ⚙️
+                - text: 설정
+            - listitem [ref=e43]:
+              - link "매뉴얼" [ref=e44] [cursor=pointer]:
+                - /url: /manuals
+                - generic [ref=e45]: 📖
+                - text: 매뉴얼
+    - generic [ref=e46]:
+      - banner "상태 표시줄" [ref=e47]:
+        - link "성향 진단" [ref=e264] [cursor=pointer]:
+          - /url: /onboarding/investor-profile
+        - generic "상태 클러스터" [ref=e48]:
+          - 'generic "환경: 모의" [ref=e265]': 모의
+          - button "자동매매 OFF" [ref=e266]
+          - button "중단됨" [ref=e267]: ⛔ 중단됨
+          - button "로그아웃" [ref=e52]
+      - main [ref=e53]:
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - heading "포트폴리오" [level=1] [ref=e57]
+              - paragraph [ref=e58]: 마지막 갱신 2026-06-21T21:51:45
+            - button "새로고침" [ref=e268]:
+              - img
+              - text: 새로고침
+          - region "포트폴리오 핵심 지표" [ref=e59]:
+            - 'button "총자산 도움말: 현금과 보유 종목 평가금액을 합산한 현재 계좌 기준 자산입니다. 상세 총자산: ₩11,633,977 0.00%" [pressed] [ref=e269]':
+              - generic [ref=e61]:
+                - generic [ref=e62]:
+                  - text: 총자산
+                  - 'button "도움말: 현금과 보유 종목 평가금액을 합산한 현재 계좌 기준 자산입니다." [ref=e64]':
+                    - img [ref=e65]
+                - generic [ref=e68]: 상세
+              - 'generic "총자산: ₩11,633,977" [ref=e270]': ₩11,633,977
+              - generic [ref=e70]: 0.00%
+            - 'button "평가손익 도움말: 현재 보유 종목을 지금 평가했을 때의 미실현 손익입니다. 상세 평가손익: +₩1,390,232 +26.75%" [ref=e271]':
+              - generic [ref=e72]:
+                - generic [ref=e73]:
+                  - text: 평가손익
+                  - 'button "도움말: 현재 보유 종목을 지금 평가했을 때의 미실현 손익입니다." [ref=e75]':
+                    - img [ref=e76]
+                - generic [ref=e79]: 상세
+              - 'generic "평가손익: +₩1,390,232" [ref=e272]': +₩1,390,232
+              - generic [ref=e81]: +26.75%
+            - 'button "일간손익 도움말: 오늘 하루 기준 평가금액 변화와 손익률입니다. 상세 일간손익: ₩0 0.00%" [ref=e273]':
+              - generic [ref=e83]:
+                - generic [ref=e84]:
+                  - text: 일간손익
+                  - 'button "도움말: 오늘 하루 기준 평가금액 변화와 손익률입니다." [ref=e86]':
+                    - img [ref=e87]
+                - generic [ref=e90]: 상세
+              - 'generic "일간손익: ₩0" [ref=e274]': ₩0
+              - generic [ref=e92]: 0.00%
+            - 'button "보유종목 도움말: 현재 포트폴리오에 들어 있는 개별 종목 수입니다. 상세 보유종목: 11" [ref=e275]':
+              - generic [ref=e94]:
+                - generic [ref=e95]:
+                  - text: 보유종목
+                  - 'button "도움말: 현재 포트폴리오에 들어 있는 개별 종목 수입니다." [ref=e97]':
+                    - img [ref=e98]
+                - generic [ref=e101]: 상세
+              - 'generic "보유종목: 11" [ref=e276]': "11"
+            - 'button "월간수익률 도움말: 최근 약 한 달 동안 포트폴리오가 만든 수익률입니다. 상세 월간수익률: 0.00%" [ref=e277]':
+              - generic [ref=e104]:
+                - generic [ref=e105]:
+                  - text: 월간수익률
+                  - 'button "도움말: 최근 약 한 달 동안 포트폴리오가 만든 수익률입니다." [ref=e107]':
+                    - img [ref=e108]
+                - generic [ref=e111]: 상세
+              - 'generic "월간수익률: 0.00%" [ref=e278]': 0.00%
+          - navigation "포트폴리오 보기" [ref=e113]:
+            - button "요약" [pressed] [ref=e114]:
+              - img
+              - text: 요약
+            - button "진단" [ref=e115]:
+              - img
+              - text: 진단
+            - button "보유" [ref=e116]:
+              - img
+              - text: 보유
+            - button "그룹" [ref=e117]:
+              - img
+              - text: 그룹
+            - button "성과" [ref=e118]:
+              - img
+              - text: 성과
+          - region "포트폴리오 시각 요약" [ref=e119]:
+            - region "총자산 상세" [ref=e120]:
+              - generic [ref=e121]:
+                - generic [ref=e122]:
+                  - heading "총자산" [level=2] [ref=e123]
+                  - paragraph [ref=e124]:
+                    - strong [ref=e125]: 총자산
+                    - text: 은
+                    - strong [ref=e126]: 평가금액
+                    - strong [ref=e279]: ₩8,549,210
+                    - text: 과
+                    - strong [ref=e128]: 현금
+                    - strong [ref=e280]: ₩3,084,767
+                    - text: 을 함께 보는 기준값입니다.
+                - generic [ref=e130]:
+                  - generic [ref=e131]:
+                    - generic [ref=e132]: 평가금액
+                    - generic [ref=e133]: ₩8,549,210
+                  - generic [ref=e134]:
+                    - generic [ref=e135]: 현금
+                    - generic [ref=e136]: ₩3,084,767
+                  - generic [ref=e137]:
+                    - generic [ref=e138]: 일간수익률
+                    - generic [ref=e139]: 0.00%
+            - generic [ref=e140]:
+              - generic [ref=e141]:
+                - generic [ref=e143]:
+                  - img [ref=e144]
+                  - generic [ref=e146]: 자산 추이
+                  - 'button "도움말: 기간 시작점 대비 현재 총자산이 얼마나 변했는지, 고점과 저점이 어디였는지 함께 보여줍니다." [ref=e148]':
+                    - img [ref=e149]
+                - generic [ref=e152]:
+                  - generic [ref=e153]:
+                    - generic [ref=e154]:
+                      - generic [ref=e155]: 현재
+                      - generic [ref=e156]: ₩8,549,210
+                    - generic [ref=e157]:
+                      - generic [ref=e158]: 기간 변화
+                      - generic [ref=e159]: "-₩1,662,275"
+                    - generic [ref=e160]:
+                      - generic [ref=e161]: 변화율
+                      - generic [ref=e162]: "-16.28%"
+                  - generic "자산 추이 차트" [ref=e281]:
+                    - table [ref=e283]:
+                      - row [ref=e284]:
+                        - cell
+                        - cell [ref=e285]:
+                          - link "Charting by TradingView" [ref=e289] [cursor=pointer]:
+                            - /url: https://www.tradingview.com/?utm_medium=lwc-link&utm_campaign=lwc-chart&utm_source=127.0.0.1/portfolio
+                            - img [ref=e290]
+                        - cell [ref=e294]
+                      - row [ref=e298]:
+                        - cell
+                        - cell [ref=e299]
+                        - cell [ref=e303]
+                  - generic [ref=e306]:
+                    - generic [ref=e307]:
+                      - text: 고점
+                      - strong [ref=e308]: ₩10,211,485
+                    - generic [ref=e309]:
+                      - text: 저점
+                      - strong [ref=e310]: ₩8,549,185
+                    - generic [ref=e311]: 3개 관측값
+              - generic [ref=e164]:
+                - generic [ref=e166]:
+                  - img [ref=e167]
+                  - generic [ref=e170]: 목표 배분
+                  - 'button "도움말: 현재 자산군 비중을 목표 비중과 비교해 리밸런싱 후보를 찾는 도넛/갭 분석입니다." [ref=e172]':
+                    - img [ref=e173]
+                - generic [ref=e176]:
+                  - generic "자산 배분 차트" [ref=e312]:
+                    - generic [ref=e314]:
+                      - list [ref=e316]:
+                        - listitem [ref=e317]:
+                          - img "ETF legend icon" [ref=e318]
+                          - text: ETF
+                        - listitem [ref=e320]:
+                          - img "주식 legend icon" [ref=e321]
+                          - text: 주식
+                        - listitem [ref=e323]:
+                          - img "채권 legend icon" [ref=e324]
+                          - text: 채권
+                      - application [ref=e326]
+                  - generic [ref=e339]:
+                    - generic [ref=e341]:
+                      - strong [ref=e342]: 주식
+                      - generic [ref=e343]: 92.5% / 목표 35%
+                    - generic [ref=e347]:
+                      - strong [ref=e348]: ETF
+                      - generic [ref=e349]: 6.9% / 목표 30%
+                    - generic [ref=e353]:
+                      - strong [ref=e354]: 채권
+                      - generic [ref=e355]: 0.7% / 목표 15%
+                    - generic [ref=e359]:
+                      - strong [ref=e360]: 원자재
+                      - generic [ref=e361]: 0% / 목표 5%
+                    - generic [ref=e364]:
+                      - strong [ref=e365]: 현금
+                      - generic [ref=e366]: 0% / 목표 15%
+            - generic [ref=e178]:
+              - generic [ref=e179]:
+                - generic [ref=e181]:
+                  - img [ref=e182]
+                  - generic [ref=e185]: 자산군 노출
+                  - 'button "도움말: 현금, 주식, ETF, 채권처럼 큰 자산군이 현재 평가금액에서 차지하는 비중입니다." [ref=e187]':
+                    - img [ref=e188]
+                - generic [ref=e191]:
+                  - generic [ref=e369]:
+                    - strong [ref=e370]: 주식
+                    - generic [ref=e371]: 92.4%
+                  - generic [ref=e375]:
+                    - strong [ref=e376]: ETF
+                    - generic [ref=e377]: 6.9%
+                  - generic [ref=e381]:
+                    - strong [ref=e382]: 채권
+                    - generic [ref=e383]: 0.7%
+              - generic [ref=e193]:
+                - generic [ref=e195]:
+                  - img [ref=e196]
+                  - generic [ref=e198]: 섹터별
+                  - 'button "도움말: 포트폴리오가 특정 산업, 지역, 전략에 몰려 있는지 확인하는 노출 분석입니다." [ref=e200]':
+                    - img [ref=e201]
+                - generic [ref=e204]:
+                  - generic [ref=e387]:
+                    - strong [ref=e388]: 반도체
+                    - generic [ref=e389]: 77.1%
+                  - generic [ref=e393]:
+                    - strong [ref=e394]: 자동차
+                    - generic [ref=e395]: 7.2%
+                  - generic [ref=e399]:
+                    - strong [ref=e400]: 국내지수
+                    - generic [ref=e401]: 6.9%
+                  - generic [ref=e405]:
+                    - strong [ref=e406]: 인터넷
+                    - generic [ref=e407]: 3.1%
+                  - generic [ref=e411]:
+                    - strong [ref=e412]: 금융
+                    - generic [ref=e413]: 3%
+                  - generic [ref=e417]:
+                    - strong [ref=e418]: 바이오
+                    - generic [ref=e419]: 2%
+              - generic [ref=e206]:
+                - generic [ref=e208]:
+                  - img [ref=e209]
+                  - generic [ref=e213]: 집중도
+                  - 'button "도움말: 상위 종목이 전체 평가금액에서 차지하는 비중입니다. 특정 종목 쏠림을 빠르게 확인합니다." [ref=e215]':
+                    - img [ref=e216]
+                - generic [ref=e219]:
+                  - generic [ref=e220]:
+                    - generic [ref=e221]:
+                      - generic [ref=e222]: 상위 1종목
+                      - generic [ref=e223]: 64.7%
+                    - generic [ref=e224]:
+                      - generic [ref=e225]: 상위 3종목
+                      - generic [ref=e226]: 84.3%
+                  - generic [ref=e227]:
+                    - generic [ref=e423]:
+                      - strong [ref=e424]: SK하이닉스
+                      - generic [ref=e425]: 64.7%
+                    - generic [ref=e429]:
+                      - strong [ref=e430]: 삼성전자
+                      - generic [ref=e431]: 12.4%
+                    - generic [ref=e435]:
+                      - strong [ref=e436]: 현대차
+                      - generic [ref=e437]: 7.2%
+                    - generic [ref=e441]:
+                      - strong [ref=e442]: KODEX 200
+                      - generic [ref=e443]: 5.2%
+                    - generic [ref=e447]:
+                      - strong [ref=e448]: NAVER
+                      - generic [ref=e449]: 2.7%
+            - generic [ref=e229]:
+              - generic [ref=e230]:
+                - generic [ref=e231]:
+                  - generic [ref=e232]:
+                    - heading "성과 기여" [level=2] [ref=e233]
+                    - 'button "도움말: 평가손익 기준으로 현재 포트폴리오 수익을 가장 많이 만든 종목입니다." [ref=e235]':
+                      - img [ref=e236]
+                  - generic [ref=e239]:
+                    - button "손익" [ref=e240]:
+                      - img
+                      - text: 손익
+                    - button "수익률" [ref=e241]:
+                      - img
+                      - text: 수익률
+                    - button "비중" [ref=e242]:
+                      - img
+                      - text: 비중
+                    - button "종목" [ref=e243]:
+                      - img
+                      - text: 종목
+                - generic [ref=e244]:
+                  - generic [ref=e452]:
+                    - generic [ref=e453]:
+                      - generic [ref=e454]:
+                        - strong [ref=e455]: SK하이닉스
+                        - generic [ref=e456]: "000660"
+                      - generic [ref=e457]:
+                        - generic [ref=e458]:
+                          - text: 비중
+                          - strong [ref=e459]: 64.7%
+                        - generic [ref=e460]:
+                          - text: 수익률
+                          - strong [ref=e461]: +29.50%
+                    - generic [ref=e462]:
+                      - generic [ref=e463]: +₩1,260,000
+                      - generic [ref=e464]: +29.50%
+                  - generic [ref=e465]:
+                    - generic [ref=e466]:
+                      - generic [ref=e467]:
+                        - strong [ref=e468]: 삼성전자
+                        - generic [ref=e469]: "005930"
+                      - generic [ref=e470]:
+                        - generic [ref=e471]:
+                          - text: 비중
+                          - strong [ref=e472]: 12.4%
+                        - generic [ref=e473]:
+                          - text: 수익률
+                          - strong [ref=e474]: +10.80%
+                    - generic [ref=e475]:
+                      - generic [ref=e476]: +₩103,734
+                      - generic [ref=e477]: +10.80%
+                  - generic [ref=e478]:
+                    - generic [ref=e479]:
+                      - generic [ref=e480]:
+                        - strong [ref=e481]: KODEX 200
+                        - generic [ref=e482]: "069500"
+                      - generic [ref=e483]:
+                        - generic [ref=e484]:
+                          - text: 비중
+                          - strong [ref=e485]: 5.2%
+                        - generic [ref=e486]:
+                          - text: 수익률
+                          - strong [ref=e487]: +8.90%
+                    - generic [ref=e488]:
+                      - generic [ref=e489]: +₩36,058
+                      - generic [ref=e490]: +8.90%
+                  - generic [ref=e491]:
+                    - generic [ref=e492]:
+                      - generic [ref=e493]:
+                        - strong [ref=e494]: TIGER 200
+                        - generic [ref=e495]: "102110"
+                      - generic [ref=e496]:
+                        - generic [ref=e497]:
+                          - text: 비중
+                          - strong [ref=e498]: 1.7%
+                        - generic [ref=e499]:
+                          - text: 수익률
+                          - strong [ref=e500]: +12.20%
+                    - generic [ref=e501]:
+                      - generic [ref=e502]: +₩15,960
+                      - generic [ref=e503]: +12.20%
+                  - generic [ref=e504]:
+                    - generic [ref=e505]:
+                      - generic [ref=e506]:
+                        - strong [ref=e507]: 신한지주
+                        - generic [ref=e508]: "055550"
+                      - generic [ref=e509]:
+                        - generic [ref=e510]:
+                          - text: 비중
+                          - strong [ref=e511]: 1.2%
+                        - generic [ref=e512]:
+                          - text: 수익률
+                          - strong [ref=e513]: +1.10%
+                    - generic [ref=e514]:
+                      - generic [ref=e515]: +₩1,100
+                      - generic [ref=e516]: +1.10%
+                - button "전체 보기 (11종목)" [ref=e517]:
+                  - img
+                  - text: 전체 보기 (11종목)
+              - generic [ref=e246]:
+                - generic [ref=e247]:
+                  - generic [ref=e248]:
+                    - heading "손실 기여" [level=2] [ref=e249]
+                    - 'button "도움말: 평가손익 기준으로 현재 포트폴리오 손실을 가장 많이 만든 종목입니다." [ref=e251]':
+                      - img [ref=e252]
+                  - generic [ref=e255]:
+                    - button "손익" [ref=e256]:
+                      - img
+                      - text: 손익
+                    - button "수익률" [ref=e257]:
+                      - img
+                      - text: 수익률
+                    - button "비중" [ref=e258]:
+                      - img
+                      - text: 비중
+                    - button "종목" [ref=e259]:
+                      - img
+                      - text: 종목
+                - generic [ref=e260]:
+                  - generic [ref=e518]:
+                    - generic [ref=e519]:
+                      - generic [ref=e520]:
+                        - strong [ref=e521]: NAVER
+                        - generic [ref=e522]: "035420"
+                      - generic [ref=e523]:
+                        - generic [ref=e524]:
+                          - text: 비중
+                          - strong [ref=e525]: 2.7%
+                        - generic [ref=e526]:
+                          - text: 수익률
+                          - strong [ref=e527]: "-6.10%"
+                    - generic [ref=e528]:
+                      - generic [ref=e529]: "-₩15,000"
+                      - generic [ref=e530]: "-6.10%"
+                  - generic [ref=e531]:
+                    - generic [ref=e532]:
+                      - generic [ref=e533]:
+                        - strong [ref=e534]: 카카오
+                        - generic [ref=e535]: "035720"
+                      - generic [ref=e536]:
+                        - generic [ref=e537]:
+                          - text: 비중
+                          - strong [ref=e538]: 0.4%
+                        - generic [ref=e539]:
+                          - text: 수익률
+                          - strong [ref=e540]: "-9.70%"
+                    - generic [ref=e541]:
+                      - generic [ref=e542]: "-₩4,050"
+                      - generic [ref=e543]: "-9.70%"
+                  - generic [ref=e544]:
+                    - generic [ref=e545]:
+                      - generic [ref=e546]:
+                        - strong [ref=e547]: KB금융
+                        - generic [ref=e548]: "105560"
+                      - generic [ref=e549]:
+                        - generic [ref=e550]:
+                          - text: 비중
+                          - strong [ref=e551]: 1.9%
+                        - generic [ref=e552]:
+                          - text: 수익률
+                          - strong [ref=e553]: "-2.50%"
+                    - generic [ref=e554]:
+                      - generic [ref=e555]: "-₩4,000"
+                      - generic [ref=e556]: "-2.50%"
+                  - generic [ref=e557]:
+                    - generic [ref=e558]:
+                      - generic [ref=e559]:
+                        - strong [ref=e560]: 현대차
+                        - generic [ref=e561]: "005380"
+                      - generic [ref=e562]:
+                        - generic [ref=e563]:
+                          - text: 비중
+                          - strong [ref=e564]: 7.2%
+                        - generic [ref=e565]:
+                          - text: 수익률
+                          - strong [ref=e566]: "-0.30%"
+                    - generic [ref=e567]:
+                      - generic [ref=e568]: "-₩2,000"
+                      - generic [ref=e569]: "-0.30%"
+                  - generic [ref=e570]:
+                    - generic [ref=e571]:
+                      - generic [ref=e572]:
+                        - strong [ref=e573]: 셀트리온
+                        - generic [ref=e574]: "068270"
+                      - generic [ref=e575]:
+                        - generic [ref=e576]:
+                          - text: 비중
+                          - strong [ref=e577]: 2%
+                        - generic [ref=e578]:
+                          - text: 수익률
+                          - strong [ref=e579]: "-1.00%"
+                    - generic [ref=e580]:
+                      - generic [ref=e581]: "-₩1,700"
+                      - generic [ref=e582]: "-1.00%"
+                - button "전체 보기 (11종목)" [ref=e583]:
+                  - img
+                  - text: 전체 보기 (11종목)
+  - alert [ref=e262]

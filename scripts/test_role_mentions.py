@@ -39,6 +39,26 @@ def test_ceo_and_lead_are_worker_roles():
     assert result["perspective_subagents"] == []
 
 
+def test_business_lane_mentions_are_worker_roles():
+    result = rm.analyze("@business @reg-admin @marketing @accounting @compliance 사업계획서와 행정서류 흐름 봐줘")
+    assert result["mode"] == "meeting-preview"
+    assert result["worker_roles"] == [
+        "business-planner",
+        "regulatory-admin",
+        "marketing-growth",
+        "finance-accounting",
+        "compliance-officer",
+    ]
+    assert result["perspective_subagents"] == []
+
+
+def test_compliance_short_alias_routes_to_worker_role():
+    result = rm.analyze("@co 유료 시그널 claim 경계 봐줘")
+    assert result["has_signal"] is True
+    assert result["mode"] == "chat-only"
+    assert result["worker_roles"] == ["compliance-officer"]
+
+
 def test_standalone_meeting_tag_is_preview():
     result = rm.analyze("@meeting 진행해줘")
     assert result["has_signal"] is True

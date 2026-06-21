@@ -1,0 +1,474 @@
+{
+  "$schema": "autofolio.promotion-asset-owner-decision-evidence-checklist/v1",
+  "contract_id": "PROMOTION-ASSET-OWNER-DECISION-EVIDENCE-CHECKLIST-CONTRACT-2026-06-20-001",
+  "status": "local_evidence_checklist_contract_not_approval_evidence",
+  "created_at": "2026-06-20T02:00:20+09:00",
+  "updated_at": "2026-06-20T02:00:20+09:00",
+  "owner": "Doc Steward",
+  "related_tasks": ["TASK-139", "TASK-140"],
+  "related_taskset": "TASKSET-MARKETING-ASSET-OWNER-DECISION-EVIDENCE-CHECKLIST",
+  "source_inputs": [
+    {
+      "id": "promotion_asset_owner_decision_queue_audit_preview",
+      "path": "agents/project/PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW.json",
+      "sha256": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "role": "audit_preview_source"
+    }
+  ],
+  "companion_markdown": "agents/project/PROMOTION-ASSET-OWNER-DECISION-EVIDENCE-CHECKLIST-CONTRACT.md",
+  "boundaries": {
+    "local_evidence_checklist_contract_only": true,
+    "not_actual_owner_approval_record": true,
+    "not_actual_approval_evidence_collection": true,
+    "not_publication_approval": true,
+    "not_legal_tax_securities_final_advice": true,
+    "no_final_pdf_export": true,
+    "no_final_pptx_export": true,
+    "no_public_url_or_upload": true,
+    "no_sns_upload": true,
+    "no_customer_contact": true,
+    "no_customer_private_data": true,
+    "no_crm_or_payment_action": true,
+    "no_secret_or_token_storage": true,
+    "no_external_account_action": true,
+    "no_oauth_flow": true,
+    "no_platform_api_call": true,
+    "no_kis_order_risk_prod_deploy_change": true,
+    "owner_approval_required_before_public_use": true,
+    "professional_review_required_before_reliance": true
+  },
+  "checklist_summary": {
+    "decision_types": 9,
+    "checklist_items": 9,
+    "total_required_evidence_items": 25,
+    "actual_approval_records": 0,
+    "actual_approval_evidence_records": 0,
+    "public_use_approved_records": 0,
+    "final_export_approved_records": 0,
+    "external_action_approved_records": 0,
+    "customer_contact_approved_records": 0,
+    "crm_payment_approved_records": 0,
+    "secret_material_records": 0,
+    "final_advice_records": 0,
+    "gate_result": "pass"
+  },
+  "checklist_contract": {
+    "required_fields": [
+      "checklist_item_id",
+      "decision_type",
+      "source_preview_id",
+      "source_hash",
+      "required_evidence",
+      "accountable_role",
+      "review_roles",
+      "acceptance_criteria",
+      "stale_evidence_triggers",
+      "forbidden_fields",
+      "actual_approval_evidence_collected",
+      "actual_approval_recorded",
+      "action_permitted_now",
+      "public_use_blocked",
+      "final_export_blocked",
+      "external_action_blocked",
+      "customer_contact_blocked",
+      "crm_payment_blocked",
+      "secret_material_blocked",
+      "final_advice_blocked",
+      "kis_order_risk_prod_deploy_blocked",
+      "rollback_or_archive_instruction"
+    ],
+    "forbidden_fields": [
+      "approval_signature",
+      "approval_secret",
+      "approved_by_owner",
+      "approval_timestamp",
+      "approval_evidence_file",
+      "owner_signature_file",
+      "access_token",
+      "refresh_token",
+      "client_secret",
+      "api_secret",
+      "customer_email",
+      "customer_phone",
+      "bank_account_number",
+      "public_url",
+      "external_upload_id",
+      "final_pdf_path",
+      "final_pptx_path",
+      "customer_record_id",
+      "payment_request_id",
+      "legal_opinion",
+      "tax_advice_final",
+      "securities_advice_final"
+    ]
+  },
+  "checklist_items": [
+    {
+      "checklist_item_id": "checklist-public-landing-use",
+      "decision_type": "public_landing_use",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "Compliance Officer claim review for landing copy and disclaimers",
+        "Professional review note if regulated wording remains before public use"
+      ],
+      "accountable_role": "Compliance Officer",
+      "review_roles": ["Compliance Officer", "Doc Steward"],
+      "acceptance_criteria": [
+        "Every public claim is traceable to MARKETING-MATERIALS-V1 or a later local source packet.",
+        "No performance guarantee, individualized advice, or KIS commercial clearance claim remains.",
+        "Owner/R3 approval remains required before public use."
+      ],
+      "stale_evidence_triggers": [
+        "Landing copy or claim wording changes",
+        "Compliance policy, disclaimer, or channel policy changes",
+        "Source preview hash changes"
+      ],
+      "forbidden_fields": ["approved_by_owner", "approval_timestamp", "public_url", "legal_opinion"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Archive or refresh the checklist item if source copy, compliance posture, or Owner/R3 boundary changes."
+    },
+    {
+      "checklist_item_id": "checklist-final-pdf-export",
+      "decision_type": "final_pdf_export",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "QA generated-file review plan for layout, links, metadata, and stale claims",
+        "Doc Steward source trace from draft material to export source",
+        "Compliance review for claims, disclaimers, and regulated wording"
+      ],
+      "accountable_role": "QA",
+      "review_roles": ["QA", "Doc Steward", "Compliance Officer"],
+      "acceptance_criteria": [
+        "PDF source content is traceable to local reviewed source artifacts.",
+        "Export remains blocked until Owner/R3 approves final asset generation.",
+        "No binary PDF path or public distribution target is recorded."
+      ],
+      "stale_evidence_triggers": [
+        "PDF source content, design, or disclaimer changes",
+        "Rendering contract or preview manifest hash changes",
+        "Compliance claim review status changes"
+      ],
+      "forbidden_fields": ["final_pdf_path", "approval_evidence_file", "owner_signature_file", "public_url"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Keep the checklist item as source-only or archive it if final export scope is withdrawn."
+    },
+    {
+      "checklist_item_id": "checklist-final-pptx-export",
+      "decision_type": "final_pptx_export",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "QA generated-file review plan for slide order, overflow, notes, and metadata",
+        "Doc Steward source trace from deck source to reviewed packet",
+        "Compliance review for claims, disclaimers, and regulated wording"
+      ],
+      "accountable_role": "Doc Steward",
+      "review_roles": ["QA", "Doc Steward", "Compliance Officer"],
+      "acceptance_criteria": [
+        "Deck source content is traceable to local reviewed source artifacts.",
+        "Export remains blocked until Owner/R3 approves final asset generation.",
+        "No binary PPTX path or external presentation target is recorded."
+      ],
+      "stale_evidence_triggers": [
+        "PPTX source content, slide design, or disclaimer changes",
+        "Rendering contract or preview manifest hash changes",
+        "Compliance claim review status changes"
+      ],
+      "forbidden_fields": ["final_pptx_path", "approval_evidence_file", "owner_signature_file", "external_upload_id"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Keep the checklist item as source-only or archive it if final export scope is withdrawn."
+    },
+    {
+      "checklist_item_id": "checklist-sns-upload",
+      "decision_type": "sns_upload",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "Channel policy review for the selected SNS channel",
+        "Compliance review for public claims and disclaimers",
+        "Owner account setup record handled outside this repository before any live channel action"
+      ],
+      "accountable_role": "Marketing Growth",
+      "review_roles": ["Marketing Growth", "Compliance Officer", "Owner"],
+      "acceptance_criteria": [
+        "Channel-specific posting constraints are documented locally.",
+        "No OAuth, token, external account, upload, or API action is stored or executed.",
+        "Owner/R3 approval remains required before live SNS upload."
+      ],
+      "stale_evidence_triggers": [
+        "Target channel changes",
+        "Channel policy or platform terms change",
+        "Post copy, image, or disclaimer changes"
+      ],
+      "forbidden_fields": ["access_token", "refresh_token", "external_upload_id", "public_url"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Withdraw or refresh the checklist item if channel selection, copy, or platform constraints change."
+    },
+    {
+      "checklist_item_id": "checklist-customer-contact",
+      "decision_type": "customer_contact",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "Privacy and customer-record policy for any future contact workflow",
+        "Support and refund policy before outreach tied to paid access",
+        "Compliance sales-claim review for outreach copy"
+      ],
+      "accountable_role": "Compliance Officer",
+      "review_roles": ["Compliance Officer", "Business Planner"],
+      "acceptance_criteria": [
+        "Customer contact remains future Owner/R3 work, not a current action.",
+        "No customer private data, message target, or outbound instruction is stored.",
+        "Support, refund, privacy, and claim boundaries are named before contact."
+      ],
+      "stale_evidence_triggers": [
+        "Customer segment or offer changes",
+        "Privacy, support, refund, or sales-claim policy changes",
+        "Outreach copy changes"
+      ],
+      "forbidden_fields": ["customer_email", "customer_phone", "customer_record_id", "payment_request_id"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Archive the checklist item if customer-contact scope is deferred or replaced by a different sales lane."
+    },
+    {
+      "checklist_item_id": "checklist-crm-payment-setup",
+      "decision_type": "crm_payment_setup",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "Payment, receipt, and refund policy before any payment workflow",
+        "Customer-record and retention policy before CRM activation",
+        "Business/admin posture confirming whether the paid offer is in scope"
+      ],
+      "accountable_role": "Business Planner",
+      "review_roles": ["Business Planner", "Compliance Officer", "Doc Steward"],
+      "acceptance_criteria": [
+        "CRM/payment setup remains a future gated decision, not a live integration.",
+        "No payment request, customer record, bank detail, or provider credential is stored.",
+        "Business/admin and compliance posture are named before implementation."
+      ],
+      "stale_evidence_triggers": [
+        "Pricing, refund, payment provider, or billing model changes",
+        "CRM/customer-record policy changes",
+        "Business/admin registration posture changes"
+      ],
+      "forbidden_fields": ["bank_account_number", "customer_record_id", "payment_request_id", "client_secret"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Archive or split into a Sales/Revenue taskset only after Owner/R3 selects a paid workflow."
+    },
+    {
+      "checklist_item_id": "checklist-paid-ads",
+      "decision_type": "paid_ads",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "Approved public claims packet before ad copy is used",
+        "Platform policy review for paid placement constraints",
+        "Budget approval boundary handled by Owner/R3 before spend"
+      ],
+      "accountable_role": "Marketing Growth",
+      "review_roles": ["Marketing Growth", "Compliance Officer", "Owner"],
+      "acceptance_criteria": [
+        "Paid ad copy remains source-only and cannot be run from this checklist.",
+        "No platform account, campaign, pixel, budget, or upload target is recorded.",
+        "Owner/R3 approval remains required before any spend or live placement."
+      ],
+      "stale_evidence_triggers": [
+        "Ad copy, target audience, budget, or offer changes",
+        "Platform policy or paid placement rules change",
+        "Compliance status of public claims changes"
+      ],
+      "forbidden_fields": ["external_upload_id", "public_url", "approval_signature", "payment_request_id"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Withdraw the checklist item if paid placement is deferred or platform scope changes."
+    },
+    {
+      "checklist_item_id": "checklist-external-account-action",
+      "decision_type": "external_account_action",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "Owner-selected external channel and purpose before account action",
+        "Credential handling plan that keeps secrets outside this repository",
+        "Platform policy review for account, OAuth, and API constraints"
+      ],
+      "accountable_role": "Doc Steward",
+      "review_roles": ["Doc Steward", "Compliance Officer", "Owner"],
+      "acceptance_criteria": [
+        "External account action remains Owner/R3 work outside local automation.",
+        "No OAuth flow, provider API call, token, secret, or browser login is executed.",
+        "Selected channel and credential boundary are documented before implementation."
+      ],
+      "stale_evidence_triggers": [
+        "External channel, account owner, or provider changes",
+        "Credential storage policy changes",
+        "Provider API or OAuth policy changes"
+      ],
+      "forbidden_fields": ["access_token", "refresh_token", "client_secret", "api_secret"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Archive the checklist item if Owner does not select a channel or if provider policy blocks automation."
+    },
+    {
+      "checklist_item_id": "checklist-legal-tax-securities-reliance",
+      "decision_type": "legal_tax_securities_reliance",
+      "source_preview_id": "PROMOTION-ASSET-OWNER-DECISION-QUEUE-AUDIT-PREVIEW-2026-06-20-001",
+      "source_hash": "90ef04417addb6a9c80b495d384c0c42bc4654f1fc3c830f973f102225b147f7",
+      "required_evidence": [
+        "Compliance Officer review for draft-only wording and risk labels",
+        "Professional review boundary if Owner intends public, paid, legal, tax, or securities reliance"
+      ],
+      "accountable_role": "Compliance Officer",
+      "review_roles": ["Compliance Officer"],
+      "acceptance_criteria": [
+        "Checklist remains a draft control and never becomes final advice.",
+        "Professional review boundary is explicit before public or paid reliance.",
+        "No legal, tax, securities, or regulatory opinion file is recorded."
+      ],
+      "stale_evidence_triggers": [
+        "Legal, tax, securities, business model, or paid-offer posture changes",
+        "Public copy or disclaimer changes",
+        "Compliance role guidance changes"
+      ],
+      "forbidden_fields": ["legal_opinion", "tax_advice_final", "securities_advice_final", "approved_by_owner"],
+      "actual_approval_evidence_collected": false,
+      "actual_approval_recorded": false,
+      "action_permitted_now": false,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "final_advice_blocked": true,
+      "kis_order_risk_prod_deploy_blocked": true,
+      "rollback_or_archive_instruction": "Archive or refresh the checklist item if any wording is intended for reliance instead of draft review."
+    }
+  ],
+  "forbidden_outputs": [
+    "actual Owner approval record",
+    "actual approval evidence file",
+    "publication approval",
+    "legal/tax/securities final advice",
+    "final PDF binary",
+    "final PPTX binary",
+    "public landing page deployment",
+    "SNS upload",
+    "customer email or direct message",
+    "CRM lead or customer record",
+    "payment or checkout request",
+    "external URL publication",
+    "external account action",
+    "OAuth flow",
+    "platform API call",
+    "secret or token material",
+    "KIS/order/risk/prod/deploy change"
+  ],
+  "taskset_handoff": {
+    "task_140_checklist_ready": true,
+    "taskset_local_scope_complete_when_task_closes": true,
+    "next_allowed_no_owner_slice": "local Owner decision evidence checklist audit preview only; still no actual approval record, approval evidence collection, public approval, final export, SNS upload, customer contact, CRM/payment, external account action, secrets, or KIS/order/risk/prod/deploy changes",
+    "owner_r3_required_for": [
+      "actual Owner approval record",
+      "actual approval evidence collection",
+      "public use of any claim",
+      "final PDF export",
+      "final PPTX export",
+      "public landing page deployment",
+      "SNS upload",
+      "customer contact",
+      "CRM/customer-record activation",
+      "payment or paid ad execution",
+      "legal/tax/securities reliance",
+      "external account action",
+      "OAuth flow or platform API call",
+      "secret or token handling"
+    ]
+  },
+  "verification": {
+    "json_check": "python -m json.tool agents\\project\\PROMOTION-ASSET-OWNER-DECISION-EVIDENCE-CHECKLIST-CONTRACT.json",
+    "local_gate": "python scripts\\promotion_asset_owner_decision_evidence_checklist_gate.py --check",
+    "focused_tests": "python -m pytest tests\\unit\\test_promotion_asset_owner_decision_evidence_checklist_gate.py -q"
+  }
+}

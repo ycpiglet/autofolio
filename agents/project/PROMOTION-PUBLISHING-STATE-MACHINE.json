@@ -1,0 +1,281 @@
+{
+  "$schema": "autofolio.promotion-publishing-state-machine/v1",
+  "contract_id": "PROMOTION-PUBLISHING-STATE-MACHINE-2026-06-19",
+  "status": "local_contract_not_live_publish_implementation",
+  "created_at": "2026-06-19T23:07:14+09:00",
+  "updated_at": "2026-06-19T23:08:29+09:00",
+  "owner": "Marketing Growth",
+  "related_tasks": ["TASK-095", "TASK-096", "TASK-129", "TASK-130"],
+  "related_taskset": "TASKSET-MARKETING-GROWTH",
+  "source_of_truth": {
+    "business_plan": "agents/project/BUSINESS-PLAN.md",
+    "marketing_brief": "agents/project/MARKETING-BRIEF.md",
+    "marketing_materials_v1": "agents/project/MARKETING-MATERIALS-V1.json",
+    "channel_policy_matrix": "agents/project/PROMOTION-CHANNEL-POLICY-MATRIX.json",
+    "publishing_policy_packet": "agents/project/PROMOTION-PUBLISHING-POLICY-PACKET.json"
+  },
+  "boundaries": {
+    "contract_only": true,
+    "not_live_publish_implementation": true,
+    "no_external_account_action": true,
+    "no_oauth_flow": true,
+    "no_platform_api_call": true,
+    "no_secret_or_token_storage": true,
+    "no_customer_contact": true,
+    "no_paid_ads": true,
+    "no_browser_automation": true,
+    "no_scraping_or_lead_harvesting": true,
+    "no_auto_publish_transition": true,
+    "owner_approval_required_before_any_live_record": true,
+    "compliance_review_required_for_public_financial_claims": true,
+    "live_action_disabled_by_default": true
+  },
+  "roles": {
+    "marketing_growth": "drafts source copy and owns queue metadata",
+    "business_planner": "checks business-plan alignment when product, pricing, support, or pilot boundary changes",
+    "compliance_officer": "classifies public financial, recommendation, performance, KIS, tax, legal, and regulatory claims",
+    "qa_or_doc_steward": "checks reproducibility, source hash, forbidden actions, and evidence links",
+    "owner": "approves any exact live destination, account action, public post, paid campaign, customer contact, or external upload"
+  },
+  "states": [
+    {
+      "id": "draft_created",
+      "kind": "draft",
+      "terminal": false,
+      "live_action": false,
+      "description": "Marketing source exists but has not been reviewed.",
+      "required_fields": ["campaign_id", "source_artifact", "source_hash", "channel", "copy_surface", "draft_text"],
+      "allowed_next": ["copy_review"]
+    },
+    {
+      "id": "copy_review",
+      "kind": "review",
+      "terminal": false,
+      "live_action": false,
+      "description": "Marketing and Business Planner review alignment with current source-of-truth docs.",
+      "required_fields": ["claim_review_status", "business_alignment_note", "forbidden_claim_scan"],
+      "allowed_next": ["compliance_review_required", "blocked"]
+    },
+    {
+      "id": "compliance_review_required",
+      "kind": "review",
+      "terminal": false,
+      "live_action": false,
+      "description": "Compliance Officer classification is required before public use.",
+      "required_fields": ["compliance_review_status", "compliance_reviewer", "compliance_disclaimer"],
+      "allowed_next": ["owner_review_required", "blocked"]
+    },
+    {
+      "id": "owner_review_required",
+      "kind": "approval",
+      "terminal": false,
+      "live_action": false,
+      "description": "Exact channel, final text, and destination are waiting for Owner approval.",
+      "required_fields": ["owner_approval_required", "owner_approval_record", "destination_review_note"],
+      "allowed_next": ["approved_for_manual_export", "dry_run_scheduled", "blocked"]
+    },
+    {
+      "id": "approved_for_manual_export",
+      "kind": "approval",
+      "terminal": false,
+      "live_action": false,
+      "description": "Approved for local/manual export only; still no platform API call.",
+      "required_fields": ["approved_source_hash", "manual_export_instruction", "rollback_or_delete_instruction"],
+      "allowed_next": ["dry_run_scheduled", "withdrawn_or_archived"]
+    },
+    {
+      "id": "dry_run_scheduled",
+      "kind": "dry_run",
+      "terminal": false,
+      "live_action": false,
+      "description": "Local dry-run preview can be generated without network calls, tokens, or external side effects.",
+      "required_fields": ["dry_run_preview", "scheduled_at", "live_action_blocked_by_default", "rollback_or_delete_instruction"],
+      "allowed_next": ["live_recorded_after_owner_action", "blocked", "withdrawn_or_archived"]
+    },
+    {
+      "id": "live_recorded_after_owner_action",
+      "kind": "record_only",
+      "terminal": true,
+      "live_action": false,
+      "action_type": "record_only_after_external_owner_action",
+      "description": "Records a post or manual publication the Owner performed outside this automation. This state never triggers publication.",
+      "required_fields": ["owner_approval_record", "external_post_id_after_live_only", "external_url_after_live_only", "posted_at_after_live_only", "rollback_or_delete_instruction"],
+      "allowed_next": []
+    },
+    {
+      "id": "blocked",
+      "kind": "terminal_block",
+      "terminal": true,
+      "live_action": false,
+      "description": "Campaign is blocked because review, policy, account, permission, claim, or Owner boundary is not satisfied.",
+      "required_fields": ["blocked_reason", "blocked_by_role", "required_unblock_action"],
+      "allowed_next": []
+    },
+    {
+      "id": "withdrawn_or_archived",
+      "kind": "terminal_archive",
+      "terminal": true,
+      "live_action": false,
+      "description": "Draft or preview is withdrawn, superseded, or archived before any live action.",
+      "required_fields": ["archive_reason", "source_hash", "withdrawal_note"],
+      "allowed_next": []
+    }
+  ],
+  "transitions": [
+    {
+      "from": "draft_created",
+      "to": "copy_review",
+      "live_action": false,
+      "guards": ["source_hash_present", "draft_text_present", "channel_in_policy_matrix"]
+    },
+    {
+      "from": "copy_review",
+      "to": "compliance_review_required",
+      "live_action": false,
+      "guards": ["forbidden_claim_scan_passed_or_flagged", "claim_review_status_not_approved"]
+    },
+    {
+      "from": "copy_review",
+      "to": "blocked",
+      "live_action": false,
+      "guards": ["unsupported_channel_or_forbidden_claim_or_missing_source"]
+    },
+    {
+      "from": "compliance_review_required",
+      "to": "owner_review_required",
+      "live_action": false,
+      "guards": ["compliance_status_allowed_draft_or_needs_owner_review", "compliance_disclaimer_present"]
+    },
+    {
+      "from": "compliance_review_required",
+      "to": "blocked",
+      "live_action": false,
+      "guards": ["compliance_status_reject_or_needs_professional_review"]
+    },
+    {
+      "from": "owner_review_required",
+      "to": "approved_for_manual_export",
+      "live_action": false,
+      "guards": ["owner_approval_record_present", "exact_destination_recorded", "manual_export_only"]
+    },
+    {
+      "from": "owner_review_required",
+      "to": "dry_run_scheduled",
+      "live_action": false,
+      "guards": ["owner_approval_record_present", "dry_run_only", "live_action_blocked_by_default"]
+    },
+    {
+      "from": "owner_review_required",
+      "to": "blocked",
+      "live_action": false,
+      "guards": ["owner_approval_missing_or_destination_unapproved"]
+    },
+    {
+      "from": "approved_for_manual_export",
+      "to": "dry_run_scheduled",
+      "live_action": false,
+      "guards": ["dry_run_only", "rollback_or_delete_instruction_present"]
+    },
+    {
+      "from": "approved_for_manual_export",
+      "to": "withdrawn_or_archived",
+      "live_action": false,
+      "guards": ["campaign_superseded_or_review_changed"]
+    },
+    {
+      "from": "dry_run_scheduled",
+      "to": "live_recorded_after_owner_action",
+      "live_action": false,
+      "guards": ["owner_external_action_completed_outside_system", "external_post_id_or_url_present_after_live", "no_platform_api_call_from_system"]
+    },
+    {
+      "from": "dry_run_scheduled",
+      "to": "blocked",
+      "live_action": false,
+      "guards": ["owner_approval_revoked_or_policy_changed_or_channel_unsupported"]
+    },
+    {
+      "from": "dry_run_scheduled",
+      "to": "withdrawn_or_archived",
+      "live_action": false,
+      "guards": ["campaign_withdrawn_before_live_action"]
+    }
+  ],
+  "forbidden_transitions": [
+    "auto_publish",
+    "skip_owner_approval",
+    "skip_compliance_review",
+    "schedule_live_without_owner_approval",
+    "external_api_upload",
+    "oauth_authorization",
+    "token_storage",
+    "customer_contact",
+    "paid_ad_purchase",
+    "browser_automation_publish",
+    "lead_scraping",
+    "bulk_dm",
+    "viewbot_or_fake_engagement",
+    "investment_advice_publication",
+    "performance_guarantee_publication",
+    "kis_commercial_clearance_publication"
+  ],
+  "queue_record_contract": {
+    "required_fields": [
+      "campaign_id",
+      "state",
+      "channel",
+      "copy_surface",
+      "source_artifact",
+      "source_hash",
+      "draft_text",
+      "claim_review_status",
+      "compliance_reviewer",
+      "owner_approval_required",
+      "owner_approval_record",
+      "dry_run_preview",
+      "scheduled_at",
+      "live_action_blocked_by_default",
+      "external_post_id_after_live_only",
+      "external_url_after_live_only",
+      "posted_at_after_live_only",
+      "rollback_or_delete_instruction",
+      "blocked_reason",
+      "audit_events"
+    ],
+    "append_only_events": [
+      "created",
+      "copy_reviewed",
+      "compliance_reviewed",
+      "owner_review_requested",
+      "owner_approved",
+      "dry_run_generated",
+      "blocked",
+      "withdrawn",
+      "live_recorded_after_owner_action"
+    ],
+    "forbidden_fields": [
+      "access_token",
+      "refresh_token",
+      "client_secret",
+      "password",
+      "cookie",
+      "customer_email",
+      "customer_phone",
+      "bank_account_number",
+      "kis_app_secret"
+    ]
+  },
+  "invariants": [
+    "all transitions have live_action false",
+    "live_recorded_after_owner_action is record-only and terminal",
+    "no transition performs OAuth, platform API upload, browser automation, paid ads, customer contact, or secret storage",
+    "source_hash is required before review",
+    "Compliance Officer review is required for public financial, recommendation, performance, KIS, tax, legal, or regulatory claims",
+    "Owner approval is required before manual export, dry-run scheduling for a real destination, or live record creation",
+    "Naver Blog remains manual-only and unsupported for auto posting"
+  ],
+  "verification": {
+    "local_gate": "python scripts/promotion_publishing_state_machine_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_promotion_publishing_state_machine_gate.py -q"
+  }
+}

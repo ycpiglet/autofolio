@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -50,6 +51,20 @@ SESSIONS_DIR = REPO_ROOT / "agents" / "runtime" / "sessions"
 TASKS_DIR = REPO_ROOT / "agents" / "lead_engineer" / "tasks"
 DEFAULT_WORKER_PROVIDER = "codex-agent"
 
+
+def _write_json_atomic(path: Path, payload: dict) -> None:
+    """Atomically write a session JSON file (crash-safe).
+
+    Writes to a temp sibling then os.replace() so a sudden power loss
+    mid-write can never leave a half-written, unparseable JSON file.
+    Mirrors the temp-then-replace pattern proven in message_queue.
+    """
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + f".tmp.{uuid.uuid4().hex[:8]}")
+    tmp.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+                   encoding="utf-8")
+    os.replace(tmp, path)
+
 # TASK-118 — /dispatch-next priority order (Critical first, Low last).
 PRIORITY_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 # Owner field aliases used in TASK frontmatter -> orchestrator role slug.
@@ -71,6 +86,11 @@ OWNER_TO_ROLE = {
     "Research Agent": "research",
     "Timeline Agent": "timeline",
     "Requirements Interviewer": "requirements-interviewer",
+    "Business Planner": "business-planner",
+    "Regulatory Admin": "regulatory-admin",
+    "Marketing Growth": "marketing-growth",
+    "Finance Accounting": "finance-accounting",
+    "Compliance Officer": "compliance-officer",
 }
 
 ROLE_ALIASES = {
@@ -101,6 +121,28 @@ ROLE_ALIASES = {
     "deep-interview": "requirements-interviewer",
     "secretary": "secretary",
     "sec": "secretary",
+    "business": "business-planner",
+    "biz": "business-planner",
+    "business-planner": "business-planner",
+    "business-plan": "business-planner",
+    "planner-biz": "business-planner",
+    "regulatory": "regulatory-admin",
+    "reg-admin": "regulatory-admin",
+    "regulatory-admin": "regulatory-admin",
+    "business-admin": "regulatory-admin",
+    "admin-compliance": "regulatory-admin",
+    "marketing": "marketing-growth",
+    "growth": "marketing-growth",
+    "marketing-growth": "marketing-growth",
+    "marketer": "marketing-growth",
+    "finance": "finance-accounting",
+    "accounting": "finance-accounting",
+    "finance-accounting": "finance-accounting",
+    "finops": "finance-accounting",
+    "planning-finance": "finance-accounting",
+    "compliance": "compliance-officer",
+    "co": "compliance-officer",
+    "compliance-officer": "compliance-officer",
 }
 KNOWN_ROLES = sorted(set(ROLE_ALIASES.values()))
 
@@ -544,10 +586,7 @@ def cmd_spawn(args: argparse.Namespace) -> Outcome:
     summary = f"spawn role={role} task={task} agent_id={agent_id} dry_run={args.dry_run}"
     if not args.dry_run:
         ensure_dirs()
-        session_path(agent_id).write_text(
-            json.dumps(record, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
+        _write_json_atomic(session_path(agent_id), record)
     return Outcome(0, summary, payload)
 
 
@@ -577,8 +616,7 @@ def cmd_kill(args: argparse.Namespace) -> Outcome:
     payload = {"dry_run": args.dry_run, "session": record}
     summary = f"kill agent_id={agent_id} dry_run={args.dry_run}"
     if not args.dry_run:
-        p.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n",
-                     encoding="utf-8")
+        _write_json_atomic(p, record)
     return Outcome(0, summary, payload)
 
 
@@ -885,8 +923,7 @@ def cmd_leave_for_work(args: argparse.Namespace) -> Outcome:
                 p = session_path(s["agent_id"])
                 s["status"] = "stopping"
                 s["stopped_at"] = ts
-                p.write_text(json.dumps(s, indent=2, ensure_ascii=False) + "\n",
-                             encoding="utf-8")
+                _write_json_atomic(p, s)
     return Outcome(0, summary, payload)
 
 
@@ -985,7 +1022,11 @@ def normalize_argv(argv: list[str]) -> list[str]:
         if stripped in {"qa", "lead-engineer", "backend", "ci-cd", "uiux", "ceo",
                         "doc", "doc-steward", "steward", "scribe", "archivist",
                         "research", "research-agent", "researcher",
-                        "timeline", "timeline-agent", "chronology"}:
+                        "timeline", "timeline-agent", "chronology",
+                        "business", "biz", "business-planner", "business-plan",
+                        "regulatory", "reg-admin", "regulatory-admin", "business-admin",
+                        "marketing", "growth", "marketing-growth",
+                        "compliance", "co", "compliance-officer"}:
             # /qa "msg" -> call qa "msg"
             return ["call", stripped] + argv[1:]
         return [stripped] + argv[1:]

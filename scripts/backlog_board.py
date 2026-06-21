@@ -204,6 +204,30 @@ TASK_SET_DEFINITIONS = [
         "Claim-time footprint conflict gate, wave dispatcher with cascade/parallel modes, integrator merge queue, and claim-first enforcement.",
         99,
     ),
+    TaskSetInfo(
+        "TASKSET-MEMBERSHIP-ACCESS",
+        "Membership Access",
+        "Verified signup, manual deposit approval, local member grant, and applicant/Owner membership surfaces.",
+        110,
+    ),
+    TaskSetInfo(
+        "TASKSET-MEMBERSHIP-PROD-READINESS",
+        "Membership Production Readiness",
+        "Local policy, contract, and validation gates for production launch blockers before any external apply.",
+        111,
+    ),
+    TaskSetInfo(
+        "TASKSET-MARKETING-GROWTH",
+        "Marketing Growth",
+        "Business Plan v1, early-user promotional assets, approval-queued publishing, and Sales/Revenue lane decision.",
+        120,
+    ),
+    TaskSetInfo(
+        "TASKSET-MARKETING-TEAM-OPERATING-SYSTEM",
+        "Marketing Team OS",
+        "Marketing team operating model, campaign backlog, asset-generator readiness, SNS automation readiness, and sales handoff readiness.",
+        121,
+    ),
 ]
 TASK_SET_INFO = {item.task_set_id: item for item in TASK_SET_DEFINITIONS}
 UNCLASSIFIED_TASK_SET = TaskSetInfo(
@@ -248,6 +272,10 @@ class Task:
     @property
     def project_id(self) -> str:
         return str(self.meta.get("project_id") or "-").strip() or "-"
+
+    @property
+    def initiative_id(self) -> str:
+        return str(self.meta.get("initiative_id") or "-").strip() or "-"
 
     @property
     def unit_spec(self) -> str:

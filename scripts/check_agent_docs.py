@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import sys
 from collections import Counter
@@ -871,12 +872,37 @@ def markdown_files() -> list[Path]:
         "packages/agent_runtime/src/agent_runtime/templates/",
         "packages/agent_runtime/templates/",
     )
-    return sorted(
-        path
-        for path in ROOT.glob("**/*.md")
-        if not any(part in ignored_parts for part in path.parts)
-        and not path.relative_to(ROOT).as_posix().startswith(ignored_prefixes)
-    )
+    files: list[Path] = []
+
+    def ignore_walk_error(_exc: OSError) -> None:
+        return None
+
+    for dirpath, dirnames, filenames in os.walk(ROOT, topdown=True, onerror=ignore_walk_error):
+        directory = Path(dirpath)
+        kept_dirs: list[str] = []
+        for name in dirnames:
+            child = directory / name
+            try:
+                child_rel = child.relative_to(ROOT).as_posix() + "/"
+            except ValueError:
+                continue
+            if name in ignored_parts or child_rel.startswith(ignored_prefixes):
+                continue
+            kept_dirs.append(name)
+        dirnames[:] = kept_dirs
+
+        for filename in filenames:
+            if not filename.endswith(".md"):
+                continue
+            path = directory / filename
+            try:
+                rel = path.relative_to(ROOT).as_posix()
+            except ValueError:
+                continue
+            if rel.startswith(ignored_prefixes):
+                continue
+            files.append(path)
+    return sorted(files)
 
 
 def normalize_link_target(target: str) -> str:

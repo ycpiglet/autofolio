@@ -1,82 +1,102 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T22:16:02+09:00
+updated_at: 2026-06-21T17:06:02+09:00
 updated_by: lead-engineer
 current_state:
   signal: pass
-  score: 94
+  score: 95
   summary: >
-    Approved closeout is merged to main via PR #92. TASK-014/021/022/026/027/028/030/031/032
-    R3 order/risk surfaces and TASK-049 Streamlit retirement are implemented
-    and recorded. R3 production order execution remains hardguarded; no secret
-    or production data mutation was performed. The refreshed backlog has one
-    open item: TASK-069, intentionally deferred until 2026-12-14 unless the
-    Owner explicitly requests early reassessment.
+    Business-plan lane status refreshed after interruption. BUSINESS-PLAN.md is
+    v1-owner-answered; TASK-092 and TASK-093 are complete. Admin/HWPX remains
+    blocked at TASK-094 until the Owner selects target official forms and the
+    private-data handling path; TASK-127 already provides the local admin packet
+    schema foundation. Marketing draft and publishing-readiness work is complete
+    through TASK-095, TASK-096, and the TASK-166 through TASK-170 marketing team
+    operating lane. TASK-165 is complete as the latest local source-trace audit
+    preview for the marketing review chain. Finance/accounting support was added
+    as TASK-171, and TASK-172 is now complete with a synthetic 5 percent planned
+    vs 8-10 percent expected scenario input contract. Next autonomous candidate
+    is TASK-173, then TASK-174. No live publication, customer contact,
+    CRM/payment, official filing, private data, secret, KIS/order/risk/prod/
+    deploy, external account, final legal/tax/securities/accounting/investment
+    advice, or trade/order boundary has been crossed.
 active_work:
-  contract: >
-    This file is the live pointer for active agents, teams, and panes. When no
-    work is actively claimed, current_agents and current_teams stay empty and
-    resume.active_task is none.
-  current_agents: []
-  current_teams: []
-  canonical_live_sources:
-    - agents/runtime/task_claims/*.json
-    - agents/runtime/events/*.jsonl
-    - agents/project/NEXT-SESSION-POINTER.yml
-    - agents/lead_engineer/STATUS.md
+  task_id: null
+  status: none
+  pane_id: TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT
+  progress_pct: 50
+  task_set_id: TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT
+  step_index: 2
+  step_total: 4
+  status_text: >
+    TASK-172 is complete. Start TASK-173 next if continuing autonomously: build
+    a read-only portfolio goal-gap model from FINANCE-SCENARIO-INPUT-CONTRACT
+    with candidate/evidence wording only, no current-portfolio fact claim, no
+    tax/accounting/investment advice, no trade recommendation/order, no real
+    customer/payment data, and no KIS/order/risk/prod/deploy changes.
+current_agents: []
 resume:
-  first_read:
-    - agents/project/NEXT-SESSION-POINTER.yml
-    - README.md
-    - AGENTS.md
-    - CLAUDE.md
-    - agents/lead_engineer/STATUS.md
-    - agents/lead_engineer/tasks/BACKLOG.md
-  active_task: none
-  task_set_id: none
-  step_index: 0
-  step_total: 0
-  status_text: No persistent active task; PR #92 merged and backlog refreshed
-  next_actions:
-    - Keep TASK-069 deferred until 2026-12-14 unless Owner explicitly requests early reassessment.
-    - Start only a new explicit Owner request or a newly registered ACT task.
-    - Treat production orders, secrets, production DB writes, and live OAuth callback validation as Owner-managed boundaries.
+  latest_cycle: CYCLE-001
+  current_request: continue finance/accounting planning-support lane after TASK-172
+  related_task: TASK-172
+  role: Lead Engineer
+  owner: Finance Accounting
+  scope: local business-plan, marketing, admin, and finance planning artifacts
+  out_of_scope: >
+    live publication, customer contact, CRM/payment, official filing, private
+    identity data, secrets, external account action, KIS/order/risk/prod/deploy,
+    and final legal/tax/securities advice
+  done_when: >
+    repo truth points to the current completed business-plan lane and next
+    autonomous finance/accounting read-model task without stale handoff text
+  verification: see verification.passed
 roles:
   accountable: Lead Engineer
+  next_owner: Backend Engineer
   reviewers:
     - QA
-    - Independent Auditor
     - Doc Steward
+    - Compliance Officer
 pointers:
   status: agents/lead_engineer/STATUS.md
   backlog: agents/lead_engineer/tasks/BACKLOG.md
-  task_index: agents/lead_engineer/tasks/INDEX.md
-  compound: agents/lead_engineer/compound_log.md
+  owner_board: BACKLOG-BOARD.md
+  business_plan: agents/project/BUSINESS-PLAN.md
+  admin_register: agents/project/BUSINESS-ADMIN-REGISTER.md
+  marketing_brief: agents/project/MARKETING-BRIEF.md
+  finance_roadmap: agents/project/FINANCE-ACCOUNTING-ROADMAP.md
+  finance_scenario_contract: agents/project/FINANCE-SCENARIO-INPUT-CONTRACT.md
 rules:
-  live_work_continuity: >
-    Update this pointer and task claim records while work is happening, not only
-    at final handoff. It must answer who is working, from which team/pane, on
-    which task, in which phase, with what progress, in which worktree, and what
-    should happen next.
-  repeated_request_api: >
-    If the Owner repeats a request or criticism twice, convert it into a
-    function, API, script, hook, gate, or explicit task proposal instead of
-    leaving it as prose.
-  compound_capture: >
-    Repeated mistakes or criticisms must produce a Compound entry and an
-    executable prevention step when feasible.
-  measured_improvement: >
-    Use Evaluate -> Propose -> Verify -> Merge. Keep one variable per verified
-    change, preserve golden set failures and edge cases, and reserve final
-    criteria and merge decisions for Owner.
+  - Use AGENTS.md as repository protocol.
+  - Use BACKLOG.md as the canonical open-work board.
+  - Treat TASK-172 as complete; start TASK-173 before TASK-174.
+  - Keep TASK-094 blocked until target official forms and Owner private-data path are selected.
+  - Do not cross Owner/R3 boundaries without explicit Owner action.
+backlog:
+  source: agents/lead_engineer/tasks/BACKLOG.md
+  generated_at: 2026-06-21T17:10:46+09:00
+  open_count: 6
+  active_count: 0
+  next_autonomous:
+    - TASK-173
+    - TASK-174
+  owner_or_external_gate:
+    - TASK-094
+  review_lane:
+    - TASK-087
 verification:
-  required:
-    - python scripts/continuity_contract_gate.py --check
-    - python scripts/owner_governance_gate.py --allow-empty-owner-docs
-    - python scripts/check_agent_docs.py
-  last_known:
-    signal: pass
-    detail: >
-      2026-06-17 backlog refresh passed: backlog_sweep shows only TASK-069 open
-      and deferred, build_task_index regenerated 73 tasks, generate_views
-      regenerated BACKLOG and 5 views, and prior closeout checks/CI for PR #92
-      passed before merge.
+  last_checked_at: 2026-06-21T17:06:02+09:00
+  passed:
+    - python scripts\check_agent_docs.py
+    - python scripts\generate_views.py --check
+    - python scripts\generate_report_views.py --check
+    - python scripts\promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace_audit_preview_gate.py --check
+    - python scripts\promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace_gate.py --check
+    - python -m pytest tests\unit\test_promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace_audit_preview_gate.py -q
+    - python scripts\finance_accounting_roadmap_gate.py --check
+    - python -m pytest tests\unit\test_finance_accounting_roadmap_gate.py -q
+    - python scripts\finance_scenario_input_contract_gate.py --check
+    - python -m pytest tests\unit\test_finance_scenario_input_contract_gate.py -q
+    - python scripts\owner_doc_format_gate.py BACKLOG-BOARD.md
+    - python scripts\owner_governance_gate.py --allow-empty-owner-docs
+  known_warnings:
+    - check_agent_docs reports 130 existing warnings; current run has 0 errors.

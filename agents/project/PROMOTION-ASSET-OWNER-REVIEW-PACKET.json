@@ -1,0 +1,313 @@
+{
+  "$schema": "autofolio.promotion-asset-owner-review-packet/v1",
+  "packet_id": "PROMOTION-ASSET-OWNER-REVIEW-PACKET-2026-06-20-001",
+  "status": "local_owner_review_packet_not_public_approval",
+  "created_at": "2026-06-20T01:08:32+09:00",
+  "updated_at": "2026-06-20T01:12:59+09:00",
+  "owner": "Compliance Officer",
+  "related_tasks": ["TASK-135", "TASK-136", "TASK-137"],
+  "related_taskset": "TASKSET-MARKETING-ASSET-OWNER-REVIEW-PACKET",
+  "source_inputs": [
+    {
+      "id": "promotion_asset_review_queue_audit_preview",
+      "path": "agents/project/PROMOTION-ASSET-REVIEW-QUEUE-AUDIT-PREVIEW.json",
+      "sha256": "b02a835958d3a1cb4958aecebdd8a3c774f24ed45543fdeea56167f136eff856",
+      "role": "owner_review_packet_source"
+    }
+  ],
+  "companion_markdown": "agents/project/PROMOTION-ASSET-OWNER-REVIEW-PACKET.md",
+  "boundaries": {
+    "local_owner_review_packet_only": true,
+    "not_publication_approval": true,
+    "not_legal_tax_securities_final_advice": true,
+    "no_final_pdf_export": true,
+    "no_final_pptx_export": true,
+    "no_public_url_or_upload": true,
+    "no_sns_upload": true,
+    "no_customer_contact": true,
+    "no_customer_private_data": true,
+    "no_crm_or_payment_action": true,
+    "no_secret_or_token_storage": true,
+    "no_external_account_action": true,
+    "no_oauth_flow": true,
+    "no_platform_api_call": true,
+    "no_kis_order_risk_prod_deploy_change": true,
+    "owner_approval_required_before_public_use": true,
+    "professional_review_required_before_reliance": true
+  },
+  "packet_summary": {
+    "source_preview": "PROMOTION-ASSET-REVIEW-QUEUE-AUDIT-PREVIEW.json",
+    "review_items": 4,
+    "owner_decisions_required": 9,
+    "blocked_actions": 9,
+    "public_use_blocked_items": 4,
+    "final_export_blocked_items": 4,
+    "external_action_blocked_items": 4,
+    "customer_contact_blocked_items": 4,
+    "crm_payment_blocked_items": 4,
+    "secret_material_blocked_items": 4,
+    "ready_for_owner_review": true,
+    "publication_approved": false,
+    "external_action_enabled": false,
+    "gate_result": "pass"
+  },
+  "review_items": [
+    {
+      "queue_item_id": "review-queue-landing-page-source",
+      "target_id": "landing_page_source",
+      "current_state": "compliance_review_required",
+      "assigned_role": "Compliance Officer",
+      "owner_decision_required": true,
+      "professional_review_required": true,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "publication_approval_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "owner_question": "May this landing-page source be used publicly after Compliance review and any professional review are complete?",
+      "required_evidence_refs": [
+        "PROMOTION-ASSET-REVIEW-QUEUE-AUDIT-PREVIEW",
+        "PROMOTION-ASSET-REVIEW-QUEUE-CONTRACT",
+        "Compliance Officer claim review"
+      ]
+    },
+    {
+      "queue_item_id": "review-queue-pdf-one-pager-source",
+      "target_id": "pdf_one_pager_source",
+      "current_state": "qa_doc_review_required",
+      "assigned_role": "QA",
+      "owner_decision_required": true,
+      "professional_review_required": true,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "publication_approval_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "owner_question": "May a final PDF one-pager be generated and shared after QA, Doc Steward, Compliance, and professional review are complete?",
+      "required_evidence_refs": [
+        "PROMOTION-ASSET-REVIEW-QUEUE-AUDIT-PREVIEW",
+        "QA generated-file review",
+        "Doc Steward source-traceability review",
+        "Owner approval before final export"
+      ]
+    },
+    {
+      "queue_item_id": "review-queue-pptx-deck-source",
+      "target_id": "pptx_deck_source",
+      "current_state": "qa_doc_review_required",
+      "assigned_role": "Doc Steward",
+      "owner_decision_required": true,
+      "professional_review_required": true,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "publication_approval_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "owner_question": "May a final PPTX deck be generated and used after QA, Doc Steward, Compliance, and professional review are complete?",
+      "required_evidence_refs": [
+        "PROMOTION-ASSET-REVIEW-QUEUE-AUDIT-PREVIEW",
+        "QA generated-file review",
+        "Doc Steward source-traceability review",
+        "Owner approval before final export"
+      ]
+    },
+    {
+      "queue_item_id": "review-queue-sns-text-bundle-source",
+      "target_id": "sns_text_bundle_source",
+      "current_state": "owner_review_required",
+      "assigned_role": "Owner",
+      "owner_decision_required": true,
+      "professional_review_required": true,
+      "public_use_blocked": true,
+      "final_export_blocked": true,
+      "publication_approval_blocked": true,
+      "external_action_blocked": true,
+      "customer_contact_blocked": true,
+      "crm_payment_blocked": true,
+      "secret_material_blocked": true,
+      "owner_question": "May any SNS copy variant be posted only after Owner channel choice, Compliance review, and platform policy review are complete?",
+      "required_evidence_refs": [
+        "PROMOTION-ASSET-REVIEW-QUEUE-AUDIT-PREVIEW",
+        "PROMOTION-CHANNEL-POLICY-MATRIX",
+        "Owner approval before posting"
+      ]
+    }
+  ],
+  "owner_decision_list": [
+    {
+      "decision_id": "public_landing_use",
+      "decision": "Approve or reject public use of the landing-page source.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["Compliance Officer claim review", "professional review if regulated wording remains"]
+    },
+    {
+      "decision_id": "final_pdf_export",
+      "decision": "Approve or reject final PDF export.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["QA generated-file review", "Doc Steward source trace", "Compliance review"]
+    },
+    {
+      "decision_id": "final_pptx_export",
+      "decision": "Approve or reject final PPTX export.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["QA generated-file review", "Doc Steward source trace", "Compliance review"]
+    },
+    {
+      "decision_id": "sns_upload",
+      "decision": "Approve or reject SNS posting and channel selection.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["channel policy review", "Compliance review", "Owner account setup outside repo"]
+    },
+    {
+      "decision_id": "customer_contact",
+      "decision": "Approve or reject any customer email, direct message, or sales contact workflow.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["privacy/customer-record policy", "support/refund policy", "Compliance sales-claim review"]
+    },
+    {
+      "decision_id": "crm_payment_setup",
+      "decision": "Approve or reject CRM, customer-record, payment, checkout, billing, or receipt setup.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["payment policy", "customer-record policy", "business/admin posture"]
+    },
+    {
+      "decision_id": "paid_ads",
+      "decision": "Approve or reject paid ads or retargeting.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["approved public claims", "platform policy review", "budget approval"]
+    },
+    {
+      "decision_id": "external_account_action",
+      "decision": "Approve or reject external account, OAuth, platform API, browser automation, or upload work.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["Owner-selected channel", "credential handling plan", "platform policy review"]
+    },
+    {
+      "decision_id": "legal_tax_securities_reliance",
+      "decision": "Approve whether professional legal, tax, or securities review is required before relying on any wording.",
+      "status": "requires_owner_r3",
+      "action_permitted_now": false,
+      "external_action": false,
+      "required_evidence": ["Compliance Officer review", "professional review if Owner intends public or paid use"]
+    }
+  ],
+  "evidence_map": [
+    {
+      "evidence_id": "source_audit_preview_hash",
+      "source": "PROMOTION-ASSET-REVIEW-QUEUE-AUDIT-PREVIEW.json",
+      "status": "recorded",
+      "proves": "Owner packet is derived from the local audit preview source hash."
+    },
+    {
+      "evidence_id": "review_queue_contract",
+      "source": "PROMOTION-ASSET-REVIEW-QUEUE-CONTRACT.json",
+      "status": "referenced_via_audit_preview",
+      "proves": "Queue items and blocked flags come from the review queue contract."
+    },
+    {
+      "evidence_id": "claim_matrix",
+      "source": "PROMOTION-ASSET-CLAIM-REVIEW-MATRIX.json",
+      "status": "referenced_via_queue_contract",
+      "proves": "Claims remain classified as draft, review-required, or Owner-only before public use."
+    },
+    {
+      "evidence_id": "channel_policy",
+      "source": "PROMOTION-CHANNEL-POLICY-MATRIX.json",
+      "status": "required_before_sns_or_channel_action",
+      "proves": "Live channel use needs a separate policy and Owner approval path."
+    },
+    {
+      "evidence_id": "professional_review",
+      "source": "Owner-selected professional or regulator review outside repo",
+      "status": "missing_until_owner_supplies",
+      "proves": "Legal, tax, securities, or regulated-service reliance is not established by this packet."
+    },
+    {
+      "evidence_id": "focused_gate_tests",
+      "source": "tests/unit/test_promotion_asset_owner_review_packet_gate.py",
+      "status": "required_for_task_closure",
+      "proves": "The local gate rejects approval, export, customer, payment, platform, and secret drift."
+    }
+  ],
+  "blocked_action_list": [
+    {"action_id": "public_use", "blocked": true, "owner_r3_required": true, "reason": "No claim or asset is approved for public use."},
+    {"action_id": "final_export", "blocked": true, "owner_r3_required": true, "reason": "Final PDF/PPTX export is outside local packet scope."},
+    {"action_id": "sns_upload", "blocked": true, "owner_r3_required": true, "reason": "SNS posting requires Owner channel choice and external-account approval."},
+    {"action_id": "external_action", "blocked": true, "owner_r3_required": true, "reason": "External account, OAuth, platform API, and browser automation actions are not local artifacts."},
+    {"action_id": "customer_contact", "blocked": true, "owner_r3_required": true, "reason": "Customer email, DM, sales outreach, or support execution requires Owner/R3 decisions."},
+    {"action_id": "crm_payment", "blocked": true, "owner_r3_required": true, "reason": "CRM, customer-record, payment, checkout, billing, receipt, and bank workflows are not activated."},
+    {"action_id": "secret_material", "blocked": true, "owner_r3_required": true, "reason": "Secrets, tokens, OAuth credentials, and customer private data are excluded."},
+    {"action_id": "final_advice", "blocked": true, "owner_r3_required": true, "reason": "This packet is not legal, tax, securities, or regulatory final advice."},
+    {"action_id": "kis_order_risk_prod_deploy", "blocked": true, "owner_r3_required": true, "reason": "KIS, order, risk, production, deploy, and CI surfaces are outside this task."}
+  ],
+  "escalation_checklist": [
+    "Owner explicitly approves public claim or asset use.",
+    "Owner selects channel and confirms external account/OAuth/API handling path.",
+    "Compliance Officer completes claim review for public or paid wording.",
+    "Professional review is completed before legal/tax/securities reliance.",
+    "QA and Doc Steward review generated PDF/PPTX output before final export.",
+    "Privacy, customer-record, support/refund, and payment policies are recorded before customer contact or payment work."
+  ],
+  "forbidden_outputs": [
+    "publication approval",
+    "legal/tax/securities final advice",
+    "final PDF binary",
+    "final PPTX binary",
+    "public landing page deployment",
+    "SNS upload",
+    "customer email or direct message",
+    "CRM lead or customer record",
+    "payment or checkout request",
+    "external URL publication",
+    "external account action",
+    "OAuth flow",
+    "platform API call",
+    "secret or token material",
+    "KIS/order/risk/prod/deploy change"
+  ],
+  "taskset_handoff": {
+    "task_137_packet_ready": true,
+    "taskset_local_scope_complete_when_task_closes": true,
+    "next_allowed_no_owner_slice": "local Owner-review packet audit or readiness sync only; still no public approval, final export, SNS upload, customer contact, CRM/payment, external account action, secrets, or KIS/order/risk/prod/deploy changes",
+    "owner_r3_required_for": [
+      "public use of any claim",
+      "final PDF export",
+      "final PPTX export",
+      "public landing page deployment",
+      "SNS upload",
+      "customer contact",
+      "CRM/customer-record activation",
+      "payment or paid ad execution",
+      "legal/tax/securities reliance",
+      "external account action",
+      "OAuth flow or platform API call"
+    ]
+  },
+  "verification": {
+    "json_check": "python -m json.tool agents\\project\\PROMOTION-ASSET-OWNER-REVIEW-PACKET.json",
+    "local_gate": "python scripts\\promotion_asset_owner_review_packet_gate.py --check",
+    "focused_tests": "python -m pytest tests\\unit\\test_promotion_asset_owner_review_packet_gate.py -q"
+  }
+}

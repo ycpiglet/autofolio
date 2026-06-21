@@ -81,7 +81,9 @@ def _initiative_records(root: Path) -> dict[str, dict[str, str]]:
         return records
     for path in sorted(base.glob("*.md")):
         meta, body = _parse_meta(path)
-        initiative_id = str(meta.get("id") or path.stem).strip()
+        if str(meta.get("kind") or "").strip() != "initiative":
+            continue
+        initiative_id = str(meta.get("work_id") or meta.get("id") or path.stem).strip()
         if not initiative_id:
             continue
         records[initiative_id] = {
@@ -100,6 +102,8 @@ def _unit_records(root: Path) -> list[tuple[Path, dict[str, object], str]]:
         return []
     records: list[tuple[Path, dict[str, object], str]] = []
     for path in sorted(base.glob("**/UNIT-*.md")):
+        if "examples" in path.relative_to(base).parts:
+            continue
         meta, body = _parse_meta(path)
         if meta:
             records.append((path, meta, body))

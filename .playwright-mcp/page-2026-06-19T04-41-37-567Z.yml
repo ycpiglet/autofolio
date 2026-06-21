@@ -1,0 +1,153 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation "사이드바 내비게이션" [ref=e3]:
+      - link "Autofolio 홈으로" [ref=e5] [cursor=pointer]:
+        - /url: /home
+        - text: Autofolio
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - paragraph [ref=e8]: 운용
+          - list [ref=e9]:
+            - listitem [ref=e10]:
+              - link "홈" [ref=e11] [cursor=pointer]:
+                - /url: /home
+                - generic [ref=e12]: 🏠
+                - text: 홈
+            - listitem [ref=e13]:
+              - link "포트폴리오" [ref=e14] [cursor=pointer]:
+                - /url: /portfolio
+                - generic [ref=e15]: 📊
+                - text: 포트폴리오
+            - listitem [ref=e16]:
+              - link "매매" [ref=e17] [cursor=pointer]:
+                - /url: /trade
+                - generic [ref=e18]: 💱
+                - text: 매매
+            - listitem [ref=e19]:
+              - link "내역" [ref=e20] [cursor=pointer]:
+                - /url: /history
+                - generic [ref=e21]: 📋
+                - text: 내역
+        - generic [ref=e22]:
+          - paragraph [ref=e23]: 인텔리전스
+          - list [ref=e24]:
+            - listitem [ref=e25]:
+              - link "분석" [ref=e26] [cursor=pointer]:
+                - /url: /analysis
+                - generic [ref=e27]: 🔍
+                - text: 분석
+            - listitem [ref=e28]:
+              - link "에이전트" [ref=e29] [cursor=pointer]:
+                - /url: /agents
+                - generic [ref=e30]: 🤖
+                - text: 에이전트
+            - listitem [ref=e31]:
+              - link "알림" [ref=e32] [cursor=pointer]:
+                - /url: /alerts
+                - generic [ref=e33]: 🔔
+                - text: 알림
+        - generic [ref=e34]:
+          - paragraph [ref=e35]: 시스템
+          - list [ref=e36]:
+            - listitem [ref=e37]:
+              - link "성향 진단" [ref=e38] [cursor=pointer]:
+                - /url: /onboarding/investor-profile
+                - generic [ref=e39]: 🧭
+                - text: 성향 진단
+            - listitem [ref=e40]:
+              - link "설정" [ref=e41] [cursor=pointer]:
+                - /url: /settings
+                - generic [ref=e42]: ⚙️
+                - text: 설정
+    - generic [ref=e43]:
+      - banner "상태 표시줄" [ref=e44]:
+        - generic [ref=e144]: 위험중립형
+        - generic "상태 클러스터" [ref=e45]:
+          - 'generic "환경: 모의" [ref=e145]': 모의
+          - button "자동매매 OFF" [ref=e146]
+          - button "자동매매 중단" [ref=e147]: 🛑 자동매매 중단
+          - button "로그아웃" [ref=e49]
+      - main [ref=e50]:
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - heading "매매" [level=1] [ref=e53]
+            - button "엔진 1회 실행" [ref=e55]
+          - generic [ref=e56]:
+            - generic [ref=e57]:
+              - form "매매 조건 등록" [ref=e58]:
+                - heading "조건 등록 (예약 주문)" [level=2] [ref=e59]
+                - generic [ref=e60]:
+                  - generic [ref=e61]: 종목 코드
+                  - textbox "종목 코드" [ref=e62]:
+                    - /placeholder: "예: 005930"
+                    - text: "005930"
+                - generic [ref=e63]:
+                  - generic [ref=e64]: 매수/매도
+                  - generic [ref=e65]:
+                    - button "매수" [pressed] [ref=e66]
+                    - button "매도" [ref=e67]
+                - generic [ref=e68]:
+                  - generic [ref=e69]: 목표가 (원)
+                  - spinbutton "목표가 (원)" [ref=e70]: "50000"
+                - generic [ref=e71]:
+                  - generic [ref=e72]: 수량 (주)
+                  - spinbutton "수량 (주)" [ref=e73]: "1"
+                - button "조건 등록" [ref=e74]
+                - status [ref=e150]: "조건이 등록되었습니다. (ID: )"
+              - region "등록된 조건" [ref=e75]:
+                - heading "등록된 조건" [level=2] [ref=e76]
+                - table "활성 매매 조건 목록" [ref=e79]:
+                  - caption [ref=e80]: 활성 매매 조건 목록
+                  - rowgroup [ref=e81]:
+                    - row "id symbol side target_price quantity order_type allow_market_fallback auto_enabled status cooldown_until created_by rationale risk_note created_at updated_at" [ref=e151]:
+                      - columnheader "id" [ref=e152]
+                      - columnheader "symbol" [ref=e153]
+                      - columnheader "side" [ref=e154]
+                      - columnheader "target_price" [ref=e155]
+                      - columnheader "quantity" [ref=e156]
+                      - columnheader "order_type" [ref=e157]
+                      - columnheader "allow_market_fallback" [ref=e158]
+                      - columnheader "auto_enabled" [ref=e159]
+                      - columnheader "status" [ref=e160]
+                      - columnheader "cooldown_until" [ref=e161]
+                      - columnheader "created_by" [ref=e162]
+                      - columnheader "rationale" [ref=e163]
+                      - columnheader "risk_note" [ref=e164]
+                      - columnheader "created_at" [ref=e165]
+                      - columnheader "updated_at" [ref=e166]
+                  - rowgroup [ref=e91]:
+                    - row "1 삼성전자 (005930) BUY 50000 1 LIMIT 0 0 ACTIVE USER 2026-06-19 04:41:36 2026-06-19 04:41:36" [ref=e167] [cursor=pointer]:
+                      - cell "1" [ref=e168]:
+                        - generic "1" [ref=e169]
+                      - cell "삼성전자 (005930)" [ref=e170]:
+                        - generic "005930" [ref=e171]: 삼성전자 (005930)
+                      - cell "BUY" [ref=e172]:
+                        - generic "BUY" [ref=e173]
+                      - cell "50000" [ref=e174]:
+                        - generic "50000" [ref=e175]
+                      - cell "1" [ref=e176]:
+                        - generic "1" [ref=e177]
+                      - cell "LIMIT" [ref=e178]:
+                        - generic "LIMIT" [ref=e179]
+                      - cell "0" [ref=e180]:
+                        - generic "0" [ref=e181]
+                      - cell "0" [ref=e182]:
+                        - generic "0" [ref=e183]
+                      - cell "ACTIVE" [ref=e184]:
+                        - generic "ACTIVE" [ref=e185]
+                      - cell [ref=e186]
+                      - cell "USER" [ref=e187]:
+                        - generic "USER" [ref=e188]
+                      - cell [ref=e189]
+                      - cell [ref=e190]
+                      - cell "2026-06-19 04:41:36" [ref=e191]:
+                        - generic "2026-06-19 04:41:36" [ref=e192]
+                      - cell "2026-06-19 04:41:36" [ref=e193]:
+                        - generic "2026-06-19 04:41:36" [ref=e194]
+            - generic [ref=e137]:
+              - generic [ref=e138]:
+                - generic [ref=e139]: 호가 조회 종목
+                - textbox "호가 조회 종목" [ref=e140]:
+                  - /placeholder: 종목 코드
+              - generic [ref=e141]: 종목 코드를 입력하면 호가가 표시됩니다.
+  - alert [ref=e142]

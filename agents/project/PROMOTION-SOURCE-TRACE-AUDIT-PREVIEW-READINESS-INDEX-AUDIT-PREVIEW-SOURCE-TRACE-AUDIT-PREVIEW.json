@@ -1,0 +1,295 @@
+{
+  "$schema": "autofolio.promotion-source-trace-audit-preview-readiness-index-audit-preview-source-trace-audit-preview/v1",
+  "id": "promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace_audit_preview",
+  "status": "local_source_trace_audit_preview_readiness_index_audit_preview_source_trace_audit_preview_not_actual_submission",
+  "companion_markdown": "agents/project/PROMOTION-SOURCE-TRACE-AUDIT-PREVIEW-READINESS-INDEX-AUDIT-PREVIEW-SOURCE-TRACE-AUDIT-PREVIEW.md",
+  "owner": "QA",
+  "related_tasks": [
+    "TASK-160",
+    "TASK-161",
+    "TASK-162",
+    "TASK-163",
+    "TASK-164",
+    "TASK-165"
+  ],
+  "related_taskset": "TASKSET-MARKETING-SOURCE-TRACE-AUDIT-PREVIEW-READINESS-INDEX-AUDIT-PREVIEW-SOURCE-TRACE-AUDIT-PREVIEW",
+  "source_inputs": [
+    {
+      "id": "promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace",
+      "path": "agents/project/PROMOTION-SOURCE-TRACE-AUDIT-PREVIEW-READINESS-INDEX-AUDIT-PREVIEW-SOURCE-TRACE.json",
+      "companion_markdown": "agents/project/PROMOTION-SOURCE-TRACE-AUDIT-PREVIEW-READINESS-INDEX-AUDIT-PREVIEW-SOURCE-TRACE.md",
+      "relationship": "audits_source_trace",
+      "sha256": "4d375a8a8c83f03ec18cd18e777727c37cd67a52283b69092626e0754ac221ce",
+      "source_status": "local_source_trace_audit_preview_readiness_index_audit_preview_source_trace_not_actual_submission",
+      "source_gate_result": "pass"
+    }
+  ],
+  "boundaries": {
+    "local_source_trace_audit_preview_only": true,
+    "audit_preview_not_submission": true,
+    "audit_preview_not_approval": true,
+    "audit_preview_not_publication_clearance": true,
+    "source_trace_not_submission": true,
+    "source_trace_not_approval": true,
+    "source_trace_not_publication_clearance": true,
+    "source_trace_not_external_archive": true,
+    "not_actual_owner_r3_review_submission": true,
+    "not_actual_owner_review_started": true,
+    "not_actual_refresh_execution": true,
+    "not_actual_archive_write": true,
+    "not_actual_rollback_execution": true,
+    "not_archive_deletion": true,
+    "not_external_archive_upload": true,
+    "not_actual_owner_approval_record": true,
+    "not_actual_owner_signature": true,
+    "not_actual_approval_evidence_collection": true,
+    "not_publication_approval": true,
+    "no_public_use_clearance": true,
+    "not_legal_tax_securities_final_advice": true,
+    "no_final_pdf_export": true,
+    "no_final_pptx_export": true,
+    "no_public_url_or_upload": true,
+    "no_sns_upload": true,
+    "no_customer_contact": true,
+    "no_customer_private_data": true,
+    "no_crm_or_payment_action": true,
+    "no_secret_or_token_storage": true,
+    "no_external_account_action": true,
+    "no_oauth_flow": true,
+    "no_platform_api_call": true,
+    "no_kis_order_risk_prod_deploy_change": true,
+    "owner_approval_required_before_public_use": true,
+    "professional_review_required_before_reliance": true
+  },
+  "audit_preview_summary": {
+    "source_root": "promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace",
+    "source_root_status": "local_source_trace_audit_preview_readiness_index_audit_preview_source_trace_not_actual_submission",
+    "source_gate_result": "pass",
+    "audit_preview_gate_result": "pass",
+    "audit_preview_records": 9,
+    "source_chain_records": 4,
+    "source_chain_hash": "8ab6808ccd85ec48f448565f8fc12d8f04ff817c2a8e44e822f154535c29bb44",
+    "owner_r3_blocker_trace_records": 9,
+    "owner_r3_blocker_trace_hash": "57f2a77c7d73688bbd9ea7528543ab7fa3a547d5dc2fe2c128387c5e6f608ca9",
+    "blocked_action_scan_items": 13,
+    "blocked_action_scan_hash": "29929d17c93b7f72ded4ebfafd488681d25948b6ae3525a15c65c811d2d0fe96",
+    "forbidden_outputs": 26,
+    "forbidden_outputs_hash": "f514ee861f98761758ece03f18740597f39ef78930bf8a8e87775184fa4e6099",
+    "actual_owner_r3_review_submissions": 0,
+    "actual_owner_review_starts": 0,
+    "actual_refresh_executions": 0,
+    "actual_archive_writes": 0,
+    "actual_rollback_executions": 0,
+    "actual_archive_deletions": 0,
+    "actual_owner_approval_records": 0,
+    "actual_owner_signatures": 0,
+    "actual_approval_evidence_collections": 0,
+    "public_use_approvals": 0,
+    "final_exports_created": 0,
+    "public_urls_published": 0,
+    "sns_uploads": 0,
+    "customer_contacts": 0,
+    "crm_payment_actions": 0,
+    "secret_handling_events": 0,
+    "platform_api_calls": 0,
+    "ready_for_owner_r3_submission_records": 0,
+    "ready_for_public_use_records": 0
+  },
+  "continuity_hashes": {
+    "source_chain": "8ab6808ccd85ec48f448565f8fc12d8f04ff817c2a8e44e822f154535c29bb44",
+    "owner_r3_blocker_trace": "57f2a77c7d73688bbd9ea7528543ab7fa3a547d5dc2fe2c128387c5e6f608ca9",
+    "blocked_action_scan": "29929d17c93b7f72ded4ebfafd488681d25948b6ae3525a15c65c811d2d0fe96",
+    "forbidden_outputs": "f514ee861f98761758ece03f18740597f39ef78930bf8a8e87775184fa4e6099"
+  },
+  "source_trace_audit_preview_records": [
+    {
+      "decision_type": "public_landing_use",
+      "source_record_id": "source-trace-public-landing-use",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "final_pdf_export",
+      "source_record_id": "source-trace-final-pdf-export",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "final_pptx_export",
+      "source_record_id": "source-trace-final-pptx-export",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "sns_upload",
+      "source_record_id": "source-trace-sns-upload",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "customer_contact",
+      "source_record_id": "source-trace-customer-contact",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "crm_payment_setup",
+      "source_record_id": "source-trace-crm-payment-setup",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "paid_ads",
+      "source_record_id": "source-trace-paid-ads",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "external_account_action",
+      "source_record_id": "source-trace-external-account-action",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    },
+    {
+      "decision_type": "legal_tax_securities_reliance",
+      "source_record_id": "source-trace-legal-tax-securities-reliance",
+      "audit_preview_status": "pass",
+      "source_trace_coverage_verified": true,
+      "owner_r3_blocker_preserved": true,
+      "blocked_action_scan_preserved": true,
+      "action_permitted_now": false,
+      "public_use_approved": false
+    }
+  ],
+  "non_action_flags": {
+    "actual_owner_r3_review_submitted": false,
+    "actual_owner_review_started": false,
+    "actual_refresh_executed": false,
+    "actual_archive_written": false,
+    "actual_rollback_executed": false,
+    "actual_archive_deleted": false,
+    "actual_owner_approval_recorded": false,
+    "actual_owner_signature_collected": false,
+    "actual_approval_evidence_collected": false,
+    "public_use_approved": false,
+    "final_export_created": false,
+    "public_url_published": false,
+    "sns_uploaded": false,
+    "customer_contacted": false,
+    "crm_payment_action": false,
+    "secret_handled": false,
+    "platform_api_called": false,
+    "audit_preview_is_submission": false,
+    "audit_preview_is_approval": false,
+    "audit_preview_is_public_clearance": false,
+    "source_trace_mutated_source": false,
+    "action_permitted_now": false
+  },
+  "audit_preview_steps": [
+    {
+      "step_id": "verify_source_trace_gate",
+      "status": "pass",
+      "external_action": false
+    },
+    {
+      "step_id": "record_source_trace_hash",
+      "status": "pass",
+      "external_action": false
+    },
+    {
+      "step_id": "verify_source_chain_continuity",
+      "status": "pass",
+      "external_action": false
+    },
+    {
+      "step_id": "audit_owner_r3_blocker_preservation",
+      "status": "pass",
+      "external_action": false
+    },
+    {
+      "step_id": "audit_blocked_action_scan_preservation",
+      "status": "pass",
+      "external_action": false
+    },
+    {
+      "step_id": "confirm_non_action_boundary",
+      "status": "pass",
+      "external_action": false
+    },
+    {
+      "step_id": "close_task_165_local_audit_preview",
+      "status": "pass",
+      "external_action": false
+    }
+  ],
+  "review_perspectives": {
+    "qa": "Pass for local audit-preview scope; source trace coverage and non-action boundaries are machine checked.",
+    "doc_steward": "Pass for documentation continuity; source hash and companion Markdown are recorded.",
+    "compliance_officer": "Watch; public, paid, advice, and publication claims remain blocked until Owner/R3 and professional review.",
+    "marketing_growth": "Pass for planning continuity; no live publication or customer-contact authority is granted.",
+    "scribe": "Record complete; preserve as local readiness evidence rather than external approval."
+  },
+  "taskset_handoff": {
+    "task_165_local_audit_preview_complete": true,
+    "taskset_local_scope_complete_when_task_closes": true,
+    "recommended_next_lane": "Return to backlog decision: TASK-087 remains the high-value REVIEW candidate; TASK-094 remains ASK until target official forms and Owner private-data path are selected.",
+    "actual_owner_r3_review_submission_allowed": false,
+    "actual_owner_review_start_allowed": false,
+    "actual_refresh_execution_allowed": false,
+    "actual_archive_write_allowed": false,
+    "actual_rollback_execution_allowed": false,
+    "actual_archive_delete_allowed": false,
+    "approval_evidence_collection_allowed": false,
+    "final_export_allowed": false,
+    "public_use_allowed": false,
+    "customer_or_payment_action_allowed": false,
+    "owner_r3_required_for": [
+      "actual Owner/R3 packet submission",
+      "actual Owner review start",
+      "refresh execution",
+      "archive write or deletion",
+      "rollback execution",
+      "approval evidence collection",
+      "legal/tax/securities reliance",
+      "final PDF/PPTX export",
+      "public URL/upload/SNS/customer/CRM/payment/platform/API use"
+    ]
+  },
+  "verification": {
+    "local_gate": "python scripts/promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace_audit_preview_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace_audit_preview_gate.py -q",
+    "source_gate": "python scripts/promotion_source_trace_audit_preview_readiness_index_audit_preview_source_trace_gate.py --check"
+  }
+}

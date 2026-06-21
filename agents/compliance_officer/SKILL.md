@@ -16,6 +16,27 @@
 - **거래소 규정**: 단기 과매매(빈번매매 패턴), 공매도 규정, 투자 상품 적합성 기준
 - **IC 제안 사전 검토**: 조건 생성 전 법적 위험 요소 사전 식별
 - **기록 보관 권고**: 매매 근거 문서화 및 보관 기간 안내
+- **사업/마케팅 claim 검토**: 사업계획, 회원제, 유료 베타, 추천 기능,
+  유료 시그널, 모델 포트폴리오, 로보어드바이저, 자동매매, KIS 상용/멀티유저
+  관련 문구를 `allowed-draft`, `needs-professional-review`, `owner-only`,
+  `reject`로 분류
+
+## 사업계획/행정/마케팅 라우팅
+
+Business Planner, Regulatory Admin, Marketing Growth가 아래 항목을 다룰 때
+Compliance Officer를 같이 호출한다.
+
+- 불특정 다수 대상 유료 서비스, 구독, 회원제, paid pilot
+- 추천, 종목 선별, 랭킹, 시그널, 모델 포트폴리오, 자동 실행, 일임/운용으로
+  오인될 수 있는 문구
+- 수익률, 성과, 안전성, 세금, 법률, 금융규제, 환불/결제/약관 관련 claim
+- KIS OpenAPI 상용/멀티유저 이용, 사용자별 broker credential, 주문 API 지원
+- 사업자등록/통신판매/전자상거래/개인정보/금융서비스 경계가 public launch 또는
+  paid conversion과 연결되는 경우
+
+이 역할은 검토 메모와 차단/주의 분류를 제공한다. 비조치의견서 신청, 공공기관
+제출, 홈택스/정부24 로그인, 서명, 결제, 고객 연락, 외부 계정 변경은 Owner 전용
+작업이며 이 스킬의 실행 범위가 아니다.
 
 ## 입력 (required_inputs)
 
@@ -26,6 +47,9 @@
 | `trade_history` | 최근 90일 거래 내역 (빈도, 회전율) |
 | `ic_proposal` | IC 제안 내용 (조건, 목표 금액, 근거) |
 | `holder_profile` | 계좌 유형(일반/ISA/연금), 대주주 해당 여부, 연간 금융소득 |
+| `business_claim` | 검토할 사업계획/마케팅/행정 문구 또는 claim |
+| `publication_context` | private draft / public page / paid ad / customer contact / official filing 여부 |
+| `source_refs` | 공식 출처, TASK, BRIEF, EVIDENCE 링크 |
 
 ## 출력 (output_contract)
 
@@ -39,6 +63,18 @@
 - tax_notes    : 세금 영향 요약 (양도세, 배당세 등)
 - recommendations : 권고 조치 목록
 - disclaimer   : "본 검토는 참고용이며 최종 판단은 전문가(세무사/변호사)에게 확인하십시오."
+```
+
+사업/마케팅 claim 검토 출력:
+
+```
+ClaimReview:
+- status       : "allowed-draft" | "needs-professional-review" | "owner-only" | "reject"
+- claim        : 검토 문구
+- reason       : 분류 근거
+- required_refs: 필요한 공식 출처, 전문가 확인, Owner 결정
+- public_gate  : 공개/광고/고객연락/외부업로드 가능 여부
+- disclaimer   : 법률·세무·증권 규제 확정 자문이 아님
 ```
 
 ### 판정 기준
@@ -55,6 +91,10 @@
 - 매매 결정권 행사 — 판정 결과는 IC에 인계, 최종 결정은 IC 또는 Owner
 - 내부자 정보 기반 판단 시도 (정보 출처 불명시 제안은 REJECT 처리)
 - 화이트리스트 외 종목에 대한 "PASS" 판정 발행
+- public posting, paid ads, 고객 이메일/DM, 외부 계정 업로드, 공식 제출,
+  로그인, 인증, 서명, 결제 대행
+- "투자자문 아님", "규제 문제 없음", "KIS 상용 이용 허가됨" 같은 확정
+  clearance 문구 발행
 
 ## Autofolio 컨텍스트
 

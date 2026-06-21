@@ -1,0 +1,305 @@
+- generic [active] [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - navigation "사이드바 내비게이션" [ref=e4]:
+      - link "Autofolio 홈으로" [ref=e6] [cursor=pointer]:
+        - /url: /home
+        - text: Autofolio
+      - generic [ref=e7]:
+        - generic [ref=e8]:
+          - paragraph [ref=e9]: 운용
+          - list [ref=e10]:
+            - listitem [ref=e11]:
+              - link "홈" [ref=e12] [cursor=pointer]:
+                - /url: /home
+                - generic [ref=e13]: 🏠
+                - text: 홈
+            - listitem [ref=e14]:
+              - link "포트폴리오" [ref=e15] [cursor=pointer]:
+                - /url: /portfolio
+                - generic [ref=e16]: 📊
+                - text: 포트폴리오
+            - listitem [ref=e17]:
+              - link "매매" [ref=e18] [cursor=pointer]:
+                - /url: /trade
+                - generic [ref=e19]: 💱
+                - text: 매매
+            - listitem [ref=e20]:
+              - link "내역" [ref=e21] [cursor=pointer]:
+                - /url: /history
+                - generic [ref=e22]: 📋
+                - text: 내역
+        - generic [ref=e23]:
+          - paragraph [ref=e24]: 인텔리전스
+          - list [ref=e25]:
+            - listitem [ref=e26]:
+              - link "분석" [ref=e27] [cursor=pointer]:
+                - /url: /analysis
+                - generic [ref=e28]: 🔍
+                - text: 분석
+            - listitem [ref=e29]:
+              - link "에이전트" [ref=e30] [cursor=pointer]:
+                - /url: /agents
+                - generic [ref=e31]: 🤖
+                - text: 에이전트
+            - listitem [ref=e32]:
+              - link "알림" [ref=e33] [cursor=pointer]:
+                - /url: /alerts
+                - generic [ref=e34]: 🔔
+                - text: 알림
+        - generic [ref=e35]:
+          - paragraph [ref=e36]: 시스템
+          - list [ref=e37]:
+            - listitem [ref=e38]:
+              - link "성향 진단" [ref=e39] [cursor=pointer]:
+                - /url: /onboarding/investor-profile
+                - generic [ref=e40]: 🧭
+                - text: 성향 진단
+            - listitem [ref=e41]:
+              - link "설정" [ref=e42] [cursor=pointer]:
+                - /url: /settings
+                - generic [ref=e43]: ⚙️
+                - text: 설정
+            - listitem [ref=e44]:
+              - link "매뉴얼" [ref=e45] [cursor=pointer]:
+                - /url: /manuals
+                - generic [ref=e46]: 📖
+                - text: 매뉴얼
+    - generic [ref=e47]:
+      - banner "상태 표시줄" [ref=e48]:
+        - link "성향 진단" [ref=e50] [cursor=pointer]:
+          - /url: /onboarding/investor-profile
+        - generic "상태 클러스터" [ref=e51]:
+          - 'generic "환경: 모의" [ref=e52]': 모의
+          - button "자동매매 OFF" [ref=e53]
+          - button "중단됨" [ref=e54]: ⛔ 중단됨
+          - button "로그아웃" [ref=e55]
+      - main [ref=e56]:
+        - generic [ref=e57]:
+          - region "투자 프로필 안내" [ref=e58]:
+            - generic [ref=e59]:
+              - generic [ref=e60]: 투자 프로필이 필요합니다.
+              - paragraph [ref=e61]: 조회는 가능하지만 조건 저장과 자동화 실행은 프로필 완료 후 사용할 수 있습니다.
+            - button "프로필 작성" [ref=e62] [cursor=pointer]
+          - region "핵심 지표" [ref=e63]:
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - generic [ref=e67]: 총평가금액
+                - 'generic "총평가금액: —" [ref=e69]': —
+              - generic [ref=e70]:
+                - generic [ref=e72]: 일간손익
+                - 'generic "일간손익: —" [ref=e74]': —
+              - generic [ref=e75]:
+                - generic [ref=e77]: 일간수익률
+                - 'generic "일간수익률: —" [ref=e79]': —
+              - generic [ref=e80]:
+                - generic [ref=e82]: 월간수익률
+                - 'generic "월간수익률: —" [ref=e84]': —
+          - region "자산 추이" [ref=e85]:
+            - heading "자산 추이 (90일)" [level=2] [ref=e86]
+            - generic "차트 로딩 중" [ref=e87]
+          - region "시장 지수" [ref=e88]:
+            - heading "시장 지수" [level=2] [ref=e89]
+            - table "주요 시장 지수" [ref=e92]:
+              - caption [ref=e93]: 주요 시장 지수
+              - rowgroup [ref=e94]:
+                - row [ref=e95]:
+                  - columnheader [ref=e96]
+                  - columnheader [ref=e98]
+                  - columnheader [ref=e100]
+                  - columnheader [ref=e102]
+              - rowgroup [ref=e104]:
+                - row [ref=e105]:
+                  - cell [ref=e106]
+                  - cell [ref=e108]
+                  - cell [ref=e110]
+                  - cell [ref=e112]
+                - row [ref=e114]:
+                  - cell [ref=e115]
+                  - cell [ref=e117]
+                  - cell [ref=e119]
+                  - cell [ref=e121]
+                - row [ref=e123]:
+                  - cell [ref=e124]
+                  - cell [ref=e126]
+                  - cell [ref=e128]
+                  - cell [ref=e130]
+                - row [ref=e132]:
+                  - cell [ref=e133]
+                  - cell [ref=e135]
+                  - cell [ref=e137]
+                  - cell [ref=e139]
+                - row [ref=e141]:
+                  - cell [ref=e142]
+                  - cell [ref=e144]
+                  - cell [ref=e146]
+                  - cell [ref=e148]
+          - region "보유 종목 (상위 5)" [ref=e150]:
+            - heading "보유 종목" [level=2] [ref=e151]
+            - table "보유 종목" [ref=e153]:
+              - rowgroup [ref=e154]:
+                - row [ref=e155]:
+                  - columnheader [ref=e156]
+                  - columnheader [ref=e158]
+                  - columnheader [ref=e160]
+                  - columnheader [ref=e162]
+                  - columnheader [ref=e164]
+              - rowgroup [ref=e166]:
+                - row [ref=e167]:
+                  - cell [ref=e168]
+                  - cell [ref=e170]
+                  - cell [ref=e172]
+                  - cell [ref=e174]
+                  - cell [ref=e176]
+                - row [ref=e178]:
+                  - cell [ref=e179]
+                  - cell [ref=e181]
+                  - cell [ref=e183]
+                  - cell [ref=e185]
+                  - cell [ref=e187]
+                - row [ref=e189]:
+                  - cell [ref=e190]
+                  - cell [ref=e192]
+                  - cell [ref=e194]
+                  - cell [ref=e196]
+                  - cell [ref=e198]
+                - row [ref=e200]:
+                  - cell [ref=e201]
+                  - cell [ref=e203]
+                  - cell [ref=e205]
+                  - cell [ref=e207]
+                  - cell [ref=e209]
+                - row [ref=e211]:
+                  - cell [ref=e212]
+                  - cell [ref=e214]
+                  - cell [ref=e216]
+                  - cell [ref=e218]
+                  - cell [ref=e220]
+          - region "최근 체결" [ref=e222]:
+            - heading "최근 체결" [level=2] [ref=e223]
+            - table "최근 체결 내역" [ref=e226]:
+              - caption [ref=e227]: 최근 체결 내역
+              - rowgroup [ref=e228]:
+                - row "시각 종목 방향 수량 체결가" [ref=e229]:
+                  - columnheader "시각" [ref=e230]
+                  - columnheader "종목" [ref=e231]
+                  - columnheader "방향" [ref=e232]
+                  - columnheader "수량" [ref=e233]
+                  - columnheader "체결가" [ref=e234]
+              - rowgroup [ref=e235]:
+                - row "00:50 069500 SELL 1 144490" [ref=e236] [cursor=pointer]:
+                  - cell "00:50" [ref=e237]:
+                    - generic "00:50" [ref=e238]
+                  - cell "069500" [ref=e239]:
+                    - generic "069500" [ref=e240]
+                  - cell "SELL" [ref=e241]:
+                    - generic "SELL" [ref=e242]
+                  - cell "1" [ref=e243]:
+                    - generic "1" [ref=e244]
+                  - cell "144490" [ref=e245]:
+                    - generic "144490" [ref=e246]
+                - row "00:50 069500 BUY 1 144465" [ref=e247] [cursor=pointer]:
+                  - cell "00:50" [ref=e248]:
+                    - generic "00:50" [ref=e249]
+                  - cell "069500" [ref=e250]:
+                    - generic "069500" [ref=e251]
+                  - cell "BUY" [ref=e252]:
+                    - generic "BUY" [ref=e253]
+                  - cell "1" [ref=e254]:
+                    - generic "1" [ref=e255]
+                  - cell "144465" [ref=e256]:
+                    - generic "144465" [ref=e257]
+                - row "05:49 105560 BUY 1 162300" [ref=e258] [cursor=pointer]:
+                  - cell "05:49" [ref=e259]:
+                    - generic "05:49" [ref=e260]
+                  - cell "105560" [ref=e261]:
+                    - generic "105560" [ref=e262]
+                  - cell "BUY" [ref=e263]:
+                    - generic "BUY" [ref=e264]
+                  - cell "1" [ref=e265]:
+                    - generic "1" [ref=e266]
+                  - cell "162300" [ref=e267]:
+                    - generic "162300" [ref=e268]
+                - row "05:49 055550 BUY 1 99800" [ref=e269] [cursor=pointer]:
+                  - cell "05:49" [ref=e270]:
+                    - generic "05:49" [ref=e271]
+                  - cell "055550" [ref=e272]:
+                    - generic "055550" [ref=e273]
+                  - cell "BUY" [ref=e274]:
+                    - generic "BUY" [ref=e275]
+                  - cell "1" [ref=e276]:
+                    - generic "1" [ref=e277]
+                  - cell "99800" [ref=e278]:
+                    - generic "99800" [ref=e279]
+                - row "05:40 114260 BUY 1 61350" [ref=e280] [cursor=pointer]:
+                  - cell "05:40" [ref=e281]:
+                    - generic "05:40" [ref=e282]
+                  - cell "114260" [ref=e283]:
+                    - generic "114260" [ref=e284]
+                  - cell "BUY" [ref=e285]:
+                    - generic "BUY" [ref=e286]
+                  - cell "1" [ref=e287]:
+                    - generic "1" [ref=e288]
+                  - cell "61350" [ref=e289]:
+                    - generic "61350" [ref=e290]
+                - row "05:39 102110 BUY 1 131290" [ref=e291] [cursor=pointer]:
+                  - cell "05:39" [ref=e292]:
+                    - generic "05:39" [ref=e293]
+                  - cell "102110" [ref=e294]:
+                    - generic "102110" [ref=e295]
+                  - cell "BUY" [ref=e296]:
+                    - generic "BUY" [ref=e297]
+                  - cell "1" [ref=e298]:
+                    - generic "1" [ref=e299]
+                  - cell "131290" [ref=e300]:
+                    - generic "131290" [ref=e301]
+                - row "05:39 068270 BUY 1 172000" [ref=e302] [cursor=pointer]:
+                  - cell "05:39" [ref=e303]:
+                    - generic "05:39" [ref=e304]
+                  - cell "068270" [ref=e305]:
+                    - generic "068270" [ref=e306]
+                  - cell "BUY" [ref=e307]:
+                    - generic "BUY" [ref=e308]
+                  - cell "1" [ref=e309]:
+                    - generic "1" [ref=e310]
+                  - cell "172000" [ref=e311]:
+                    - generic "172000" [ref=e312]
+                - row "05:38 005380 BUY 1 615000" [ref=e313] [cursor=pointer]:
+                  - cell "05:38" [ref=e314]:
+                    - generic "05:38" [ref=e315]
+                  - cell "005380" [ref=e316]:
+                    - generic "005380" [ref=e317]
+                  - cell "BUY" [ref=e318]:
+                    - generic "BUY" [ref=e319]
+                  - cell "1" [ref=e320]:
+                    - generic "1" [ref=e321]
+                  - cell "615000" [ref=e322]:
+                    - generic "615000" [ref=e323]
+                - row "05:38 035720 BUY 1 41800" [ref=e324] [cursor=pointer]:
+                  - cell "05:38" [ref=e325]:
+                    - generic "05:38" [ref=e326]
+                  - cell "035720" [ref=e327]:
+                    - generic "035720" [ref=e328]
+                  - cell "BUY" [ref=e329]:
+                    - generic "BUY" [ref=e330]
+                  - cell "1" [ref=e331]:
+                    - generic "1" [ref=e332]
+                  - cell "41800" [ref=e333]:
+                    - generic "41800" [ref=e334]
+                - row "05:38 035420 BUY 1 244500" [ref=e335] [cursor=pointer]:
+                  - cell "05:38" [ref=e336]:
+                    - generic "05:38" [ref=e337]
+                  - cell "035420" [ref=e338]:
+                    - generic "035420" [ref=e339]
+                  - cell "BUY" [ref=e340]:
+                    - generic "BUY" [ref=e341]
+                  - cell "1" [ref=e342]:
+                    - generic "1" [ref=e343]
+                  - cell "244500" [ref=e344]:
+                    - generic "244500" [ref=e345]
+          - region "투자 제안" [ref=e346]:
+            - heading "투자 제안" [level=2] [ref=e347]
+            - status "제안 없음" [ref=e348]:
+              - generic [ref=e349]: 🏗️
+              - heading "제안 없음" [level=2] [ref=e350]
+              - paragraph [ref=e351]: 현재 활성 투자 제안이 없습니다.

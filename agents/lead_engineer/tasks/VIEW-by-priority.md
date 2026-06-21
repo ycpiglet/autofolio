@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T22:14:31+09:00`
+> 생성 시각: `2026-06-21T17:10:46+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -13,6 +13,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
+| [TASK-080](TASK-080-prod-minimal-live-smoke.md) | 완료 | Critical | 중 | 1 ph / ~12000 tok | Lead Engineer | kis,prod,live-smoke,order-lifecycle,risk-minimization |
 
 ## High
 
@@ -50,6 +51,47 @@
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
+| [TASK-075](TASK-075-live-kis-beta-test-round.md) | 완료 | High | 중 | 4 ph / ~80000 tok | QA | qa,beta,kis,paper,prod-readonly,ui,market-hours |
+| [TASK-078](TASK-078-kis-capability-smoke-closeout.md) | 완료 | High | 중 | 1 ph / ~20000 tok | QA | qa,kis,paper,prod-readonly,smoke |
+| [TASK-079](TASK-079-prod-minimal-risk-order-test-candidates.md) | 완료 | High | 낮 | 1 ph / ~15000 tok | Research Agent | research,kis,prod-readiness,paper,risk-minimization |
+| [TASK-081](TASK-081-tomorrow-kis-minimal-smoke-scripts.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | kis,paper,prod,live-smoke,tomorrow-runbook |
+| [TASK-082](TASK-082-inapp-manual-risk-audit-safety.md) | 완료 | High | 상 | 3 ph / ~30000 tok | Lead Engineer | manuals,safety,audit,ui,order-flow,r3 |
+| [TASK-083](TASK-083-portfolio-diagnosis-hub-rebuild.md) | 완료 | High | 상 | 4 ph / ~35000 tok | Lead Engineer | portfolio,ui,api,analytics,kis,qa |
+| [TASK-084](TASK-084-portfolio-readability-interaction-polish.md) | 완료 | High | 중 | 2 ph / ~18000 tok | UI/UX Designer | portfolio,ui,readability,interaction,qa |
+| [TASK-085](TASK-085-portfolio-visual-overview-refinement.md) | 완료 | High | 중 | 3 ph / ~22000 tok | UI/UX Designer | portfolio,ui,visualization,api,qa |
+| [TASK-086](TASK-086-investor-profile-ack-signature-ux.md) | 완료 | High | 중 | 1 ph / ~10000 tok | UI/UX Designer | profile,onboarding,ui,safety,qa |
+| [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | High | 상 | 24 ph / ~200000 tok | Lead Engineer | deploy,web,auth,membership,payment,multitenant,compliance,supabase,vercel |
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | High | 상 | 16 ph / ~120000 tok | Lead Engineer | compliance,regulatory,legal,gate,deferred,deploy |
+| [TASK-091](TASK-091-profile-confirmation-portfolio-kpi-polish.md) | 완료 | High | 낮 | 0.7 ph / ~9000 tok | UI/UX Designer | profile,onboarding,portfolio,ui,qa |
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Lead Engineer | business-plan,agents,regulatory-admin,marketing,hwpx,governance |
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | High | 중-상 | 4 ph / ~60000 tok | Business Planner | business-plan,vision,strategy,owner-interview,go-to-market,marketing |
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | High | 중 | 4 ph / ~50000 tok | Marketing Growth | marketing,go-to-market,campaign,pdf,pptx,early-users |
+| [TASK-098](TASK-098-membership-access-manual-deposit-plan.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | membership,payment,bank-transfer,approval,signup,taskset |
+| [TASK-099](TASK-099-membership-local-autoregister-fail-closed.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Backend Engineer | auth,membership,approval,safety,tests |
+| [TASK-100](TASK-100-membership-local-request-approval-prototype.md) | 완료 | High | 상 | 2 ph / ~30000 tok | Backend Engineer | auth,membership,approval,signup,local-prototype,tests |
+| [TASK-101](TASK-101-membership-admin-settings-tab.md) | 완료 | High | 중 | 1 ph / ~18000 tok | UI/UX Designer | auth,membership,approval,admin-ui,settings,local-prototype |
+| [TASK-102](TASK-102-membership-local-account-grant.md) | 완료 | High | 중 | 1 ph / ~22000 tok | Backend Engineer | auth,membership,approval,account-grant,subscription,local-prototype |
+| [TASK-103](TASK-103-membership-local-deposit-recognition.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,deposit-recognition,bank-transfer,approval,local-prototype |
+| [TASK-104](TASK-104-membership-member-admin-boundary.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Backend Engineer | auth,membership,authorization,member-boundary,local-prototype |
+| [TASK-105](TASK-105-membership-guest-demo-fail-closed.md) | 완료 | High | 중 | 1 ph / ~14000 tok | Backend Engineer | auth,membership,guest-demo,fail-closed,local-prototype |
+| [TASK-106](TASK-106-membership-app-user-read-boundary.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Backend Engineer | auth,membership,read-scope,app-user,local-prototype |
+| [TASK-107](TASK-107-user-owned-integration-token-harness.md) | 완료 | High | 중 | 2 ph / ~24000 tok | Backend Engineer | membership,integrations,llm,sns,token-vault,local-prototype |
+| [TASK-108](TASK-108-membership-production-readiness-gate.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,readiness,deploy-gate,production,local-prototype |
+| [TASK-109](TASK-109-membership-supabase-rls-contract.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,supabase,rls,production-contract,deploy-gate |
+| [TASK-110](TASK-110-membership-applicant-deposit-status-lookup.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,signup,deposit-instructions,applicant-status,local-prototype |
+| [TASK-111](TASK-111-membership-payment-evidence-policy.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,payment-evidence,policy,quality-gate,production-readiness |
+| [TASK-112](TASK-112-membership-production-secret-policy.md) | 완료 | High | 중 | 1 ph / ~20000 tok | Backend Engineer | membership,secrets,policy,quality-gate,production-readiness |
+| [TASK-113](TASK-113-membership-per-user-engine-safety-contract.md) | 완료 | High | 중 | 1 ph / ~22000 tok | Lead Engineer | membership,engine-safety,multitenant,contract,production-readiness |
+| [TASK-114](TASK-114-membership-tenant-isolation-matrix.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,supabase,rls,tenant-isolation,deploy-gate |
+| [TASK-115](TASK-115-membership-production-implementation-plan.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Lead Engineer | membership,production-readiness,implementation-plan,taskset |
+| [TASK-116](TASK-116-membership-supabase-staging-schema-field-map.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Backend Engineer | membership,supabase,rls,schema,field-map,production-readiness |
+| [TASK-118](TASK-118-membership-production-secret-store-implementation-plan.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Backend Engineer | membership,secrets,oauth,kis,production-readiness |
+| [TASK-125](TASK-125-membership-kis-commercial-terms-review-packet.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Compliance Officer | membership,kis,open-api,terms,compliance |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | High | 중 | 2 ph / ~25000 tok | Lead Engineer | marketing,agents,operating-model,routing,go-to-market |
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,campaign,content-calendar,claim-bank,early-users |
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
 
 ## Medium
 
@@ -78,6 +120,62 @@
 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 보류 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual,deferred,scheduled |
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | authentication,sso,mock,dev-mode,ui-overhaul |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Medium | 낮 | 0.5 ph / ~6000 tok | Lead Engineer | backlog,governance,deferred,scheduling |
+| [TASK-076](TASK-076-ui-design-system-maturity.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Lead Engineer | ui,design-system,governance,diagnostic,lead-designer,qa,token-budget |
+| [TASK-077](TASK-077-ui-chart-token-bridge.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | UI/UX Designer | ui,refactor,design-system,frontend,token-bridge,qa |
+| [TASK-094](TASK-094-admin-document-packet-hwpx-prototype.md) | 보류 | Medium | 상 | 8 ph / ~90000 tok | Regulatory Admin | admin,documents,hwpx,business-registration,prototype |
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Medium | 상 | 8 ph / ~80000 tok | Marketing Growth | marketing,sns,external-api,publishing,automation,audit-log |
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Business Planner | sales,revenue,go-to-market,agents,pricing,crm |
+| [TASK-117](TASK-117-membership-payment-recognition-decision-packet.md) | 완료 | Medium | 중 | 2 ph / ~35000 tok | Regulatory Admin | membership,payment,bank-transfer,recognition,decision-packet |
+| [TASK-119](TASK-119-membership-staging-deploy-preflight-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | CI/CD Engineer | membership,deploy,staging,preflight,vercel,railway,supabase |
+| [TASK-120](TASK-120-membership-staging-env-inventory-template.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | CI/CD Engineer | membership,deploy,staging,env,preflight |
+| [TASK-121](TASK-121-membership-railway-port-healthcheck-readiness.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | Backend Engineer | membership,deploy,railway,healthcheck,preflight |
+| [TASK-122](TASK-122-membership-staging-persistent-storage-decision.md) | 완료 | Medium | 중 | 2 ph / ~22000 tok | Backend Engineer | membership,deploy,storage,staging,preflight |
+| [TASK-123](TASK-123-membership-supabase-staging-migration-rls-review-packet.md) | 완료 | Medium | 중 | 2 ph / ~26000 tok | Backend Engineer | membership,supabase,staging,rls,migration-review |
+| [TASK-124](TASK-124-membership-supabase-backup-apply-evidence-checklist.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | Backend Engineer | membership,supabase,staging,backup,evidence |
+| [TASK-126](TASK-126-membership-readiness-surface-sync.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | membership,readiness,governance,owner-surface |
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Medium | 중 | 1 ph / ~18000 tok | Regulatory Admin | business-admin,document-packet,hwpx,business-registration,governance |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Marketing Growth | marketing,sns,external-api,publishing,policy,research |
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,sns,publishing,state-machine,audit-log |
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Backend Engineer | marketing,sns,publishing,dry-run,audit-log |
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,gate |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,preview |
+| [TASK-134](TASK-134-promotion-asset-claim-review-matrix.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,assets |
+| [TASK-135](TASK-135-promotion-asset-review-queue-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,queue,assets |
+| [TASK-136](TASK-136-promotion-asset-review-queue-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,audit,preview |
+| [TASK-137](TASK-137-promotion-asset-owner-review-packet.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-packet |
+| [TASK-138](TASK-138-promotion-asset-owner-decision-queue-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-decision-queue |
+| [TASK-139](TASK-139-promotion-asset-owner-decision-queue-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-queue,audit |
+| [TASK-140](TASK-140-promotion-asset-owner-decision-evidence-checklist-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,compliance,claims,review,owner-decision-evidence |
+| [TASK-141](TASK-141-promotion-asset-owner-decision-evidence-checklist-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,audit |
+| [TASK-142](TASK-142-promotion-asset-owner-decision-evidence-freshness-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,compliance,claims,review,owner-decision-evidence,freshness |
+| [TASK-143](TASK-143-promotion-asset-owner-decision-evidence-freshness-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,audit |
+| [TASK-144](TASK-144-promotion-asset-owner-decision-evidence-refresh-queue-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue |
+| [TASK-145](TASK-145-promotion-asset-owner-decision-evidence-refresh-queue-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,audit |
+| [TASK-146](TASK-146-promotion-asset-owner-decision-evidence-refresh-work-order-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order |
+| [TASK-147](TASK-147-promotion-asset-owner-decision-evidence-refresh-work-order-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,audit |
+| [TASK-148](TASK-148-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-candidate.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet |
+| [TASK-149](TASK-149-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-candidate-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,audit |
+| [TASK-150](TASK-150-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-queue-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue |
+| [TASK-151](TASK-151-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-queue-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit |
+| [TASK-152](TASK-152-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-preflight-contract.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight |
+| [TASK-153](TASK-153-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-preflight-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight |
+| [TASK-154](TASK-154-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff |
+| [TASK-155](TASK-155-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff |
+| [TASK-156](TASK-156-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff,archive,rollback |
+| [TASK-157](TASK-157-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff,archive,rollback |
+| [TASK-158](TASK-158-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff,archive,rollback,readiness |
+| [TASK-159](TASK-159-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff,archive,rollback,readiness |
+| [TASK-160](TASK-160-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index-audit-preview-source-trace.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff,archive,rollback,readiness,source-trace |
+| [TASK-161](TASK-161-promotion-asset-owner-decision-evidence-refresh-owner-r3-packet-review-submission-handoff-packet-candidate-archive-rollback-manifest-audit-preview-readiness-index-audit-preview-source-trace-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,freshness,refresh-queue,work-order,owner-r3,packet,queue,audit,preflight,handoff,archive,rollback,readiness,source-trace |
+| [TASK-162](TASK-162-source-trace-audit-preview-readiness-index.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Compliance Officer | marketing,compliance,claims,review,owner-decision-evidence,owner-r3,audit,readiness,source-trace |
+| [TASK-163](TASK-163-source-trace-audit-preview-readiness-index-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,owner-r3,audit,readiness,source-trace |
+| [TASK-164](TASK-164-source-trace-audit-preview-readiness-index-audit-preview-source-trace.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,compliance,claims,review,owner-decision-evidence,owner-r3,audit,readiness,source-trace |
+| [TASK-165](TASK-165-source-trace-audit-preview-readiness-index-audit-preview-source-trace-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | QA | marketing,compliance,claims,review,owner-decision-evidence,owner-r3,audit,readiness,source-trace |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## Low
 

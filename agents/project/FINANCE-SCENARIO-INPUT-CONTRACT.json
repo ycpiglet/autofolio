@@ -1,0 +1,284 @@
+{
+  "$schema": "autofolio.finance-scenario-input-contract/v1",
+  "status": "local_synthetic_fixture_not_financial_or_investment_advice",
+  "owner": "Finance Accounting",
+  "last_updated": "2026-06-21T17:06:02+09:00",
+  "related_tasks": ["TASK-171", "TASK-172", "TASK-173", "TASK-174"],
+  "task_set_id": "TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT",
+  "source_artifacts": {
+    "finance_accounting_roadmap": "agents/project/FINANCE-ACCOUNTING-ROADMAP.json",
+    "business_plan": "agents/project/BUSINESS-PLAN.md",
+    "membership_payment_evidence_policy": "agents/project/MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.md",
+    "sales_handoff_checklist": "agents/project/SALES-HANDOFF-READINESS-CHECKLIST.md",
+    "task_171_record": "agents/lead_engineer/tasks/TASK-171-finance-accounting-planning-support-lane.md",
+    "task_172_record": "agents/lead_engineer/tasks/TASK-172-finance-scenario-input-contract.md"
+  },
+  "boundary": {
+    "synthetic_fixture_only": true,
+    "planning_support_only": true,
+    "example_not_current_portfolio_fact": true,
+    "read_only_planning_input_only": true,
+    "not_tax_accounting_final_advice": true,
+    "not_legal_or_securities_advice": true,
+    "not_investment_recommendation": true,
+    "no_trade_recommendation_or_order": true,
+    "no_order_execution": true,
+    "no_profit_guarantee": true,
+    "no_customer_payment_action": true,
+    "no_bank_or_pg_api_call": true,
+    "no_raw_statement_or_private_payment_record": true,
+    "no_secret_or_token_handling": true,
+    "no_kis_order_risk_prod_deploy_change": true
+  },
+  "scenario_input_contract": {
+    "observed": [
+      {
+        "id": "portfolio_snapshot_ref",
+        "source_bucket": "observed",
+        "required": true,
+        "fixture_value": "synthetic_read_only_snapshot",
+        "privacy_boundary": "reference only; no raw statement or private payment record"
+      },
+      {
+        "id": "allocation_summary",
+        "source_bucket": "observed",
+        "required": true,
+        "fixture_value": "synthetic allocation summary",
+        "advice_boundary": "diagnostic input only"
+      }
+    ],
+    "planned": [
+      {
+        "id": "planned_return_pct",
+        "source_bucket": "planned",
+        "required": true,
+        "fixture_value": 5.0,
+        "advice_boundary": "Owner or business-plan input, not generated guidance"
+      },
+      {
+        "id": "planning_horizon",
+        "source_bucket": "planned",
+        "required": true,
+        "fixture_value": "quarter",
+        "advice_boundary": "comparison horizon only"
+      }
+    ],
+    "expected": [
+      {
+        "id": "expected_return_range_pct",
+        "source_bucket": "expected",
+        "required": true,
+        "fixture_value": [8.0, 10.0],
+        "advice_boundary": "scenario range with assumptions; never guaranteed"
+      },
+      {
+        "id": "confidence",
+        "source_bucket": "expected",
+        "required": true,
+        "fixture_value": "medium",
+        "advice_boundary": "quality marker only"
+      }
+    ],
+    "missing": [
+      {
+        "id": "cashflow_assumptions",
+        "source_bucket": "missing",
+        "required": true,
+        "fixture_value": "missing",
+        "owner_decision_required": true
+      },
+      {
+        "id": "professional_review",
+        "source_bucket": "missing",
+        "required": true,
+        "fixture_value": "missing",
+        "owner_decision_required": true
+      }
+    ],
+    "blocked": [
+      {
+        "id": "trade_recommendation",
+        "reason": "blocked boundary, not a scenario input",
+        "action_permitted_now": false
+      },
+      {
+        "id": "customer_payment_or_bank_action",
+        "reason": "blocked boundary, not a scenario input",
+        "action_permitted_now": false
+      }
+    ]
+  },
+  "metric_contract": [
+    {
+      "id": "planned_return_pct",
+      "bucket": "planned",
+      "required": true,
+      "fixture_value": 5.0
+    },
+    {
+      "id": "expected_return_range_pct",
+      "bucket": "expected",
+      "required": true,
+      "fixture_value": [8.0, 10.0]
+    },
+    {
+      "id": "gap_to_plan_pct_points",
+      "bucket": "derived",
+      "required": true,
+      "fixture_value": {
+        "low": 3.0,
+        "high": 5.0
+      }
+    },
+    {
+      "id": "allocation_drift",
+      "bucket": "derived",
+      "required": true,
+      "fixture_value": "candidate_review_signal_only"
+    },
+    {
+      "id": "cash_and_payment_readiness",
+      "bucket": "derived",
+      "required": true,
+      "fixture_value": "missing_evidence_only"
+    },
+    {
+      "id": "timeline_candidate",
+      "bucket": "derived",
+      "required": true,
+      "fixture_value": "owner_review_after_required_evidence"
+    }
+  ],
+  "sample_fixtures": [
+    {
+      "id": "synthetic_plan_5_expected_around_10",
+      "label": "Synthetic plan 5 pct vs expected around 10 pct",
+      "synthetic": true,
+      "example_is_not_current_portfolio_fact": true,
+      "current_portfolio_fact": false,
+      "real_customer_payment_data": false,
+      "observed": {
+        "portfolio_snapshot_ref": "synthetic_read_only_snapshot",
+        "allocation_summary": "synthetic allocation summary",
+        "data_freshness": "fixture_static"
+      },
+      "planned": {
+        "planned_return_pct": 5.0,
+        "planning_horizon": "quarter",
+        "risk_constraints": ["owner_review_required_before_action"]
+      },
+      "expected": {
+        "expected_return_range_pct": [8.0, 10.0],
+        "assumptions": [
+          "synthetic market context",
+          "synthetic allocation drift",
+          "no guarantee and no action trigger"
+        ],
+        "confidence": "medium",
+        "not_guaranteed": true
+      },
+      "derived": {
+        "gap_to_plan_pct_points": {
+          "low": 3.0,
+          "high": 5.0
+        },
+        "allocation_drift": "candidate_review_signal_only",
+        "cash_and_payment_readiness": "missing_evidence_only",
+        "timeline_candidate": "owner_review_after_required_evidence"
+      },
+      "missing": [
+        "cashflow assumptions",
+        "portfolio source freshness",
+        "payment evidence posture",
+        "professional review if used outside local planning"
+      ],
+      "blocked": [
+        "trade recommendation",
+        "order placement",
+        "profit taking instruction",
+        "additional investment instruction",
+        "portfolio rebalance instruction",
+        "customer payment request",
+        "receipt or tax filing action",
+        "bank or payment-provider API call",
+        "raw statement persistence",
+        "secret or token handling",
+        "KIS/order/risk/prod/deploy change"
+      ]
+    }
+  ],
+  "gap_matrix": [
+    {
+      "id": "portfolio_goal_gap",
+      "source_bucket": "derived",
+      "required_evidence": ["planned_return_pct", "expected_return_range_pct"],
+      "action_boundary": "diagnostic only"
+    },
+    {
+      "id": "allocation_or_concentration_gap",
+      "source_bucket": "observed",
+      "required_evidence": ["portfolio_snapshot_ref", "allocation_summary"],
+      "action_boundary": "candidate review only"
+    },
+    {
+      "id": "cashflow_or_payment_evidence_gap",
+      "source_bucket": "missing",
+      "required_evidence": ["cashflow_assumptions", "payment evidence posture"],
+      "action_boundary": "no payment action"
+    },
+    {
+      "id": "compliance_or_professional_review_gap",
+      "source_bucket": "missing",
+      "required_evidence": ["professional_review"],
+      "action_boundary": "Owner and professional review before external use"
+    }
+  ],
+  "portfolio_review_candidates": [
+    {
+      "id": "synthetic_allocation_drift_review",
+      "candidate_for_owner_review_only": true,
+      "action_permitted_now": false,
+      "no_trade_instruction": true,
+      "why_flagged": "expected range is above planned return in the synthetic fixture",
+      "missing_evidence": ["portfolio source freshness", "risk constraints", "professional review if externalized"]
+    }
+  ],
+  "timeline_candidates": [
+    {
+      "id": "synthetic_quarter_review",
+      "candidate_for_owner_review_only": true,
+      "action_permitted_now": false,
+      "horizon": "quarter",
+      "trigger": "all required evidence is available and reviewed",
+      "required_evidence": [
+        "read-only source freshness",
+        "cashflow assumptions",
+        "payment evidence posture",
+        "compliance wording review"
+      ]
+    }
+  ],
+  "forbidden_outputs": [
+    "tax advice",
+    "accounting advice",
+    "investment advice",
+    "trade recommendation",
+    "order placement",
+    "customer payment request",
+    "bank or payment-provider API call",
+    "guaranteed return claim",
+    "public performance claim",
+    "secret or token handling",
+    "KIS/order/risk/prod/deploy change"
+  ],
+  "handoff": {
+    "next_task": "TASK-173",
+    "stable_input_ref": "agents/project/FINANCE-SCENARIO-INPUT-CONTRACT.json",
+    "ready_for_read_model": true,
+    "read_model_boundary": "read-only derived model; no order path and no trade recommendation"
+  },
+  "verification": {
+    "local_gate": "python scripts/finance_scenario_input_contract_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_finance_scenario_input_contract_gate.py -q"
+  }
+}

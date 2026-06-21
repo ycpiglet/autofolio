@@ -1,0 +1,58 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - text: 투자는 에이전트 팀에게,
+        - text: 결정은 나에게.
+      - paragraph [ref=e6]:
+        - text: AI 에이전트가 시장을 분석하고 조건을 제안합니다.
+        - text: 실제 주문은 당신의 확인 후 실행됩니다.
+    - generic [ref=e7]:
+      - generic [ref=e8]: 포트폴리오 미리보기 (데모)
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: 총 평가금액
+          - generic [ref=e12]: ₩12,543,000
+        - generic [ref=e13]:
+          - generic [ref=e14]: 오늘 손익
+          - generic [ref=e15]: +₩123,400
+        - generic [ref=e16]:
+          - generic [ref=e17]: 수익률
+          - generic [ref=e18]: +0.99%
+        - generic [ref=e19]:
+          - generic [ref=e20]: 보유 종목
+          - generic [ref=e21]: "4"
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - generic [ref=e24]: 삼성전자
+          - generic [ref=e25]: +1.2%
+        - generic [ref=e26]:
+          - generic [ref=e27]: SK하이닉스
+          - generic [ref=e28]: +2.8%
+        - generic [ref=e29]:
+          - generic [ref=e30]: NAVER
+          - generic [ref=e31]: "-0.4%"
+    - paragraph [ref=e33]: 🛡️ 모의투자 기본 · 자동매매 기본 OFF · 킬스위치 상시
+  - generic [ref=e35]:
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: 로그인
+        - generic [ref=e39]: Autofolio 계정으로 로그인하세요.
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e43]: 아이디
+            - textbox "아이디" [ref=e44]:
+              - /placeholder: 아이디 입력
+          - generic [ref=e45]:
+            - generic [ref=e46]: 비밀번호
+            - textbox "비밀번호" [ref=e47]:
+              - /placeholder: 비밀번호 입력
+          - button "로그인" [ref=e48]
+        - generic "SSO SNS 로그인" [ref=e49]:
+          - generic [ref=e52]: 소셜 로그인
+          - paragraph [ref=e54]: 소셜 로그인은 각 제공자 OAuth 앱 등록(클라이언트 ID/secret·리디렉션 URI)이 필요합니다. 버튼을 누르면 설정 방법을 안내합니다.
+    - generic [ref=e57]:
+      - generic [ref=e58]: 로그인 없이 둘러보기
+      - paragraph [ref=e59]: 데모 데이터로 Autofolio를 체험해보세요.
+      - button "게스트 데모 시작" [ref=e60]
