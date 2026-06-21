@@ -657,4 +657,11 @@ python scripts/report_upstream_bug.py --evidence EVIDENCE-*.md --dry-run
 - Autofolio: 이 §17 + `scripts/report_upstream_bug.py`
 - agent_runtime: upstream PR을 통해 `AGENTS.md §N Downstream Bug Intake` 추가 요청
   (Autofolio가 발견한 버그를 upstream이 체계적으로 수신·처리하도록)
+
+## 19. Measured Improvement Loop (요약 규약)
+
+업스트림 §8.5/§8.6의 측정형 개선 루프를 한 줄 규약으로 고정한다:
+**개선 루프는 `Evaluate -> Propose -> Verify -> Merge` 순서**로 두고, 오답·실패
+사례·golden set·edge case는 검증 증거로 보존하며, 반복 요청/비판은 Repeated
+Request API로 승격하고 Compound 자동 캡처한다. 최종 기준과 위험 병합은 Owner 권한.
 <!-- AUTOFOLIO-OVERLAY:end -->
