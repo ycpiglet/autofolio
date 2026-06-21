@@ -75,7 +75,7 @@ export function pnlColor(value: number): string {
     // SSR fallback — return KR defaults
     if (value > 0) return pnlColorTokens.kr.up;
     if (value < 0) return pnlColorTokens.kr.down;
-    return "#8B95A1";
+    return pnlColorTokens.flat;
   }
 
   const isWestern =
@@ -83,7 +83,7 @@ export function pnlColor(value: number): string {
 
   if (value > 0) return isWestern ? pnlColorTokens.western.up : pnlColorTokens.kr.up;
   if (value < 0) return isWestern ? pnlColorTokens.western.down : pnlColorTokens.kr.down;
-  return "#8B95A1";
+  return pnlColorTokens.flat;
 }
 
 // ── Tabular numbers ────────────────────────────────────────────────────────
