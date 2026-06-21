@@ -15,6 +15,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface SessionResponse {
   role: string;
@@ -323,38 +329,26 @@ export default function LoginPage() {
       </div>
 
       {/* Setup guide modal (shown when an unconfigured provider is clicked) */}
-      {setupProvider && (() => {
-        const guide = SETUP_GUIDE[setupProvider.id] ?? {
-          title: `${setupProvider.label} 연동 설정`,
-          steps: ["제공자 개발자 콘솔에서 OAuth 앱을 등록하고 콜백 URI를 등록하세요."],
-          env: [],
-          manual: "docs/EXTERNAL_APP_API_OWNER_MANUAL.md",
-        };
-        return (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label={guide.title}
-            onClick={() => setSetupProvider(null)}
-          >
-            <div
-              className="max-h-[85vh] w-full max-w-lg overflow-auto rounded-xl bg-surface p-6 shadow-soft"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-3 flex items-start justify-between gap-4">
-                <h2 className="text-lg font-bold text-foreground" style={{ wordBreak: "keep-all" }}>
+      <Dialog
+        open={setupProvider !== null}
+        onOpenChange={(open) => {
+          if (!open) setSetupProvider(null);
+        }}
+      >
+        {setupProvider && (() => {
+          const guide = SETUP_GUIDE[setupProvider.id] ?? {
+            title: `${setupProvider.label} 연동 설정`,
+            steps: ["제공자 개발자 콘솔에서 OAuth 앱을 등록하고 콜백 URI를 등록하세요."],
+            env: [],
+            manual: "docs/EXTERNAL_APP_API_OWNER_MANUAL.md",
+          };
+          return (
+            <DialogContent className="block max-h-[85vh] w-full max-w-lg overflow-auto bg-surface p-6 shadow-soft sm:max-w-lg">
+              <DialogHeader className="mb-3 pr-8">
+                <DialogTitle className="text-lg font-bold text-foreground" style={{ wordBreak: "keep-all" }}>
                   {guide.title}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setSetupProvider(null)}
-                  className="rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted"
-                  aria-label="닫기"
-                >
-                  ✕
-                </button>
-              </div>
+                </DialogTitle>
+              </DialogHeader>
               <p className="mb-4 text-sm text-muted-foreground leading-relaxed">
                 계정 생성·콘솔 등록·secret 발급은 <strong>Owner가 직접</strong> 수행합니다.
                 아래 값을 준비해 <code className="rounded bg-muted px-1">.env</code>에 넣고 API 서버를
@@ -386,10 +380,10 @@ export default function LoginPage() {
               <p className="text-xs text-muted-foreground">
                 상세 절차·주의사항: <code className="rounded bg-muted px-1">{guide.manual}</code>
               </p>
-            </div>
-          </div>
-        );
-      })()}
+            </DialogContent>
+          );
+        })()}
+      </Dialog>
     </main>
   );
 }

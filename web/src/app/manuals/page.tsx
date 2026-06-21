@@ -133,7 +133,7 @@ function AcknowledgementPanel({
     } catch (err) {
       const message =
         err instanceof ApiError
-          ? JSON.stringify(err.body)
+          ? (err.body as { detail?: string } | undefined)?.detail ?? err.message
           : "동의를 기록하지 못했습니다.";
       setState({ kind: "error", message });
     }

@@ -271,7 +271,7 @@ function KpiDetailPanel({ cards, activeKpi }: { cards: PortfolioKpiCardModel[]; 
           {card.items.map((item) => (
             <div key={item.label} className="rounded-lg border border-border bg-card px-3 py-2">
               <div className="text-xs font-semibold text-muted-foreground">{item.label}</div>
-              <div className={cn("mt-1 text-sm", STRONG_NUMBER_TEXT_CLASS, item.tone === "pnl" && portfolioPnlColorClass(parseDisplayNumber(item.value)))}>
+              <div className={cn("mt-1 text-sm", STRONG_NUMBER_TEXT_CLASS, item.tone === "pnl" && portfolioPnlColorClass(toNumber(item.value)))}>
                 {item.value}
               </div>
             </div>
@@ -970,16 +970,22 @@ function InfoHint({ label }: { label: string }) {
       ref={anchorRef}
       data-testid="portfolio-info-hint"
       className="relative inline-flex shrink-0"
-      title={label}
-      aria-label={label}
       onMouseEnter={show}
       onMouseLeave={() => setPosition(null)}
-      onFocus={show}
-      onBlur={() => setPosition(null)}
     >
-      <span className="inline-flex size-5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm">
+      <button
+        type="button"
+        title={label}
+        aria-label={`도움말: ${label}`}
+        className="inline-flex size-5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        onFocus={show}
+        onBlur={() => setPosition(null)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setPosition(null);
+        }}
+      >
         <HelpCircle className="size-3.5" aria-hidden />
-      </span>
+      </button>
       {position && (
         <span
           role="tooltip"
@@ -1186,11 +1192,6 @@ function toNumber(value: unknown): number {
 }
 
 function kpiNumber(value: unknown): number {
-  return toNumber(value);
-}
-
-function parseDisplayNumber(value: string): number {
-  if (value.startsWith("-")) return -toNumber(value);
   return toNumber(value);
 }
 
