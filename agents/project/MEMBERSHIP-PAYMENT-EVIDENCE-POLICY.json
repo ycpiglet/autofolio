@@ -1,0 +1,141 @@
+{
+  "$schema": "autofolio.membership-payment-evidence-policy/v1",
+  "policy_version": 1,
+  "status": "draft_policy_not_applied",
+  "updated_at": "2026-06-19T18:29:43+09:00",
+  "owner": "Lead Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-103",
+    "TASK-108",
+    "TASK-110",
+    "TASK-111"
+  ],
+  "purpose": "Define the minimum payment evidence Autofolio may retain for verified signup and manual bank-transfer approval before any production launch.",
+  "non_goals": [
+    "No real bank account number, raw bank statement, customer payment record, or customer PII is stored in this repository.",
+    "No bank API, open-banking API, PG, virtual account, OAuth, production DB, or deploy action is performed by this policy.",
+    "No automatic account activation is authorized by this policy.",
+    "No refund, receipt, tax, accounting, or legal conclusion is finalized by this policy."
+  ],
+  "allowed_evidence_sources": [
+    {
+      "id": "manual_bank_app_check",
+      "label": "Owner manually checks bank app or statement outside Autofolio",
+      "allowed_in_local_prototype": true,
+      "allowed_in_production_after_review": true,
+      "raw_source_persisted": false
+    },
+    {
+      "id": "code_assisted_deposit_match",
+      "label": "Autofolio matches deposit code, amount, applicant name, and contact from pasted text",
+      "allowed_in_local_prototype": true,
+      "allowed_in_production_after_review": true,
+      "raw_source_persisted": false
+    },
+    {
+      "id": "csv_import_review",
+      "label": "Owner imports a reviewed CSV extract after retention and privacy review",
+      "allowed_in_local_prototype": false,
+      "allowed_in_production_after_review": true,
+      "raw_source_persisted": false
+    },
+    {
+      "id": "provider_receipt_reference",
+      "label": "Payment provider or virtual account reference after provider contract review",
+      "allowed_in_local_prototype": false,
+      "allowed_in_production_after_review": true,
+      "raw_source_persisted": false
+    }
+  ],
+  "forbidden_evidence": [
+    "raw_bank_statement_text",
+    "full_bank_account_number",
+    "resident_registration_number",
+    "card_number",
+    "bank_login_credential",
+    "payment_provider_secret",
+    "unredacted_customer_identifier",
+    "freeform_owner_note_with_payment_private_data"
+  ],
+  "retained_fields": [
+    "membership_request_id",
+    "target_user_id",
+    "actor_user_id",
+    "approval_event_id",
+    "evidence_type",
+    "deposit_code",
+    "amount_krw",
+    "currency",
+    "source_type",
+    "source_reference",
+    "masked_excerpt",
+    "confidence",
+    "recorded_at"
+  ],
+  "redaction_rules": [
+    {
+      "id": "mask_bank_account_like_numbers",
+      "pattern_class": "bank_account_or_long_digit_sequence",
+      "action": "mask_middle_digits",
+      "max_visible_digits": 4
+    },
+    {
+      "id": "mask_personal_identifier_like_numbers",
+      "pattern_class": "resident_registration_or_card_like_number",
+      "action": "mask_all_but_last_four",
+      "max_visible_digits": 4
+    },
+    {
+      "id": "bound_text_excerpt",
+      "pattern_class": "any_freeform_source_text",
+      "action": "truncate_after_redaction",
+      "max_chars": 120
+    }
+  ],
+  "audit_invariants": [
+    {
+      "id": "raw_pasted_statement_not_persisted_by_default",
+      "statement": "Raw pasted bank statement or CSV text is processed in memory and is not persisted by default."
+    },
+    {
+      "id": "payment_evidence_minimal_fields_only",
+      "statement": "Production payment evidence stores only the retained_fields allowlist after redaction."
+    },
+    {
+      "id": "applicant_public_lookup_hides_owner_evidence",
+      "statement": "Applicant-facing status lookup must not expose Owner notes, audit events, account grant internals, or private payment evidence."
+    },
+    {
+      "id": "activation_requires_explicit_privileged_action",
+      "statement": "Payment matching may assist a reviewer, but account activation requires an explicit audited privileged action or a separately approved automation policy."
+    },
+    {
+      "id": "no_real_bank_account_in_repo",
+      "statement": "Real bank account numbers and payment records must not be committed to repository files."
+    },
+    {
+      "id": "refund_receipt_tax_boundary_separate_record",
+      "statement": "Refund, receipt, tax, and accounting treatment require a separate reviewed operating record before paid external users."
+    }
+  ],
+  "launch_gates": [
+    "policy_gate_passes",
+    "production_data_model_maps_retained_fields",
+    "retention_period_and_delete_path_reviewed",
+    "refund_receipt_tax_boundary_recorded",
+    "payment_recognition_method_selected",
+    "staging_privacy_non_disclosure_tests_pass"
+  ],
+  "verification": {
+    "local_policy_gate": "python scripts/membership_payment_policy_gate.py --check",
+    "readiness_api_test": ".venv\\Scripts\\python.exe -m pytest tests/api/test_membership.py -q",
+    "forbidden_actions": [
+      "bank API call",
+      "production DB write",
+      "external deploy",
+      "secret read or write",
+      "real customer payment evidence storage"
+    ]
+  }
+}

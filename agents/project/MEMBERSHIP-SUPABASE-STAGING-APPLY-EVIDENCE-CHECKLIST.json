@@ -1,0 +1,149 @@
+{
+  "$schema": "autofolio.membership-supabase-staging-apply-evidence-checklist/v1",
+  "status": "draft_evidence_checklist_not_applied",
+  "updated_at": "2026-06-19T22:02:58+09:00",
+  "owner": "Backend Engineer",
+  "related_tasks": ["TASK-087", "TASK-119", "TASK-122", "TASK-123", "TASK-124"],
+  "source_inputs": [
+    "agents/project/MEMBERSHIP-SUPABASE-STAGING-MIGRATION-RLS-REVIEW.json",
+    "agents/project/MEMBERSHIP-STAGING-PERSISTENT-STORAGE-DECISION.json",
+    "agents/project/MEMBERSHIP-STAGING-DEPLOY-PREFLIGHT-CHECKLIST.json"
+  ],
+  "boundaries": {
+    "checklist_only": true,
+    "no_supabase_connection": true,
+    "no_project_selection_or_mutation": true,
+    "no_migration_file_created": true,
+    "no_sql_apply": true,
+    "no_backup_download_or_restore": true,
+    "no_advisor_execution": true,
+    "no_data_api_grant_change": true,
+    "no_external_env_write": true,
+    "no_secret_values": true,
+    "no_production_data": true,
+    "no_deploy_or_public_url": true,
+    "keeps_can_launch_false": true
+  },
+  "source_basis": [
+    {
+      "id": "supabase_backups",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/platform/backups",
+      "note": "Backup and restore posture is evidence required before persistent staging user data is accepted."
+    },
+    {
+      "id": "supabase_backup_restore_cli",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore",
+      "note": "CLI backup/restore workflow is Owner/R3 execution evidence, not performed in this task."
+    },
+    {
+      "id": "supabase_database_advisors",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/database/database-advisors",
+      "note": "Security and performance advisor output is required after schema exists."
+    }
+  ],
+  "evidence_stages": [
+    {
+      "id": "pre_apply_review",
+      "required_evidence_ids": [
+        "owner_selected_staging_project",
+        "backup_restore_plan_reviewed",
+        "migration_rls_review_packet_passed",
+        "rollback_notes_reviewed",
+        "external_env_values_ready_outside_repo"
+      ],
+      "blocks_without_evidence": true
+    },
+    {
+      "id": "apply_execution",
+      "required_evidence_ids": [
+        "approved_migration_created_in_r3_lane",
+        "migration_apply_log_captured",
+        "migration_status_captured",
+        "can_launch_still_false_after_apply"
+      ],
+      "blocks_without_evidence": true
+    },
+    {
+      "id": "post_apply_security",
+      "required_evidence_ids": [
+        "security_advisor_output_captured",
+        "performance_advisor_output_captured",
+        "data_api_grant_review_captured",
+        "service_role_server_only_reviewed"
+      ],
+      "blocks_without_evidence": true
+    },
+    {
+      "id": "post_apply_isolation",
+      "required_evidence_ids": [
+        "cross_user_membership_request_test_passed",
+        "cross_user_integration_metadata_test_passed",
+        "anon_tenant_access_test_passed",
+        "append_only_order_audit_test_passed"
+      ],
+      "blocks_without_evidence": true
+    },
+    {
+      "id": "deploy_smoke_prerequisite",
+      "required_evidence_ids": [
+        "railway_env_written_by_owner",
+        "vercel_env_written_by_owner",
+        "backend_health_smoke_ready",
+        "frontend_proxy_health_smoke_ready",
+        "no_real_kis_or_payment_activation"
+      ],
+      "blocks_without_evidence": true
+    }
+  ],
+  "required_evidence_ids": [
+    "owner_selected_staging_project",
+    "backup_restore_plan_reviewed",
+    "migration_rls_review_packet_passed",
+    "rollback_notes_reviewed",
+    "external_env_values_ready_outside_repo",
+    "approved_migration_created_in_r3_lane",
+    "migration_apply_log_captured",
+    "migration_status_captured",
+    "can_launch_still_false_after_apply",
+    "security_advisor_output_captured",
+    "performance_advisor_output_captured",
+    "data_api_grant_review_captured",
+    "service_role_server_only_reviewed",
+    "cross_user_membership_request_test_passed",
+    "cross_user_integration_metadata_test_passed",
+    "anon_tenant_access_test_passed",
+    "append_only_order_audit_test_passed",
+    "railway_env_written_by_owner",
+    "vercel_env_written_by_owner",
+    "backend_health_smoke_ready",
+    "frontend_proxy_health_smoke_ready",
+    "no_real_kis_or_payment_activation"
+  ],
+  "owner_only_actions": [
+    "Select and approve the Supabase staging project outside repository files.",
+    "Create/apply the actual migration in an Owner/R3 lane.",
+    "Capture backup/restore, advisor, Data API grant, and cross-user evidence after apply.",
+    "Write Vercel/Railway/Supabase environment values outside git.",
+    "Approve any external user staging."
+  ],
+  "forbidden_actions": [
+    "Do not connect to Supabase or select a project in this task.",
+    "Do not create migration files or execute SQL.",
+    "Do not download backups or restore data.",
+    "Do not run advisors or change Data API grants.",
+    "Do not write external environment variables.",
+    "Do not store secrets, production data, real customer data, payment records, bank values, provider tokens, or KIS credentials in repository files.",
+    "Do not deploy, publish a URL, or mark can_launch true."
+  ],
+  "verification": {
+    "local_checklist_gate": "python scripts/membership_supabase_apply_evidence_gate.py --check",
+    "json_parse": "python -m json.tool agents/project/MEMBERSHIP-SUPABASE-STAGING-APPLY-EVIDENCE-CHECKLIST.json",
+    "unit_tests": "python -m pytest tests/unit/test_membership_supabase_apply_evidence_gate.py -q"
+  }
+}
