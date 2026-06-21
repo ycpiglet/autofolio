@@ -11,6 +11,7 @@ export const chartColors = {
   positive: "#34C759",
   warning: "#FF9500",
   neutral: "#8E8E93",
+  textMuted: "#8B95A1",
   accentPurple: "#AF52DE",
   accentCyan: "#5AC8FA",
   accentYellow: "#FFCC00",
@@ -39,7 +40,7 @@ export const compactChartSeriesPalette = [
 
 export const lightweightChartTheme = {
   background: "transparent",
-  textColor: chartColors.neutral,
+  textColor: chartColors.textMuted,
   gridColor: chartColors.grid,
   borderColor: chartColors.grid,
 } as const;
@@ -64,5 +65,5 @@ export const pnlColorTokens = {
     up: chartColors.positive,
     down: chartColors.negative,
   },
-  flat: chartColors.neutral,
+  flat: chartColors.textMuted,
 } as const;

@@ -58,7 +58,7 @@ export function CandleChart({ className }: CandleChartProps) {
     const chart = createChart(el, {
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#8B95A1",
+        textColor: lightweightChartTheme.textColor,
       },
       grid: {
         vertLines: { color: lightweightChartTheme.gridColor },
