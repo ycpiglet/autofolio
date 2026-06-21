@@ -5,6 +5,20 @@ Claude-specific companion guidance for this repository.
 Read `AGENTS.md` first. If this file conflicts with `AGENTS.md` or current
 records under `agents/lead_engineer/`, follow the shared protocol.
 
+## Compliance Gate — 판매 전 금융규제 확인 (MANDATORY)
+
+Autofolio를 **돈을 받는 상용 서비스로 출시/판매하기 전** 반드시 통과해야 하는 게이트다. 현재는 제품이
+판매 가능 수준으로 성숙하지 않아 신청서 작성은 보류하되, 성숙 시점(유료 베타·결제 연동 직전)에 다음을
+먼저 진행한다:
+
+1. 금융위 **비조치의견서(no-action letter)** 신청.
+2. **금융규제 샌드박스(혁신금융서비스)** 또는 한국핀테크지원센터 상담.
+
+근거: 무인가/무등록 금융투자업 영위는 형사처벌(자본시장법 §444)의 비대칭 리스크이며, LLM 단독으로
+"합법 확정"을 줄 수 없다(소송 대응과 다른 영역). 그 전까지 **종목 추천을 영업으로 배포 / 자동승인
+자동매매를 대신 운용**하는 기능은 기본 OFF 플래그로 잠근다. 선행 블로커: KIS OpenAPI 약관의 멀티유저·
+상용 허용 여부 확인. 상세: `agents/lead_engineer/tasks/TASK-087`, `TASK-088`.
+
 ## Operating Mode
 
 - Treat `AGENTS.md` as the source of truth.
@@ -16,6 +30,7 @@ records under `agents/lead_engineer/`, follow the shared protocol.
 
 ## Start Checklist
 
+0. Run `python scripts/session_resume_check.py` and resume from its `RESUME HERE` output (crash-recovery + pointer/loop consistency).
 1. Read `AGENTS.md`.
 2. Read `README.md`.
 3. Read `AGENT_RUNTIME.md`.
@@ -76,7 +91,7 @@ Authoritative shared role definitions live under `agents/`:
    - Task당 implementer 서브에이전트 1개 → spec reviewer → code quality reviewer 순서.
    - 리뷰가 이슈를 찾으면 implementer가 수정 → 재리뷰. 이슈가 없어야 다음 Task로 넘어간다.
 2. **독립적인 작업 2개 이상이면** `superpowers:dispatching-parallel-agents`로 병렬 처리한다.
-3. **백로그 자동화 사이클은** Ralph Loop(`/ralph-loop`)로 구동한다. 세션 시작 시 `.claude/ralph-loop.local.md`를 읽고 active면 즉시 재개한다.
+3. **백로그 자동화 사이클은** Ralph Loop(`/ralph-loop`)로 구동한다. 세션 시작 시 먼저 `python scripts/session_resume_check.py`로 상태를 확인하고, `.claude/ralph-loop.local.md`가 `active: true`이며 **신선하고** `agents/project/NEXT-SESSION-POINTER.yml`와 **일치할 때에만** 재개한다. 스테일·모순이면 재개하지 말고 포인터/STATUS를 권위로 삼아 reconcile한다.
 4. **단일 에이전트 인라인 구현 금지** — 간단해 보여도 서브에이전트로 위임한다.
    - 허용 예외: 한 줄 수정, 설정 조회, 상태 확인, 사람에게 설명하는 응답.
 
