@@ -461,7 +461,8 @@ function SignatureField({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
-  const signedAtValue = value.signed_at || new Date().toISOString();
+  const [fallbackSignedAt] = useState(() => new Date().toISOString());
+  const signedAtValue = value.signed_at || fallbackSignedAt;
   const hasInk = value.signature_data_url.length > 0;
 
   useEffect(() => {

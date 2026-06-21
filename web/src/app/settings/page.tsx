@@ -449,13 +449,17 @@ function MembershipTab() {
         login_username: loginUsername || undefined,
         initial_password: initialPassword || undefined,
       });
-      setState({
-        kind: "ready",
-        busyId: null,
-        requests: state.requests.map((item) =>
-          item.request_id === updated.request_id ? updated : item,
-        ),
-      });
+      setState((prev) =>
+        prev.kind === "ready"
+          ? {
+              ...prev,
+              busyId: null,
+              requests: prev.requests.map((item) =>
+                item.request_id === updated.request_id ? updated : item,
+              ),
+            }
+          : prev,
+      );
     } catch (err) {
       setState({ kind: "error", message: membershipErrorMessage(err) });
     }
