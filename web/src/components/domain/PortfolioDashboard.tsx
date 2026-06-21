@@ -973,11 +973,16 @@ function InfoHint({ label }: { label: string }) {
       onMouseEnter={show}
       onMouseLeave={() => setPosition(null)}
     >
-      <button
-        type="button"
+      {/* role=button span (not <button>) — InfoHint is used inside the KpiCard
+          <button>, and a <button> nested in a <button> is invalid HTML that the
+          browser reparents during hydration (React #418). A span[role=button]
+          stays keyboard-focusable without breaking nesting. */}
+      <span
+        role="button"
+        tabIndex={0}
         title={label}
         aria-label={`도움말: ${label}`}
-        className="inline-flex size-5 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="inline-flex size-5 cursor-help items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
         onFocus={show}
         onBlur={() => setPosition(null)}
         onKeyDown={(event) => {
@@ -985,7 +990,7 @@ function InfoHint({ label }: { label: string }) {
         }}
       >
         <HelpCircle className="size-3.5" aria-hidden />
-      </button>
+      </span>
       {position && (
         <span
           role="tooltip"
