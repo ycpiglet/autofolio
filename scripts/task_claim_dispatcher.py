@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import uuid
@@ -34,12 +35,21 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+import atomic_io
 import backlog_board
+import claim_guard
 import plan_assumption_gate
 from agent_instance_registry import record_claim_instance
 from footprint_conflict_gate import ACTIVE_CLAIM_STATUSES as FOOTPRINT_ACTIVE_STATUSES
 from footprint_conflict_gate import footprints_overlap
 from pane_event_log import append_event
+
+
+def _claim_autocommit_enabled() -> bool:
+    # Default ON; opt out with AGENT_RUNTIME_CLAIM_AUTOCOMMIT=0 (e.g. bespoke flows).
+    return os.environ.get("AGENT_RUNTIME_CLAIM_AUTOCOMMIT", "1").strip().lower() not in {
+        "0", "false", "no", "off",
+    }
 
 
 SCHEMA = "agent-runtime-task-claim/v1"
@@ -339,6 +349,8 @@ def _build_claim(
         "mode": mode,
         "status": "claimed",
         "task_set_id": args.task_set_id,
+        "active_scope": args.active_scope or args.task_set_id,
+        "scope_transition_approved": bool(args.scope_transition_approved),
         "project_id": args.project_id,
         "unit_id": args.unit_id,
         "unit_spec": args.unit_spec,
@@ -570,7 +582,7 @@ def cmd_create(args: argparse.Namespace) -> int:
         ),
     )
 
-    claim_path.write_text(json.dumps(claim, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_io.write_json_atomic(claim_path, claim)
     record_claim_instance(root, claim, claim_path=claim_path)
     append_event(
         root,
@@ -589,6 +601,23 @@ def cmd_create(args: argparse.Namespace) -> int:
             "ts": claim["claimed_at"],
         },
     )
+    # Crash-safety guard: commit the claim immediately so a sibling session's
+    # `git reset --hard` / `git clean -fd` cannot erase an untracked claim
+    # (incident 2026-06-12). Best-effort — never fails claim creation.
+    if _claim_autocommit_enabled():
+        guard = claim_guard.commit_claim_artifacts(
+            root,
+            claim_path,
+            extra_paths=[root / str(claim["handoff_path"]), root / str(claim["log_path"])],
+            claim_id=str(claim["claim_id"]),
+        )
+        if not guard.get("ok") and guard.get("reason") != "not-a-git-repo":
+            print(
+                f"warning: claim {claim['claim_id']} was not committed "
+                f"({guard.get('reason')}); an untracked claim can be lost by a "
+                "concurrent 'git reset --hard'/'git clean -fd'",
+                file=sys.stderr,
+            )
     _emit({"status": "created", "path": _rel(root, claim_path), "claim": claim}, as_json=args.json)
     return 0
 
@@ -730,6 +759,31 @@ def cmd_release(args: argparse.Namespace) -> int:
             "ts": now_text,
         },
     )
+    if str(claim.get("phase") or "").strip().lower() == "taskset-completed":
+        # Taskset boundary reached: emit a completion signal so the runtime
+        # (boundary guard + UI banner) can enforce STOP-and-report rather than
+        # drifting into out-of-scope follow-on work.
+        scope = str(claim.get("active_scope") or claim.get("task_set_id") or "").strip()
+        append_event(
+            root,
+            {
+                "event": "taskset.completed",
+                "actor": claim.get("agent_instance_id") or "unknown",
+                "actor_role": claim.get("agent_role"),
+                "agent_instance_id": claim.get("agent_instance_id"),
+                "display_name": claim.get("display_name"),
+                "callsite_id": claim.get("callsite_id"),
+                "task_id": claim.get("task_id"),
+                "task_set_id": scope,
+                "claim_id": claim.get("claim_id"),
+                "worktree_path": claim.get("worktree_path"),
+                "message": (
+                    f"Taskset {scope} completed; stop and report. "
+                    "Out-of-scope follow-on work requires owner approval."
+                ),
+                "ts": now_text,
+            },
+        )
     _emit({"status": "released", "path": _rel(root, path), "claim": claim}, as_json=args.json)
     return 0
 
@@ -744,6 +798,24 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--agent-role", required=True)
     create.add_argument("--team-id", default="agent-runtime-core")
     create.add_argument("--task-set-id", default="")
+    create.add_argument(
+        "--active-scope",
+        default="",
+        help=(
+            "Active taskset boundary recorded on the claim (defaults to "
+            "--task-set-id). The taskset boundary guard treats work outside "
+            "this scope after completion as drift."
+        ),
+    )
+    create.add_argument(
+        "--scope-transition-approved",
+        action="store_true",
+        help=(
+            "Mark this claim as an owner-approved scope transition so the "
+            "taskset boundary guard does not block it after a prior taskset "
+            "completed"
+        ),
+    )
     create.add_argument("--project-id", default="")
     create.add_argument("--unit-id", default="")
     create.add_argument("--unit-spec", default="")
