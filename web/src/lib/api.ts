@@ -45,6 +45,10 @@ export interface ConditionPayload {
   target_price: number;
   quantity: number;
   ack_token?: string;
+  actor_type?: "USER" | "AGENT" | "SCHEDULER";
+  source_surface?: string;
+  trigger_reason?: string;
+  live_ack_id?: number;
 }
 
 export interface ConditionResponse {
@@ -93,18 +97,28 @@ export interface InvestorProfileResponse {
 export interface SurveyOption {
   value: string;
   label: string;
+  exclusive?: boolean;
 }
 
 export interface SurveyQuestion {
   id: string;
   title: string;
-  kind: "single" | "multi" | "acknowledgement";
+  kind: "single" | "multi" | "acknowledgement" | "signature";
   required: boolean;
+  category: string;
+  description?: string | null;
   options: SurveyOption[];
+}
+
+export interface SurveyCategory {
+  key: string;
+  title: string;
+  description: string;
 }
 
 export interface SurveyDefinitionResponse {
   version: string;
+  categories: SurveyCategory[];
   questions: SurveyQuestion[];
 }
 
@@ -126,6 +140,155 @@ export interface ProfileCheckinResponse {
   status: string;
   id: number;
   profile: InvestorProfileResponse;
+}
+
+export interface EngineHealthResponse {
+  status: "ok" | "watch" | string;
+  active_conditions: number;
+  processing_conditions: number;
+  stale_processing_conditions: number;
+  duplicate_intent_keys: number;
+  open_intents_over_5m: number;
+  latest_run: Record<string, unknown> | null;
+}
+
+export interface ManualSummary {
+  slug: string;
+  title: string;
+  description: string;
+  audience: string;
+  visibility: string;
+  ui_section: string;
+  risk_level: string;
+  requires_ack: boolean;
+  ack_kind: string | null;
+  version: string;
+  order: number;
+}
+
+export interface ManualDetail extends ManualSummary {
+  content: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface ManualsListResponse {
+  manuals: ManualSummary[];
+}
+
+export interface AcknowledgementStatusResponse {
+  username: string;
+  live_trading_acknowledged: boolean;
+  live_trading_acknowledged_at: string | null;
+  latest_live_trading_ack_id: number | null;
+  totp_recommended: boolean;
+  totp_enabled: boolean;
+  message: string;
+}
+
+export interface AcknowledgementResponse {
+  id: number;
+  status: string;
+  method: string;
+  created_at: string;
+}
+
+export type IntegrationKind = "llm" | "sns" | "broker" | "other";
+
+export interface IntegrationProviderInfo {
+  id: string;
+  label: string;
+  kind: IntegrationKind;
+  auth_type: string;
+  secret_label: string;
+  account_label_hint: string;
+  description: string;
+}
+
+export interface IntegrationCredentialResponse {
+  provider_id: string;
+  label: string;
+  kind: IntegrationKind;
+  auth_type: string;
+  configured: boolean;
+  enabled: boolean;
+  account_label: string | null;
+  scopes: string[];
+  secret_set: boolean;
+  secret_hint: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  last_checked_at: string | null;
+  status: "not_configured" | "configured" | "disabled";
+  message: string;
+}
+
+export interface IntegrationSettingsResponse {
+  providers: IntegrationProviderInfo[];
+  integrations: IntegrationCredentialResponse[];
+}
+
+export interface IntegrationCredentialPayload {
+  secret_value?: string;
+  account_label?: string;
+  scopes?: string[];
+  enabled?: boolean;
+  note?: string;
+}
+
+export interface PortfolioHoldingRow extends Record<string, unknown> {
+  종목: string;
+  티커: string;
+  자산군: string;
+  지역: string;
+  섹터?: string;
+  전략?: string;
+  그룹?: string;
+  수량: number;
+  평단: number;
+  현재가: number;
+  평가금액: number;
+  평가손익: number;
+  손익률: number;
+  비중: number;
+  예상연배당?: number;
+  배당수익률?: number;
+  위험버킷?: string;
+  data_quality?: Record<string, unknown>;
+}
+
+export interface PortfolioGroup {
+  group_id: string;
+  name: string;
+  description: string;
+  color: string;
+  sort_order: number;
+  symbols: string[];
+  members?: Record<string, unknown>[];
+  summary?: Record<string, unknown>;
+  rows?: PortfolioHoldingRow[];
+}
+
+export interface PortfolioGroupPayload {
+  name: string;
+  symbols: string[];
+  description?: string;
+  color?: string;
+  sort_order?: number;
+}
+
+export interface PortfolioOverviewResponse {
+  kpis: Record<string, number | string | null>;
+  holdings: TableResponse<PortfolioHoldingRow>;
+  groups: {
+    automatic: Array<{ id: string; title: string; rows: Record<string, unknown>[] }>;
+    manual: PortfolioGroup[];
+    saved: PortfolioGroup[];
+  };
+  diagnostics: Array<Record<string, unknown>>;
+  top_movers: Record<string, PortfolioHoldingRow[]>;
+  concentration: Record<string, number>;
+  allocation_gap: TableResponse;
+  data_quality: Record<string, unknown>;
 }
 
 // ── Internal helpers ───────────────────────────────────────────────────────
@@ -176,7 +339,12 @@ export function apiGet<T>(path: string): Promise<T> {
  * failure: /api/auth/me returns 401 before login, so getCsrfToken() would throw
  * and the login POST would never fire.
  */
-const CSRF_EXEMPT_PATHS = new Set(["/api/auth/login", "/api/auth/logout"]);
+const CSRF_EXEMPT_PATHS = new Set([
+  "/api/auth/login",
+  "/api/auth/logout",
+  "/api/membership/requests",
+  "/api/membership/requests/status",
+]);
 
 /**
  * HTTP POST with JSON body.
@@ -214,6 +382,21 @@ export async function apiPut<T>(path: string, data?: unknown): Promise<T> {
   });
 }
 
+/**
+ * HTTP DELETE.
+ * Fetches (cached) CSRF token from /api/auth/me and sends it as X-CSRF-Token.
+ */
+export async function apiDelete<T>(path: string): Promise<T> {
+  const csrfToken = await getCsrfToken();
+  return request<T>(path, {
+    method: "DELETE",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRF-Token": csrfToken,
+    },
+  });
+}
+
 /** Convenience: fetch a TableResponse endpoint */
 export function apiTable<TRow extends Record<string, unknown>>(
   path: string,
@@ -239,6 +422,34 @@ export function postAutoTrading(enabled: boolean): Promise<unknown> {
  */
 export function postRunOnce(): Promise<unknown> {
   return apiPost("/api/engine/run-once");
+}
+
+/** GET /api/engine/health — scheduler/queue/order-intent diagnostics */
+export function getEngineHealth(): Promise<EngineHealthResponse> {
+  return apiGet<EngineHealthResponse>("/api/engine/health");
+}
+
+/** GET /api/portfolio/overview — portfolio diagnosis dashboard payload */
+export function getPortfolioOverview(): Promise<PortfolioOverviewResponse> {
+  return apiGet<PortfolioOverviewResponse>("/api/portfolio/overview");
+}
+
+/** POST /api/portfolio/groups — create manual portfolio group */
+export function postPortfolioGroup(payload: PortfolioGroupPayload): Promise<PortfolioGroup> {
+  return apiPost<PortfolioGroup>("/api/portfolio/groups", payload);
+}
+
+/** PUT /api/portfolio/groups/{id} — update manual portfolio group */
+export function putPortfolioGroup(
+  groupId: string,
+  payload: PortfolioGroupPayload,
+): Promise<PortfolioGroup> {
+  return apiPut<PortfolioGroup>(`/api/portfolio/groups/${encodeURIComponent(groupId)}`, payload);
+}
+
+/** DELETE /api/portfolio/groups/{id} */
+export function deletePortfolioGroup(groupId: string): Promise<{ status: string }> {
+  return apiDelete<{ status: string }>(`/api/portfolio/groups/${encodeURIComponent(groupId)}`);
 }
 
 /**
@@ -281,6 +492,57 @@ export function postProfileCheckin(
   return apiPost<ProfileCheckinResponse>("/api/profile/checkin", payload);
 }
 
+/** GET /api/manuals — manuals visible to current session */
+export function getManuals(): Promise<ManualsListResponse> {
+  return apiGet<ManualsListResponse>("/api/manuals");
+}
+
+/** GET /api/manuals/{slug} */
+export function getManual(slug: string): Promise<ManualDetail> {
+  return apiGet<ManualDetail>(`/api/manuals/${encodeURIComponent(slug)}`);
+}
+
+/** GET /api/acknowledgements/status */
+export function getAcknowledgementStatus(): Promise<AcknowledgementStatusResponse> {
+  return apiGet<AcknowledgementStatusResponse>("/api/acknowledgements/status");
+}
+
+/** POST /api/acknowledgements — record risk/manual acknowledgement */
+export function postAcknowledgement(payload: {
+  kind: string;
+  document_slug: string;
+  document_version: string;
+  acknowledgement_text: string;
+  current_password?: string;
+}): Promise<AcknowledgementResponse> {
+  return apiPost<AcknowledgementResponse>("/api/acknowledgements", payload);
+}
+
+/** GET /api/integrations — current user's redacted integration status. */
+export function getIntegrations(): Promise<IntegrationSettingsResponse> {
+  return apiGet<IntegrationSettingsResponse>("/api/integrations");
+}
+
+/** PUT /api/integrations/{provider_id} — write-only token/settings upsert. */
+export function putIntegrationCredential(
+  providerId: string,
+  payload: IntegrationCredentialPayload,
+): Promise<IntegrationCredentialResponse> {
+  return apiPut<IntegrationCredentialResponse>(
+    `/api/integrations/${encodeURIComponent(providerId)}`,
+    payload,
+  );
+}
+
+/** DELETE /api/integrations/{provider_id} — remove current user's provider token. */
+export function deleteIntegrationCredential(
+  providerId: string,
+): Promise<{ status: string; integration: IntegrationCredentialResponse }> {
+  return apiDelete<{ status: string; integration: IntegrationCredentialResponse }>(
+    `/api/integrations/${encodeURIComponent(providerId)}`,
+  );
+}
+
 // ── Account (local account management) ──────────────────────────────────────
 
 /** Read-only account profile — never contains a secret. */
@@ -289,6 +551,189 @@ export interface AccountResponse {
   role: string;
   data_source: string;
   is_owner: boolean;
+}
+
+// ── Membership approval ────────────────────────────────────────────────────
+
+export type MembershipStatus =
+  | "requested"
+  | "verification_pending"
+  | "deposit_pending"
+  | "active"
+  | "rejected"
+  | "expired";
+
+export interface DepositInstructionResponse {
+  price_krw: number;
+  currency: string;
+  deposit_code: string;
+  bank_name: string | null;
+  account_holder: string | null;
+  account_number: string | null;
+  account_configured: boolean;
+  due_at: string | null;
+}
+
+export interface ApprovalEventResponse {
+  actor: string;
+  action: string;
+  previous_status: string | null;
+  next_status: string;
+  evidence_type: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+export interface MembershipAccountGrantResponse {
+  username: string;
+  role: string;
+  created_at: string;
+  password_set: boolean;
+}
+
+export interface SubscriptionGrantResponse {
+  plan: string;
+  starts_at: string;
+  ends_at: string | null;
+  source_event: string;
+}
+
+export interface MembershipRequestResponse {
+  request_id: string;
+  status: MembershipStatus;
+  display_name: string;
+  contact: string;
+  plan: string;
+  price_krw: number;
+  requested_at: string;
+  updated_at: string;
+  verified_at: string | null;
+  activated_at: string | null;
+  grant_expires_at: string | null;
+  deposit_instruction: DepositInstructionResponse | null;
+  account_grant: MembershipAccountGrantResponse | null;
+  subscription_grant: SubscriptionGrantResponse | null;
+  events: ApprovalEventResponse[];
+  message: string;
+}
+
+export interface MembershipRequestListResponse {
+  requests: MembershipRequestResponse[];
+}
+
+export interface MembershipRequestPayload {
+  display_name: string;
+  contact: string;
+  plan?: string;
+  referral_source?: string;
+  note?: string;
+}
+
+export interface MembershipRequestStatusLookupPayload {
+  request_id: string;
+  contact: string;
+}
+
+export interface MembershipTransitionPayload {
+  status: MembershipStatus;
+  evidence_type?: string;
+  note?: string;
+  grant_days?: number;
+  login_username?: string;
+  initial_password?: string;
+}
+
+export interface MembershipDepositRecognitionPayload {
+  source_text: string;
+  min_confidence?: number;
+}
+
+export interface MembershipDepositMatchResponse {
+  request_id: string;
+  display_name: string;
+  contact: string;
+  status: MembershipStatus;
+  deposit_code: string;
+  expected_amount_krw: number;
+  matched_amount_krw: number | null;
+  confidence: number;
+  reasons: string[];
+  matched_text_excerpt: string;
+  suggested_evidence_type: string;
+}
+
+export interface MembershipDepositRecognitionResponse {
+  matches: MembershipDepositMatchResponse[];
+  scanned_lines: number;
+  candidate_requests: number;
+  min_confidence: number;
+}
+
+export interface MembershipReadinessItem {
+  id: string;
+  label: string;
+  state: "pass" | "watch" | "block";
+  detail: string;
+  evidence: string;
+  gate: string;
+}
+
+export interface MembershipReadinessResponse {
+  can_launch: boolean;
+  mode: string;
+  score: number;
+  summary: string;
+  items: MembershipReadinessItem[];
+  required_owner_actions: string[];
+  environment_flags: Record<string, boolean>;
+}
+
+/** POST /api/membership/requests — public request intake; does not create a session. */
+export function postMembershipRequest(
+  payload: MembershipRequestPayload,
+): Promise<MembershipRequestResponse> {
+  return apiPost<MembershipRequestResponse>("/api/membership/requests", payload);
+}
+
+/** POST /api/membership/requests/status — public applicant status lookup. */
+export function postMembershipRequestStatus(
+  payload: MembershipRequestStatusLookupPayload,
+): Promise<MembershipRequestResponse> {
+  return apiPost<MembershipRequestResponse>("/api/membership/requests/status", payload);
+}
+
+/** GET /api/membership/requests — Owner review queue. */
+export function getMembershipRequests(
+  status?: MembershipStatus,
+): Promise<MembershipRequestListResponse> {
+  const suffix = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiGet<MembershipRequestListResponse>(`/api/membership/requests${suffix}`);
+}
+
+/** POST /api/membership/requests/{id}/transition — Owner approval action. */
+export function postMembershipTransition(
+  requestId: string,
+  payload: MembershipTransitionPayload,
+): Promise<MembershipRequestResponse> {
+  return apiPost<MembershipRequestResponse>(
+    `/api/membership/requests/${encodeURIComponent(requestId)}/transition`,
+    payload,
+  );
+}
+
+/** POST /api/membership/deposits/recognize — Owner-only pasted statement matcher. */
+export function postMembershipDepositRecognition(
+  payload: MembershipDepositRecognitionPayload,
+): Promise<MembershipDepositRecognitionResponse> {
+  return apiPost<MembershipDepositRecognitionResponse>(
+    "/api/membership/deposits/recognize",
+    payload,
+  );
+}
+
+/** GET /api/membership/readiness — Owner-only production readiness checklist. */
+export function getMembershipReadiness(): Promise<MembershipReadinessResponse> {
+  return apiGet<MembershipReadinessResponse>("/api/membership/readiness");
 }
 
 // ── SSO / SNS login ────────────────────────────────────────────────────────
@@ -318,7 +763,7 @@ export function getAccount(): Promise<AccountResponse> {
  * POST /api/account/password — change the SESSION's own password.
  * The server derives the username from the session, never the body.
  * Throws ApiError(401) on wrong current password, ApiError(400) on a
- * weak/invalid new password, ApiError(403) for guests.
+ * weak/invalid new password, ApiError(403) for unapproved sessions.
  */
 export function postPasswordChange(
   oldPassword: string,

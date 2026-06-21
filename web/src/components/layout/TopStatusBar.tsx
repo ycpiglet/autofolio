@@ -1,9 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiGet, getInvestorProfile, type InvestorProfileResponse } from "@/lib/api";
+import {
+  apiGet,
+  getInvestorProfile,
+  postLogout,
+  type InvestorProfileResponse,
+} from "@/lib/api";
+import { clearCsrfCache } from "@/lib/csrf";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { EnvBadge } from "@/components/safety/EnvBadge";
 import { KillSwitchButton } from "@/components/safety/KillSwitchButton";
 import { AutoTradingToggle } from "@/components/safety/AutoTradingToggle";
@@ -26,6 +35,8 @@ interface TopStatusBarProps {
 }
 
 export function TopStatusBar({ className }: TopStatusBarProps) {
+  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
   const { data: status, refetch } = useQuery<EngineStatus>({
     queryKey: ["engine-status"],
     queryFn: () => apiGet<EngineStatus>("/api/engine/status"),
@@ -38,6 +49,18 @@ export function TopStatusBar({ className }: TopStatusBarProps) {
     staleTime: 60_000,
     retry: 1,
   });
+
+  async function handleLogout() {
+    setLoggingOut(true);
+    try {
+      await postLogout();
+    } catch {
+      // Even if the request fails, clear local state and send the user to /login.
+    } finally {
+      clearCsrfCache();
+      router.replace("/login");
+    }
+  }
 
   return (
     <header
@@ -55,7 +78,7 @@ export function TopStatusBar({ className }: TopStatusBarProps) {
             </Badge>
           ) : (
             <Badge variant="outline" render={<Link href="/onboarding/investor-profile" />}>
-              프로필 작성
+              성향 진단
             </Badge>
           )
         )}
@@ -85,6 +108,15 @@ export function TopStatusBar({ className }: TopStatusBarProps) {
             <span className="h-7 w-24 animate-pulse rounded-lg bg-muted" />
           </>
         )}
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label="로그아웃"
+          onClick={handleLogout}
+          disabled={loggingOut}
+        >
+          {loggingOut ? "로그아웃 중…" : "로그아웃"}
+        </Button>
       </div>
     </header>
   );
