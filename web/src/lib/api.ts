@@ -311,7 +311,9 @@ async function request<T>(
     ...init,
     credentials: "include",
     headers: {
-      "Content-Type": "application/json",
+      // Only declare a JSON body type when a body is actually sent; bodyless
+      // GET/DELETE requests should not carry Content-Type.
+      ...(init.body != null ? { "Content-Type": "application/json" } : {}),
       ...init.headers,
     },
   });
