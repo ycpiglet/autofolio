@@ -81,9 +81,10 @@ export function AllocationChart({
     );
   }
 
-  // Determine name column (first col) and value column (prefer "비중" or "현재비중")
+  // Determine name column (first col) and value column (prefer current weight).
   const nameCol = data.columns[0];
   const valueCol =
+    data.columns.find((c) => c.includes("현재")) ??
     data.columns.find((c) => c.includes("비중") || c.toLowerCase().includes("weight")) ??
     data.columns[1] ??
     data.columns[0];

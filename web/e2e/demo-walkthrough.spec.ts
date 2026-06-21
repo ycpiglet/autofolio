@@ -78,6 +78,88 @@ const ALLOCATION_TABLE = {
   ],
 };
 
+const PORTFOLIO_OVERVIEW = {
+  kpis: {
+    as_of: "2026-06-16T09:00:00+09:00",
+    total_assets: 12_345_678,
+    total_market_value: 9_345_678,
+    cash: 3_000_000,
+    cash_ratio_pct: 24.3,
+    unrealized_pnl: 234_567,
+    daily_pnl: 34_567,
+    daily_return_pct: 1.23,
+    total_return_pct: 4.56,
+    monthly_return_pct: 3.45,
+    holdings_count: 3,
+  },
+  holdings: {
+    columns: ["종목", "티커", "자산군", "지역", "섹터", "수량", "평가금액", "평가손익", "손익률", "비중"],
+    rows: [
+      { 종목: "SK하이닉스", 티커: "000660", 자산군: "주식", 지역: "KR", 섹터: "반도체", 수량: 2, 평가금액: 5_370_000, 평가손익: 1_102_000, 손익률: 25.8, 비중: 57.5 },
+      { 종목: "KODEX 200", 티커: "069500", 자산군: "ETF", 지역: "KR", 섹터: "국내지수", 수량: 3, 평가금액: 440_835, 평가손익: 36_163, 손익률: 8.9, 비중: 4.7 },
+      { 종목: "삼성전자", 티커: "005930", 자산군: "주식", 지역: "KR", 섹터: "반도체", 수량: 3, 평가금액: 1_087_500, 평가손익: 166_312, 손익률: 18.1, 비중: 11.6 },
+    ],
+  },
+  groups: {
+    automatic: [
+      {
+        id: "asset-class",
+        title: "자산군별",
+        rows: [
+          { name: "주식", weight_pct: 69.1, pnl: 1_268_312, market_value: 6_457_500 },
+          { name: "ETF", weight_pct: 4.7, pnl: 36_163, market_value: 440_835 },
+          { name: "현금", weight_pct: 24.3, pnl: 0, market_value: 3_000_000 },
+        ],
+      },
+      {
+        id: "sector",
+        title: "섹터별",
+        rows: [
+          { name: "반도체", weight_pct: 69.1, pnl: 1_268_312, market_value: 6_457_500 },
+          { name: "국내지수", weight_pct: 4.7, pnl: 36_163, market_value: 440_835 },
+        ],
+      },
+    ],
+    manual: [],
+    saved: [],
+  },
+  diagnostics: [
+    {
+      level: "watch",
+      title: "단일 종목 집중",
+      message: "상위 1종목 비중이 57.5%입니다.",
+      action: "보유 목적과 손실 허용 범위를 다시 확인하세요.",
+      symbols: ["000660"],
+    },
+  ],
+  top_movers: {
+    contributors: [
+      { 종목: "SK하이닉스", 티커: "000660", 평가손익: 1_102_000, 손익률: 25.8, 비중: 57.5 },
+      { 종목: "삼성전자", 티커: "005930", 평가손익: 166_312, 손익률: 18.1, 비중: 11.6 },
+    ],
+    detractors: [],
+  },
+  concentration: {
+    top1_weight_pct: 57.5,
+    top3_weight_pct: 73.8,
+    top5_weight_pct: 73.8,
+    held_symbols: 3,
+  },
+  allocation_gap: {
+    columns: ["자산군", "목표%", "현재%", "갭%"],
+    rows: [
+      { 자산군: "주식", "목표%": 35, "현재%": 69.1, "갭%": 34.1 },
+      { 자산군: "ETF", "목표%": 30, "현재%": 4.7, "갭%": -25.3 },
+      { 자산군: "현금", "목표%": 15, "현재%": 24.3, "갭%": 9.3 },
+    ],
+  },
+  data_quality: {
+    warnings: 0,
+    fallback_ticker_name_symbols: [],
+    missing_sector_symbols: [],
+  },
+};
+
 const INDICES_TABLE = {
   columns: ["지수", "현재가", "등락률"],
   rows: [
@@ -207,6 +289,9 @@ async function mockDemoApis(page: Page) {
   await page.route(/\/api\/portfolio\/kpis/, (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(KPI_RESPONSE) }),
   );
+  await page.route(/\/api\/portfolio\/overview/, (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(PORTFOLIO_OVERVIEW) }),
+  );
   await page.route(/\/api\/portfolio\/holdings/, (route) =>
     route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(HOLDINGS_TABLE) }),
   );
@@ -261,6 +346,7 @@ async function loginAsOwner(page: Page) {
   await page.getByLabel("아이디").fill("admin");
   await page.getByLabel("비밀번호").fill("secret");
   await page.getByRole("button", { name: /^로그인$/ }).click();
+  await page.goto("/home");
   await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
 }
 
@@ -272,10 +358,19 @@ test.describe("Demo walkthrough — Next.js replacement surface", () => {
     for (const item of WALKTHROUGH_PAGES) {
       await test.step(`visit ${item.path}`, async () => {
         await page.goto(item.path);
-        await expect(page.getByRole("navigation")).toBeVisible({ timeout: 10_000 });
+        await expect(page.getByRole("navigation", { name: "사이드바 내비게이션" })).toBeVisible({ timeout: 10_000 });
         await expect(page.getByRole("heading", { name: item.heading, exact: true })).toBeVisible({
           timeout: 10_000,
         });
+        if (item.path === "/portfolio") {
+          const kpis = page.getByLabel("포트폴리오 핵심 지표");
+          await expect(kpis.locator('[data-kpi-id="unrealized"]')).toContainText("+4.56%");
+          await expect(kpis.locator('[data-kpi-id="cash"]')).toHaveCount(0);
+
+          await page.getByRole("button", { name: "진단" }).click();
+          await expect(page.locator("strong", { hasText: "보유 목적" })).toBeVisible();
+          await expect(page.locator("strong", { hasText: "손실 허용 범위" })).toBeVisible();
+        }
       });
     }
   });

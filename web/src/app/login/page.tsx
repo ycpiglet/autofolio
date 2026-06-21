@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiPost, ApiError, getSsoProviders, type SsoProviderInfo } from "@/lib/api";
@@ -70,6 +71,15 @@ const SETUP_GUIDE: Record<
   },
 };
 
+function apiErrorDetail(err: unknown): string | null {
+  if (!(err instanceof ApiError)) return null;
+  if (typeof err.body === "object" && err.body && "detail" in err.body) {
+    const detail = (err.body as { detail?: unknown }).detail;
+    return typeof detail === "string" ? detail : null;
+  }
+  return null;
+}
+
 function callbackUrl(providerId: string): string {
   const origin =
     typeof window !== "undefined" ? window.location.origin : "http://127.0.0.1:3000";
@@ -82,7 +92,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [guestLoading, setGuestLoading] = useState(false);
   const [setupProvider, setSetupProvider] = useState<SsoProviderInfo | null>(null);
 
   const { data: ssoData } = useQuery({
@@ -109,25 +118,12 @@ export default function LoginPage() {
       router.push("/home");
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+        setError(apiErrorDetail(err) ?? "아이디 또는 비밀번호가 올바르지 않습니다.");
       } else {
         setError("로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
       }
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleGuest() {
-    setError(null);
-    setGuestLoading(true);
-    try {
-      await apiPost<SessionResponse>("/api/auth/login", { guest: true });
-      router.push("/home");
-    } catch {
-      setError("게스트 로그인 중 오류가 발생했습니다.");
-    } finally {
-      setGuestLoading(false);
     }
   }
 
@@ -218,7 +214,7 @@ export default function LoginPage() {
           <Card>
             <CardHeader>
               <CardTitle>로그인</CardTitle>
-              <CardDescription>Autofolio 계정으로 로그인하세요.</CardDescription>
+              <CardDescription>승인된 Autofolio 계정으로 로그인하세요.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} noValidate className="flex flex-col gap-4">
@@ -305,28 +301,24 @@ export default function LoginPage() {
             </CardContent>
           </Card>
 
-          {/* Guest card */}
+          {/* Signup request card */}
           <Card className="border-dashed">
             <CardContent className="pt-4 pb-4">
               <div className="flex flex-col items-center gap-3 text-center">
-                <div className="text-sm font-medium text-foreground">
-                  로그인 없이 둘러보기
-                </div>
+                <div className="text-sm font-medium text-foreground">승인 기반 가입</div>
                 <p className="text-xs text-muted-foreground">
-                  데모 데이터로 Autofolio를 체험해보세요.
+                  검증된 사용자만 계정이 활성화됩니다.
                 </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleGuest}
-                  disabled={guestLoading}
-                  aria-busy={guestLoading}
-                >
-                  {guestLoading ? "연결 중…" : "게스트 데모 시작"}
+                <Button nativeButton={false} render={<Link href="/signup" />} className="w-full">
+                  가입 승인 신청
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            계정은 Owner가 신청자와 입금 확인을 검증한 뒤 활성화합니다.
+          </p>
         </div>
       </div>
 
