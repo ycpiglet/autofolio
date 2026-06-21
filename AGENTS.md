@@ -17,22 +17,27 @@ conflict, follow this file and the latest records under `agents/lead_engineer/`.
 5. A task is not complete until the result and verification are recorded.
 6. Do not guess timestamps. Use `python scripts/now.py`.
 7. Never commit secrets, credentials, private runtime state, or local tool data.
+8. Owner-facing chat responses must be Korean by default. Use another language
+   only when the Owner explicitly asks for it. Agent-to-agent notes, code
+   comments, machine fields, and evidence records may use English when that is
+   clearer or more parseable.
 
 ## 1. Start Protocol
 
 Before non-trivial work, read:
 
-1. `AGENTS.md`
-2. `README.md`
-3. `agents/project/PROJECT-CONTEXT.yml` if present
-4. `AGENT_RUNTIME.md`
-5. `agents/lead_engineer/STATUS.md`
-6. `agents/lead_engineer/AUDIT-LOG.md`
-7. `agents/roles.yml`
-8. Tool-specific guidance, if relevant
-9. Your role file: `agents/{role}/SKILL.md`
-10. `agents/lead_engineer/tasks/BACKLOG.md`
-11. The latest relevant `CYCLE`, `REVIEW`, and `TASK` files
+1. `agents/project/NEXT-SESSION-POINTER.yml`
+2. `AGENTS.md`
+3. `README.md`
+4. `agents/project/PROJECT-CONTEXT.yml` if present
+5. `AGENT_RUNTIME.md`
+6. `agents/lead_engineer/STATUS.md`
+7. `agents/lead_engineer/AUDIT-LOG.md`
+8. `agents/roles.yml`
+9. Tool-specific guidance, if relevant
+10. Your role file: `agents/{role}/SKILL.md`
+11. `agents/lead_engineer/tasks/BACKLOG.md`
+12. The latest relevant `CYCLE`, `REVIEW`, and `TASK` files
 
 Create an internal context snapshot:
 
@@ -49,6 +54,26 @@ verification:
 ```
 
 Only print the snapshot when it would clarify ambiguity or risk.
+
+## 1.5 Live Work Pointer
+
+`agents/project/NEXT-SESSION-POINTER.yml` is the compact live work pointer for
+the whole runtime, not only a next-session note. Together with
+`agents/runtime/task_claims/*.json`, it must identify which agent, team, and
+pane is working on which task, current status, phase, progress_pct, worktree,
+branch, claim, handoff, pointers, required rules, and next verification steps.
+
+Update it while work is happening and before closure whenever non-trivial state
+changes:
+
+1. active task, role, team, pane, owner, or responsibility changes;
+2. a decision or blocker changes the next action;
+3. status, phase, progress_pct, or verification status changes;
+4. a repeated request becomes a rule, function/API, script, hook, gate, or task;
+5. Compound captures a repeated mistake or criticism.
+
+If the pointer and longer records disagree, treat the pointer as a resume hint,
+then verify against the canonical task, status, backlog, and audit records.
 
 ## 2. Source Of Truth
 
@@ -132,6 +157,140 @@ Allowed task states:
 - `완료`
 - `보류`
 
+## 5.4 Project Management Decomposition
+
+Non-trivial work uses this hierarchy:
+
+```text
+initiative -> taskset -> task -> unit
+```
+
+Use `project` only for the host/repository/product lane. Use `initiative` for
+the Owner-facing parent above one or more tasksets.
+
+The backlog/board is a routing index, not the full task specification. Keep
+only metadata there: ids, status, priority, owner, model tier, difficulty,
+task_set_id, project_id, initiative_id, and evidence pointers. Put detailed
+work instructions in linked initiative, taskset, task, or unit spec files.
+
+Owner request vocabulary:
+
+- `initiative 작성/등록해줘`: create or update the parent outcome record and
+  propose tasksets under it.
+- `taskset 작성/등록해줘`: create an executable batch plan and task files under
+  an initiative.
+- `task 작성/등록해줘`: add one canonical task to an existing taskset.
+- `unit 작성해줘`: split one task into worker-ready unit specs with exact scope
+  and verification.
+
+Human-facing numbers are generated, not planner-reserved. Use generated
+`Initiative N -> Taskset N.N -> Task N.N.N -> Unit N.N.N.N` labels for Owner
+recognition, and keep UUID/timestamp-backed file IDs for collision resistance.
+
+Milestone, horizon, team, owner, role, priority, and phase are metadata axes,
+not extra hierarchy levels. Routine recurring work and spike research may use
+their own record type instead of being forced into the goal tree.
+
+Planning or design discussion must be recorded in `reviews/` before closeout;
+do not leave hierarchy, numbering, or workflow decisions as chat-only state.
+
+A worker-ready unit must include:
+
+1. context and source links;
+2. exact target files or components;
+3. in-scope and out-of-scope boundaries;
+4. step-by-step execution notes when needed;
+5. acceptance criteria;
+6. verification commands;
+7. handoff/report format.
+
+Before assigning a low-tier worker to a unit, run the readiness gate for the
+target task or unit:
+
+```powershell
+python scripts/task_unit_readiness_gate.py --task-id TASK-ID --require-ready --check
+```
+
+Planning, research synthesis, architecture, risk classification, and
+decomposition belong to higher-capability planner roles/models. Routine
+implementation units should be assigned to lower-cost worker models when the
+unit is precise, reversible, and verifiable. Escalate the model tier when the
+unit is ambiguous, high-risk, cross-cutting, security-sensitive, or repeatedly
+failing.
+
+Implementation agents execute the smallest registered unit. They must not
+expand into reprioritization, adjacent tasksets, or new planning unless a
+planner-approved record says so.
+
+## 5.5 Task Set Dispatch
+
+Task sets are the default unit for parallel panes. A "pane" may be a terminal
+pane, a separate terminal tab, or another worktree-backed agent session. The
+important boundary is not the UI container; it is the tuple
+`task_set_id + task_id + claim_id + worktree_path + branch + pane_id`.
+
+When the Owner says `taskset-xxx 진행해줘`, `taskset-xxx 시작`, or an equivalent
+request:
+
+1. Resolve the alias and inspect the lane:
+   `python scripts/taskset_dispatcher.py plan <taskset-alias> --json`.
+2. Claim the task set before editing:
+   `python scripts/taskset_dispatcher.py start <taskset-alias> --json`.
+3. Work only in the returned `worktree_path` and `branch`.
+4. Keep one active claim per `task_set_id` unless the claim explicitly records
+   `allow_parallel_task_set: true` and the reason is documented.
+5. Keep the claim and live pointer updated with `phase`, `progress_pct`,
+   `step_index`, `step_total`, and `status_text`.
+6. Before handoff or closure, run:
+   `python scripts/taskset_work_gate.py --check` and
+   `python scripts/parallel_worktree_gate.py --check`.
+
+Use human-friendly task-set display names in reports, for example
+`Quality Sentinel`, `Progress Scout`, `Console Operator`, or `Repo Custodian`.
+System identifiers remain stable machine fields; display names help humans read
+the board like RPG-style party/status labels.
+
+## 5.6 Standard Work Lifecycle (W0~W6)
+
+The deferred-revalidation discipline (T0 plan snapshot at registration, T2
+drift check at dispatch) and the W0~W6 order below are the DEFAULT for every
+taskset, not an opt-in. No step may run out of order.
+
+- W0 Visibility (session start): inspect `agents/runtime/task_claims/*.json`,
+  `git worktree list`, and `python scripts/inflight_overlay.py --summary` to
+  see active claims, worktrees, and unmerged agent-branch divergence before
+  picking work. Never enter a problem that already has an active claim.
+- W1 Registration: search existing tasks/claims first (no duplicates), then
+  register the task records, and record the plan-assumption snapshot (T0)
+  with `python scripts/plan_assumption_gate.py record --taskset <id>
+  --design-record <review> --anchor <path>` covering the design record and
+  the scripts the plan depends on.
+- W2 Claim (claim-first): `python scripts/task_claim_dispatcher.py create`
+  re-verifies the recorded assumptions (T2) BEFORE writing the claim; drift
+  refuses the claim until a replan review re-records anchors (T3).
+  `--skip-plan-check` is a loud transitional escape. The claim is created in
+  the main checkout BEFORE any worktree work; footprint conflicts and
+  duplicate task/taskset claims block. Never create a worktree without a
+  claim.
+- W3 Implement: work only inside the claimed worktree/branch; keep
+  heartbeat/pane events current; no shared-SSoT writes (board, STATUS, INDEX,
+  registries are orchestrator-only); adjacent problems found mid-work go to
+  intake registration, never direct fixes.
+- W4 Verify: W4a — the worker runs the recorded verification commands and
+  writes the self-verification report; W4b — an INDEPENDENT agent instance
+  verifies and releases the claim (`release` enforces verifier != worker and
+  a verification evidence ref).
+- W5 Cleanup: serial merge-queue integration, board/index regeneration, then
+  worktree removal plus merged-branch cleanup — no zombie worktrees, no
+  standing ahead(N).
+- W6 Closeout: close the work record plus retro at wave boundaries; the next
+  session starts again at W0.
+
+T0/T2 wiring: T0 = snapshot at registration; T1 = informational
+`plan_assumption_gate --check` after merges; T2 = enforced at dispatch (claim
+creation refuses on drift); T3 = the replan review re-runs `record` to
+re-anchor the plan.
+
 ## 6. Reversibility Gate
 
 Use reversibility and blast radius to decide whether to act or ask.
@@ -187,6 +346,8 @@ smallest safe command scope.
 4. Keep generated, local, runtime, and secret files out of public release.
 5. Use structured parsers or existing scripts where available.
 6. If behavior changes, update the relevant docs and verification records.
+7. If a rule is repeated by the Owner, prefer a function/API, script, hook, gate,
+   or test over another prose-only instruction.
 
 ## 8. Records
 
@@ -219,18 +380,66 @@ Completion records must state:
 - changed files
 - verification commands and outcomes
 - remaining issues or handoff notes
+- whether `agents/project/NEXT-SESSION-POINTER.yml` was updated or did not need
+  an update
+- whether repeated criticism required Compound capture
+
+## 8.5 Measured Improvement Loop
+
+Use this loop for process, prompt, workflow, quality, and agent-behavior
+improvements:
+
+1. Evaluate: define a measurable score, golden set, failure cases, and edge
+   cases before changing behavior.
+2. Propose: suggest one change that should improve the score.
+3. Verify: rerun the same evaluation and record whether the score improved.
+4. Merge: keep the change only when it is valuable, meaningful, and safe.
+
+Keep one variable per verified change. If multiple variants are useful, run
+them as separate proposals or parallel experiments and keep only the verified
+winners. The problem-posing/proposer role and grader role should be separate
+when stakes justify the overhead.
+
+Owner defines what "better" means and owns final merge decisions. Agents may
+recommend criteria and present evidence, but they do not redefine success to fit
+their own proposal.
+
+## 8.6 Repeated Request API And Compound Capture
+
+Repeated Owner requests are signal, not noise. If the same request, criticism,
+or failure class appears twice:
+
+1. create or propose a Repeated Request API: function/API, script, hook, gate,
+   checklist item, template, or explicit task that prevents manual repetition;
+2. add or update tests when the behavior can be checked automatically;
+3. record the recurrence in `agents/lead_engineer/compound_log.md` when it is a
+   repeated mistake, drift, or governance failure;
+4. close the Compound item with an executable prevention step when feasible.
+
+Long documents are not sufficient prevention. A rule is considered durable only
+when a future agent can find it quickly from the pointer and, where practical,
+an executable gate can fail when it is violated.
 
 ## 9. Reporting
 
 Final task reports use the human-centered, machine-readable Executive BRIEF
 format. Keep it concise, visually scannable, and action-oriented.
 
+### Owner-Facing Language Contract
+
+- 사용자와 직접 대화할 때는 별도 요청이 없는 한 무조건 한국어로 답한다.
+- Owner-facing 보고, 상태 업데이트, 질문, 계획, 검토 요약은 한국어가 기본값이다.
+- 에이전트 간 메시지, 로그, machine-readable frontmatter, 코드 주석, 테스트명,
+  evidence record는 필요하면 영어를 사용할 수 있다.
+- 사용자가 영어로 말해도 "영어로 답해줘"처럼 명시 요청하지 않으면 한국어로 답한다.
+- 이 규칙은 짧은 진행 업데이트와 최종 보고 모두에 적용한다.
+
 ```yaml
 ---
 type: brief
 id: BRIEF-YYYY-MM-DD-NNN
 audience: owner|ceo|agent-team
-status: pass|watch|block
+signal: pass|watch|block
 score: 0-100
 priority: Critical|High|Medium|Low
 tags: [release, automation]
@@ -246,7 +455,7 @@ Bottom Line: <one-line outcome and decision>.
 ## Signal
 | Item | State | Evidence |
 |------|-------|----------|
-| Work | pass/watch/block | <evidence> |
+| Work | pass/watch/block + score | <evidence> |
 
 ## Insight
 1. <short interpretation>
@@ -260,8 +469,7 @@ Bottom Line: <one-line outcome and decision>.
 | <action> | <role> | <condition> |
 ```
 
-Use `pass`, `watch`, and `block` for state. Include `score: 0-100`
-when a report needs machine-sortable risk or health. Do not use emoji.
+Use `pass`, `watch`, and `block` with `score: 0-100` for state. Do not use color labels or emoji as machine values.
 
 ## 10. Time
 
@@ -327,6 +535,14 @@ agent_runtime lock --root . --write
 
 The update path must preserve host edits and only apply managed template files.
 
+New upstream releases are announced automatically: the `.codex/hooks.json`
+SessionStart hook runs `scripts\update_notify_hook.cmd`
+(`python -m agent_runtime.cli update-notify`), which prints one non-blocking
+notice line when the latest upstream release tag is newer than the pinned
+`upstream.ref`. On notice: bump `upstream.ref` in `agent_runtime.yml`, then run
+`update-plan --check` and the `update --check/--diff/--apply` chain above.
+Failures (offline, timeout) exit 0 silently and never block a session.
+
 ## 13. Validation
 
 Before closure, run the narrowest useful checks first, then the repository gate:
@@ -337,18 +553,54 @@ python scripts/check_agent_docs.py
 
 If a check cannot run, report exactly why and what remains unverified.
 
+## 14. Downstream Bug Intake
+
+Host projects that consume this runtime report bugs through a structured evidence
+process. Maintainers should respond to issues labelled `downstream-report`.
+
+### What a good bug report includes
+
+Every downstream bug report must follow the 6W1H structure:
+
+| Field | Content |
+|-------|---------|
+| Who | Component / caller that triggered the error |
+| What | Error type and message (verbatim) |
+| When | agent_runtime version, upgrade path |
+| Where | File:line in agent_runtime source |
+| Why | Root cause analysis (design gap / missing doc / regression) |
+| How | Reproduction steps and minimal code snippet |
+
+### Intake checklist for maintainers
+
+1. Confirm reproduction in a clean install.
+2. Apply labels: `bug` + severity (`critical`/`high`/`medium`/`low`) + `downstream-report`.
+3. Link to the host EVIDENCE file if provided.
+4. Prioritize `high` and above within one release cycle.
+5. Add a CHANGELOG entry and update public compatibility evidence when fixing
+   a public API change (function signature rename, removed export, etc.).
+
+### Known standing issues from downstream
+
+- **Windows cp949 encoding**: `sync --diff` fails on Windows cp949 consoles
+  when template files contain non-ASCII characters. Workaround: set
+  `PYTHONIOENCODING=utf-8`. Tracked in issue #6.
+- **`build_sync_plan` signature**: the function internally calls `load_config`;
+  callers must NOT pass an `AgentRuntimeConfig` as `template_root`. Tracked
+  in issue #5. Add a type guard or clear error message.
+
 <!-- AUTOFOLIO-OVERLAY:start — 아래는 호스트(Autofolio) 추가분이며 업스트림 템플릿에는 없다.
      AGENTS.md 는 agent_runtime.yml 의 sync.unmanaged 로 분리(sync 가 건드리지 않음).
      분기 원장·업데이트 재조정 절차: docs/AGENT_RUNTIME_INTEGRATION.md §3–§4. -->
-## 14. Handoff Protocol
+## 15. Handoff Protocol
 
 다른 모델/세션으로 인계할 때는 4섹션으로 남긴다: (1) 한 일·검증, (2) 열린 작업·블로커, (3) 봐야 할 파일·문서·TASK, (4) 주의/리스크.
 
-## 15. Token Budget
+## 16. Token Budget
 
 세션 토큰 카탈로그·예산 규약은 [agents/lead_engineer/TOKEN-BUDGET.md](agents/lead_engineer/TOKEN-BUDGET.md)를 따른다. 대형 작업 전 예상 비용을 BRIEF/PLAN의 Cost에 기재한다.
 
-## 16. Autofolio R3 Surface (Autonomous Delivery Lane 보정)
+## 17. Autofolio R3 Surface (Autonomous Delivery Lane 보정)
 
 §6 Autonomous Delivery Lane의 "critical boundary" 를 Autofolio 고유 surface로 구체화한다. 아래가 하나라도 포함되면 Owner 에스컬레이션:
 
@@ -361,7 +613,7 @@ If a check cannot run, report exactly why and what remains unverified.
 전체 게이트·우선순위: [agents/lead_engineer/MERGE-POLICY.md](agents/lead_engineer/MERGE-POLICY.md) 참조.
 코드 정본: `scripts/auto_merge.py`.
 
-## 17. Upstream Bug Reporting (강제 규칙)
+## 18. Upstream Bug Reporting (강제 규칙)
 
 에러·버그·이슈 발생 시 **반드시** 다음 절차를 따른다.
 
@@ -405,19 +657,4 @@ python scripts/report_upstream_bug.py --evidence EVIDENCE-*.md --dry-run
 - Autofolio: 이 §17 + `scripts/report_upstream_bug.py`
 - agent_runtime: upstream PR을 통해 `AGENTS.md §N Downstream Bug Intake` 추가 요청
   (Autofolio가 발견한 버그를 upstream이 체계적으로 수신·처리하도록)
-
-## 18. Live Work Continuity And Improvement Loop
-
-활성 작업은 `agents/project/NEXT-SESSION-POINTER.yml`에 유지한다. 이 파일은
-단순 다음 세션 메모가 아니라 `active_work`, `pane_id`, `progress_pct`,
-`task_set_id`, `step_index`, `step_total`, `status_text`를 포함하는 라이브
-작업 포인터다.
-
-반복되는 요청이나 비판은 Repeated Request API 규칙으로 승격한다. 두 번 이상
-반복되는 수동 절차는 function/API, script, hook, gate, 또는 명시 TASK로
-바꾸고, 같은 실수는 Compound 자동 캡처 대상으로 기록한다.
-
-개선 루프는 `Evaluate -> Propose -> Verify -> Merge` 순서로 둔다. 오답,
-실패 사례, golden set, edge case는 검증 증거로 보존하고, 최종 기준과
-위험한 병합·승인은 Owner 권한을 유지한다.
 <!-- AUTOFOLIO-OVERLAY:end -->

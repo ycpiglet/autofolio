@@ -59,6 +59,8 @@
 1. 업스트림 §3.5 **전부 채택(정본)**, 2. `MERGE-POLICY.md` 는 **Autofolio R3 surface 애드덤만 잔존(조금)**, 3. `AGENTS.md` 오버레이 §15 제거→한 줄 포인터, 4. 본 §3.1 "반영 완료"로 갱신.
 **감지/강제**: `python scripts/check_merge_policy_precedence.py`(업스트림 §3.5 발견 시 non-zero). §4 런북 4-bis 단계로 돌린다.
 
+**✅ 반영 완료 (v0.3.0, issue #103)**: 업스트림 v0.3.0 `AGENTS.md`가 **§6 Autonomous Delivery Lane**을 정본으로 보유 → 호스트 AGENTS.md를 업스트림 v0.3.0 본문(590L) 베이스로 재구성하고, autofolio 오버레이를 §15 Handoff·§16 Token Budget·**§17 Autofolio R3 Surface**(=Autonomous Delivery Lane의 R3 보정, MERGE-POLICY 애드덤)·§18 Upstream Bug Reporting으로 재번호. 업스트림이 흡수한 **구 §18 Live Work Continuity는 제거**(업스트림 §1.5 Live Work Pointer + §8.5 Measured Improvement Loop + §8.6 Repeated Request API가 대체). `check_merge_policy_precedence` OK. `agents/roles.yml`은 업스트림 신규 스키마 필드 0 → 현행 유지(host 소유 레지스트리).
+
 ---
 
 ## 4. 업데이트 런북
