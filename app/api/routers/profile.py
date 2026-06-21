@@ -5,7 +5,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import require_owner_csrf, require_session
+from app.api.deps import require_app_user, require_app_user_csrf
 from app.api.schemas import (
     InvestorProfileResponse,
     OverrideAckRequest,
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/profile", tags=["profile"])
 
 @router.get("/investor", response_model=InvestorProfileResponse)
 def investor_profile(
-    session: Annotated[dict[str, Any], Depends(require_session)],
+    session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> InvestorProfileResponse:
     """Return the current user's personalization profile."""
     username = profiles.username_from_session(session)
@@ -43,7 +43,7 @@ def survey_definition() -> SurveyDefinitionResponse:
 @router.post("/survey", response_model=SurveySubmitResponse)
 def submit_survey(
     body: SurveySubmitRequest,
-    session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+    session: Annotated[dict[str, Any], Depends(require_app_user_csrf)],
 ) -> SurveySubmitResponse:
     """Store survey answers and update the user's active investor profile."""
     username = profiles.username_from_session(session)
@@ -60,7 +60,7 @@ def submit_survey(
 @router.post("/override-ack", response_model=OverrideAckResponse)
 def override_acknowledgement(
     body: OverrideAckRequest,
-    session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+    session: Annotated[dict[str, Any], Depends(require_app_user_csrf)],
 ) -> OverrideAckResponse:
     """Record an explicit user acknowledgement for a profile/risk mismatch."""
     username = profiles.username_from_session(session)
@@ -77,7 +77,7 @@ def override_acknowledgement(
 @router.post("/checkin", response_model=ProfileCheckinResponse)
 def profile_checkin(
     body: ProfileCheckinRequest,
-    session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+    session: Annotated[dict[str, Any], Depends(require_app_user_csrf)],
 ) -> ProfileCheckinResponse:
     """Store a monthly/event satisfaction check-in."""
     username = profiles.username_from_session(session)

@@ -4,7 +4,7 @@ Design:
 - READ-ONLY endpoint: it must NOT persist a trade condition (propose() only
   suggests). We assert backend.add_condition is never invoked.
 - All backend functions are monkeypatched (no network, no DB, no KIS keys).
-- Guest gets 200 (read-only briefing); no session → 401; a backend exception
+- Approved member gets 200; guest → 403; no session → 401; a backend exception
   must surface as a non-200 (fail-loud, no silent empty).
 """
 from __future__ import annotations
@@ -37,12 +37,16 @@ def research_backend(mock_backend, monkeypatch):
 
 
 class TestResearchHappyPath:
-    def test_guest_200(self, guest_client, research_backend):
-        resp = guest_client.get("/api/agents/research?symbol=005930")
+    def test_member_200(self, member_client, research_backend):
+        resp = member_client.get("/api/agents/research?symbol=005930")
         assert resp.status_code == 200
 
-    def test_response_shape(self, guest_client, research_backend):
-        body = guest_client.get("/api/agents/research?symbol=005930").json()
+    def test_guest_403(self, guest_client, research_backend):
+        resp = guest_client.get("/api/agents/research?symbol=005930")
+        assert resp.status_code == 403
+
+    def test_response_shape(self, member_client, research_backend):
+        body = member_client.get("/api/agents/research?symbol=005930").json()
         # Top-level keys
         for key in ("symbol", "name", "price", "fundamental", "disclosures",
                     "disclosure_gate", "proposal"):
@@ -67,7 +71,7 @@ class TestResearchHappyPath:
         resp = owner_client.get("/api/agents/research?symbol=005930")
         assert resp.status_code == 200
 
-    def test_days_param_forwarded(self, guest_client, research_backend, monkeypatch):
+    def test_days_param_forwarded(self, member_client, research_backend, monkeypatch):
         import pandas as pd
 
         captured: dict = {}
@@ -78,13 +82,13 @@ class TestResearchHappyPath:
             return pd.DataFrame(columns=["date", "title"])
 
         monkeypatch.setattr(research_backend, "disclosures_df", fake_disclosures)
-        guest_client.get("/api/agents/research?symbol=005930&days=14")
+        member_client.get("/api/agents/research?symbol=005930&days=14")
         assert captured["days"] == 14
         assert captured["symbol"] == "005930"
 
 
 class TestReadOnly:
-    def test_propose_does_not_save_condition(self, guest_client, research_backend, monkeypatch):
+    def test_propose_does_not_save_condition(self, member_client, research_backend, monkeypatch):
         """propose() suggests only; the endpoint must NOT persist a condition."""
         called = {"add": 0}
 
@@ -93,7 +97,7 @@ class TestReadOnly:
             raise AssertionError("add_condition must NOT be called by research endpoint")
 
         monkeypatch.setattr(research_backend, "add_condition", fail_add)
-        resp = guest_client.get("/api/agents/research?symbol=005930")
+        resp = member_client.get("/api/agents/research?symbol=005930")
         assert resp.status_code == 200
         assert called["add"] == 0
 
@@ -104,22 +108,22 @@ class TestAuthAndValidation:
         resp = client.get("/api/agents/research?symbol=005930")
         assert resp.status_code == 401
 
-    def test_invalid_symbol_422(self, guest_client, research_backend):
-        resp = guest_client.get("/api/agents/research?symbol=" + "X" * 50)
+    def test_invalid_symbol_422(self, member_client, research_backend):
+        resp = member_client.get("/api/agents/research?symbol=" + "X" * 50)
         assert resp.status_code == 422
 
-    def test_missing_symbol_422(self, guest_client, research_backend):
-        resp = guest_client.get("/api/agents/research")
+    def test_missing_symbol_422(self, member_client, research_backend):
+        resp = member_client.get("/api/agents/research")
         assert resp.status_code == 422
 
 
 class TestFailLoud:
-    def test_backend_exception_is_non_200(self, error_client, mock_backend, monkeypatch):
+    def test_backend_exception_is_non_200(self, error_member_client, mock_backend, monkeypatch):
         """A backend error must surface as a non-200 — no silent empty briefing."""
         def boom(symbol):
             raise RuntimeError("price feed down")
 
         monkeypatch.setattr(mock_backend, "price", boom)
-        resp = error_client.get("/api/agents/research?symbol=005930")
+        resp = error_member_client.get("/api/agents/research?symbol=005930")
         assert resp.status_code != 200
         assert resp.status_code >= 500

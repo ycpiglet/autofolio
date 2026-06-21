@@ -1,13 +1,14 @@
 """Authentication router — /api/auth/*
 
 Endpoints:
-  POST /auth/login   — local ID/PW or guest
+  POST /auth/login   — approved local ID/PW; guest demo only with explicit dev opt-in
   POST /auth/logout  — clear session cookie
   GET  /auth/me      — current session info (includes csrf_token for JS)
 """
 from __future__ import annotations
 
 import secrets
+import os
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Cookie, HTTPException, Query, Response, status
@@ -26,20 +27,35 @@ from app.api.security import (
 from app.services import sso
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+_GUEST_DEMO_ENV = "AUTOFOLIO_GUEST_DEMO_ENABLED"
+
+
+def guest_demo_enabled() -> bool:
+    return (os.getenv(_GUEST_DEMO_ENV) or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
 
 @router.post("/login", response_model=SessionResponse)
 def login(body: LoginRequest, response: Response) -> SessionResponse:
-    """Log in as guest or with local ID/PW credentials.
+    """Log in with approved local credentials.
 
-    - guest=true  → session {role:"guest", data_source:"demo"}
-    - otherwise   → call login_or_register; 401 on failure
+    - guest=true  → disabled by default; requires AUTOFOLIO_GUEST_DEMO_ENABLED=1
+    - otherwise   → call approved local login; 401 on failure
 
     A fresh csrf_token is generated and embedded in the session cookie at
     every login. JS reads it from GET /auth/me and sends it as X-CSRF-Token
     on every state-changing request.
     """
     if body.guest:
+        if not guest_demo_enabled():
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="게스트 데모는 비활성화되어 있습니다. 가입 승인 후 로그인하세요.",
+            )
         csrf = secrets.token_hex(32)
         session_data: dict[str, Any] = {
             "role": "guest",
@@ -50,7 +66,7 @@ def login(body: LoginRequest, response: Response) -> SessionResponse:
         return SessionResponse(role="guest", username=None, data_source="demo", csrf_token=csrf)
 
     # local login
-    from app.services.auth_service import login_or_register
+    from app.services.auth_service import login_or_register, role_for_user
 
     username = (body.username or "").strip()
     password = body.password or ""
@@ -65,15 +81,16 @@ def login(body: LoginRequest, response: Response) -> SessionResponse:
     if not ok:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=msg)
 
+    role = role_for_user(username)
     csrf = secrets.token_hex(32)
     session_data = {
-        "role": "owner",
+        "role": role,
         "username": username,
         "data_source": "backend",
         "csrf_token": csrf,
     }
     _set_cookie(response, session_data)
-    return SessionResponse(role="owner", username=username, data_source="backend", csrf_token=csrf)
+    return SessionResponse(role=role, username=username, data_source="backend", csrf_token=csrf)
 
 
 @router.post("/logout")

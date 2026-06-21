@@ -6,8 +6,12 @@ Usage:
 
 SAFETY invariants enforced here:
   1. No POST /trade/orders or any direct-order endpoint.
-  2. All state-changing paths require require_owner_csrf (owner role + CSRF token).
-  3. KIS keys are never serialized in any response.
+  2. State-changing app-control paths require require_owner_csrf (owner role + CSRF token).
+     Approved member self-service paths use require_app_user_csrf and must derive
+     their target from the session.
+     Public membership request intake is the only local prototype exception and
+     cannot create a session or active account.
+  3. KIS keys and user-owned integration tokens are never serialized in any response.
   4. Server binds 127.0.0.1 only (see run script).
 """
 from __future__ import annotations
@@ -18,9 +22,13 @@ from app.api.routers import (
     account,
     agents,
     analysis,
+    acknowledgements,
     auth,
     engine,
+    integrations,
     market,
+    manuals,
+    membership,
     portfolio,
     profile,
     settings,
@@ -49,6 +57,10 @@ def create_app() -> FastAPI:
     # Routers — all under /api prefix
     app.include_router(auth.router, prefix="/api")
     app.include_router(account.router, prefix="/api")
+    app.include_router(manuals.router, prefix="/api")
+    app.include_router(acknowledgements.router, prefix="/api")
+    app.include_router(membership.router, prefix="/api")
+    app.include_router(integrations.router, prefix="/api")
     app.include_router(engine.router, prefix="/api")
     app.include_router(portfolio.router, prefix="/api")
     app.include_router(profile.router, prefix="/api")

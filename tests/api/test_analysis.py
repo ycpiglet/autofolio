@@ -10,12 +10,16 @@ import pytest
 # ── Existing endpoints ────────────────────────────────────────────────────────
 
 class TestAttribution:
-    def test_attribution_guest_200(self, guest_client, mock_backend):
-        resp = guest_client.get("/api/analysis/attribution")
+    def test_attribution_member_200(self, member_client, mock_backend):
+        resp = member_client.get("/api/analysis/attribution")
         assert resp.status_code == 200
 
-    def test_attribution_shape(self, guest_client, mock_backend):
-        body = guest_client.get("/api/analysis/attribution").json()
+    def test_attribution_guest_403(self, guest_client, mock_backend):
+        resp = guest_client.get("/api/analysis/attribution")
+        assert resp.status_code == 403
+
+    def test_attribution_shape(self, member_client, mock_backend):
+        body = member_client.get("/api/analysis/attribution").json()
         assert "columns" in body and "rows" in body
         assert "구분" in body["columns"]
         assert "기여(만원)" in body["columns"]
@@ -25,7 +29,7 @@ class TestAttribution:
         resp = client.get("/api/analysis/attribution")
         assert resp.status_code == 401
 
-    def test_attribution_backend_error_surfaces(self, error_client, monkeypatch):
+    def test_attribution_backend_error_surfaces(self, error_member_client, monkeypatch):
         """Backend exception must propagate as non-200 (fail-loud)."""
         import app.services.backend as bmod
 
@@ -33,17 +37,17 @@ class TestAttribution:
             raise RuntimeError("analysis failure")
 
         monkeypatch.setattr(bmod, "attribution_df", _raise)
-        resp = error_client.get("/api/analysis/attribution")
+        resp = error_member_client.get("/api/analysis/attribution")
         assert resp.status_code != 200
 
 
 class TestRetro:
-    def test_retro_guest_200(self, guest_client, mock_backend):
-        resp = guest_client.get("/api/analysis/retro")
+    def test_retro_member_200(self, member_client, mock_backend):
+        resp = member_client.get("/api/analysis/retro")
         assert resp.status_code == 200
 
-    def test_retro_shape(self, guest_client, mock_backend):
-        body = guest_client.get("/api/analysis/retro").json()
+    def test_retro_shape(self, member_client, mock_backend):
+        body = member_client.get("/api/analysis/retro").json()
         assert "승률" in body
         assert "평균R" in body
         assert "MDD" in body
@@ -54,7 +58,7 @@ class TestRetro:
         resp = client.get("/api/analysis/retro")
         assert resp.status_code == 401
 
-    def test_retro_backend_error_surfaces(self, error_client, monkeypatch):
+    def test_retro_backend_error_surfaces(self, error_member_client, monkeypatch):
         """Backend exception must propagate as non-200 (fail-loud)."""
         import app.services.backend as bmod
 
@@ -62,17 +66,17 @@ class TestRetro:
             raise RuntimeError("metrics error")
 
         monkeypatch.setattr(bmod, "retro_metrics", _raise)
-        resp = error_client.get("/api/analysis/retro")
+        resp = error_member_client.get("/api/analysis/retro")
         assert resp.status_code != 200
 
 
 class TestDailyPnl:
-    def test_daily_pnl_guest_200(self, guest_client, mock_backend):
-        resp = guest_client.get("/api/analysis/daily-pnl")
+    def test_daily_pnl_member_200(self, member_client, mock_backend):
+        resp = member_client.get("/api/analysis/daily-pnl")
         assert resp.status_code == 200
 
-    def test_daily_pnl_shape(self, guest_client, mock_backend):
-        body = guest_client.get("/api/analysis/daily-pnl").json()
+    def test_daily_pnl_shape(self, member_client, mock_backend):
+        body = member_client.get("/api/analysis/daily-pnl").json()
         assert "columns" in body and "rows" in body
         assert "date" in body["columns"]
         assert "pnl" in body["columns"]
@@ -108,21 +112,21 @@ _FAKE_RESULT = BacktestResult(
 
 
 class TestBacktest:
-    def test_backtest_guest_200(self, guest_client, monkeypatch):
+    def test_backtest_member_200(self, member_client, monkeypatch):
         import app.quant.backtest as bt_mod
 
         monkeypatch.setattr(bt_mod, "run_sma_crossover", lambda *a, **kw: _FAKE_RESULT)
-        resp = guest_client.get(
+        resp = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "005930", "start": "2025-01-01", "end": "2025-06-30"},
         )
         assert resp.status_code == 200
 
-    def test_backtest_shape(self, guest_client, monkeypatch):
+    def test_backtest_shape(self, member_client, monkeypatch):
         import app.quant.backtest as bt_mod
 
         monkeypatch.setattr(bt_mod, "run_sma_crossover", lambda *a, **kw: _FAKE_RESULT)
-        body = guest_client.get(
+        body = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "005930", "start": "2025-01-01", "end": "2025-06-30"},
         ).json()
@@ -143,43 +147,43 @@ class TestBacktest:
         )
         assert resp.status_code == 401
 
-    def test_backtest_bad_symbol_422(self, guest_client):
-        resp = guest_client.get(
+    def test_backtest_bad_symbol_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "BAD SYMBOL!", "start": "2025-01-01", "end": "2025-06-30"},
         )
         assert resp.status_code == 422
 
-    def test_backtest_empty_symbol_422(self, guest_client):
-        resp = guest_client.get(
+    def test_backtest_empty_symbol_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "", "start": "2025-01-01", "end": "2025-06-30"},
         )
         assert resp.status_code == 422
 
-    def test_backtest_bad_start_date_422(self, guest_client):
-        resp = guest_client.get(
+    def test_backtest_bad_start_date_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "005930", "start": "not-a-date", "end": "2025-06-30"},
         )
         assert resp.status_code == 422
 
-    def test_backtest_bad_end_date_422(self, guest_client):
-        resp = guest_client.get(
+    def test_backtest_bad_end_date_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "005930", "start": "2025-01-01", "end": "2025-13-99"},
         )
         assert resp.status_code == 422
 
-    def test_backtest_start_after_end_422(self, guest_client):
-        resp = guest_client.get(
+    def test_backtest_start_after_end_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "005930", "start": "2025-12-01", "end": "2025-01-01"},
         )
         assert resp.status_code == 422
 
-    def test_backtest_fast_gte_slow_422(self, guest_client):
-        resp = guest_client.get(
+    def test_backtest_fast_gte_slow_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/backtest",
             params={
                 "symbol": "005930",
@@ -191,7 +195,7 @@ class TestBacktest:
         )
         assert resp.status_code == 422
 
-    def test_backtest_backend_error_surfaces(self, error_client, monkeypatch):
+    def test_backtest_backend_error_surfaces(self, error_member_client, monkeypatch):
         """Backend exception must propagate as non-200 (fail-loud)."""
         import app.quant.backtest as bt_mod
 
@@ -199,18 +203,18 @@ class TestBacktest:
             raise RuntimeError("backtest failure")
 
         monkeypatch.setattr(bt_mod, "run_sma_crossover", _raise)
-        resp = error_client.get(
+        resp = error_member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "005930", "start": "2025-01-01", "end": "2025-06-30"},
         )
         assert resp.status_code != 200
 
-    def test_backtest_dates_serialized_as_strings(self, guest_client, monkeypatch):
+    def test_backtest_dates_serialized_as_strings(self, member_client, monkeypatch):
         """All date fields must be ISO strings, not Python date objects."""
         import app.quant.backtest as bt_mod
 
         monkeypatch.setattr(bt_mod, "run_sma_crossover", lambda *a, **kw: _FAKE_RESULT)
-        body = guest_client.get(
+        body = member_client.get(
             "/api/analysis/backtest",
             params={"symbol": "005930", "start": "2025-01-01", "end": "2025-06-30"},
         ).json()
@@ -271,14 +275,14 @@ class TestVar:
             lambda *a, **kw: sim_result or _FAKE_SIM,
         )
 
-    def test_var_guest_200(self, guest_client, monkeypatch):
+    def test_var_member_200(self, member_client, monkeypatch):
         self._patch(monkeypatch)
-        resp = guest_client.get("/api/analysis/var")
+        resp = member_client.get("/api/analysis/var")
         assert resp.status_code == 200
 
-    def test_var_shape(self, guest_client, monkeypatch):
+    def test_var_shape(self, member_client, monkeypatch):
         self._patch(monkeypatch)
-        body = guest_client.get("/api/analysis/var").json()
+        body = member_client.get("/api/analysis/var").json()
         assert "var_95" in body
         assert "var_99" in body
         assert "cvar_95" in body
@@ -293,7 +297,7 @@ class TestVar:
         resp = client.get("/api/analysis/var")
         assert resp.status_code == 401
 
-    def test_var_n_simulations_clamped(self, guest_client, monkeypatch):
+    def test_var_n_simulations_clamped(self, member_client, monkeypatch):
         """n_simulations above cap must be clamped to 50_000, not rejected."""
         captured = {}
 
@@ -308,23 +312,23 @@ class TestVar:
             return _FAKE_SIM
 
         monkeypatch.setattr(rs_mod, "compute_var", _capture)
-        resp = guest_client.get("/api/analysis/var", params={"n_simulations": "999999"})
+        resp = member_client.get("/api/analysis/var", params={"n_simulations": "999999"})
         assert resp.status_code == 200
         assert captured.get("n_sim", 999999) <= 50_000
 
-    def test_var_empty_portfolio_returns_200_with_note(self, guest_client, monkeypatch):
+    def test_var_empty_portfolio_returns_200_with_note(self, member_client, monkeypatch):
         """Empty pnl / zero portfolio value → 200 with explicit note, not fabricated."""
         import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "daily_pnl_series", lambda: pd.DataFrame(columns=["date", "pnl"]))
         monkeypatch.setattr(bmod, "account_summary", lambda: {"tot_evlu_amt": 0.0})
-        resp = guest_client.get("/api/analysis/var")
+        resp = member_client.get("/api/analysis/var")
         assert resp.status_code == 200
         body = resp.json()
         assert "note" in body
         assert body["note"]  # non-empty note signals the empty-data path
 
-    def test_var_backend_error_surfaces(self, error_client, monkeypatch):
+    def test_var_backend_error_surfaces(self, error_member_client, monkeypatch):
         """Backend exception must propagate as non-200 (fail-loud)."""
         import app.services.backend as bmod
 
@@ -333,15 +337,15 @@ class TestVar:
 
         monkeypatch.setattr(bmod, "daily_pnl_series", _raise)
         monkeypatch.setattr(bmod, "account_summary", lambda: _SAMPLE_SUMMARY)
-        resp = error_client.get("/api/analysis/var")
+        resp = error_member_client.get("/api/analysis/var")
         assert resp.status_code != 200
 
-    def test_var_horizon_days_below_min_422(self, guest_client):
-        resp = guest_client.get("/api/analysis/var", params={"horizon_days": "0"})
+    def test_var_horizon_days_below_min_422(self, member_client):
+        resp = member_client.get("/api/analysis/var", params={"horizon_days": "0"})
         assert resp.status_code == 422
 
-    def test_var_n_simulations_below_min_422(self, guest_client):
-        resp = guest_client.get("/api/analysis/var", params={"n_simulations": "5"})
+    def test_var_n_simulations_below_min_422(self, member_client):
+        resp = member_client.get("/api/analysis/var", params={"n_simulations": "5"})
         assert resp.status_code == 422
 
 
@@ -370,18 +374,18 @@ _SAMPLE_SCENARIO = pd.DataFrame(
 
 
 class TestScenario:
-    def test_scenario_guest_200(self, guest_client, monkeypatch):
+    def test_scenario_member_200(self, member_client, monkeypatch):
         import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "scenario_analysis", lambda scenarios=None: _SAMPLE_SCENARIO)
-        resp = guest_client.get("/api/analysis/scenario")
+        resp = member_client.get("/api/analysis/scenario")
         assert resp.status_code == 200
 
-    def test_scenario_shape(self, guest_client, monkeypatch):
+    def test_scenario_shape(self, member_client, monkeypatch):
         import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "scenario_analysis", lambda scenarios=None: _SAMPLE_SCENARIO)
-        body = guest_client.get("/api/analysis/scenario").json()
+        body = member_client.get("/api/analysis/scenario").json()
         assert "columns" in body and "rows" in body
         assert "시나리오" in body["columns"]
         assert "자산군" in body["columns"]
@@ -392,14 +396,14 @@ class TestScenario:
         resp = client.get("/api/analysis/scenario")
         assert resp.status_code == 401
 
-    def test_scenario_backend_error_surfaces(self, error_client, monkeypatch):
+    def test_scenario_backend_error_surfaces(self, error_member_client, monkeypatch):
         import app.services.backend as bmod
 
         def _raise(scenarios=None):
             raise RuntimeError("scenario failure")
 
         monkeypatch.setattr(bmod, "scenario_analysis", _raise)
-        resp = error_client.get("/api/analysis/scenario")
+        resp = error_member_client.get("/api/analysis/scenario")
         assert resp.status_code != 200
 
 
@@ -417,21 +421,21 @@ _SAMPLE_WHATIF = {
 
 
 class TestWhatif:
-    def test_whatif_guest_200(self, guest_client, monkeypatch):
+    def test_whatif_member_200(self, member_client, monkeypatch):
         import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "whatif_weight_change", lambda sym, w: _SAMPLE_WHATIF)
-        resp = guest_client.get(
+        resp = member_client.get(
             "/api/analysis/whatif",
             params={"symbol": "005930", "weight": "50.0"},
         )
         assert resp.status_code == 200
 
-    def test_whatif_shape(self, guest_client, monkeypatch):
+    def test_whatif_shape(self, member_client, monkeypatch):
         import app.services.backend as bmod
 
         monkeypatch.setattr(bmod, "whatif_weight_change", lambda sym, w: _SAMPLE_WHATIF)
-        body = guest_client.get(
+        body = member_client.get(
             "/api/analysis/whatif",
             params={"symbol": "005930", "weight": "50.0"},
         ).json()
@@ -449,35 +453,35 @@ class TestWhatif:
         )
         assert resp.status_code == 401
 
-    def test_whatif_bad_symbol_422(self, guest_client):
-        resp = guest_client.get(
+    def test_whatif_bad_symbol_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/whatif",
             params={"symbol": "bad symbol!", "weight": "50.0"},
         )
         assert resp.status_code == 422
 
-    def test_whatif_empty_symbol_422(self, guest_client):
-        resp = guest_client.get(
+    def test_whatif_empty_symbol_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/whatif",
             params={"symbol": "", "weight": "50.0"},
         )
         assert resp.status_code == 422
 
-    def test_whatif_weight_over_100_422(self, guest_client):
-        resp = guest_client.get(
+    def test_whatif_weight_over_100_422(self, member_client):
+        resp = member_client.get(
             "/api/analysis/whatif",
             params={"symbol": "005930", "weight": "150.0"},
         )
         assert resp.status_code == 422
 
-    def test_whatif_backend_error_surfaces(self, error_client, monkeypatch):
+    def test_whatif_backend_error_surfaces(self, error_member_client, monkeypatch):
         import app.services.backend as bmod
 
         def _raise(sym, w):
             raise RuntimeError("whatif failure")
 
         monkeypatch.setattr(bmod, "whatif_weight_change", _raise)
-        resp = error_client.get(
+        resp = error_member_client.get(
             "/api/analysis/whatif",
             params={"symbol": "005930", "weight": "50.0"},
         )

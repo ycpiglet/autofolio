@@ -10,6 +10,7 @@ Strangler Migration — Phase 5:
 """
 from __future__ import annotations
 
+import logging
 import threading
 from functools import lru_cache
 
@@ -28,9 +29,13 @@ _SEED = [
     ("360750", "TIGER 미국S&P500", "LONG_TERM_CANDIDATE"),
 ]
 
+_LOGGER = logging.getLogger(__name__)
+
 # FastAPI 스레드풀에서 동시에 초기화되는 이중-init 레이스를 방지한다.
 # lru_cache 자체는 GIL로 보호되지만 초기화 함수 본체의 재진입은 막지 못한다.
 _ctx_lock = threading.Lock()
+_holdings_cache_lock = threading.Lock()
+_LAST_HOLDINGS_DF: pd.DataFrame | None = None
 
 
 @lru_cache(maxsize=1)
@@ -117,10 +122,54 @@ def positions() -> pd.DataFrame:
 
 # 포트폴리오 뷰가 기대하는 컬럼(=mock.data.holdings_df 와 동일 스키마).
 HOLDINGS_COLUMNS = [
-    "종목", "티커", "자산군", "지역", "수량", "평단", "현재가",
+    "종목", "티커", "자산군", "지역", "섹터", "전략", "위험버킷", "수량", "평단", "현재가",
     "평가금액", "평가손익", "손익률", "예상연배당", "배당수익률", "비중",
 ]
 _ROLE_TO_ASSET_CLASS = {"ETF_TEST": "ETF", "LARGE_CAP_TEST": "주식", "LONG_TERM_CANDIDATE": "기타"}
+_DEFAULT_SYMBOL_META = {
+    "000660": {"name": "SK하이닉스", "asset_class": "주식", "sector": "반도체"},
+    "005380": {"name": "현대차", "asset_class": "주식", "sector": "자동차"},
+    "005930": {"name": "삼성전자", "asset_class": "주식", "sector": "반도체"},
+    "035420": {"name": "NAVER", "asset_class": "주식", "sector": "인터넷"},
+    "035720": {"name": "카카오", "asset_class": "주식", "sector": "인터넷"},
+    "055550": {"name": "신한지주", "asset_class": "주식", "sector": "금융"},
+    "068270": {"name": "셀트리온", "asset_class": "주식", "sector": "바이오"},
+    "069500": {"name": "KODEX 200", "asset_class": "ETF", "sector": "국내지수"},
+    "102110": {"name": "TIGER 200", "asset_class": "ETF", "sector": "국내지수"},
+    "105560": {"name": "KB금융", "asset_class": "주식", "sector": "금융"},
+    "114260": {"name": "KODEX 국고채3년", "asset_class": "채권", "sector": "채권"},
+}
+
+
+def _empty_holdings_df() -> pd.DataFrame:
+    return pd.DataFrame(columns=HOLDINGS_COLUMNS)
+
+
+def _cache_holdings_df(df: pd.DataFrame) -> pd.DataFrame:
+    global _LAST_HOLDINGS_DF
+    with _holdings_cache_lock:
+        _LAST_HOLDINGS_DF = df.copy()
+    return df
+
+
+def _cached_holdings_df() -> pd.DataFrame | None:
+    with _holdings_cache_lock:
+        if _LAST_HOLDINGS_DF is None:
+            return None
+        return _LAST_HOLDINGS_DF.copy()
+
+
+def _fallback_holdings_df_after_error() -> pd.DataFrame:
+    cached = _cached_holdings_df()
+    if cached is not None:
+        _LOGGER.warning("holdings_df live source failed; using cached portfolio holdings", exc_info=True)
+        return cached
+    _LOGGER.warning("holdings_df live source failed; returning empty portfolio schema", exc_info=True)
+    return _empty_holdings_df()
+
+
+def _fallback_symbol_meta(symbol: str) -> dict:
+    return dict(_DEFAULT_SYMBOL_META.get(symbol, {}))
 
 
 def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> pd.DataFrame:
@@ -135,7 +184,8 @@ def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> p
     dividend_lookup = dividend_of or (lambda symbol: {})
     rows = []
     for p in positions_list:
-        meta = meta_of(p.symbol) or {}
+        fallback_meta = _fallback_symbol_meta(p.symbol)
+        meta = {**fallback_meta, **(meta_of(p.symbol) or {})}
         cur_native = float(price_of(p.symbol))
         avg_native = float(p.avg_price) if p.avg_price else 0.0
         currency = str(getattr(p, "currency", "KRW") or "KRW").upper()
@@ -155,7 +205,10 @@ def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> p
         rows.append({
             "종목": meta.get("name") or p.symbol,
             "티커": p.symbol,
-            "자산군": _ROLE_TO_ASSET_CLASS.get(meta.get("role"), "주식"),
+            "자산군": meta.get("asset_class") or _ROLE_TO_ASSET_CLASS.get(meta.get("role"), "주식"),
+            "섹터": meta.get("sector") or "",
+            "전략": meta.get("strategy") or "",
+            "위험버킷": meta.get("risk_bucket") or "",
             "지역": _region_for_market(str(getattr(p, "market", None) or meta.get("market") or "KRX")),
             "수량": p.quantity,
             "평단": round(avg),
@@ -166,7 +219,11 @@ def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> p
             "예상연배당": round(annual_income),
             "배당수익률": round(dividend_yield, 2),
         })
-    df = pd.DataFrame(rows, columns=HOLDINGS_COLUMNS[:-1])
+    df = pd.DataFrame(rows)
+    for column in HOLDINGS_COLUMNS[:-1]:
+        if column not in df.columns:
+            df[column] = ""
+    df = df[HOLDINGS_COLUMNS[:-1]]
     total = df["평가금액"].sum()
     df["비중"] = (df["평가금액"] / total * 100).round(1) if total else 0.0
     return df
@@ -189,24 +246,28 @@ def holdings_df(*, include_dividends: bool = True) -> pd.DataFrame:
     """
     repo, broker, _, _ = _ctx()
     wl = {r["symbol"]: r for r in repo.list_whitelist_symbols()}
-    positions = broker.get_positions()
-    if not positions:
-        return pd.DataFrame(columns=HOLDINGS_COLUMNS)
-    symbols = [p.symbol for p in positions]
-    if hasattr(broker, "get_prices_batch"):
-        price_cache = broker.get_prices_batch(symbols)
-        price_of = lambda s: price_cache.get(s) or broker.get_current_price(s).price
-    else:
-        price_of = lambda s: broker.get_current_price(s).price
-    if include_dividends and hasattr(broker, "get_dividend_info"):
-        def dividend_of(symbol: str) -> dict:
-            try:
-                return broker.get_dividend_info(symbol) or {}
-            except Exception:  # noqa: BLE001
-                return {}
-    else:
-        dividend_of = lambda symbol: {}
-    return _build_holdings_df(positions, price_of, lambda s: wl.get(s, {}), dividend_of)
+    try:
+        positions = broker.get_positions()
+        if not positions:
+            return _cache_holdings_df(_empty_holdings_df())
+        symbols = [p.symbol for p in positions]
+        if hasattr(broker, "get_prices_batch"):
+            price_cache = broker.get_prices_batch(symbols)
+            price_of = lambda s: price_cache.get(s) or broker.get_current_price(s).price
+        else:
+            price_of = lambda s: broker.get_current_price(s).price
+        if include_dividends and hasattr(broker, "get_dividend_info"):
+            def dividend_of(symbol: str) -> dict:
+                try:
+                    return broker.get_dividend_info(symbol) or {}
+                except Exception:  # noqa: BLE001
+                    return {}
+        else:
+            dividend_of = lambda symbol: {}
+        df = _build_holdings_df(positions, price_of, lambda s: wl.get(s, {}), dividend_of)
+        return _cache_holdings_df(df)
+    except Exception:  # noqa: BLE001 - portfolio read UI must degrade instead of returning 500 on live KIS glitches
+        return _fallback_holdings_df_after_error()
 
 
 def kpis() -> dict:
@@ -491,6 +552,26 @@ def account_summary() -> dict:
         "nass_amt": market_val,         # 순자산
         "source": "estimated",
     }
+
+
+def list_portfolio_groups() -> list[dict]:
+    repo, *_ = _ctx()
+    return repo.list_portfolio_groups()
+
+
+def create_portfolio_group(**payload) -> dict:
+    repo, *_ = _ctx()
+    return repo.create_portfolio_group(**payload)
+
+
+def update_portfolio_group(group_id: str, **payload) -> dict | None:
+    repo, *_ = _ctx()
+    return repo.update_portfolio_group(group_id, **payload)
+
+
+def delete_portfolio_group(group_id: str) -> bool:
+    repo, *_ = _ctx()
+    return repo.delete_portfolio_group(group_id)
 
 
 def watchlist() -> pd.DataFrame:

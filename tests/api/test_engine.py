@@ -3,12 +3,16 @@ from __future__ import annotations
 
 
 class TestEngineStatus:
-    def test_status_guest_200(self, guest_client, mock_backend):
-        resp = guest_client.get("/api/engine/status")
+    def test_status_member_200(self, member_client, mock_backend):
+        resp = member_client.get("/api/engine/status")
         assert resp.status_code == 200
 
-    def test_status_shape(self, guest_client, mock_backend):
-        body = guest_client.get("/api/engine/status").json()
+    def test_status_guest_403(self, guest_client, mock_backend):
+        resp = guest_client.get("/api/engine/status")
+        assert resp.status_code == 403
+
+    def test_status_shape(self, member_client, mock_backend):
+        body = member_client.get("/api/engine/status").json()
         assert "env" in body
         assert "auto_trading_enabled" in body
         assert "kill_switch_active" in body
@@ -19,8 +23,8 @@ class TestEngineStatus:
         assert "consecutive_failures" in cb
         assert "today_pnl" in cb
 
-    def test_status_env_value(self, guest_client, mock_backend):
-        body = guest_client.get("/api/engine/status").json()
+    def test_status_env_value(self, member_client, mock_backend):
+        body = member_client.get("/api/engine/status").json()
         assert body["env"] == "mock"
 
     def test_status_unauthenticated_401(self, client, mock_backend):

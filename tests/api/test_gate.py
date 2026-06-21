@@ -1,10 +1,11 @@
-"""Auth gate tests — 401 without session, 403 for guest on owner-only routes.
+"""Auth gate tests — 401 without session, 403 for guest on guarded routes.
 
-These tests verify the safety seam (require_owner) that will gate all
-Phase 3 state-changing endpoints.
+These tests verify the safety seams:
+- require_owner gates Owner/admin-only surfaces.
+- require_app_user gates approved self-service surfaces.
 
-The tests use a dedicated owner-only test route registered on the app so
-we don't need a real Phase 3 endpoint to test the dependency.
+The tests use dedicated test routes so we don't need real endpoints to test the
+dependencies.
 """
 from __future__ import annotations
 
@@ -12,7 +13,7 @@ import pytest
 from fastapi import Depends
 from fastapi.testclient import TestClient
 
-from app.api.deps import require_owner, require_session
+from app.api.deps import require_app_user, require_owner, require_session
 from app.api.main import create_app
 
 
@@ -23,6 +24,10 @@ def app_with_owner_route():
 
     @app.get("/api/_test/owner-only")
     def _owner_only(session=Depends(require_owner)):
+        return {"ok": True, "role": session["role"]}
+
+    @app.get("/api/_test/app-user")
+    def _app_user(session=Depends(require_app_user)):
         return {"ok": True, "role": session["role"]}
 
     @app.get("/api/_test/session-only")
@@ -82,6 +87,36 @@ class TestRequireOwner:
         assert resp.status_code == 200
         assert resp.json()["role"] == "owner"
 
+    def test_member_gets_403_on_owner_only_route(self, gated_client):
+        from app.api.security import encode_session
+
+        gated_client.cookies.set(
+            "af_session",
+            encode_session({"role": "member", "username": "alice", "data_source": "backend"}),
+        )
+        resp = gated_client.get("/api/_test/owner-only")
+        assert resp.status_code == 403
+
+    def test_member_gets_200_on_app_user_route(self, gated_client):
+        from app.api.security import encode_session
+
+        gated_client.cookies.set(
+            "af_session",
+            encode_session({"role": "member", "username": "alice", "data_source": "backend"}),
+        )
+        resp = gated_client.get("/api/_test/app-user")
+        assert resp.status_code == 200
+        assert resp.json()["role"] == "member"
+
+    def test_guest_gets_403_on_app_user_route(self, gated_client):
+        from app.api.security import encode_session
+
+        gated_client.cookies.set(
+            "af_session", encode_session({"role": "guest", "data_source": "demo"})
+        )
+        resp = gated_client.get("/api/_test/app-user")
+        assert resp.status_code == 403
+
     def test_no_session_gets_401_on_owner_only_route(self, gated_client):
         gated_client.cookies.clear()
         resp = gated_client.get("/api/_test/owner-only")
@@ -103,3 +138,25 @@ class TestRequireOwner:
         assert resp.status_code in (404, 405), (
             f"POST /api/trade/orders must not exist — got {resp.status_code}"
         )
+
+    def test_member_cannot_mutate_global_engine_state(self, client):
+        from app.api.security import encode_session
+
+        csrf = "csrf-member"
+        client.cookies.set(
+            "af_session",
+            encode_session(
+                {
+                    "role": "member",
+                    "username": "alice",
+                    "data_source": "backend",
+                    "csrf_token": csrf,
+                }
+            ),
+        )
+        resp = client.post(
+            "/api/engine/kill-switch",
+            json={"active": True},
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert resp.status_code == 403

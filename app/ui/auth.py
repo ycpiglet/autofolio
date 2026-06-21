@@ -1,6 +1,7 @@
-"""로그인 — 로컬 ID/PW(해시) + Google OIDC(st.login) + 게스트.
+"""로그인 — 승인된 로컬 ID/PW(해시) + Google OIDC(st.login) + 게스트.
 
-로컬 계정: 처음 보는 ID면 그 비밀번호로 **자동 가입**, 이후엔 로그인.
+로컬 계정: 기본값은 승인된 기존 계정만 로그인한다. first-run 자동 가입은
+`AUTOFOLIO_LOCAL_AUTO_REGISTER=1`일 때만 로컬/dev opt-in으로 허용한다.
 비밀번호는 PBKDF2(sha256, 200k)로 해시해서 암호화 보관함에 저장한다(평문 저장 없음).
 
 순수 로컬 인증 구현은 app/services/auth_service.py 에 있다 (Phase 0 SPLIT).
