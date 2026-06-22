@@ -23,6 +23,11 @@ sync:
     - agents/research_agent/notes/EVIDENCE-2026-06-03-001-requirement-elicitation.md
     # autofolio 고유: TASK-070 미만 identity grandfather
     - scripts/task_identity.py
+    # v0.5.0 업스트림 버그 시임: v0.5.0 backlog_board.py가 Task.initiative_id property를
+    # 제거했으나 v0.5.0 work_item_classifier.py(템플릿)는 여전히 task.initiative_id 사용
+    # → 채택 시 work_item_classifier 런타임 AttributeError. 호스트 버전(initiative_id 보유,
+    # wic와 정합) 유지. 업스트림 수정(property 복원 또는 wic 사용 제거) 시 해제. (업스트림 이슈)
+    - scripts/backlog_board.py
     # NOTE: continuity_contract_gate.py / owner_governance_gate.py 시임은 v0.3.1에서 해제
     # (업스트림 #187이 소비자-환경 동작을 정본화 → 다시 ① 관리대상).
     # NOTE: doc_steward_due.py 시임은 v0.4.0에서 해제 (업스트림 #194가 autofolio 버전을
