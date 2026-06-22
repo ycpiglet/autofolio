@@ -2,7 +2,7 @@ project: autofolio
 upstream:
   package: agent_runtime
   remote_url: https://github.com/ycpiglet/agent_runtime.git
-  ref: v0.3.1
+  ref: v0.4.0
 sync:
   mode: check-diff-apply
   allow_silent_overwrite: false
@@ -16,7 +16,6 @@ sync:
     - agents/lead_engineer/REPORTING-FORMAT.md
     - agents/project/SKILL-GOVERNANCE.md
     - CLAUDE.md
-    - scripts/doc_steward_due.py
     # --- v0.3.0 sync (issue #101): 호스트 소유 시임 ---
     # autofolio 세션 상태(데이터) — 업스트림은 placeholder 템플릿
     - agents/project/NEXT-SESSION-POINTER.yml
@@ -26,3 +25,5 @@ sync:
     - scripts/task_identity.py
     # NOTE: continuity_contract_gate.py / owner_governance_gate.py 시임은 v0.3.1에서 해제
     # (업스트림 #187이 소비자-환경 동작을 정본화 → 다시 ① 관리대상).
+    # NOTE: doc_steward_due.py 시임은 v0.4.0에서 해제 (업스트림 #194가 autofolio 버전을
+    # cycle_status 가드 포함해 정본화 → 다시 ① 관리대상; 콘텐츠 이미 동일).
