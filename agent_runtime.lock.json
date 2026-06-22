@@ -22,11 +22,11 @@
       "agents/lead_engineer/RALPH-PROMPT-SCAFFOLD.md": "sha256:c2d06b9ddce89df2cb5548e0a2e0dd0321ec652e777aa4a603d3977d46b8bbf9",
       "agents/lead_engineer/SKILL.md": "sha256:b1b82e260dab0f5c616f1fd3ffb1f9e4ac58a80fdb2c2cebd3d6835476c50a63",
       "agents/lead_engineer/TOKEN-BUDGET.md": "sha256:437a3e676948572f37737e71db55edd29c62f8fea916feb864954349cccc402a",
-      "agents/lead_engineer/retros/README.md": "sha256:258d631565097a5a882ca6649dd024b1bb175e460059c5a564cea53c0a36f15b",
-      "agents/lead_engineer/retros/TEMPLATE.md": "sha256:479669a43afa4f13ab4188b28e47752663c80e84408852a0802c216e668bd1e3",
+      "agents/lead_engineer/retros/README.md": "sha256:79b92a7fad17b189a06fdbbacc477a9cb625867cd99efe46d052b17f5d541d17",
+      "agents/lead_engineer/retros/TEMPLATE.md": "sha256:f9ec2818ae01850fe9244b778bf3b2a910e32a04267f5b333a02af0c478bcd5f",
       "agents/lead_engineer/tasks/units/README.md": "sha256:e44234861bf6ee25ebe5a31685a816e053559fd1ac27ed1aea95382b4156dc77",
       "agents/lead_engineer/tasks/units/examples/UNIT-EXAMPLE-001.md": "sha256:6c86c93fb4168053843b67269d6ea9744b8f11119e82a575cead5657341ea37c",
-      "agents/managing_partner/INDEPENDENCE-RUBRIC.md": "sha256:18b4cc575ac4c0adfb485054bf488811a2130fcde39e71dc9f2477fe00060d32",
+      "agents/managing_partner/INDEPENDENCE-RUBRIC.md": "sha256:a5193b7a437858df70501a2eec90d58813341d6923fcf190cfee0a14473cb2bd",
       "agents/managing_partner/SKILL.md": "sha256:0d54db960eeb111e2b863007e897f5f1ae96db32b4611ee14a832159c5f79e12",
       "agents/owner/SKILL.md": "sha256:eeeb78ac0aabcefd8ce81088a5c8c149cfae3f07fc1088befa9911e04effed8d",
       "agents/project/AGENT-KNOWLEDGE-WAREHOUSE.md": "sha256:b88ea8f5f866eb6d92de349ff8e85274a90533486a2ff61da4ffed8663519803",
@@ -113,6 +113,7 @@
       "scripts/deadlock_watchdog.py": "sha256:93b317f0ac03a0c337cc36141b37589b0b090e2f9d91fc9d3558221595eac1d5",
       "scripts/dependency_cycle_gate.py": "sha256:227dde735d63e7d70fa6a41705044f6b58dae123a2596359ad1fab0c8a7ebd79",
       "scripts/doc_health_report.py": "sha256:fd35feb3ad0da78a76dfef1e13abee732638deb660e47552fdd2b9315a0988ed",
+      "scripts/doc_steward_due.py": "sha256:b6baf42c215f80c84493fa7372c4529a6c46e206c09fe60fae93540791b7e6b8",
       "scripts/env_check.py": "sha256:4e556e559a149f63c62af4cd983817243f58938f2c64a5ce03d1196b3fcd0085",
       "scripts/eval_harness.py": "sha256:af1cd6bc9bedfc3b120792b5f8d70cb564f664f902a23181af3aeb53f2ccb68f",
       "scripts/evidence_index_generator.py": "sha256:9b418f03cafcdf27f6e974f6d432b7ed71ce8c0c6440f9e6a3de6304562b7fbf",
@@ -254,19 +255,19 @@
       "skills/scm-steward/SKILL.md": "sha256:eac36caaabb483fa72d04106311dd956d36c4f654116fd7cb800db33e9586c1c",
       "skills/session-closeout/SKILL.md": "sha256:547d28dca609519a3940d453eb11b563f53ffe8308e6bb4881bcbead93fa0570",
       "skills/taskset-dispatch/SKILL.md": "sha256:5322aca4780a9e79eb876ef431ce951db6b6ce7a013c07a741929c3a18325b2a",
-      "skills/wave-conductor/SKILL.md": "sha256:9d779bdef56f93295ca6ba5621103ab971bff175aba4cf8f9878e9d46161da56",
+      "skills/wave-conductor/SKILL.md": "sha256:13ce1d5a3c1aa96e35dc49ec0e5bb610a7427adfd30ee95543fe45b3eaf849c7",
       "skills/work-analytics/SKILL.md": "sha256:bd63dbfaa4edba888c0683e41cae5b72fcddc7d3618197c0d23f5e41bb7d156a",
       "specs/agent_loop/ralph_compatibility.md": "sha256:5b80c00f93b22aa9d1d99be85e6419b97d30878f829f61339278bd9372970f88"
     },
-    "package_version": "0.3.1",
-    "template_digest": "sha256:da2d84a2a233f50a19c016fcde57e9efb6875d9939452309cbf546200b6443b7",
-    "template_files": 256
+    "package_version": "0.4.0",
+    "template_digest": "sha256:417ffe79c7106d39f436ae044857efe974140097bb865eccd78d78f55547127f",
+    "template_files": 257
   },
   "project": "autofolio",
   "schema": "agent-runtime-lock/v1",
   "upstream": {
     "package": "agent_runtime",
-    "ref": "v0.3.1",
+    "ref": "v0.4.0",
     "remote_url": "https://github.com/ycpiglet/agent_runtime.git"
   }
 }
