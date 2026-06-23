@@ -1,7 +1,7 @@
 """Engine router — /api/engine/*
 
 Endpoints:
-  GET  /engine/status       — circuit breaker + flags + env (require_session)
+  GET  /engine/status       — circuit breaker + flags + env (require_app_user)
   POST /engine/kill-switch  — set kill_switch_active flag (require_owner_csrf)
   POST /engine/auto-trading — set auto_trading_enabled flag (require_owner_csrf)
   POST /engine/run-once     — single-flight engine run (require_owner_csrf)
@@ -13,7 +13,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import require_owner_csrf, require_session
+from app.api.deps import require_app_user, require_owner_csrf
 from app.api.schemas import (
     AutoTradingRequest,
     AutoTradingResponse,
@@ -35,7 +35,7 @@ _run_once_lock = threading.Lock()
 
 @router.get("/status", response_model=EngineStatusResponse)
 def engine_status(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> EngineStatusResponse:
     """Return composite engine health (circuit breaker, flags, env)."""
     from app.services import backend

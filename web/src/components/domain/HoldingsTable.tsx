@@ -15,9 +15,30 @@ function isPnlColumn(col: string): boolean {
 interface CellProps {
   col: string;
   value: unknown;
+  pnlClassName?: (value: number) => string;
+  emphasizeValues?: boolean;
 }
 
-function Cell({ col, value }: CellProps) {
+const NUMERIC_COLUMN_KEYWORDS = ["수량", "평단", "현재가", "평가금액", "비중", "배당", "price", "amount", "weight"];
+
+function isNumericColumn(col: string): boolean {
+  const lower = col.toLowerCase();
+  return NUMERIC_COLUMN_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
+function SkeletonRow({ colCount }: { colCount: number }) {
+  return (
+    <tr aria-hidden>
+      {Array.from({ length: colCount }).map((_, i) => (
+        <td key={i} className="px-3 py-2">
+          <div className="h-4 animate-pulse rounded bg-muted" />
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function Cell({ col, value, pnlClassName, emphasizeValues = false }: CellProps) {
   if (isPnlColumn(col)) {
     const num = typeof value === "number" ? value : parseFloat(String(value ?? ""));
     if (!isNaN(num)) {
@@ -27,13 +48,29 @@ function Cell({ col, value }: CellProps) {
         : `${num > 0 ? "+" : ""}${Math.round(num).toLocaleString("ko-KR")}`;
       return (
         <span
-          className={cn("font-mono tabular-nums", pnlColorClass(num))}
+          className={cn(
+            "font-semibold tabular-nums",
+            pnlClassName ? pnlClassName(num) : pnlColorClass(num),
+          )}
           aria-label={`${col}: ${display}`}
         >
           {display}
         </span>
       );
     }
+  }
+  if (emphasizeValues && typeof value === "number" && isNumericColumn(col)) {
+    return (
+      <span className="font-semibold tabular-nums text-foreground">
+        {value.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}
+      </span>
+    );
+  }
+  if (emphasizeValues && (col === "종목" || col === "자산군" || col === "지역" || col === "섹터" || col === "전략")) {
+    return <strong className="font-bold text-foreground">{String(value ?? "")}</strong>;
+  }
+  if (emphasizeValues && col === "티커") {
+    return <span className="font-semibold tabular-nums text-muted-foreground">{String(value ?? "")}</span>;
   }
   return <>{String(value ?? "")}</>;
 }
@@ -44,6 +81,8 @@ interface HoldingsTableProps {
   error?: Error | null;
   maxRows?: number;
   className?: string;
+  pnlClassName?: (value: number) => string;
+  emphasizeValues?: boolean;
 }
 
 /**
@@ -56,6 +95,8 @@ export function HoldingsTable({
   error,
   maxRows,
   className,
+  pnlClassName,
+  emphasizeValues = false,
 }: HoldingsTableProps) {
   if (error) {
     return (
@@ -77,18 +118,6 @@ export function HoldingsTable({
     : [];
   const colCount = columns.length || 5;
 
-  function SkeletonRow() {
-    return (
-      <tr aria-hidden>
-        {Array.from({ length: colCount }).map((_, i) => (
-          <td key={i} className="px-3 py-2">
-            <div className="h-4 animate-pulse rounded bg-muted" />
-          </td>
-        ))}
-      </tr>
-    );
-  }
-
   return (
     <div
       className={cn("overflow-x-auto rounded-xl border border-border", className)}
@@ -106,7 +135,10 @@ export function HoldingsTable({
                   <th
                     key={col}
                     scope="col"
-                    className="px-3 py-2 text-left font-medium text-muted-foreground"
+                    className={cn(
+                      "px-3 py-2 font-medium text-muted-foreground",
+                      emphasizeValues && (isPnlColumn(col) || isNumericColumn(col)) ? "text-right" : "text-left",
+                    )}
                   >
                     {col}
                   </th>
@@ -115,7 +147,9 @@ export function HoldingsTable({
         </thead>
         <tbody>
           {isLoading ? (
-            Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+            Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonRow key={i} colCount={colCount} />
+                ))
           ) : rows.length === 0 ? (
             <tr>
               <td
@@ -132,8 +166,19 @@ export function HoldingsTable({
                 className="border-b border-border last:border-0 hover:bg-muted/20"
               >
                 {columns.map((col) => (
-                  <td key={col} className="px-3 py-2 text-foreground">
-                    <Cell col={col} value={row[col]} />
+                  <td
+                    key={col}
+                    className={cn(
+                      "px-3 py-2 text-foreground",
+                      emphasizeValues && (isPnlColumn(col) || isNumericColumn(col)) && "text-right",
+                    )}
+                  >
+                    <Cell
+                      col={col}
+                      value={row[col]}
+                      pnlClassName={pnlClassName}
+                      emphasizeValues={emphasizeValues}
+                    />
                   </td>
                 ))}
               </tr>

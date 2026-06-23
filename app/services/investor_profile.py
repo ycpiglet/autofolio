@@ -11,7 +11,8 @@ from typing import Any
 
 from app.database.sqlite_db import get_connection
 
-SURVEY_VERSION = "investor-profile-v1"
+SURVEY_VERSION = "investor-profile-v2"
+REQUIRED_CONFIRMATION_TEXT = "위 항목을 모두 이해했습니다."
 AXES = (
     "risk_capacity",
     "risk_tolerance",
@@ -20,6 +21,44 @@ AXES = (
     "time_horizon",
     "automation_comfort",
 )
+
+_CATEGORIES: list[dict[str, str]] = [
+    {
+        "key": "goals",
+        "title": "투자 목표와 자금",
+        "description": "투자 목적, 가능 기간, 자금의 성격을 확인합니다.",
+    },
+    {
+        "key": "risk",
+        "title": "위험 성향",
+        "description": "손실을 견디는 정도와 변동성 선호를 확인합니다.",
+    },
+    {
+        "key": "knowledge",
+        "title": "투자 지식",
+        "description": "기본 개념의 이해도를 점검합니다. 정답을 채점해 불이익을 주지 않으며, 맞춤 설명 수준을 정하는 용도입니다.",
+    },
+    {
+        "key": "experience",
+        "title": "투자 경험",
+        "description": "직접 경험해 본 투자 상품과 활동입니다.",
+    },
+    {
+        "key": "automation",
+        "title": "자동화 선호",
+        "description": "시스템 개입 수준과 승인 방식을 정합니다.",
+    },
+    {
+        "key": "preferences",
+        "title": "선호와 만족 기준",
+        "description": "선호하는 상품과 무엇을 성공으로 볼지 확인합니다.",
+    },
+    {
+        "key": "agreement",
+        "title": "확인과 동의",
+        "description": "아래 내용을 모두 확인하고 동의해야 진단을 저장할 수 있습니다.",
+    },
+]
 
 
 class SurveyValidationError(ValueError):
@@ -103,6 +142,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "investment_goal",
         "title": "투자 목적",
         "kind": "single",
+        "category": "goals",
         "required": True,
         "options": [
             {"value": "preserve", "label": "원금 보존", "scores": {"risk_tolerance": 0, "time_horizon": 1}},
@@ -116,6 +156,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "time_horizon",
         "title": "투자 가능 기간",
         "kind": "single",
+        "category": "goals",
         "required": True,
         "options": [
             {"value": "under_6m", "label": "6개월 미만", "scores": {"time_horizon": 0, "risk_capacity": 0}},
@@ -128,6 +169,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "capital_need",
         "title": "투자금 성격",
         "kind": "single",
+        "category": "goals",
         "required": True,
         "options": [
             {"value": "near_term_need", "label": "곧 필요할 수 있는 자금", "scores": {"risk_capacity": 0}},
@@ -140,6 +182,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "loss_response",
         "title": "손실 구간 행동",
         "kind": "single",
+        "category": "risk",
         "required": True,
         "options": [
             {"value": "sell_5", "label": "-5% 전후에서 대부분 정리", "scores": {"risk_tolerance": 0}},
@@ -152,6 +195,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "volatility_preference",
         "title": "변동성 선호",
         "kind": "single",
+        "category": "risk",
         "required": True,
         "options": [
             {"value": "low", "label": "낮은 변동과 낮은 기대수익", "scores": {"risk_tolerance": 0}},
@@ -163,6 +207,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "experience",
         "title": "경험한 투자 상품",
         "kind": "multi",
+        "category": "experience",
         "required": True,
         "options": [
             {"value": "deposit", "label": "예적금", "scores": {"experience": 0}},
@@ -171,12 +216,15 @@ _QUESTIONS: list[dict[str, Any]] = [
             {"value": "overseas_stock", "label": "해외주식", "scores": {"experience": 2, "knowledge": 1}},
             {"value": "leveraged", "label": "레버리지/인버스", "scores": {"experience": 2, "knowledge": 2}},
             {"value": "derivatives", "label": "파생상품", "scores": {"experience": 3, "knowledge": 2}},
+            {"value": "none", "label": "투자 경험 없음", "exclusive": True, "scores": {"experience": 0}},
         ],
     },
     {
         "id": "knowledge_diversification",
         "title": "분산투자 이해",
         "kind": "single",
+        "category": "knowledge",
+        "description": "정답으로 불이익을 주지 않으며, 맞춤 설명 수준을 정하는 용도입니다.",
         "required": True,
         "options": [
             {"value": "single_is_safer", "label": "확신 있는 한 종목 집중이 항상 더 안전", "scores": {"knowledge": 0}},
@@ -188,6 +236,8 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "knowledge_drawdown",
         "title": "최대낙폭 이해",
         "kind": "single",
+        "category": "knowledge",
+        "description": "정답으로 불이익을 주지 않으며, 맞춤 설명 수준을 정하는 용도입니다.",
         "required": True,
         "options": [
             {"value": "largest_drop", "label": "고점 대비 최대 하락폭", "scores": {"knowledge": 3}},
@@ -199,6 +249,8 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "knowledge_order_type",
         "title": "주문 방식 이해",
         "kind": "single",
+        "category": "knowledge",
+        "description": "정답으로 불이익을 주지 않으며, 맞춤 설명 수준을 정하는 용도입니다.",
         "required": True,
         "options": [
             {"value": "limit_controls_price", "label": "지정가는 가격을 제한하지만 체결 안 될 수 있음", "scores": {"knowledge": 3}},
@@ -210,6 +262,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "automation_preference",
         "title": "자동화 선호",
         "kind": "single",
+        "category": "automation",
         "required": True,
         "options": [
             {"value": "alerts_only", "label": "알림만 받고 직접 판단", "scores": {"automation_comfort": 0}},
@@ -223,6 +276,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "approval_preference",
         "title": "승인 방식",
         "kind": "single",
+        "category": "automation",
         "required": True,
         "options": [
             {"value": "every_time", "label": "매번 사람 승인", "scores": {"automation_comfort": 0}},
@@ -234,6 +288,7 @@ _QUESTIONS: list[dict[str, Any]] = [
         "id": "product_preference",
         "title": "선호 상품",
         "kind": "multi",
+        "category": "preferences",
         "required": True,
         "options": [
             {"value": "cash", "label": "현금성"},
@@ -243,12 +298,15 @@ _QUESTIONS: list[dict[str, Any]] = [
             {"value": "growth", "label": "성장주", "scores": {"risk_tolerance": 1}},
             {"value": "theme", "label": "테마주", "scores": {"risk_tolerance": 1}},
             {"value": "leveraged", "label": "레버리지/인버스", "scores": {"risk_tolerance": 2, "knowledge": 1}},
+            {"value": "other", "label": "기타"},
+            {"value": "none", "label": "아직 없음", "exclusive": True},
         ],
     },
     {
         "id": "discomfort",
         "title": "불편한 상황",
         "kind": "multi",
+        "category": "preferences",
         "required": True,
         "options": [
             {"value": "frequent_trading", "label": "잦은 거래"},
@@ -256,12 +314,15 @@ _QUESTIONS: list[dict[str, Any]] = [
             {"value": "intraday_volatility", "label": "큰 일중 변동"},
             {"value": "weak_explanation", "label": "설명 부족"},
             {"value": "too_many_alerts", "label": "알림 과다"},
+            {"value": "other", "label": "기타"},
+            {"value": "none", "label": "특별히 없음", "exclusive": True},
         ],
     },
     {
         "id": "satisfaction_focus",
         "title": "만족 기준",
         "kind": "multi",
+        "category": "preferences",
         "required": True,
         "options": [
             {"value": "absolute_return", "label": "절대수익"},
@@ -270,19 +331,82 @@ _QUESTIONS: list[dict[str, Any]] = [
             {"value": "plan_adherence", "label": "계획 준수"},
             {"value": "explainability", "label": "이해 가능한 설명"},
             {"value": "time_saved", "label": "시간 절약"},
+            {"value": "other", "label": "기타"},
         ],
     },
     {
-        "id": "final_ack",
-        "title": "최종 확인",
+        "id": "ack_loss_risk",
+        "title": "원금 손실 위험",
         "kind": "acknowledgement",
+        "category": "agreement",
         "required": True,
         "options": [
             {
                 "value": "acknowledged",
-                "label": "수익 보장이나 투자 권유가 아니며, 자동화는 내가 정한 한도와 승인 흐름 안에서만 동작함을 확인합니다.",
+                "label": "투자에는 원금 손실 위험이 있으며, 어떠한 수익도 보장되지 않음을 이해합니다.",
             }
         ],
+    },
+    {
+        "id": "ack_not_advice",
+        "title": "투자 권유·자문 아님",
+        "kind": "acknowledgement",
+        "category": "agreement",
+        "required": True,
+        "options": [
+            {
+                "value": "acknowledged",
+                "label": "이 서비스가 제공하는 분석·제안·진단은 투자 권유나 투자자문이 아니며, 모든 투자 판단과 그 결과에 대한 책임이 전적으로 본인에게 있음을 확인합니다.",
+            }
+        ],
+    },
+    {
+        "id": "ack_automation_scope",
+        "title": "자동화 범위",
+        "kind": "acknowledgement",
+        "category": "agreement",
+        "required": True,
+        "options": [
+            {
+                "value": "acknowledged",
+                "label": "자동화 기능은 내가 직접 설정한 한도와 승인 흐름 안에서만 동작하며, 그 범위에서 발생한 실행과 결과의 책임이 본인에게 있음에 동의합니다.",
+            }
+        ],
+    },
+    {
+        "id": "ack_no_liability",
+        "title": "책임의 한계",
+        "kind": "acknowledgement",
+        "category": "agreement",
+        "required": True,
+        "options": [
+            {
+                "value": "acknowledged",
+                "label": "투자 손실 및 시스템·시세 데이터 오류로 인한 손해에 대하여 본 서비스의 제공자·운영자·개발자에게 법적 책임을 묻지 않을 것에 동의합니다.",
+            }
+        ],
+    },
+    {
+        "id": "ack_data_use",
+        "title": "정보 활용 동의",
+        "kind": "acknowledgement",
+        "category": "agreement",
+        "required": True,
+        "options": [
+            {
+                "value": "acknowledged",
+                "label": "본 설문 응답이 제안과 경고를 개인화하기 위한 목적으로 저장·이용됨에 동의합니다.",
+            }
+        ],
+    },
+    {
+        "id": "legal_signature",
+        "title": "전자 서명",
+        "kind": "signature",
+        "category": "agreement",
+        "description": "성명, 확인 문구, 직접 그린 서명이 모두 있어야 저장됩니다. 서명 일시는 저장 시 자동으로 기록됩니다.",
+        "required": True,
+        "options": [],
     },
 ]
 
@@ -295,6 +419,7 @@ def username_from_session(session: dict[str, Any]) -> str:
 def survey_definition() -> dict[str, Any]:
     return {
         "version": SURVEY_VERSION,
+        "categories": [dict(category) for category in _CATEGORIES],
         "questions": [_public_question(question) for question in _QUESTIONS],
     }
 
@@ -516,7 +641,39 @@ def _validate_answers(answers: dict[str, Any]) -> dict[str, Any]:
             if value not in (True, "acknowledged"):
                 raise SurveyValidationError(f"{qid} must be acknowledged")
             normalized[qid] = "acknowledged"
+        elif kind == "signature":
+            normalized[qid] = _validate_signature(value, qid)
     return normalized
+
+
+def _validate_signature(value: Any, qid: str) -> dict[str, str]:
+    if not isinstance(value, dict):
+        raise SurveyValidationError(f"{qid} requires a signed acknowledgement object")
+    name = _clean_text(value.get("name"))
+    confirmation_text = _clean_text(value.get("confirmation_text"))
+    signature_data_url = _clean_text(value.get("signature_data_url"))
+    signed_at = _clean_text(value.get("signed_at"))
+
+    if not name:
+        raise SurveyValidationError(f"{qid} requires a typed name")
+    if confirmation_text != REQUIRED_CONFIRMATION_TEXT:
+        raise SurveyValidationError(f"{qid} requires exact confirmation text")
+    if not signature_data_url.startswith("data:image/png;base64,") or len(signature_data_url) < 120:
+        raise SurveyValidationError(f"{qid} requires a drawn signature")
+    if len(signature_data_url) > 300_000:
+        raise SurveyValidationError(f"{qid} signature image is too large")
+    if not signed_at:
+        raise SurveyValidationError(f"{qid} requires a signed timestamp")
+    return {
+        "name": name,
+        "confirmation_text": confirmation_text,
+        "signature_data_url": signature_data_url,
+        "signed_at": signed_at,
+    }
+
+
+def _clean_text(value: Any) -> str:
+    return str(value or "").strip()
 
 
 def _score_answers(answers: dict[str, Any]) -> dict[str, float]:
@@ -538,6 +695,8 @@ def _score_answers(answers: dict[str, Any]) -> dict[str, float]:
             for axis, value in axis_max.items():
                 max_totals[axis] += max(0.0, value)
         for value in selected:
+            if not isinstance(value, str):
+                continue
             option = option_map.get(value)
             if not option:
                 continue
@@ -677,10 +836,13 @@ def _public_question(question: dict[str, Any]) -> dict[str, Any]:
         "title": question["title"],
         "kind": question["kind"],
         "required": bool(question.get("required")),
+        "category": question["category"],
+        "description": question.get("description"),
         "options": [
             {
                 "value": option["value"],
                 "label": option["label"],
+                "exclusive": bool(option.get("exclusive", False)),
             }
             for option in question.get("options", [])
         ],

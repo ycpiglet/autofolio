@@ -1,0 +1,36 @@
+{
+  "schema": "autofolio.membership-railway-backend-readiness/v1",
+  "status": "local_readiness_not_deployed",
+  "updated_at": "2026-06-19T21:30:36+09:00",
+  "task": "TASK-121",
+  "source_preflight": "agents/project/MEMBERSHIP-STAGING-DEPLOY-PREFLIGHT-CHECKLIST.json",
+  "boundaries": {
+    "no_railway_deploy": true,
+    "no_external_project_mutation": true,
+    "no_external_env_write": true,
+    "no_public_url_publish": true,
+    "no_secret_values": true,
+    "no_supabase_apply": true,
+    "no_kis_or_payment_activation": true
+  },
+  "backend": {
+    "dockerfile": "Dockerfile",
+    "host_binding": "0.0.0.0",
+    "port_binding": "${PORT:-8000}",
+    "healthcheck_path": "/api/health",
+    "healthcheck_expected_status": "ok",
+    "deploy_status": "not_deployed"
+  },
+  "readiness_checks": [
+    "Dockerfile CMD uses shell expansion for ${PORT:-8000}.",
+    "Uvicorn host remains 0.0.0.0.",
+    "FastAPI exposes unauthenticated /api/health.",
+    "No Railway project, env var, domain, or deployment is changed."
+  ],
+  "remaining_blockers": [
+    "External platform env values are still not written.",
+    "Supabase migration/RLS/advisor/cross-user evidence remains Owner/R3.",
+    "Persistent storage decision remains TASK-122.",
+    "KIS/payment/provider external boundaries remain blocked."
+  ]
+}

@@ -1,0 +1,190 @@
+{
+  "$schema": "autofolio.membership-supabase-staging-migration-rls-review/v1",
+  "status": "draft_review_packet_not_migration_not_applied",
+  "updated_at": "2026-06-19T21:52:56+09:00",
+  "owner": "Backend Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-109",
+    "TASK-116",
+    "TASK-122",
+    "TASK-123"
+  ],
+  "source_inputs": [
+    "agents/project/MEMBERSHIP-PRODUCTION-CONTRACT.json",
+    "agents/project/MEMBERSHIP-SUPABASE-STAGING-FIELD-MAP.json",
+    "agents/project/MEMBERSHIP-STAGING-PERSISTENT-STORAGE-DECISION.json",
+    "agents/project/MEMBERSHIP-TENANT-ISOLATION-MATRIX.json",
+    "agents/project/MEMBERSHIP-PRODUCTION-SECRET-POLICY.json",
+    "agents/project/MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.json",
+    "agents/project/MEMBERSHIP-ENGINE-SAFETY-CONTRACT.json"
+  ],
+  "boundaries": {
+    "review_packet_only": true,
+    "no_migration_file_created": true,
+    "no_executable_sql": true,
+    "no_supabase_connection": true,
+    "no_supabase_apply": true,
+    "no_schema_sql_change": true,
+    "no_data_api_grant_change": true,
+    "no_external_env_write": true,
+    "no_secret_values": true,
+    "no_production_data": true,
+    "no_public_url_publish": true,
+    "keeps_can_launch_false": true
+  },
+  "source_basis": [
+    {
+      "id": "supabase_rls",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "note": "Review packet keeps RLS ownership and WITH CHECK requirements explicit before any migration is created or applied."
+    },
+    {
+      "id": "supabase_api_security",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/api/securing-your-api",
+      "note": "Data API exposure, grants, views, functions, and RLS must be reviewed separately before external staging."
+    },
+    {
+      "id": "supabase_database_advisors",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/database/database-advisors",
+      "note": "Security and performance advisor output is required after schema exists; no advisor is run in this task."
+    },
+    {
+      "id": "supabase_backups",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/platform/backups",
+      "note": "Backup/restore posture must be reviewed before staging is treated as persistent user data storage."
+    }
+  ],
+  "review_mode": {
+    "artifact_type": "local_review_packet",
+    "migration_artifact_created": false,
+    "sql_statements_present": false,
+    "apply_or_push_performed": false,
+    "intended_next_step": "Owner/R3 reviews this packet, selects a Supabase staging project, creates a real migration through the approved workflow, applies it outside this task, then captures advisor and cross-user test evidence."
+  },
+  "table_groups": [
+    {
+      "id": "identity_and_membership",
+      "tables": [
+        "profiles",
+        "membership_requests",
+        "deposit_instructions",
+        "approval_events",
+        "subscription_grants"
+      ],
+      "review_focus": "Account ownership, signup/request state, manual approval audit, grant visibility, and applicant lookup non-disclosure."
+    },
+    {
+      "id": "payment_and_secret_metadata",
+      "tables": [
+        "payment_evidence",
+        "integration_secret_metadata"
+      ],
+      "review_focus": "Minimal masked payment evidence, no raw statements, secret metadata only, and no plaintext provider payloads."
+    },
+    {
+      "id": "portfolio_runtime",
+      "tables": [
+        "portfolio_accounts",
+        "holdings_snapshots",
+        "risk_settings",
+        "engine_state",
+        "engine_run_queue"
+      ],
+      "review_focus": "Tenant-owned portfolio and engine runtime state, worker queue user scope, and update WITH CHECK coverage."
+    },
+    {
+      "id": "trading_and_audit",
+      "tables": [
+        "trade_conditions",
+        "order_intents",
+        "order_logs",
+        "execution_logs",
+        "notifications",
+        "audit_events"
+      ],
+      "review_focus": "Trading condition ownership, append-only order/audit records, notification destination isolation, and no live KIS activation."
+    }
+  ],
+  "table_review_specs": [
+    {"table": "profiles", "owner_fields": ["id"], "authenticated_grants": ["select", "insert", "update"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": true, "append_only": false},
+    {"table": "membership_requests", "owner_fields": ["user_id"], "authenticated_grants": ["select", "insert"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "deposit_instructions", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "approval_events", "owner_fields": ["target_user_id", "actor_user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": true},
+    {"table": "subscription_grants", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "integration_secret_metadata", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false, "plaintext_secret_allowed": false},
+    {"table": "payment_evidence", "owner_fields": ["target_user_id", "actor_user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false, "raw_source_persisted": false},
+    {"table": "portfolio_accounts", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "holdings_snapshots", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "risk_settings", "owner_fields": ["user_id"], "authenticated_grants": ["select", "update"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": true, "append_only": false},
+    {"table": "engine_state", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "engine_run_queue", "owner_fields": ["user_id"], "authenticated_grants": ["select", "insert"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "trade_conditions", "owner_fields": ["user_id"], "authenticated_grants": ["select", "insert", "update"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": true, "append_only": false},
+    {"table": "order_intents", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": true},
+    {"table": "order_logs", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": true},
+    {"table": "execution_logs", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": true},
+    {"table": "notifications", "owner_fields": ["user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": false},
+    {"table": "audit_events", "owner_fields": ["target_user_id", "actor_user_id"], "authenticated_grants": ["select"], "rls_required": true, "auth_uid_policy_required": true, "update_with_check_required": false, "append_only": true}
+  ],
+  "rls_review_requirements": [
+    "Every table in table_review_specs must have RLS enabled before external users.",
+    "Every authenticated member policy must combine TO authenticated with auth.uid ownership intent.",
+    "Every update-capable tenant table must have a WITH CHECK ownership rule.",
+    "Append-only tables must not grant authenticated update or delete.",
+    "Anon must have no direct tenant table access; public signup/status lookup stays backend-mediated.",
+    "Owner/admin cross-tenant operations must be server-side and append audit events.",
+    "Service role or secret keys are server-runtime only and never browser-visible."
+  ],
+  "data_api_review_order": [
+    "Confirm table list and owner fields against TASK-116.",
+    "Confirm RLS policy names and ownership predicates.",
+    "Confirm anon has no tenant table grants.",
+    "Confirm authenticated grants are least-privilege.",
+    "Confirm public pre-auth routes do not expose tenant tables directly.",
+    "Confirm Data API exposure settings after RLS exists.",
+    "Run security and performance advisors after schema exists.",
+    "Run cross-user tests before any external user staging."
+  ],
+  "required_cross_user_tests": [
+    "anon_has_no_tenant_table_access",
+    "member_a_cannot_read_member_b",
+    "member_a_cannot_update_member_b",
+    "member_cannot_reassign_user_id",
+    "member_cannot_call_owner_admin",
+    "owner_admin_routes_create_audit_events",
+    "secret_metadata_never_returns_plaintext",
+    "payment_evidence_minimized",
+    "engine_queue_user_scope",
+    "order_intent_append_only"
+  ],
+  "rollback_and_apply_review": [
+    "Owner selects the staging project and records it outside repo.",
+    "A real migration is created later through the approved Supabase workflow, not in this task.",
+    "Rollback notes and backup/restore plan are reviewed before apply.",
+    "Security and performance advisor output is captured after apply.",
+    "Cross-user test evidence is captured after apply.",
+    "can_launch remains false until deploy smoke and R3 evidence are complete."
+  ],
+  "forbidden_actions": [
+    "Do not create a migration file in this task.",
+    "Do not execute SQL or apply schema.",
+    "Do not connect to or mutate a Supabase project.",
+    "Do not edit app/database/schema.sql.",
+    "Do not change Data API grants or platform environment variables.",
+    "Do not store secret values, provider tokens, KIS credentials, payment records, bank values, production data, or real customer data in repository files.",
+    "Do not deploy, publish a URL, or mark can_launch true."
+  ],
+  "verification": {
+    "local_review_gate": "python scripts/membership_supabase_migration_review_gate.py --check",
+    "json_parse": "python -m json.tool agents/project/MEMBERSHIP-SUPABASE-STAGING-MIGRATION-RLS-REVIEW.json",
+    "unit_tests": "python -m pytest tests/unit/test_membership_supabase_migration_review_gate.py -q"
+  }
+}

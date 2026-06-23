@@ -1,11 +1,11 @@
 """Agents router — /api/agents/*
 
 Endpoints:
-  GET  /agents/list            (require_session) → available flag + public agent metadata
+  GET  /agents/list            (require_app_user) → available flag + agent metadata
   POST /agents/ask             (require_owner_csrf) → single-agent Q&A
   POST /agents/ic/run          (require_owner_csrf) → start IC job, return job_id (202)
-  GET  /agents/ic/stream/{job_id} (require_session) → SSE progress + done event
-  GET  /agents/ic/decisions    (require_session) → list of past decision files
+  GET  /agents/ic/stream/{job_id} (require_app_user) → SSE progress + done event
+  GET  /agents/ic/decisions    (require_app_user) → list of past decision files
 
 SSE format: "data: <json>\\n\\n" per event.
 IC reconnect-replay: on connect, any already-recorded steps are replayed before live streaming.
@@ -23,7 +23,7 @@ from typing import Annotated, Any, AsyncGenerator
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
 
-from app.api.deps import require_owner_csrf, require_session
+from app.api.deps import require_app_user, require_owner_csrf
 from app.api.schemas import (
     AgentResearchResponse,
     AgentsListResponse,
@@ -73,7 +73,7 @@ _jobs: dict[str, dict[str, Any]] = {}
 
 @router.get("/list", response_model=AgentsListResponse)
 def agents_list(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     experts_only: bool = Query(default=False),
 ) -> AgentsListResponse:
     """Return available flag, message, and public agent metadata."""
@@ -93,7 +93,7 @@ def agents_list(
 
 @router.get("/premarket/summary", response_model=PremarketSummaryResponse)
 def premarket_summary(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     date: str | None = Query(default=None, description="YYYY-MM-DD. Omit for latest saved summary."),
 ) -> PremarketSummaryResponse:
     """Load a CLI-generated pre-market summary markdown file.
@@ -118,7 +118,7 @@ def premarket_summary(
 
 @router.get("/research", response_model=AgentResearchResponse)
 def agents_research(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: str = Query(..., description="종목 코드 (화이트리스트)"),
     days: int = Query(default=7, ge=1, le=30, description="공시 조회 기간(일)"),
 ) -> AgentResearchResponse:
@@ -253,7 +253,7 @@ async def ic_run(
 async def ic_stream(
     job_id: str,
     request: Request,
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> StreamingResponse:
     """SSE stream for an IC job.
 
@@ -317,7 +317,7 @@ async def ic_stream(
 
 @router.get("/ic/decisions")
 def ic_decisions(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     limit: int = Query(default=10, ge=1, le=100),
 ) -> list[dict[str, Any]]:
     """Return list of past IC decision files (most recent first)."""

@@ -1,0 +1,126 @@
+{
+  "schema": "autofolio.membership-staging-env-inventory/v1",
+  "status": "sanitized_template_only",
+  "updated_at": "2026-06-19T21:17:00+09:00",
+  "task": "TASK-120",
+  "source_preflight": "agents/project/MEMBERSHIP-STAGING-DEPLOY-PREFLIGHT-CHECKLIST.json",
+  "template": ".env.example",
+  "boundaries": {
+    "no_secret_values": true,
+    "no_real_account_numbers": true,
+    "no_external_env_write": true,
+    "no_external_project_mutation": true,
+    "no_deploy": true,
+    "no_public_url_publish": true,
+    "no_supabase_apply": true,
+    "no_kis_activation": true,
+    "no_payment_or_bank_api": true
+  },
+  "fail_closed_defaults": {
+    "KIS_ENV": "mock",
+    "AUTOFOLIO_LOCAL_AUTO_REGISTER": "0",
+    "AUTOFOLIO_GUEST_DEMO_ENABLED": "0",
+    "AUTOFOLIO_SSO_MOCK_ENABLED": "0",
+    "AUTOFOLIO_KIS_WS_ENABLE": "0",
+    "AUTOFOLIO_MEMBERSHIP_PRICE_KRW": "0"
+  },
+  "groups": [
+    {
+      "id": "runtime",
+      "keys": [
+        "AUTOFOLIO_ENV",
+        "AUTOFOLIO_HOME",
+        "PORT",
+        "API_INTERNAL_URL",
+        "AUTOFOLIO_PUBLIC_BASE_URL",
+        "NEXT_PUBLIC_BASE_URL",
+        "AUTOFOLIO_FRONTEND_HOME_URL",
+        "AUTOFOLIO_FRONTEND_LOGIN_URL"
+      ],
+      "note": "Local defaults only. Platform values must be entered outside the repository."
+    },
+    {
+      "id": "safety",
+      "keys": [
+        "KIS_ENV",
+        "AUTOFOLIO_LOCAL_AUTO_REGISTER",
+        "AUTOFOLIO_GUEST_DEMO_ENABLED",
+        "AUTOFOLIO_SSO_MOCK_ENABLED",
+        "AUTOFOLIO_KIS_WS_ENABLE"
+      ],
+      "note": "Defaults keep trading, guest/demo, auto-register, mock SSO, and KIS WebSocket disabled."
+    },
+    {
+      "id": "membership",
+      "keys": [
+        "AUTOFOLIO_MEMBERSHIP_PRICE_KRW",
+        "AUTOFOLIO_MEMBERSHIP_BANK_NAME",
+        "AUTOFOLIO_MEMBERSHIP_ACCOUNT_HOLDER",
+        "AUTOFOLIO_MEMBERSHIP_BANK_ACCOUNT"
+      ],
+      "note": "Bank/account placeholders stay empty in repo."
+    },
+    {
+      "id": "sso",
+      "keys": [
+        "AUTOFOLIO_SSO_ALLOWED_EMAILS",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "KAKAO_REST_API_KEY",
+        "KAKAO_CLIENT_SECRET",
+        "NAVER_CLIENT_ID",
+        "NAVER_CLIENT_SECRET"
+      ],
+      "note": "OAuth credentials stay empty in repo."
+    },
+    {
+      "id": "supabase",
+      "keys": [
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SECRET_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ],
+      "note": "Actual Supabase staging values are external platform secrets."
+    },
+    {
+      "id": "kis",
+      "keys": [
+        "KIS_APP_KEY",
+        "KIS_APP_SECRET",
+        "KIS_PAPER_APP_KEY",
+        "KIS_PAPER_APP_SECRET",
+        "KIS_PAPER_ACCOUNT_NO",
+        "KIS_PAPER_ACCOUNT_PRODUCT_CODE",
+        "KIS_PAPER_HTS_ID",
+        "KIS_PROD_APP_KEY",
+        "KIS_PROD_APP_SECRET",
+        "KIS_PROD_ACCOUNT_NO",
+        "KIS_PROD_ACCOUNT_PRODUCT_CODE",
+        "KIS_PROD_HTS_ID"
+      ],
+      "note": "All values stay empty and KIS_ENV stays mock."
+    },
+    {
+      "id": "optional_integrations",
+      "keys": [
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "TELEGRAM_BOT_TOKEN",
+        "TELEGRAM_CHAT_ID",
+        "X_API_KEY",
+        "X_API_SECRET",
+        "X_ACCESS_TOKEN",
+        "X_ACCESS_TOKEN_SECRET"
+      ],
+      "note": "Optional provider tokens stay empty in repo."
+    }
+  ],
+  "actual_deploy_blockers_remaining": [
+    "External platform env vars are still not written.",
+    "Railway backend PORT and healthcheck readiness still needs TASK-121.",
+    "Supabase migration/RLS/advisor/cross-user evidence still needs Owner/R3 lane.",
+    "Persistent storage strategy still needs TASK-122.",
+    "KIS/payment/provider external boundaries remain blocked."
+  ]
+}

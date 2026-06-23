@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiPost, ApiError, getSsoProviders, type SsoProviderInfo } from "@/lib/api";
@@ -14,6 +15,12 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface SessionResponse {
   role: string;
@@ -70,6 +77,15 @@ const SETUP_GUIDE: Record<
   },
 };
 
+function apiErrorDetail(err: unknown): string | null {
+  if (!(err instanceof ApiError)) return null;
+  if (typeof err.body === "object" && err.body && "detail" in err.body) {
+    const detail = (err.body as { detail?: unknown }).detail;
+    return typeof detail === "string" ? detail : null;
+  }
+  return null;
+}
+
 function callbackUrl(providerId: string): string {
   const origin =
     typeof window !== "undefined" ? window.location.origin : "http://127.0.0.1:3000";
@@ -82,7 +98,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [guestLoading, setGuestLoading] = useState(false);
   const [setupProvider, setSetupProvider] = useState<SsoProviderInfo | null>(null);
 
   const { data: ssoData } = useQuery({
@@ -109,25 +124,12 @@ export default function LoginPage() {
       router.push("/home");
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
-        setError("아이디 또는 비밀번호가 올바르지 않습니다.");
+        setError(apiErrorDetail(err) ?? "아이디 또는 비밀번호가 올바르지 않습니다.");
       } else {
         setError("로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
       }
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function handleGuest() {
-    setError(null);
-    setGuestLoading(true);
-    try {
-      await apiPost<SessionResponse>("/api/auth/login", { guest: true });
-      router.push("/home");
-    } catch {
-      setError("게스트 로그인 중 오류가 발생했습니다.");
-    } finally {
-      setGuestLoading(false);
     }
   }
 
@@ -218,7 +220,7 @@ export default function LoginPage() {
           <Card>
             <CardHeader>
               <CardTitle>로그인</CardTitle>
-              <CardDescription>Autofolio 계정으로 로그인하세요.</CardDescription>
+              <CardDescription>승인된 Autofolio 계정으로 로그인하세요.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} noValidate className="flex flex-col gap-4">
@@ -305,64 +307,48 @@ export default function LoginPage() {
             </CardContent>
           </Card>
 
-          {/* Guest card */}
+          {/* Signup request card */}
           <Card className="border-dashed">
             <CardContent className="pt-4 pb-4">
               <div className="flex flex-col items-center gap-3 text-center">
-                <div className="text-sm font-medium text-foreground">
-                  로그인 없이 둘러보기
-                </div>
+                <div className="text-sm font-medium text-foreground">승인 기반 가입</div>
                 <p className="text-xs text-muted-foreground">
-                  데모 데이터로 Autofolio를 체험해보세요.
+                  검증된 사용자만 계정이 활성화됩니다.
                 </p>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleGuest}
-                  disabled={guestLoading}
-                  aria-busy={guestLoading}
-                >
-                  {guestLoading ? "연결 중…" : "게스트 데모 시작"}
+                <Button nativeButton={false} render={<Link href="/signup" />} className="w-full">
+                  가입 승인 신청
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            계정은 Owner가 신청자와 입금 확인을 검증한 뒤 활성화합니다.
+          </p>
         </div>
       </div>
 
       {/* Setup guide modal (shown when an unconfigured provider is clicked) */}
-      {setupProvider && (() => {
-        const guide = SETUP_GUIDE[setupProvider.id] ?? {
-          title: `${setupProvider.label} 연동 설정`,
-          steps: ["제공자 개발자 콘솔에서 OAuth 앱을 등록하고 콜백 URI를 등록하세요."],
-          env: [],
-          manual: "docs/EXTERNAL_APP_API_OWNER_MANUAL.md",
-        };
-        return (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label={guide.title}
-            onClick={() => setSetupProvider(null)}
-          >
-            <div
-              className="max-h-[85vh] w-full max-w-lg overflow-auto rounded-xl bg-surface p-6 shadow-soft"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="mb-3 flex items-start justify-between gap-4">
-                <h2 className="text-lg font-bold text-foreground" style={{ wordBreak: "keep-all" }}>
+      <Dialog
+        open={setupProvider !== null}
+        onOpenChange={(open) => {
+          if (!open) setSetupProvider(null);
+        }}
+      >
+        {setupProvider && (() => {
+          const guide = SETUP_GUIDE[setupProvider.id] ?? {
+            title: `${setupProvider.label} 연동 설정`,
+            steps: ["제공자 개발자 콘솔에서 OAuth 앱을 등록하고 콜백 URI를 등록하세요."],
+            env: [],
+            manual: "docs/EXTERNAL_APP_API_OWNER_MANUAL.md",
+          };
+          return (
+            <DialogContent className="block max-h-[85vh] w-full max-w-lg overflow-auto bg-surface p-6 shadow-soft sm:max-w-lg">
+              <DialogHeader className="mb-3 pr-8">
+                <DialogTitle className="text-lg font-bold text-foreground" style={{ wordBreak: "keep-all" }}>
                   {guide.title}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setSetupProvider(null)}
-                  className="rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted"
-                  aria-label="닫기"
-                >
-                  ✕
-                </button>
-              </div>
+                </DialogTitle>
+              </DialogHeader>
               <p className="mb-4 text-sm text-muted-foreground leading-relaxed">
                 계정 생성·콘솔 등록·secret 발급은 <strong>Owner가 직접</strong> 수행합니다.
                 아래 값을 준비해 <code className="rounded bg-muted px-1">.env</code>에 넣고 API 서버를
@@ -394,10 +380,10 @@ export default function LoginPage() {
               <p className="text-xs text-muted-foreground">
                 상세 절차·주의사항: <code className="rounded bg-muted px-1">{guide.manual}</code>
               </p>
-            </div>
-          </div>
-        );
-      })()}
+            </DialogContent>
+          );
+        })()}
+      </Dialog>
     </main>
   );
 }

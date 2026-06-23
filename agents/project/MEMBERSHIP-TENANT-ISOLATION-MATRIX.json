@@ -1,0 +1,380 @@
+{
+  "$schema": "autofolio.membership-tenant-isolation-matrix/v1",
+  "matrix_version": 1,
+  "status": "draft_matrix_not_applied",
+  "updated_at": "2026-06-19T18:31:09+09:00",
+  "owner": "Lead Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-106",
+    "TASK-107",
+    "TASK-108",
+    "TASK-109",
+    "TASK-110",
+    "TASK-114"
+  ],
+  "source_basis": [
+    "Supabase changelog checked 2026-06-19: new public-schema tables may not be exposed to the Data API automatically, so grants/exposure must be explicit.",
+    "Supabase RLS docs checked 2026-06-19: member policies should use TO authenticated plus auth.uid() ownership predicates, not role-only checks.",
+    "Supabase API security docs checked 2026-06-19: Data API grants do not replace RLS; exposed tables need row policies.",
+    "Owner direction: verified signup, app-user product access, user-owned LLM/SNS/KIS tokens, and no production DB/deploy/secret mutation without explicit approval."
+  ],
+  "non_goals": [
+    "No Supabase project connection or mutation.",
+    "No SQL migration file and no production DB apply.",
+    "No secret, provider token, bank account number, customer PII, or payment record in repository files.",
+    "No external deploy, OAuth callback validation, payment provider, bank API, KIS credential activation, or live order path change."
+  ],
+  "boundaries": {
+    "not_applied_to_supabase": true,
+    "no_sql_migration": true,
+    "no_secret_values": true,
+    "no_external_network_action_required": true,
+    "keeps_can_launch_false": true
+  },
+  "route_groups": [
+    {
+      "id": "public_pre_auth",
+      "label": "Public pre-auth intake",
+      "allowed": [
+        "signup request creation",
+        "request id + contact applicant status lookup",
+        "SSO provider availability metadata"
+      ],
+      "forbidden": [
+        "product data read",
+        "account grant details",
+        "owner events or notes",
+        "session creation for unapproved applicants"
+      ],
+      "tenant_source": "request id plus original contact for applicant lookup only"
+    },
+    {
+      "id": "app_user_self_service",
+      "label": "Approved app-user self-service",
+      "allowed": [
+        "own account password change",
+        "own profile and acknowledgement writes",
+        "own integration metadata and write-only secret submission"
+      ],
+      "forbidden": [
+        "global admin settings",
+        "membership approval transitions",
+        "engine or trading global control"
+      ],
+      "tenant_source": "Supabase auth.uid() / server session subject"
+    },
+    {
+      "id": "app_user_product_read",
+      "label": "Approved app-user product read",
+      "allowed": [
+        "own portfolio, analysis, market context, trade read, engine state, agent output, manuals"
+      ],
+      "forbidden": [
+        "other user's private rows",
+        "owner/admin membership queue",
+        "raw secret values"
+      ],
+      "tenant_source": "Supabase auth.uid() ownership policy plus backend validation"
+    },
+    {
+      "id": "owner_admin",
+      "label": "Owner/admin operation",
+      "allowed": [
+        "review membership requests",
+        "transition applicant status",
+        "activate or expire grants",
+        "support read with audit event"
+      ],
+      "forbidden": [
+        "browser-side service key use",
+        "unlogged cross-tenant edits",
+        "client-side privileged direct table writes"
+      ],
+      "tenant_source": "server-side audited owner action"
+    },
+    {
+      "id": "engine_worker",
+      "label": "Server worker / engine",
+      "allowed": [
+        "per-user queue processing",
+        "per-user safety and kill switch checks",
+        "server-audited order-intent creation after risk gate"
+      ],
+      "forbidden": [
+        "single global owner state for external members",
+        "live execution before per-user safety evidence",
+        "service key exposure to browser"
+      ],
+      "tenant_source": "server-side user_id task context"
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "membership_requests",
+      "data_class": "tenant_private",
+      "current_local_state": "encrypted local vault request objects",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own request where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited owner review and transition",
+      "current_status": "local_only"
+    },
+    {
+      "id": "deposit_instructions",
+      "data_class": "tenant_private",
+      "current_local_state": "runtime-configured instruction generated for deposit_pending applicants",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own deposit instruction where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited owner issuance; no bank account values in repo",
+      "current_status": "local_only"
+    },
+    {
+      "id": "approval_events",
+      "data_class": "tenant_audit",
+      "current_local_state": "local request event history",
+      "production_owner_field": "target_user_id",
+      "actor_field": "actor_user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "append_only": true,
+      "member_policy": "select own approval events where (select auth.uid()) = target_user_id",
+      "admin_policy": "server-audited append only",
+      "current_status": "local_only"
+    },
+    {
+      "id": "subscription_grants",
+      "data_class": "tenant_private",
+      "current_local_state": "local grant attached to active membership",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own grant where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited grant/revoke",
+      "current_status": "local_only"
+    },
+    {
+      "id": "integration_records",
+      "data_class": "tenant_secret_metadata",
+      "current_local_state": "local encrypted-vault provider records keyed by session username",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own redacted metadata where (select auth.uid()) = user_id; write secrets only through backend route",
+      "admin_policy": "no routine plaintext admin read; deletion/rotation audited",
+      "current_status": "local_only",
+      "raw_secret_response_allowed": false
+    },
+    {
+      "id": "profiles",
+      "data_class": "tenant_private",
+      "current_local_state": "session-derived profile self-service",
+      "production_owner_field": "id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select/insert/update own profile where (select auth.uid()) = id",
+      "admin_policy": "server-audited support action only",
+      "current_status": "local_gate_only"
+    },
+    {
+      "id": "acknowledgements",
+      "data_class": "tenant_private",
+      "current_local_state": "member can submit own risk acknowledgements",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select/insert own acknowledgements where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited support read only",
+      "current_status": "local_gate_only"
+    },
+    {
+      "id": "portfolio_accounts",
+      "data_class": "tenant_financial",
+      "current_local_state": "single local owner-oriented read model",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own account where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited support read only",
+      "current_status": "blocked_until_schema"
+    },
+    {
+      "id": "holdings_snapshots",
+      "data_class": "tenant_financial",
+      "current_local_state": "single local owner-oriented holdings model",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own holdings snapshots where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited ingestion/support only",
+      "current_status": "blocked_until_schema"
+    },
+    {
+      "id": "analysis_reports",
+      "data_class": "tenant_product",
+      "current_local_state": "single local owner-oriented analysis outputs",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own analysis reports where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited support read only",
+      "current_status": "blocked_until_schema"
+    },
+    {
+      "id": "engine_state",
+      "data_class": "tenant_control",
+      "current_local_state": "single local owner-oriented engine status",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select own engine state where (select auth.uid()) = user_id; update own requested mode only through backend validation",
+      "admin_policy": "server-audited operations only",
+      "current_status": "blocked_until_engine_isolation"
+    },
+    {
+      "id": "risk_settings",
+      "data_class": "tenant_control",
+      "current_local_state": "global safety settings for local owner",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policy": "select/update own allowed limits where (select auth.uid()) = user_id through backend validation",
+      "admin_policy": "server-audited override only",
+      "current_status": "blocked_until_engine_isolation"
+    },
+    {
+      "id": "order_intents",
+      "data_class": "tenant_trading",
+      "current_local_state": "not enabled for external members",
+      "production_owner_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "append_only": true,
+      "member_policy": "select own intents; insert only through backend risk gate where (select auth.uid()) = user_id",
+      "admin_policy": "server-audited support read only",
+      "current_status": "blocked_until_engine_isolation"
+    },
+    {
+      "id": "audit_events",
+      "data_class": "tenant_audit",
+      "current_local_state": "mixed local runtime/task audit records",
+      "production_owner_field": "target_user_id",
+      "actor_field": "actor_user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "append_only": true,
+      "member_policy": "select own audit events where (select auth.uid()) in (target_user_id, actor_user_id)",
+      "admin_policy": "server-audited append only; retention policy required before delete",
+      "current_status": "blocked_until_schema"
+    },
+    {
+      "id": "public_reference_data",
+      "data_class": "public_or_market_reference",
+      "current_local_state": "market metadata and public documentation can be shared when not user-private",
+      "production_owner_field": null,
+      "references_auth_users": false,
+      "rls_required": false,
+      "member_policy": "public/reference access is separated from user-private product rows",
+      "admin_policy": "no private tenant rows in public tables",
+      "current_status": "design_only"
+    }
+  ],
+  "security_invariants": [
+    {
+      "id": "jwt_user_id_source",
+      "statement": "Production member scope comes from Supabase Auth JWT/auth.uid() or server session subject, never from a client-provided user_id."
+    },
+    {
+      "id": "no_request_body_user_scope",
+      "statement": "Self-service write APIs ignore request-body user_id for target selection and derive the target from the authenticated session."
+    },
+    {
+      "id": "rls_on_tenant_tables",
+      "statement": "Every tenant_private, tenant_financial, tenant_control, tenant_secret_metadata, tenant_trading, tenant_product, and tenant_audit table has RLS enabled before external users."
+    },
+    {
+      "id": "no_client_side_filter_security",
+      "statement": "Client-side filters are display hints only; they are not used as the authorization boundary."
+    },
+    {
+      "id": "owner_cross_tenant_server_audited",
+      "statement": "Owner/admin cross-tenant reads or mutations run only through server-side audited operations."
+    },
+    {
+      "id": "service_key_server_only",
+      "statement": "Supabase service role and secret keys are server-only and never appear in browser bundles, logs, reports, or repository files."
+    },
+    {
+      "id": "secrets_write_only",
+      "statement": "Provider/KIS tokens are write-only at the API boundary and responses return only configured state and masked hints."
+    },
+    {
+      "id": "engine_safety_user_scoped",
+      "statement": "Engine loop state, risk limits, kill switch, order queues, and order intents are user-scoped before live-readiness features are exposed to members."
+    },
+    {
+      "id": "applicant_lookup_non_disclosure",
+      "statement": "Public applicant lookup requires request id plus contact and never exposes Owner notes/events, account grants, subscription grants, or product rows."
+    },
+    {
+      "id": "market_reference_data_separated",
+      "statement": "Shared public/market reference data is separated from tenant-private portfolio, engine, analysis, and secret rows."
+    }
+  ],
+  "verification_required": {
+    "local_matrix_gate": "python scripts/membership_tenant_isolation_gate.py --check",
+    "required_test_cases": [
+      {
+        "id": "anon_no_product_read",
+        "description": "Anonymous callers cannot read product surfaces."
+      },
+      {
+        "id": "guest_no_product_read",
+        "description": "Signed guest sessions receive 403 on product surfaces."
+      },
+      {
+        "id": "member_a_cannot_read_member_b",
+        "description": "Member A cannot read or mutate Member B tenant rows in staging RLS tests."
+      },
+      {
+        "id": "member_cannot_admin",
+        "description": "Member cannot call Owner/admin membership or engine control routes."
+      },
+      {
+        "id": "owner_admin_events_audited",
+        "description": "Owner cross-tenant membership transitions create immutable audit events."
+      },
+      {
+        "id": "secret_response_redacted",
+        "description": "Secret/token writes never return plaintext values."
+      },
+      {
+        "id": "engine_state_scoped",
+        "description": "Engine state, kill switch, risk settings, and order intent queue are user-scoped."
+      },
+      {
+        "id": "applicant_lookup_requires_contact",
+        "description": "Applicant status lookup requires request id plus original contact and strips internal fields."
+      }
+    ],
+    "future_supabase_checks": [
+      "RLS enabled on every tenant-owned table.",
+      "Policies use TO authenticated plus auth.uid() ownership predicates.",
+      "UPDATE policies include both USING and WITH CHECK.",
+      "Data API grants are explicit and reviewed after RLS policies exist.",
+      "Security Advisor and Performance Advisor findings are reviewed before launch."
+    ]
+  },
+  "launch_blockers_remaining": [
+    "Supabase staging schema/RLS not applied.",
+    "Tenant-isolation staging tests not run.",
+    "Production secret storage and deletion/rotation policy not implemented.",
+    "Payment evidence retention policy not approved.",
+    "Per-user engine/safety/order isolation not implemented.",
+    "KIS terms/compliance review not recorded.",
+    "External deploy smoke not run."
+  ]
+}
