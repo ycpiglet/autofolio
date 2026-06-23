@@ -144,10 +144,6 @@ function PremarketSummaryPanel({ isAuthenticated }: { isAuthenticated: boolean }
   );
 }
 
-// ── Owner detection (for owner-only AI insight) ─────────────────────────────
-// Derived from the shared ["auth-me"] session — no extra request.
-// useIsOwner is kept as a helper used only by AgentsPage (passed as isOwner prop).
-
 // ── Fundamental key labels (Korean) ─────────────────────────────────────────
 
 const FUNDAMENTAL_LABELS: Record<string, string> = {
