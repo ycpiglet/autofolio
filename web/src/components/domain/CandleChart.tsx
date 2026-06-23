@@ -1,17 +1,13 @@
 // web/src/components/domain/CandleChart.tsx
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  createChart,
-  ColorType,
-  CandlestickSeries,
-  type IChartApi,
-} from "lightweight-charts";
 import { cn } from "@/lib/utils";
 import { apiIntraday } from "@/lib/api";
 import type { TableResponse } from "@/lib/api";
+import { tableToCandles } from "@/lib/candle-table";
+import { CandleChartKline } from "./CandleChartKline";
 
 const SYMBOLS = [
   { label: "삼성전자", value: "005930" },
@@ -25,14 +21,16 @@ interface CandleChartProps {
 }
 
 /**
- * CandleChart — lightweight-charts candlestick series.
+ * CandleChart — candlestick chart rendered via the self-hosted KLineCharts
+ * engine (CandleChartKline), with KR candle colors (up=red #F04452 /
+ * down=blue #3182F6). Owns the symbol selector + intraday data query; the
+ * pure TableResponse→Candle[] mapping lives in lib/candle-table.ts.
  *
- * IMPORTANT: Must be imported via next/dynamic with ssr: false at the page level.
- * DOM access only happens inside useEffect.
+ * Still imported via next/dynamic with ssr: false at the page level —
+ * CandleChartKline dynamically imports klinecharts (which touches `window`
+ * at import time) only in the browser.
  */
 export function CandleChart({ className }: CandleChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
   const [symbol, setSymbol] = useState(SYMBOLS[0].value);
 
   const { data, isPending, error } = useQuery<TableResponse>({
@@ -40,104 +38,6 @@ export function CandleChart({ className }: CandleChartProps) {
     queryFn: () => apiIntraday(symbol, 1, 80),
     staleTime: 30_000,
   });
-
-  // Mount/update chart when data changes
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    // Destroy previous chart
-    if (chartRef.current) {
-      chartRef.current.remove();
-      chartRef.current = null;
-    }
-
-    if (!data || data.rows.length === 0) return;
-
-    const chart = createChart(el, {
-      layout: {
-        background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#8B95A1",
-      },
-      grid: {
-        vertLines: { color: "#DDE1E7" },
-        horzLines: { color: "#DDE1E7" },
-      },
-      rightPriceScale: { borderColor: "#DDE1E7" },
-      timeScale: { borderColor: "#DDE1E7", timeVisible: true },
-      width: el.clientWidth,
-      height: 280,
-    });
-    chartRef.current = chart;
-
-    const series = chart.addSeries(CandlestickSeries, {
-      upColor: "#F04452",
-      downColor: "#3182F6",
-      borderUpColor: "#F04452",
-      borderDownColor: "#3182F6",
-      wickUpColor: "#F04452",
-      wickDownColor: "#3182F6",
-    });
-
-    // Map TableResponse rows to lightweight-charts candlestick format
-    // Expected columns: time (or date), open, high, low, close
-    const timeCol =
-      data.columns.find((c) => c === "time" || c === "date" || c === "시간") ??
-      data.columns[0];
-    const openCol =
-      data.columns.find((c) => c === "open" || c === "시가") ?? data.columns[1];
-    const highCol =
-      data.columns.find((c) => c === "high" || c === "고가") ?? data.columns[2];
-    const lowCol =
-      data.columns.find((c) => c === "low" || c === "저가") ?? data.columns[3];
-    const closeCol =
-      data.columns.find((c) => c === "close" || c === "종가") ?? data.columns[4];
-
-    // Convert time to lightweight-charts accepted format:
-    // "yyyy-mm-dd" strings stay as BusinessDay; everything else → UTCTimestamp (epoch seconds).
-    function toChartTime(raw: string): string | number {
-      if (raw.length === 10 && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-        return raw; // already YYYY-MM-DD — pass as BusinessDay string
-      }
-      // ISO datetime or "YYYY-MM-DD HH:mm" → epoch seconds (UTCTimestamp)
-      const ms = new Date(raw.replace(" ", "T")).getTime();
-      return Number.isFinite(ms) ? Math.floor(ms / 1000) : 0;
-    }
-
-    const candles = data.rows
-      .map((row) => ({
-        time: toChartTime(String(row[timeCol] ?? "")),
-        open: Number(row[openCol] ?? 0),
-        high: Number(row[highCol] ?? 0),
-        low: Number(row[lowCol] ?? 0),
-        close: Number(row[closeCol] ?? 0),
-      }))
-      .filter((c) => c.time !== 0 && c.time !== "")
-      .sort((a, b) => {
-        // Both types (string or number) are comparable with < >
-        return a.time < b.time ? -1 : a.time > b.time ? 1 : 0;
-      });
-
-    if (candles.length > 0) {
-      series.setData(candles as Parameters<typeof series.setData>[0]);
-      chart.timeScale().fitContent();
-    }
-
-    const handleResize = () => {
-      if (el && chartRef.current) {
-        chartRef.current.applyOptions({ width: el.clientWidth });
-      }
-    };
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      if (chartRef.current) {
-        chartRef.current.remove();
-        chartRef.current = null;
-      }
-    };
-  }, [data]);
 
   return (
     <div className={cn("space-y-3", className)} data-testid="candle-chart-section">
@@ -174,12 +74,13 @@ export function CandleChart({ className }: CandleChartProps) {
           aria-label="차트 로딩 중"
         />
       ) : (
-        <div
-          ref={containerRef}
-          className="h-[280px] w-full overflow-visible rounded-xl"
-          aria-label="캔들차트"
-          data-testid="candle-chart"
-        />
+        <div data-testid="candle-chart">
+          <CandleChartKline
+            candles={tableToCandles(data)}
+            height={280}
+            className="h-[280px] w-full overflow-visible rounded-xl"
+          />
+        </div>
       )}
     </div>
   );
