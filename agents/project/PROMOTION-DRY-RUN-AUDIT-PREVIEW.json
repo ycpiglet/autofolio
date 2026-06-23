@@ -1,0 +1,140 @@
+{
+  "$schema": "autofolio.promotion-dry-run-audit-preview/v1",
+  "preview_id": "PROMOTION-DRY-RUN-AUDIT-PREVIEW-2026-06-19-001",
+  "status": "local_preview_not_live_publication",
+  "created_at": "2026-06-19T23:22:07+09:00",
+  "updated_at": "2026-06-19T23:22:07+09:00",
+  "owner": "Backend Engineer",
+  "related_tasks": ["TASK-095", "TASK-096", "TASK-129", "TASK-130", "TASK-131"],
+  "related_taskset": "TASKSET-MARKETING-GROWTH",
+  "source_inputs": [
+    {
+      "id": "marketing_materials_v1",
+      "path": "agents/project/MARKETING-MATERIALS-V1.json",
+      "sha256": "24e26a3dde017c917b710017f25b393af33f829639cf26be50b1eee96ab0cc4f",
+      "role": "draft_copy_source"
+    },
+    {
+      "id": "channel_policy_matrix",
+      "path": "agents/project/PROMOTION-CHANNEL-POLICY-MATRIX.json",
+      "sha256": "fc0684a9de6580dc8bc6019cf7a7971bf4c25d8f1c3bd73544374265fbe86d3a",
+      "role": "channel_policy_source"
+    },
+    {
+      "id": "publishing_policy_packet",
+      "path": "agents/project/PROMOTION-PUBLISHING-POLICY-PACKET.json",
+      "sha256": "b44ec3934a5a64fbb319da22b90d1128a92807ea0aa8a17fd99bcf9252aee82d",
+      "role": "live_boundary_source"
+    },
+    {
+      "id": "state_machine_contract",
+      "path": "agents/project/PROMOTION-PUBLISHING-STATE-MACHINE.json",
+      "sha256": "5a3588634aece62d48414f8423e3112b8ec2244c86aee1d6de8683f19da2903f",
+      "role": "state_contract_source"
+    }
+  ],
+  "boundaries": {
+    "local_preview_only": true,
+    "not_publication_approval": true,
+    "no_live_posting": true,
+    "no_external_network_calls": true,
+    "no_external_api_upload": true,
+    "no_external_account_action": true,
+    "no_oauth_flow": true,
+    "no_secret_or_token_storage": true,
+    "no_customer_contact": true,
+    "no_paid_ads": true,
+    "no_browser_automation": true,
+    "no_scraping": true,
+    "no_engagement_manipulation": true,
+    "live_action_blocked_by_default": true,
+    "owner_approval_required_for_live_use": true,
+    "compliance_review_required_before_public_use": true
+  },
+  "preview_record": {
+    "campaign_id": "MKT-2026-06-19-001",
+    "channel_id": "owner_blog_manual",
+    "channel_policy_source": "PROMOTION-PUBLISHING-POLICY-PACKET.channel_policies.owner_blog_manual",
+    "state": "dry_run_scheduled",
+    "source_artifact": "agents/project/MARKETING-MATERIALS-V1.json",
+    "source_hash": "24e26a3dde017c917b710017f25b393af33f829639cf26be50b1eee96ab0cc4f",
+    "copy_surface": "sns_private_post",
+    "preview_text": "Building Autofolio as a verified-membership investing workflow: safety guards first, then portfolio visibility, workflow, and live-readiness. Draft preview only.",
+    "claim_review_status": "allowed_draft_for_local_preview",
+    "compliance_review_status": "required_before_public_use",
+    "owner_approval_status": "required_before_live_use",
+    "owner_approval_required_for_live": true,
+    "planned_visibility": "local_preview_only",
+    "scheduled_at": "not_scheduled",
+    "live_action_blocked_by_default": true,
+    "external_network_calls": false,
+    "external_action_enabled": false,
+    "rollback_instruction": "No external object exists for this dry-run. If Owner later posts manually, record the external URL/id after the fact and keep a manual edit, archive, or withdrawal note.",
+    "blocked_reason": "Live publication, external account action, OAuth, token handling, customer contact, paid ads, and platform API upload are blocked until Owner/R3 approval."
+  },
+  "review_scan": {
+    "forbidden_automation": {
+      "status": "pass",
+      "matches": []
+    },
+    "forbidden_public_claims": {
+      "status": "pass",
+      "matches": []
+    },
+    "secret_or_customer_data": {
+      "status": "pass",
+      "matches": []
+    }
+  },
+  "audit_events": [
+    {
+      "event": "dry_run_generated",
+      "actor": "Backend Engineer",
+      "external_action": false,
+      "note": "Preview generated from local source hashes only."
+    },
+    {
+      "event": "live_action_blocked",
+      "actor": "Compliance Officer",
+      "external_action": false,
+      "note": "Live posting and public claim use remain Owner/R3."
+    }
+  ],
+  "forbidden_actions": [
+    "public posting",
+    "scheduled live post",
+    "external account login",
+    "OAuth authorization flow",
+    "external API upload",
+    "token or credential storage",
+    "customer email or direct message",
+    "paid ads",
+    "browser automation",
+    "lead scraping",
+    "bulk messaging",
+    "viewbot or fake engagement",
+    "investment advice claim",
+    "paid signal claim",
+    "model portfolio claim",
+    "performance guarantee",
+    "KIS commercial clearance claim"
+  ],
+  "task_096_handoff": {
+    "dry_run_preview_done": true,
+    "live_pipeline_still_blocked": true,
+    "next_allowed_slice": "approval queue storage contract or channel asset rendering requirements, still without network calls or live posting",
+    "owner_r3_required_for": [
+      "selecting real channel accounts",
+      "creating developer apps",
+      "OAuth login or callback validation",
+      "storing tokens or channel ids",
+      "posting, scheduling, editing, or deleting live content",
+      "paid ads or billing setup",
+      "customer messaging"
+    ]
+  },
+  "verification": {
+    "local_gate": "python scripts/promotion_dry_run_audit_preview_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_promotion_dry_run_audit_preview_gate.py -q"
+  }
+}

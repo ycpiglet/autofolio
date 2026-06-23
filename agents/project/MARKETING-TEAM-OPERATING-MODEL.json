@@ -1,0 +1,459 @@
+{
+  "$schema": "autofolio.marketing-team-operating-model/v1",
+  "model_id": "MARKETING-TEAM-OPERATING-MODEL-2026-06-20-001",
+  "status": "local_operating_model_complete_not_publication_not_sales_activation",
+  "owner": "Lead Engineer",
+  "created_at": "2026-06-20T10:56:38+09:00",
+  "updated_at": "2026-06-20T11:00:16+09:00",
+  "source_inputs": [
+    {
+      "id": "business_plan",
+      "path": "agents/project/BUSINESS-PLAN.md",
+      "relationship": "business_model_and_gtm_source"
+    },
+    {
+      "id": "marketing_brief",
+      "path": "agents/project/MARKETING-BRIEF.md",
+      "relationship": "marketing_claim_and_channel_source"
+    },
+    {
+      "id": "marketing_growth_taskset",
+      "path": "agents/project/initiatives/TASKSET-MARKETING-GROWTH.md",
+      "relationship": "completed_marketing_growth_plan"
+    },
+    {
+      "id": "marketing_team_taskset",
+      "path": "agents/project/initiatives/TASKSET-MARKETING-TEAM-OPERATING-SYSTEM.md",
+      "relationship": "active_operating_taskset"
+    },
+    {
+      "id": "marketing_materials_v1",
+      "path": "agents/project/MARKETING-MATERIALS-V1.json",
+      "relationship": "draft_asset_source"
+    },
+    {
+      "id": "promotion_channel_policy_matrix",
+      "path": "agents/project/PROMOTION-CHANNEL-POLICY-MATRIX.json",
+      "relationship": "channel_policy_source"
+    },
+    {
+      "id": "promotion_publishing_state_machine",
+      "path": "agents/project/PROMOTION-PUBLISHING-STATE-MACHINE.json",
+      "relationship": "publishing_state_source"
+    },
+    {
+      "id": "promotion_asset_rendering_contract",
+      "path": "agents/project/PROMOTION-ASSET-RENDERING-CONTRACT.json",
+      "relationship": "asset_rendering_boundary_source"
+    },
+    {
+      "id": "sales_revenue_lane_decision",
+      "path": "agents/project/SALES-REVENUE-LANE-DECISION.json",
+      "relationship": "sales_handoff_boundary_source"
+    }
+  ],
+  "team_roles": [
+    {
+      "role_id": "lead-engineer",
+      "accountable_for": [
+        "taskset sequencing",
+        "task registration and closure",
+        "status and audit log alignment",
+        "routing conflicts"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "STATUS.md",
+        "BACKLOG.md",
+        "TASKSET-MARKETING-TEAM-OPERATING-SYSTEM"
+      ],
+      "outputs": [
+        "TASK records",
+        "BRIEF reports",
+        "updated backlog views",
+        "handoff pointer"
+      ],
+      "forbidden_actions": [
+        "public posting",
+        "external account action",
+        "customer contact",
+        "Sales/Revenue activation without gate"
+      ]
+    },
+    {
+      "role_id": "marketing-growth",
+      "accountable_for": [
+        "positioning",
+        "campaign brief",
+        "copy drafts",
+        "channel draft plans",
+        "claim-bank alignment"
+      ],
+      "inputs": [
+        "BUSINESS-PLAN.md",
+        "MARKETING-BRIEF.md",
+        "MARKETING-MATERIALS-V1.json",
+        "PROMOTION-CHANNEL-POLICY-MATRIX.json"
+      ],
+      "outputs": [
+        "campaign backlog",
+        "content calendar",
+        "draft copy variants",
+        "review flags"
+      ],
+      "forbidden_actions": [
+        "public posting",
+        "paid ads",
+        "customer email or DM",
+        "performance guarantee",
+        "investment advice claim"
+      ]
+    },
+    {
+      "role_id": "compliance-officer",
+      "accountable_for": [
+        "financial-service claim classification",
+        "performance claim review",
+        "investment-advice boundary",
+        "KIS commercial wording review",
+        "paid signal wording review"
+      ],
+      "inputs": [
+        "draft campaign copy",
+        "claim review map",
+        "BUSINESS-PLAN.md",
+        "MARKETING-BRIEF.md"
+      ],
+      "outputs": [
+        "allowed_draft",
+        "needs_professional_review",
+        "owner_only",
+        "reject"
+      ],
+      "forbidden_actions": [
+        "legal final advice",
+        "tax final advice",
+        "securities final advice",
+        "publication approval"
+      ]
+    },
+    {
+      "role_id": "business-planner",
+      "accountable_for": [
+        "business-plan consistency",
+        "target audience consistency",
+        "pricing hypothesis boundary",
+        "sales handoff preconditions"
+      ],
+      "inputs": [
+        "BUSINESS-PLAN.md",
+        "SALES-REVENUE-LANE-DECISION.json"
+      ],
+      "outputs": [
+        "business-plan alignment notes",
+        "sales handoff checklist inputs"
+      ],
+      "forbidden_actions": [
+        "customer contact",
+        "payment request",
+        "CRM activation",
+        "unsupported market-size claim"
+      ]
+    },
+    {
+      "role_id": "regulatory-admin",
+      "accountable_for": [
+        "admin filing readiness notes",
+        "registration posture watchlist",
+        "official-form input boundary"
+      ],
+      "inputs": [
+        "BUSINESS-ADMIN-REGISTER.md",
+        "BUSINESS-PLAN.md"
+      ],
+      "outputs": [
+        "admin checklist inputs",
+        "professional review watchlist"
+      ],
+      "forbidden_actions": [
+        "official filing",
+        "login to government services",
+        "signature",
+        "payment",
+        "private identity data storage"
+      ]
+    },
+    {
+      "role_id": "doc-steward",
+      "accountable_for": [
+        "source inventory",
+        "artifact freshness",
+        "review gate references",
+        "handoff documentation"
+      ],
+      "inputs": [
+        "TASK records",
+        "project artifacts",
+        "BRIEF reports"
+      ],
+      "outputs": [
+        "readiness maps",
+        "source trace notes",
+        "doc freshness findings"
+      ],
+      "forbidden_actions": [
+        "audit verdict",
+        "priority decision",
+        "product implementation"
+      ]
+    },
+    {
+      "role_id": "backend",
+      "accountable_for": [
+        "local queue contract",
+        "no-network adapter tests",
+        "dry-run record schema",
+        "artifact generator implementation plan"
+      ],
+      "inputs": [
+        "PROMOTION-PUBLISHING-STATE-MACHINE.json",
+        "PROMOTION-DRY-RUN-AUDIT-PREVIEW.json",
+        "PROMOTION-ASSET-RENDERING-CONTRACT.json"
+      ],
+      "outputs": [
+        "readiness backlog",
+        "local validation scripts",
+        "no-network test plan"
+      ],
+      "forbidden_actions": [
+        "OAuth flow",
+        "token handling",
+        "platform API call",
+        "live post",
+        "final PDF/PPTX export"
+      ]
+    },
+    {
+      "role_id": "qa",
+      "accountable_for": [
+        "local gate validation",
+        "boundary regression tests",
+        "forbidden action checks",
+        "artifact parse checks"
+      ],
+      "inputs": [
+        "TASK body",
+        "project artifact",
+        "local gate"
+      ],
+      "outputs": [
+        "focused test results",
+        "gate evidence"
+      ],
+      "forbidden_actions": [
+        "publication approval",
+        "customer contact",
+        "platform execution"
+      ]
+    }
+  ],
+  "workflow": [
+    {
+      "phase_id": "intake",
+      "owner_role": "lead-engineer",
+      "entry_condition": "Owner request or open marketing TASK",
+      "exit_condition": "source plan and R2/R3 boundary identified",
+      "external_action_enabled": false
+    },
+    {
+      "phase_id": "source_alignment",
+      "owner_role": "doc-steward",
+      "entry_condition": "source artifacts are known",
+      "exit_condition": "source paths and review status recorded",
+      "external_action_enabled": false
+    },
+    {
+      "phase_id": "draft_or_readiness_work",
+      "owner_role": "marketing-growth",
+      "entry_condition": "task-specific source inputs exist",
+      "exit_condition": "local draft, checklist, or readiness artifact exists",
+      "external_action_enabled": false
+    },
+    {
+      "phase_id": "claim_review",
+      "owner_role": "compliance-officer",
+      "entry_condition": "copy touches financial, performance, investment, tax, legal, KIS, paid signal, or public paid launch wording",
+      "exit_condition": "claims classified as allowed_draft, needs_professional_review, owner_only, or reject",
+      "external_action_enabled": false
+    },
+    {
+      "phase_id": "qa_gate",
+      "owner_role": "qa",
+      "entry_condition": "artifact and local gate exist",
+      "exit_condition": "focused tests and parse checks pass",
+      "external_action_enabled": false
+    },
+    {
+      "phase_id": "closeout",
+      "owner_role": "lead-engineer",
+      "entry_condition": "task completion evidence exists",
+      "exit_condition": "TASK, BRIEF, AUDIT, STATUS, pointer, and generated views are aligned",
+      "external_action_enabled": false
+    }
+  ],
+  "routing_rules": [
+    {
+      "request_type": "campaign_copy_or_content_calendar",
+      "primary_role": "marketing-growth",
+      "review_roles": [
+        "compliance-officer",
+        "qa",
+        "doc-steward"
+      ],
+      "next_task": "TASK-167"
+    },
+    {
+      "request_type": "pdf_pptx_or_asset_generation",
+      "primary_role": "doc-steward",
+      "review_roles": [
+        "marketing-growth",
+        "backend",
+        "qa",
+        "compliance-officer"
+      ],
+      "next_task": "TASK-168"
+    },
+    {
+      "request_type": "sns_or_external_publishing_automation",
+      "primary_role": "backend",
+      "review_roles": [
+        "marketing-growth",
+        "compliance-officer",
+        "qa",
+        "doc-steward"
+      ],
+      "next_task": "TASK-169"
+    },
+    {
+      "request_type": "sales_or_revenue_or_customer_conversion",
+      "primary_role": "business-planner",
+      "review_roles": [
+        "marketing-growth",
+        "compliance-officer",
+        "managing-partner",
+        "lead-engineer"
+      ],
+      "next_task": "TASK-170"
+    }
+  ],
+  "compliance_review_triggers": [
+    "investment advice wording",
+    "paid signal wording",
+    "model portfolio wording",
+    "automated trading wording",
+    "performance or return wording",
+    "KIS commercial use wording",
+    "tax or legal wording",
+    "regulatory status wording",
+    "public paid launch wording",
+    "recommendation wording"
+  ],
+  "owner_r3_triggers": [
+    "public post",
+    "SNS upload",
+    "paid ads",
+    "customer contact",
+    "CRM or customer-record system activation",
+    "payment request or billing setup",
+    "Sales/Revenue role activation",
+    "OAuth flow",
+    "external platform API call",
+    "external account setting change",
+    "browser automation against social platform",
+    "final PDF/PPTX binary export",
+    "public URL publication",
+    "secret or token handling",
+    "customer private data handling",
+    "production DB apply",
+    "deploy",
+    "KIS/order/risk/prod change",
+    "legal/tax/securities final advice"
+  ],
+  "downstream_task_start_criteria": {
+    "TASK-167": [
+      "marketing team operating model complete",
+      "source claim bank remains draft-safe",
+      "public action gate is closed"
+    ],
+    "TASK-168": [
+      "TASK-167 campaign backlog source exists",
+      "PROMOTION-ASSET-RENDERING-CONTRACT source remains local-only",
+      "final export gate is closed"
+    ],
+    "TASK-169": [
+      "TASK-167 campaign backlog source exists",
+      "PROMOTION-PUBLISHING-STATE-MACHINE source remains live_action false",
+      "OAuth and platform API gates are closed"
+    ],
+    "TASK-170": [
+      "TASK-167 campaign backlog source exists",
+      "SALES-REVENUE-LANE-DECISION remains not_active",
+      "customer contact and payment gates are closed"
+    ]
+  },
+  "boundaries": {
+    "local_operating_model_only": true,
+    "not_publication_approval": true,
+    "not_sales_revenue_activation": true,
+    "no_public_post": true,
+    "no_sns_upload": true,
+    "no_paid_ads": true,
+    "no_customer_contact": true,
+    "no_customer_private_data": true,
+    "no_crm_or_customer_record_activation": true,
+    "no_payment_request": true,
+    "no_billing_setup": true,
+    "no_oauth_flow": true,
+    "no_external_account_action": true,
+    "no_external_platform_api_call": true,
+    "no_browser_automation_against_social_platform": true,
+    "no_final_pdf_pptx_binary_export": true,
+    "no_public_url_publication": true,
+    "no_secret_or_token_handling": true,
+    "no_legal_tax_securities_final_advice": true,
+    "no_kis_order_risk_prod_deploy_change": true
+  },
+  "forbidden_actions": [
+    "public posting",
+    "SNS upload",
+    "paid ads",
+    "customer contact",
+    "CRM activation",
+    "customer record storage",
+    "payment request",
+    "billing setup",
+    "Sales/Revenue role activation",
+    "OAuth flow",
+    "token handling",
+    "platform API call",
+    "browser automation against social platforms",
+    "final PDF export",
+    "final PPTX export",
+    "public URL publication",
+    "secret storage",
+    "KIS/order/risk/prod/deploy change"
+  ],
+  "taskset_handoff": {
+    "task_166_complete": true,
+    "next_task_candidate": "TASK-167",
+    "taskset_remains_active": true,
+    "sales_revenue_lane_active": false,
+    "live_publication_approved": false,
+    "final_asset_export_approved": false
+  },
+  "verification": {
+    "json_check": "python -m json.tool agents\\project\\MARKETING-TEAM-OPERATING-MODEL.json",
+    "local_gate": "python scripts\\marketing_team_operating_model_gate.py --check",
+    "focused_tests": "python -m pytest tests\\unit\\test_marketing_team_operating_model_gate.py -q"
+  }
+}

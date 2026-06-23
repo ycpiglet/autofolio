@@ -1,0 +1,211 @@
+{
+  "$schema": "autofolio.business-admin-document-packet-schema/v1",
+  "id": "BUSINESS-ADMIN-DOCUMENT-PACKET-SCHEMA",
+  "status": "foundation_only_not_submission_ready",
+  "created_at": "2026-06-19T22:31:45+09:00",
+  "updated_at": "2026-06-19T22:31:45+09:00",
+  "owner": "Regulatory Admin",
+  "related_tasks": ["TASK-092", "TASK-093", "TASK-094", "TASK-127"],
+  "purpose": "Define a reusable, placeholder-safe contract for future business registration, admin filing, policy, and HWPX document packets before a target official form or Owner private data is supplied.",
+  "boundaries": {
+    "foundation_only": true,
+    "not_official_form": true,
+    "no_owner_identity_data": true,
+    "no_login_or_authentication": true,
+    "no_signature_or_submission": true,
+    "no_payment_or_fee": true,
+    "no_legal_tax_securities_final_advice": true,
+    "no_hwpx_binary_mutation": true,
+    "no_external_service_action": true,
+    "keeps_task_094_blocked_until_form_selected": true
+  },
+  "source_basis": [
+    {
+      "id": "nts_business_registration_procedure",
+      "authority": "National Tax Service",
+      "url": "https://www.nts.go.kr/nts/cm/cntnts/cntntsView.do?cntntsId=7777&mi=2444",
+      "checked_at": "2026-06-19T22:31:45+09:00",
+      "note": "Business registration timing, per-place registration, signature, and Hometax online submission possibility are official-source inputs for packet owner-only boundaries."
+    },
+    {
+      "id": "nts_business_registration_documents",
+      "authority": "National Tax Service",
+      "url": "https://www.nts.go.kr/nts/ad/cntnts/cntntsView.do?mi=2445",
+      "checked_at": "2026-06-19T22:31:45+09:00",
+      "note": "Submission documents vary by individual/corporation, lease, permit, partnership, and other facts; packet schema must separate fact-specific attachments from generic drafts."
+    },
+    {
+      "id": "hancom_hwp_owpml_format",
+      "authority": "Hancom",
+      "url": "https://www.hancom.com/support/downloadCenter/hwpOwpml",
+      "checked_at": "2026-06-19T22:31:45+09:00",
+      "note": "Hancom publishes HWP and OWPML format material; future HWPX generation should use documented/open structures and fixtures."
+    },
+    {
+      "id": "hancom_hwpx_format_structure",
+      "authority": "Hancom Tech",
+      "url": "https://tech.hancom.com/hwpxformat/",
+      "checked_at": "2026-06-19T22:31:45+09:00",
+      "note": "HWPX is an XML package based on OWPML, so generated packets should be structured, diffable, and reviewable before Owner submission."
+    },
+    {
+      "id": "fsc_robo_advisor_interpretation",
+      "authority": "Financial Services Commission / Financial Supervisory Service",
+      "url": "https://better.fsc.go.kr/fsc_new/replyCase/LawreqDetail.do?lawreqIdx=3790&muGpNo=75&muNo=85&stNo=11",
+      "checked_at": "2026-06-19T22:31:45+09:00",
+      "note": "A specific no-separate-fee ancillary context is not blanket clearance for Autofolio commercial recommendation claims."
+    },
+    {
+      "id": "fsc_similar_investment_advice_auto_trading_interpretation",
+      "authority": "Financial Services Commission / Financial Supervisory Service",
+      "url": "https://better.fsc.go.kr/fsc_new/replyCase/LawreqDetail.do?lawreqIdx=3505&muGpNo=75&muNo=85&stNo=11",
+      "checked_at": "2026-06-19T22:31:45+09:00",
+      "note": "Individualized advice and automatic execution for users are regulated watch items; admin packets must keep these as review gates."
+    },
+    {
+      "id": "capital_markets_act_reference",
+      "authority": "National Law Information Center",
+      "url": "https://www.law.go.kr/",
+      "checked_at": "2026-06-19T22:31:45+09:00",
+      "note": "Use law.go.kr as the canonical statute lookup for later professional/regulator review packets."
+    }
+  ],
+  "packet_lifecycle": [
+    "draft_schema",
+    "official_source_refreshed",
+    "owner_non_sensitive_facts_collected",
+    "owner_private_facts_supplied_outside_repo",
+    "markdown_review_draft_generated",
+    "optional_hwpx_fixture_generated",
+    "professional_review_needed",
+    "owner_review",
+    "owner_submitted",
+    "archived"
+  ],
+  "document_packet_contract": {
+    "required_top_level_fields": [
+      "packet_id",
+      "procedure",
+      "jurisdiction",
+      "status",
+      "source_basis",
+      "checked_at",
+      "owner_non_sensitive_business_data",
+      "owner_private_data_placeholders",
+      "agent_drafted_text",
+      "required_attachments",
+      "generated_artifacts",
+      "owner_only_steps",
+      "review_gates",
+      "forbidden_repo_data",
+      "verification"
+    ],
+    "status_values": [
+      "draft",
+      "owner-review",
+      "professional-review",
+      "ready-for-owner-submission",
+      "submitted-by-owner",
+      "archived"
+    ],
+    "packet_field_groups": [
+      {
+        "id": "owner_non_sensitive_business_data",
+        "description": "Business facts that can be tracked without private identity material, such as product form, customer segment, pricing posture, support/refund draft status, and selected procedure."
+      },
+      {
+        "id": "owner_private_data_placeholders",
+        "description": "Placeholder labels for facts the Owner supplies outside the repo, such as identity, exact legal name, business address, certificate/authentication, and payment account details."
+      },
+      {
+        "id": "agent_drafted_text",
+        "description": "Draft descriptions, business purpose text, policy clauses, checklists, and attachment descriptions derived from approved business-plan sections."
+      },
+      {
+        "id": "required_attachments",
+        "description": "Fact-specific attachment checklist, not the attachments themselves unless they are public templates with no Owner private data."
+      },
+      {
+        "id": "generated_artifacts",
+        "description": "Reviewable Markdown first, optional DOCX/PDF/HWPX only from template fixtures and structured data."
+      },
+      {
+        "id": "owner_only_steps",
+        "description": "Login, authentication, signature, payment, upload, final review, and official submission stay Owner-only."
+      },
+      {
+        "id": "review_gates",
+        "description": "Tax accountant, attorney, FSC/FSS, KIS, privacy, refund, and terms review gates where applicable."
+      }
+    ]
+  },
+  "future_hwpx_policy": {
+    "markdown_first": true,
+    "structured_data_source_required": true,
+    "template_fixture_required": true,
+    "xml_diff_required": true,
+    "human_review_required": true,
+    "no_auto_submit": true,
+    "target_form_required_before_generation": true
+  },
+  "prototype_packet_candidates": [
+    {
+      "id": "business_registration_intake_placeholder",
+      "status": "candidate_after_owner_business_type_decision",
+      "procedure": "business_registration",
+      "output": "field map and Markdown review draft first; HWPX only after target form fixture is selected"
+    },
+    {
+      "id": "membership_terms_privacy_refund_placeholder",
+      "status": "candidate_after_policy_scope_decision",
+      "procedure": "terms_privacy_refund_policy",
+      "output": "policy source packet for professional review, not public terms"
+    },
+    {
+      "id": "startup_support_business_plan_placeholder",
+      "status": "candidate_after_program_selection",
+      "procedure": "startup_support_application",
+      "output": "transform from BUSINESS-PLAN.md into selected program form only"
+    }
+  ],
+  "owner_only_steps": [
+    "official_service_login",
+    "certificate_or_identity_authentication",
+    "final_fact_review",
+    "signature_or_electronic_signature",
+    "fee_payment_if_any",
+    "document_upload",
+    "official_submission",
+    "post_submission_correction_or_withdrawal"
+  ],
+  "forbidden_repo_data": [
+    "resident registration number",
+    "certificate password",
+    "private authentication material",
+    "full unmasked personal address",
+    "full bank account number",
+    "KIS credential or broker key",
+    "OAuth client secret or API secret",
+    "raw customer payment record",
+    "signed official filing copy with private data"
+  ],
+  "forbidden_actions": [
+    "Do not log in to Hometax, Government24, Hancom account, KIS, bank, payment provider, or any official service.",
+    "Do not authenticate, sign, pay, upload, submit, withdraw, correct, or contact authorities on behalf of the Owner.",
+    "Do not store private identity numbers, certificates, credentials, bank account numbers, customer data, broker keys, or production secrets in the repo.",
+    "Do not state legal, tax, accounting, securities, KIS, or regulatory clearance as final advice.",
+    "Do not generate final HWPX or PDF files from a target official form until the form and private-data handling path are selected."
+  ],
+  "required_validation": [
+    "business_admin_document_packet_schema_gate_passes",
+    "no_forbidden_key_names_present",
+    "owner_only_steps_cover_login_auth_signature_payment_submission",
+    "future_hwpx_policy_requires_template_fixture_and_xml_diff",
+    "task_094_remains_blocked_until_target_form_and_owner_data_path"
+  ],
+  "verification": {
+    "local_schema_gate": "python scripts/business_admin_document_packet_schema_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_business_admin_document_packet_schema_gate.py -q",
+    "notes": "Gate validates local schema/contract only. It does not validate a specific official form and does not generate, submit, or sign documents."
+  }
+}

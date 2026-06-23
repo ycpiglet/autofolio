@@ -1,0 +1,201 @@
+{
+  "$schema": "autofolio.finance-accounting-roadmap/v1",
+  "status": "local_planning_support_not_financial_or_investment_advice",
+  "owner": "Finance Accounting",
+  "last_updated": "2026-06-21T17:06:02+09:00",
+  "related_tasks": ["TASK-087", "TASK-093", "TASK-111", "TASK-117", "TASK-171", "TASK-172"],
+  "task_set_id": "TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT",
+  "source_artifacts": {
+    "business_plan": "agents/project/BUSINESS-PLAN.md",
+    "membership_access_plan": "agents/project/MEMBERSHIP-ACCESS-PLAN.md",
+    "payment_evidence_policy": "agents/project/MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.md",
+    "payment_recognition_decision_packet": "agents/project/MEMBERSHIP-PAYMENT-RECOGNITION-DECISION-PACKET.md",
+    "portfolio_overview_api": "app/api/routers/portfolio.py",
+    "investor_profile_model": "app/services/investor_profile.py",
+    "sales_handoff_checklist": "agents/project/SALES-HANDOFF-READINESS-CHECKLIST.md",
+    "scenario_input_contract": "agents/project/FINANCE-SCENARIO-INPUT-CONTRACT.json"
+  },
+  "boundary": {
+    "planning_support_only": true,
+    "not_tax_accounting_final_advice": true,
+    "not_legal_or_securities_advice": true,
+    "not_investment_recommendation": true,
+    "no_trade_recommendation_or_order": true,
+    "no_order_execution": true,
+    "no_profit_guarantee": true,
+    "no_customer_payment_action": true,
+    "no_bank_or_pg_api_call": true,
+    "no_raw_statement_or_private_payment_record": true,
+    "no_secret_or_token_handling": true,
+    "no_kis_order_risk_prod_deploy_change": true
+  },
+  "planning_question": {
+    "current": "How should Autofolio compare planned return, expected outcome, portfolio gaps, cash/payment posture, and operating readiness without turning the output into tax/accounting/investment advice?",
+    "owner_example": "If the initial expectation was 5 percent but the current scenario projects around 10 percent, the packet should support roadmap questions such as what needs review, what gaps exist, which allocation or profit-taking candidates need Owner review, and what timeline evidence is missing.",
+    "example_is_not_current_portfolio_fact": true
+  },
+  "horizons": [
+    {
+      "id": "near_term",
+      "label": "0-30 days",
+      "purpose": "data readiness, current plan-vs-expected snapshot, and missing-evidence capture"
+    },
+    {
+      "id": "quarter",
+      "label": "1 quarter",
+      "purpose": "portfolio roadmap candidates, cash/payment readiness, and operating-support milestones"
+    },
+    {
+      "id": "annual",
+      "label": "12 months",
+      "purpose": "business-plan alignment, target-return assumption review, and tax/accounting/professional-review watch list"
+    }
+  ],
+  "input_contract": {
+    "observed": [
+      "current portfolio valuation and cash from read-only portfolio/account surfaces",
+      "realized and unrealized PnL where already available",
+      "current holdings, allocation, concentration, and data-quality diagnostics",
+      "membership payment evidence readiness state",
+      "business-plan pricing and pilot assumptions"
+    ],
+    "planned": [
+      "target return assumption",
+      "risk tolerance and investor profile constraints",
+      "capital allocation target",
+      "time horizon",
+      "business/pilot operating milestones"
+    ],
+    "expected": [
+      "scenario return range with assumptions",
+      "confidence level",
+      "drivers and blockers",
+      "data freshness marker"
+    ],
+    "missing": [
+      "missing target-return baseline",
+      "missing cashflow or deposit/withdrawal assumptions",
+      "missing tax/receipt/refund policy",
+      "missing professional review",
+      "missing scenario evidence"
+    ]
+  },
+  "metric_contract": [
+    {
+      "id": "planned_return_pct",
+      "type": "owner_or_plan_input",
+      "required": true,
+      "advice_boundary": "input only; not generated as advice"
+    },
+    {
+      "id": "expected_return_range_pct",
+      "type": "scenario_output",
+      "required": true,
+      "advice_boundary": "projection with assumptions; never guaranteed"
+    },
+    {
+      "id": "gap_to_plan_pct_points",
+      "type": "derived_output",
+      "required": true,
+      "advice_boundary": "diagnostic only"
+    },
+    {
+      "id": "allocation_drift",
+      "type": "derived_output",
+      "required": true,
+      "advice_boundary": "candidate review signal only"
+    },
+    {
+      "id": "cash_and_payment_readiness",
+      "type": "operating_output",
+      "required": true,
+      "advice_boundary": "support/readiness only"
+    },
+    {
+      "id": "timeline_candidate",
+      "type": "roadmap_output",
+      "required": true,
+      "advice_boundary": "Owner review candidate only"
+    }
+  ],
+  "gap_categories": [
+    "portfolio_goal_gap",
+    "allocation_or_concentration_gap",
+    "cashflow_or_payment_evidence_gap",
+    "business_plan_alignment_gap",
+    "tax_receipt_refund_policy_gap",
+    "compliance_or_professional_review_gap",
+    "data_quality_gap"
+  ],
+  "roadmap_outputs": [
+    {
+      "id": "scenario_summary",
+      "state": "required_before_ui_or_api",
+      "owner": "Finance Accounting",
+      "must_include": ["planned", "expected", "gap", "assumptions", "confidence", "evidence"]
+    },
+    {
+      "id": "portfolio_review_candidates",
+      "state": "candidate_for_owner_review_only",
+      "owner": "Finance Accounting + Compliance Officer",
+      "must_include": ["why_flagged", "missing_evidence", "risk_boundary", "no_trade_instruction"]
+    },
+    {
+      "id": "operations_support_gaps",
+      "state": "required_before_sales_or_paid_expansion",
+      "owner": "Finance Accounting + Business Planner + Regulatory Admin",
+      "must_include": ["payment_evidence", "receipt_refund_tax_watch", "support_load", "owner_decision"]
+    },
+    {
+      "id": "timeline_plan",
+      "state": "candidate_for_owner_review_only",
+      "owner": "Finance Accounting + Lead Engineer",
+      "must_include": ["horizon", "trigger", "required_evidence", "blocked_action"]
+    }
+  ],
+  "blocked_actions": [
+    "trade recommendation",
+    "order placement",
+    "profit taking instruction",
+    "additional investment instruction",
+    "portfolio rebalance instruction",
+    "deposit or withdrawal instruction",
+    "customer payment request",
+    "receipt or tax filing action",
+    "bank or payment-provider API call",
+    "raw statement persistence",
+    "secret or token handling",
+    "public performance claim",
+    "guaranteed return claim",
+    "KIS/order/risk/prod/deploy change"
+  ],
+  "next_tasks": [
+    {
+      "task_id": "TASK-172",
+      "title": "Finance scenario input contract and sample fixture",
+      "owner": "Finance Accounting",
+      "status": "complete",
+      "gate": "local fixture only; no real customer payment data, no trade advice",
+      "output": "agents/project/FINANCE-SCENARIO-INPUT-CONTRACT.json"
+    },
+    {
+      "task_id": "TASK-173",
+      "title": "Portfolio goal-gap read model",
+      "owner": "Backend Engineer",
+      "status": "planned",
+      "gate": "read-only derived model; no order path change"
+    },
+    {
+      "task_id": "TASK-174",
+      "title": "Finance roadmap UI preview",
+      "owner": "UI/UX Designer",
+      "status": "planned",
+      "gate": "local preview only; no recommendation wording"
+    }
+  ],
+  "verification": {
+    "local_gate": "python scripts/finance_accounting_roadmap_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_finance_accounting_roadmap_gate.py -q",
+    "scenario_input_gate": "python scripts/finance_scenario_input_contract_gate.py --check"
+  }
+}

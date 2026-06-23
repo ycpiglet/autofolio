@@ -27,7 +27,7 @@
 
 version: 1
 schema: agent-role-registry/v1
-updated_at: 2026-05-27T17:20:40+09:00
+updated_at: 2026-06-19T00:04:30+09:00
 
 roles:
   - id: lead-engineer
@@ -171,6 +171,111 @@ roles:
       Research Agent는 증거·레퍼런스 제공 역할이다. 공식 문서·선행 사례·
       비교 패턴을 찾아 compact evidence note 로 제공하되 최종 결정은 하지
       않는다. plan agent_role_refactor_plan.md §3.5 기준.
+
+  - id: business-planner
+    aliases: [business, biz, business-planner, business-plan, planner-biz]
+    skill_file: agents/business_planner/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - README.md
+      - agents/business_planner/SKILL.md
+      - agents/project/BUSINESS-PLAN.md
+      - agents/project/BUSINESS-ADMIN-REGISTER.md
+      - agents/lead_engineer/STATUS.md
+      - "관련 TASK/BRIEF/EVIDENCE 기록"
+    forbidden_inputs:
+      - "법률·세무·증권 규제 확정 자문"
+      - "홈택스/정부24/외부기관 로그인·서명·제출·결제"
+      - "검증되지 않은 수익·고객·시장 규모를 사실로 단정"
+      - "제품 코드/KIS/order/risk/prod/secret 변경"
+    output_contract:
+      - "Business Plan section update + Owner Decision List"
+      - "Agent Context Summary for downstream roles"
+      - "가설/확정/Owner 결정/professional review 필요 항목 분리"
+    audit_gate: false
+    default_subagents: [strategist, reviewer]
+    notes: |
+      Business Planner는 사업계획서와 비전/사업모델 정본 owner다.
+      행정·법규 절차는 Regulatory Admin, 투자자문/거래 규제 경계는
+      Compliance Officer로 라우팅한다.
+
+  - id: regulatory-admin
+    aliases: [regulatory, reg-admin, regulatory-admin, business-admin, admin-compliance]
+    skill_file: agents/regulatory_admin/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/regulatory_admin/SKILL.md
+      - agents/project/BUSINESS-ADMIN-REGISTER.md
+      - agents/project/BUSINESS-PLAN.md
+      - "최신 official-source EVIDENCE note"
+      - "Owner가 제공한 사업자등록/행정서류 입력값"
+    forbidden_inputs:
+      - "법률·세무·회계·증권 규제 최종 자문"
+      - "홈택스/정부24/공공기관 로그인·인증·서명·제출·결제"
+      - "주민등록번호·인증서·계좌·KIS key·API secret repo 저장"
+      - "제품 code/order/risk/production DB gate 변경"
+    output_contract:
+      - "Admin Checklist + Source Register + Owner-only Step List"
+      - "Document Packet Plan / HWPX field map"
+      - "전문가·기관 확인 필요 watch list"
+    audit_gate: true
+    default_subagents: [reviewer, auditor]
+    notes: |
+      Regulatory Admin은 공식 출처 기반 절차·서식·문서 패킷 지원 역할이다.
+      제출권한은 Owner에게만 있으며, 법률/세무 확정 자문을 하지 않는다.
+
+  - id: marketing-growth
+    aliases: [marketing, growth, marketing-growth, marketer]
+    skill_file: agents/marketing_growth/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/marketing_growth/SKILL.md
+      - agents/project/BUSINESS-PLAN.md
+      - agents/project/MARKETING-BRIEF.md
+      - "관련 compliance/business-plan evidence"
+    forbidden_inputs:
+      - "수익률·성과·안전성 보장 문구"
+      - "투자자문/일임/로보어드바이저로 오인될 공개 claim"
+      - "Owner 승인 없는 공개 게시·광고 집행·고객 이메일 발송"
+      - "제품 코드/KIS/order/risk/prod/secret 변경"
+    output_contract:
+      - "Marketing Brief update + claim bank + banned-claim list"
+      - "Channel-specific campaign/copy draft"
+      - "Compliance Officer review flag for financial/performance claims"
+    audit_gate: false
+    default_subagents: [strategist, reviewer]
+    notes: |
+      Marketing Growth는 승인된 사업계획서를 홍보/판매 자료로 변환한다.
+      사업모델 자체를 결정하지 않고, public action은 Owner 승인 대상이다.
+
+  - id: finance-accounting
+    aliases: [finance, accounting, finance-accounting, finops, planning-finance]
+    skill_file: agents/finance_accounting/SKILL.md
+    required_inputs:
+      - AGENTS.md
+      - agents/finance_accounting/SKILL.md
+      - agents/project/BUSINESS-PLAN.md
+      - agents/project/MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.md
+      - agents/project/MEMBERSHIP-PAYMENT-RECOGNITION-DECISION-PACKET.md
+      - agents/project/FINANCE-ACCOUNTING-ROADMAP.md
+      - agents/lead_engineer/STATUS.md
+      - "관련 portfolio/membership/business/compliance TASK 기록"
+    forbidden_inputs:
+      - "법률·세무·회계·증권·투자자문 최종 자문"
+      - "주문 실행·수익실현·추가매수·리밸런싱 지시"
+      - "실계좌·입금기록·원문 명세·고객 결제정보·secret repo 저장"
+      - "KIS/order/risk/prod/deploy 변경"
+    output_contract:
+      - "Plan-vs-expected finance roadmap + gap matrix"
+      - "Portfolio/accounting planning support scenario packet"
+      - "Owner Decision List + professional-review watch list"
+    audit_gate: true
+    default_subagents: [strategist, reviewer, auditor]
+    notes: |
+      Finance Accounting은 세무회계 확정 자문이 아니라 planning-support
+      역할이다. 목표수익률 대비 예상, 부족한 운영 준비, 재배분 후보,
+      타임라인 후보를 evidence-gated candidate로 정리하며 실제 투자행동은
+      Owner/Compliance/전문가 검토 전까지 열지 않는다.
 
   - id: timeline
     aliases: [timeline, timeline-agent, chronology]
@@ -414,16 +519,19 @@ roles:
     default_subagents: [reviewer]
 
   - id: compliance-officer
-    aliases: [compliance, co]
+    aliases: [compliance, co, compliance-officer]
     skill_file: agents/compliance_officer/SKILL.md
     required_inputs:
       - AGENTS.md
       - agents/compliance_officer/SKILL.md
       - "거래 내역 또는 IC 제안"
+      - "사업계획/마케팅/행정 claim 또는 관련 TASK/BRIEF/EVIDENCE"
     forbidden_inputs:
       - "법률 확정 자문 (disclaimer 필수)"
+      - "Owner 승인 없는 공개 게시·고객 연락·공식 제출·외부 계정 변경"
     output_contract:
       - "준수 판정 (통과/주의/거부) + 근거 + 권고사항"
+      - "사업/마케팅 claim review (allowed-draft / needs-professional-review / owner-only / reject)"
     audit_gate: true
     default_subagents: [auditor]
 

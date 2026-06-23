@@ -77,8 +77,13 @@
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Lead Engineer | Dev mock SSO provider |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Lead Engineer | Defer future maturity reassessment from ACT lane |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | Lead Engineer | Investor profile survey and satisfaction loop |
-| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | UI/UX Designer | UI 비주얼 에셋(그래프·이미지·캐릭터) 확장 채택 |
 | [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | Lead Engineer | 웹 배포 + 구매자 한정 회원제 |
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | Lead Engineer | 판매 전 금융규제 클리어런스 (비조치의견서 + 샌드박스) |
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | Lead Engineer | business plan agent lane |
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | Business Planner | Business Plan v1 |
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | Marketing Growth | Marketing Materials v1 |
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Marketing Growth | Promotion Publishing Pipeline |
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Business Planner | Sales/Revenue Lane Decision |
 | [TASK-098](TASK-098-membership-access-manual-deposit-plan.md) | 완료 | Lead Engineer | Membership access manual deposit plan |
 | [TASK-099](TASK-099-membership-local-autoregister-fail-closed.md) | 완료 | Backend Engineer | Membership local auto-register fail-closed |
 | [TASK-100](TASK-100-membership-local-request-approval-prototype.md) | 완료 | Backend Engineer | Membership local request approval prototype |
@@ -107,3 +112,20 @@
 | [TASK-124](TASK-124-membership-supabase-backup-apply-evidence-checklist.md) | 완료 | Backend Engineer | Membership Supabase backup/apply evidence checklist |
 | [TASK-125](TASK-125-membership-kis-commercial-terms-review-packet.md) | 완료 | Compliance Officer | Membership KIS commercial terms review packet |
 | [TASK-126](TASK-126-membership-readiness-surface-sync.md) | 완료 | Lead Engineer | Membership readiness surface sync |
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Regulatory Admin | Business admin document packet schema |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | Lead Engineer | Compliance business routing alignment |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Marketing Growth | Promotion Channel Policy Matrix |
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Marketing Growth | Promotion Publishing State Machine Contract |
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Backend Engineer | Promotion Dry-run Audit Preview |
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Marketing Growth | Promotion Asset Rendering Contract |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Marketing Growth | Promotion Asset Preview Manifest |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | UI/UX Designer | UI 비주얼 에셋(그래프·이미지·캐릭터) 확장 채택 |
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | Lead Engineer | Marketing Team Operating Model |
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | Marketing Growth | Promotion Campaign Backlog And Content Calendar V1 |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Doc Steward | Promotion Asset Generator Readiness Map |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Backend Engineer | SNS Publishing Automation Readiness Backlog |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Business Planner | Sales Handoff Readiness Checklist |
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | Finance Accounting | Finance Accounting Planning Support Lane |
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | Finance Accounting | Finance Scenario Input Contract And Sample Fixture |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Backend Engineer | Portfolio Goal-Gap Read Model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | UI/UX Designer | Finance Roadmap UI Preview |

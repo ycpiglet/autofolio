@@ -1,0 +1,292 @@
+{
+  "$schema": "autofolio.promotion-publishing-policy-packet/v1",
+  "status": "policy_foundation_not_live_publication_approval",
+  "created_at": "2026-06-19T23:00:13+09:00",
+  "updated_at": "2026-06-19T23:08:29+09:00",
+  "owner": "Marketing Growth",
+  "related_tasks": ["TASK-095", "TASK-096", "TASK-128", "TASK-129"],
+  "related_taskset": "TASKSET-MARKETING-GROWTH",
+  "source_of_truth": {
+    "marketing_brief": "agents/project/MARKETING-BRIEF.md",
+    "marketing_materials": "agents/project/MARKETING-MATERIALS-V1.json",
+    "compliance_routing": "agents/lead_engineer/tasks/TASK-128-compliance-business-routing-alignment.md"
+  },
+  "boundaries": {
+    "policy_foundation_only": true,
+    "not_publication_approval": true,
+    "no_live_posting": true,
+    "no_external_account_action": true,
+    "no_external_api_upload": true,
+    "no_oauth_flow": true,
+    "no_secret_or_token_storage": true,
+    "no_customer_contact": true,
+    "no_paid_ads": true,
+    "no_bulk_messaging": true,
+    "no_scraping": true,
+    "no_engagement_manipulation": true,
+    "owner_approval_required_for_live_post": true,
+    "compliance_review_required_for_financial_claims": true,
+    "keeps_task_096_live_posting_blocked": true
+  },
+  "official_sources": [
+    {
+      "id": "telegram_bot_api",
+      "url": "https://core.telegram.org/bots/api",
+      "official": true,
+      "finding": "Bot API is HTTP-based and suitable for controlled bot/channel interactions, not a public social feed by itself."
+    },
+    {
+      "id": "telegram_bots_faq",
+      "url": "https://core.telegram.org/bots/faq",
+      "official": true,
+      "finding": "Bot setup requires BotFather and broadcast limits apply; bulk notifications have rate limits and paid broadcast requirements."
+    },
+    {
+      "id": "x_api_intro",
+      "url": "https://docs.x.com/x-api/introduction",
+      "official": true,
+      "finding": "X API supports publishing posts with pay-per-usage pricing."
+    },
+    {
+      "id": "x_create_post",
+      "url": "https://docs.x.com/x-api/posts/create-post",
+      "official": true,
+      "finding": "X post creation uses POST /2/tweets for the authenticated user and requires user-token authorization."
+    },
+    {
+      "id": "x_auth_scopes",
+      "url": "https://docs.x.com/fundamentals/authentication/guides/v2-authentication-mapping",
+      "official": true,
+      "finding": "X posting requires tweet.read, tweet.write, and users.read scopes."
+    },
+    {
+      "id": "linkedin_share",
+      "url": "https://learn.microsoft.com/en-us/linkedin/consumer/integrations/self-serve/share-on-linkedin",
+      "official": true,
+      "finding": "LinkedIn sharing requires OAuth member authentication and w_member_social; creating a share uses the UGC API."
+    },
+    {
+      "id": "google_business_profile_local_posts",
+      "url": "https://developers.google.com/my-business/reference/rest/v4/accounts.locations.localPosts",
+      "official": true,
+      "finding": "Google Business Profile local posts support scheduledTime and SIGN_UP style call-to-action, but are tied to a business location."
+    },
+    {
+      "id": "kakao_message_rest",
+      "url": "https://developers.kakao.com/docs/ko/kakaotalk-message/rest-api",
+      "official": true,
+      "finding": "KakaoTalk message APIs are constrained to self or same-service users; friend messaging requires permissions and is not a general marketing broadcast path."
+    },
+    {
+      "id": "naver_share",
+      "url": "https://developers.naver.com/docs/share/navershare/",
+      "official": true,
+      "finding": "Naver Share is a web share helper for public URLs, not a server-side automatic blog publishing API."
+    },
+    {
+      "id": "naver_cafe_write",
+      "url": "https://developers.naver.com/docs/login/cafe-api/cafe-api.md",
+      "official": true,
+      "finding": "Naver Cafe join/write API is OAuth-based and specific to cafe membership/posting, not Naver Blog publishing."
+    }
+  ],
+  "workflow_state_model": [
+    {
+      "state": "draft_source",
+      "external_action_enabled": false,
+      "description": "Copy is still sourced from MARKETING-MATERIALS-V1 and MARKETING-BRIEF."
+    },
+    {
+      "state": "preview_rendered",
+      "external_action_enabled": false,
+      "description": "A human-readable preview is created for review only."
+    },
+    {
+      "state": "claim_review_required",
+      "external_action_enabled": false,
+      "description": "Compliance Officer classifies financial, recommendation, paid-signal, tax, legal, regulatory, KIS, or performance claims."
+    },
+    {
+      "state": "owner_approval_required",
+      "external_action_enabled": false,
+      "description": "Owner must approve a specific channel, account, content hash, schedule, and rollback path before any live post."
+    },
+    {
+      "state": "dry_run_audit_preview",
+      "external_action_enabled": false,
+      "description": "A local audit preview can be generated without OAuth, tokens, or network posting."
+    },
+    {
+      "state": "live_post_blocked",
+      "external_action_enabled": false,
+      "description": "Default terminal state for this packet; live publication is not enabled."
+    },
+    {
+      "state": "rollback_instruction_recorded",
+      "external_action_enabled": false,
+      "description": "Channel-specific delete/edit/share-withdrawal instructions must be reviewed before live use."
+    }
+  ],
+  "dry_run_contract": {
+    "external_network_calls": false,
+    "writes_only_preview_record": true,
+    "requires_content_hash": true,
+    "requires_channel_policy_id": true,
+    "requires_claim_review_status": true,
+    "requires_owner_approval_reference_for_live_mode": true,
+    "output_fields": [
+      "campaign_id",
+      "channel_id",
+      "source_hash",
+      "claim_review_status",
+      "owner_approval_status",
+      "planned_visibility",
+      "scheduled_at",
+      "rollback_instruction",
+      "blocked_reason"
+    ]
+  },
+  "channel_policies": [
+    {
+      "channel_id": "owner_blog_manual",
+      "display_name": "Owner Blog Manual Export",
+      "current_mode": "manual_export_candidate",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": false,
+      "initial_recommendation": "Use first for reviewed long-form dev logs or private previews; copy/paste remains Owner action.",
+      "rollback_instruction": "Owner manually edits, unpublishes, or archives the post on the blog platform."
+    },
+    {
+      "channel_id": "telegram_bot",
+      "display_name": "Telegram Bot / Channel",
+      "current_mode": "notification_channel_candidate_owner_only",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": true,
+      "credential_boundary": "Bot token and chat/channel ids must stay in secret storage, never repo files.",
+      "initial_recommendation": "Useful for Owner-approved private channel updates or opt-in pilot notices; not a public discovery channel.",
+      "rollback_instruction": "Delete the Telegram message or follow channel moderation flow from the Owner account."
+    },
+    {
+      "channel_id": "x_api",
+      "display_name": "X API",
+      "current_mode": "public_social_api_candidate_r3",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": true,
+      "credential_boundary": "Developer app, OAuth user token, and billing/usage setup are Owner/R3.",
+      "initial_recommendation": "Keep as reviewed draft only until cost, app permissions, tweet.write scope, link policy, and delete flow are confirmed.",
+      "rollback_instruction": "Use the authenticated Owner account or API delete endpoint after Owner approval."
+    },
+    {
+      "channel_id": "linkedin_share",
+      "display_name": "LinkedIn Share",
+      "current_mode": "public_professional_api_candidate_r3",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": true,
+      "credential_boundary": "OAuth member token and w_member_social scope are Owner/R3.",
+      "initial_recommendation": "Consider for reviewed professional positioning after claim review; do not auto-post in v1.",
+      "rollback_instruction": "Owner deletes or edits the LinkedIn share from the authenticated account."
+    },
+    {
+      "channel_id": "naver_share",
+      "display_name": "Naver Share",
+      "current_mode": "manual_share_link_candidate",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": false,
+      "initial_recommendation": "Use only as a manual share helper after a public reviewed URL exists; it is not automatic Naver Blog publication.",
+      "rollback_instruction": "Remove or update the source URL; Owner withdraws any manual share."
+    },
+    {
+      "channel_id": "naver_cafe_write",
+      "display_name": "Naver Cafe Write API",
+      "current_mode": "community_post_api_candidate_r3",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": true,
+      "credential_boundary": "Naver OAuth token, cafe membership, board permissions, and community rules are Owner/R3.",
+      "initial_recommendation": "Do not use for marketing v1 unless a specific cafe, permission, and non-spam community policy are approved.",
+      "rollback_instruction": "Owner deletes or edits the cafe post under the cafe's moderation rules."
+    },
+    {
+      "channel_id": "kakao_message",
+      "display_name": "KakaoTalk Message API",
+      "current_mode": "personal_message_candidate_blocked_for_marketing_broadcast",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": true,
+      "credential_boundary": "Kakao app, OAuth token, message permissions, and recipient consent are Owner/R3.",
+      "initial_recommendation": "Do not treat as marketing broadcast; only consider Owner-approved self memo or consented same-service user messaging.",
+      "rollback_instruction": "No reliable public rollback for received chat messages; avoid until policy and consent are reviewed."
+    },
+    {
+      "channel_id": "google_business_profile",
+      "display_name": "Google Business Profile Local Post",
+      "current_mode": "blocked_until_business_profile_ready",
+      "external_action_enabled": false,
+      "owner_approval_required": true,
+      "compliance_review_required": true,
+      "credential_required": true,
+      "credential_boundary": "Google account, OAuth client, verified business profile/location, and business registration context are Owner/R3.",
+      "initial_recommendation": "Defer until business registration/profile/location are intentionally set up.",
+      "rollback_instruction": "Owner updates or deletes the local post from Google Business Profile tools/API."
+    }
+  ],
+  "forbidden_actions": [
+    "live posting without Owner approval",
+    "public posting",
+    "paid ads",
+    "customer email or direct message",
+    "external account login",
+    "external API upload",
+    "OAuth callback validation",
+    "token or credential storage",
+    "bulk messaging",
+    "spam",
+    "viewbot or fake engagement",
+    "platform manipulation",
+    "terms-of-service evasion",
+    "unsourced lead scraping",
+    "investment advice claim",
+    "paid signal claim",
+    "model portfolio claim",
+    "performance guarantee",
+    "KIS commercial clearance claim"
+  ],
+  "required_reviews_before_live_use": [
+    "Owner approval for the exact channel, account, content hash, schedule, and rollback path",
+    "Compliance Officer claim review for financial, performance, recommendation, paid-signal, model-portfolio, tax, legal, regulatory, or KIS wording",
+    "Provider policy review for every channel selected for live use",
+    "Secret-storage review before any OAuth token, bot token, app secret, channel id, or account id is handled",
+    "QA dry-run record showing no network calls or external mutations",
+    "Doc Steward review that the public copy still matches BUSINESS-PLAN.md and MARKETING-BRIEF.md"
+  ],
+  "task_096_handoff": {
+    "r2_foundation_done": true,
+    "live_pipeline_still_blocked": true,
+    "next_allowed_slice": "local dry-run audit record generator without network calls, OAuth, tokens, live post, or external account action",
+    "owner_r3_required_for": [
+      "selecting real channel accounts",
+      "creating developer apps",
+      "OAuth login or callback validation",
+      "storing tokens or channel ids",
+      "posting, scheduling, editing, or deleting live content",
+      "paid ads or billing setup",
+      "customer messaging"
+    ]
+  },
+  "verification": {
+    "local_gate": "python scripts/promotion_publishing_policy_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_promotion_publishing_policy_gate.py -q"
+  }
+}
