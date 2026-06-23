@@ -1,0 +1,439 @@
+{
+  "$schema": "autofolio.membership-staging-deploy-preflight-checklist/v1",
+  "status": "draft_preflight_checklist_not_deployed",
+  "updated_at": "2026-06-19T22:16:54+09:00",
+  "owner": "CI/CD Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-115",
+    "TASK-116",
+    "TASK-117",
+    "TASK-118",
+    "TASK-119",
+    "TASK-120",
+    "TASK-121",
+    "TASK-122",
+    "TASK-123",
+    "TASK-124",
+    "TASK-125"
+  ],
+  "boundaries": {
+    "not_deployed": true,
+    "no_external_project_mutation": true,
+    "no_env_var_write": true,
+    "no_public_url_publish": true,
+    "no_supabase_project_mutation": true,
+    "no_migration_apply": true,
+    "no_secret_read_or_write": true,
+    "no_kis_credential_activation": true,
+    "no_bank_or_payment_api": true,
+    "keeps_can_launch_false": true
+  },
+  "source_basis": [
+    {
+      "id": "vercel_git_deployments",
+      "authority": "Vercel",
+      "type": "official_documentation",
+      "url": "https://vercel.com/docs/git",
+      "note": "Git integration creates preview deployments for pull requests and production deployments from the production branch."
+    },
+    {
+      "id": "vercel_environment_variables",
+      "authority": "Vercel",
+      "type": "official_documentation",
+      "url": "https://vercel.com/docs/environment-variables",
+      "note": "Environment variable changes apply only to new deployments and can be scoped to production, preview, custom, or development environments."
+    },
+    {
+      "id": "vercel_environments",
+      "authority": "Vercel",
+      "type": "official_documentation",
+      "url": "https://vercel.com/docs/deployments/environments",
+      "note": "Preview deployments are pre-production; custom staging environments are plan-dependent and require project/admin setup."
+    },
+    {
+      "id": "railway_variables",
+      "authority": "Railway",
+      "type": "official_documentation",
+      "url": "https://docs.railway.com/variables",
+      "note": "Variable changes are staged changes that must be reviewed and deployed to apply."
+    },
+    {
+      "id": "railway_healthchecks",
+      "authority": "Railway",
+      "type": "official_documentation",
+      "url": "https://docs.railway.com/deployments/healthchecks",
+      "note": "Configured healthchecks wait for HTTP 200 before switching traffic to a new deployment."
+    },
+    {
+      "id": "railway_public_networking",
+      "authority": "Railway",
+      "type": "official_documentation",
+      "url": "https://docs.railway.com/public-networking",
+      "note": "Public web services should listen on 0.0.0.0 and the Railway-provided PORT variable."
+    },
+    {
+      "id": "railway_dockerfiles",
+      "authority": "Railway",
+      "type": "official_documentation",
+      "url": "https://docs.railway.com/builds/dockerfiles",
+      "note": "Railway detects a root Dockerfile by default or can use RAILWAY_DOCKERFILE_PATH for a custom path."
+    },
+    {
+      "id": "supabase_cli",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/reference/cli/introduction",
+      "note": "Supabase CLI supports local development, migrations, db push, project management, and type generation; no CLI action is run in this task."
+    },
+    {
+      "id": "supabase_api_security",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/api/securing-your-api",
+      "note": "Exposed Data API tables and views need RLS; functions need restricted EXECUTE grants and SECURITY DEFINER review."
+    },
+    {
+      "id": "supabase_rls",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "note": "RLS plus Supabase Auth is the staging data-isolation gate for tenant-owned data."
+    },
+    {
+      "id": "supabase_database_overview",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/database/overview",
+      "note": "Supabase Postgres/Auth/RLS is selected by TASK-122 as the external staging source of truth for structured membership and tenant data."
+    },
+    {
+      "id": "railway_volumes",
+      "authority": "Railway",
+      "type": "official_documentation",
+      "url": "https://docs.railway.com/volumes/reference",
+      "note": "Railway volumes provide persistent service files, but TASK-122 does not select them as tenant source of truth."
+    },
+    {
+      "id": "kis_developers_provider_guide",
+      "authority": "Korea Investment & Securities KIS Developers",
+      "type": "official_documentation",
+      "url": "https://apiportal.koreainvestment.com/provider",
+      "note": "KIS provider guidance makes third-party service, market-data agreement, and order API regulatory process review a launch blocker."
+    },
+    {
+      "id": "kis_open_api_affiliate_user_terms",
+      "authority": "Korea Investment & Securities",
+      "type": "official_terms",
+      "url": "https://file.koreainvestment.com/updata/namo/09101613%EC%98%A4%ED%94%88API%EC%84%9C%EB%B9%84%EC%8A%A4%EC%9D%B4%EC%9A%A9%EC%95%BD%EA%B4%80_%EC%A0%84%EB%AC%B8.pdf",
+      "note": "Affiliate user terms assume an approved company/institution path and do not clear Autofolio paid hosted member use."
+    }
+  ],
+  "repo_state_findings": [
+    {
+      "id": "env_inventory_template_created_external_env_write_blocked",
+      "state": "block_actual_deploy",
+      "evidence": ".env.example and MEMBERSHIP-STAGING-ENV-INVENTORY now exist with sanitized placeholders only; external platform env vars are still not written.",
+      "required_before_deploy": "Owner/R3 must write reviewed values in Vercel/Railway/Supabase outside the repository and keep real secrets out of git."
+    },
+    {
+      "id": "railway_backend_port_binding_ready_external_deploy_blocked",
+      "state": "block_actual_deploy",
+      "evidence": "Root Dockerfile now starts uvicorn with ${PORT:-8000}; /api/health readiness is recorded in MEMBERSHIP-RAILWAY-BACKEND-READINESS.",
+      "required_before_deploy": "Owner/R3 must still configure and execute Railway staging deploy outside this repository."
+    },
+    {
+      "id": "supabase_migration_review_packet_recorded_apply_blocked",
+      "state": "block_actual_deploy",
+      "evidence": "MEMBERSHIP-SUPABASE-STAGING-MIGRATION-RLS-REVIEW records table groups, owner fields, RLS review requirements, Data API review order, and cross-user tests; no migration file or apply exists.",
+      "required_before_deploy": "Owner/R3 must create and apply a staging-only Supabase migration, run advisors/cross-user tests, and capture apply evidence."
+    },
+    {
+      "id": "persistent_storage_decision_recorded_implementation_blocked",
+      "state": "block_actual_deploy",
+      "evidence": "MEMBERSHIP-STAGING-PERSISTENT-STORAGE-DECISION selects Supabase Postgres/Auth/RLS as external staging source of truth; local vault/SQLite/Railway volume remain internal-smoke or non-tenant only.",
+      "required_before_deploy": "Owner/R3 must select/create Supabase staging, review/apply migration and RLS, run advisors/cross-user tests, and review backup/restore before external users."
+    },
+    {
+      "id": "kis_terms_review_packet_recorded_clearance_blocked",
+      "state": "block_external_user_launch",
+      "evidence": "MEMBERSHIP-KIS-COMMERCIAL-TERMS-REVIEW-PACKET records official KIS provider/terms risks and Owner/KIS/legal question set; no KIS/legal clearance exists.",
+      "required_before_deploy": "Keep KIS_ENV=mock and do not activate KIS credentials, market-data display, order API support, or paid KIS integration claims until Owner/KIS/legal confirmation exists."
+    },
+    {
+      "id": "payment_external_boundaries_blocked",
+      "state": "block_external_user_launch",
+      "evidence": "TASK-117 and secret-store plans forbid bank/PG/Open Banking setup and real payment records.",
+      "required_before_deploy": "Use non-real payment placeholders for staging until Owner approval."
+    }
+  ],
+  "services": [
+    {
+      "id": "vercel_frontend",
+      "platform": "Vercel",
+      "repo_path": "web",
+      "framework": "Next.js",
+      "build_command": "npm run build",
+      "start_command": "npm run start",
+      "environment_target": "preview_or_owner_approved_custom_staging",
+      "required_env_placeholders": [
+        "API_INTERNAL_URL",
+        "AUTOFOLIO_PUBLIC_BASE_URL"
+      ],
+      "forbidden_env_prefixes": [
+        "KIS_",
+        "SUPABASE_SECRET",
+        "SUPABASE_SERVICE_ROLE",
+        "AUTOFOLIO_MEMBERSHIP_BANK_ACCOUNT"
+      ],
+      "preflight_checks": [
+        "web_npm_ci_or_lockfile_install",
+        "web_lint_passes",
+        "web_build_passes_with_staging_api_internal_url",
+        "no_secret_next_public_env_values",
+        "api_rewrite_points_to_staging_backend"
+      ],
+      "deploy_status": "not_deployed"
+    },
+    {
+      "id": "railway_backend",
+      "platform": "Railway",
+      "repo_path": ".",
+      "framework": "FastAPI",
+      "build_source": "Dockerfile",
+      "healthcheck_path": "/api/health",
+      "required_env_placeholders": [
+        "PORT",
+        "AUTOFOLIO_ENV",
+        "AUTOFOLIO_HOME",
+        "KIS_ENV",
+        "AUTOFOLIO_LOCAL_AUTO_REGISTER",
+        "AUTOFOLIO_GUEST_DEMO_ENABLED",
+        "AUTOFOLIO_SSO_ALLOWED_EMAILS",
+        "SUPABASE_URL"
+      ],
+      "preflight_checks": [
+        "backend_imports_pass",
+        "api_health_local_passes",
+        "railway_port_binding_uses_port_variable",
+        "healthcheck_path_returns_200",
+        "kis_env_mock_for_staging",
+        "guest_demo_and_local_autoregister_disabled",
+        "no_real_bank_or_payment_values"
+      ],
+      "deploy_status": "not_deployed"
+    },
+    {
+      "id": "supabase_staging",
+      "platform": "Supabase",
+      "repo_path": "agents/project/MEMBERSHIP-SUPABASE-STAGING-FIELD-MAP.json",
+      "required_inputs": [
+        "MEMBERSHIP-PRODUCTION-CONTRACT.json",
+        "MEMBERSHIP-SUPABASE-STAGING-FIELD-MAP.json",
+        "MEMBERSHIP-TENANT-ISOLATION-MATRIX.json",
+        "MEMBERSHIP-PRODUCTION-SECRET-POLICY.json",
+        "MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.json"
+      ],
+      "preflight_checks": [
+        "staging_project_selected_by_owner",
+        "persistent_storage_decision_gate_passes",
+        "migration_rls_review_packet_gate_passes",
+        "migration_review_packet_exists",
+        "rls_enabled_on_exposed_tenant_tables",
+        "data_api_exposure_reviewed",
+        "security_and_performance_advisors_pass",
+        "cross_user_rls_tests_pass"
+      ],
+      "deploy_status": "not_created_or_not_mutated_by_this_task"
+    }
+  ],
+  "environment_inventory_placeholders": [
+    {
+      "id": "frontend_public_base_url",
+      "target": "Vercel",
+      "key": "AUTOFOLIO_PUBLIC_BASE_URL",
+      "secret": false,
+      "value_allowed_in_repo": false,
+      "note": "Record placeholder only; actual staging URL is Owner/external-platform state."
+    },
+    {
+      "id": "frontend_api_internal_url",
+      "target": "Vercel",
+      "key": "API_INTERNAL_URL",
+      "secret": false,
+      "value_allowed_in_repo": false,
+      "note": "Must point to the approved staging backend before build; do not commit live URLs in source artifacts."
+    },
+    {
+      "id": "backend_autofolio_env",
+      "target": "Railway",
+      "key": "AUTOFOLIO_ENV",
+      "secret": false,
+      "value_allowed_in_repo": false,
+      "note": "Cookie security behavior depends on this setting; external HTTPS staging must review secure-cookie behavior."
+    },
+    {
+      "id": "backend_kis_env",
+      "target": "Railway",
+      "key": "KIS_ENV",
+      "secret": false,
+      "value_allowed_in_repo": false,
+      "required_staging_value": "mock",
+      "note": "Paper/prod KIS activation is outside this preflight task."
+    },
+    {
+      "id": "backend_autofolio_home",
+      "target": "Railway",
+      "key": "AUTOFOLIO_HOME",
+      "secret": false,
+      "value_allowed_in_repo": false,
+      "note": "Local vault/runtime path is not a production tenant store; persistence strategy remains blocked."
+    },
+    {
+      "id": "backend_membership_bank_placeholders",
+      "target": "Railway",
+      "keys": [
+        "AUTOFOLIO_MEMBERSHIP_BANK_NAME",
+        "AUTOFOLIO_MEMBERSHIP_ACCOUNT_HOLDER",
+        "AUTOFOLIO_MEMBERSHIP_BANK_ACCOUNT"
+      ],
+      "secret": true,
+      "value_allowed_in_repo": false,
+      "required_staging_value": "non-real placeholder only",
+      "note": "Real receiving account information is Owner-only and not allowed in repo."
+    },
+    {
+      "id": "backend_supabase_placeholders",
+      "target": "Railway",
+      "keys": [
+        "SUPABASE_URL",
+        "SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SECRET_KEY_OR_SERVICE_ROLE_SERVER_ONLY"
+      ],
+      "secret": true,
+      "value_allowed_in_repo": false,
+      "note": "Actual keys are forbidden in repo and require Supabase staging approval before use."
+    }
+  ],
+  "required_local_checks": [
+    "python -m json.tool agents/project/MEMBERSHIP-STAGING-DEPLOY-PREFLIGHT-CHECKLIST.json",
+    "python scripts/membership_staging_deploy_preflight_gate.py --check",
+    "python scripts/membership_staging_env_inventory_gate.py --check",
+    "python scripts/membership_railway_backend_readiness_gate.py --check",
+    "python scripts/membership_staging_storage_decision_gate.py --check",
+    "python scripts/membership_supabase_migration_review_gate.py --check",
+    "python scripts/membership_supabase_apply_evidence_gate.py --check",
+    "python scripts/membership_kis_terms_review_gate.py --check",
+    "python -m pytest tests/unit/test_membership_staging_deploy_preflight_gate.py -q",
+    "python scripts/membership_contract_gate.py --check",
+    "python scripts/membership_supabase_field_map_gate.py --check",
+    "python scripts/membership_secret_store_plan_gate.py --check",
+    "python scripts/membership_payment_recognition_decision_gate.py --check",
+    "python scripts/check_agent_docs.py"
+  ],
+  "required_staging_smoke_plan": [
+    {
+      "id": "frontend_loads_login",
+      "target": "Vercel preview/custom staging",
+      "method": "browser",
+      "expected": "/login loads without console errors and does not expose guest demo CTA"
+    },
+    {
+      "id": "frontend_proxy_health",
+      "target": "Vercel to Railway",
+      "method": "http",
+      "expected": "GET /api/health returns 200 and JSON status ok through the frontend origin"
+    },
+    {
+      "id": "public_signup_intake_safe",
+      "target": "membership public flow",
+      "method": "api_or_browser",
+      "expected": "Public signup can create/request status only in staging-safe mode and cannot create active account or session"
+    },
+    {
+      "id": "guest_and_autoregister_fail_closed",
+      "target": "auth",
+      "method": "api",
+      "expected": "guest demo and unknown local auto-register are disabled by staging env"
+    },
+    {
+      "id": "readiness_can_launch_false",
+      "target": "membership readiness",
+      "method": "owner_session_api",
+      "expected": "can_launch remains false until Supabase/RLS, secrets, payment, engine, KIS terms, and deploy evidence pass"
+    },
+    {
+      "id": "no_order_or_kis_activation",
+      "target": "trading safety",
+      "method": "config_and_log_review",
+      "expected": "KIS_ENV is mock, no KIS credentials are configured, no order endpoint is enabled, and no live order path is touched"
+    },
+    {
+      "id": "no_secret_or_payment_disclosure",
+      "target": "logs_and_api",
+      "method": "log_and_response_review",
+      "expected": "No secret, bank account, raw payment evidence, provider token, or customer PII appears in logs or responses"
+    },
+    {
+      "id": "persistent_storage_source_of_truth",
+      "target": "Supabase staging",
+      "method": "storage_decision_and_rls_review",
+      "expected": "External/member staging uses Supabase Postgres/Auth/RLS after Owner/R3 apply; local vault, SQLite, Railway volume, and runtime files are not tenant sources of truth"
+    }
+  ],
+  "rollback_plan": [
+    {
+      "id": "vercel_preview_only",
+      "rule": "Use preview/custom staging only; do not promote to production."
+    },
+    {
+      "id": "railway_healthcheck_blocks_bad_release",
+      "rule": "Configure /api/health healthcheck before actual Railway deploy; failed healthcheck must prevent traffic switch."
+    },
+    {
+      "id": "no_db_migration_without_rollback",
+      "rule": "Supabase staging migration must have down/rollback notes and a restore point before apply."
+    },
+    {
+      "id": "env_change_reversal",
+      "rule": "Any future platform variable change must have a recorded previous-value owner-held backup outside repo."
+    },
+    {
+      "id": "kill_switch_and_mock_default",
+      "rule": "KIS_ENV stays mock and trading automation stays blocked during staging smoke."
+    }
+  ],
+  "forbidden_actions": [
+    "Do not deploy to Vercel, Railway, Supabase, or any public URL in this task.",
+    "Do not create, mutate, or link external platform projects.",
+    "Do not add or edit environment variables in any external platform.",
+    "Do not create or apply Supabase migrations.",
+    "Do not write .github workflow changes for this task.",
+    "Do not read, write, rotate, or validate secrets.",
+    "Do not configure real KIS, bank, PG, Open Banking, or payment values.",
+    "Do not mark can_launch true."
+  ],
+  "launch_gates": [
+    "preflight_gate_passes",
+    "repo_state_blockers_resolved_or_waived_by_owner",
+    "local_backend_health_passes",
+    "web_lint_and_build_pass",
+    "vercel_preview_or_custom_staging_target_selected",
+    "railway_backend_port_and_healthcheck_reviewed",
+    "persistent_storage_decision_gate_passes",
+    "migration_rls_review_packet_gate_passes",
+    "apply_evidence_checklist_gate_passes",
+    "kis_terms_review_packet_gate_passes",
+    "supabase_staging_project_and_migration_reviewed",
+    "secret_store_not_plaintext_and_not_repo",
+    "payment_and_kis_external_boundaries_remain_blocked",
+    "staging_smoke_plan_passes",
+    "rollback_plan_recorded",
+    "can_launch_remains_false_until_r3_evidence"
+  ],
+  "verification": {
+    "local_preflight_gate": "python scripts/membership_staging_deploy_preflight_gate.py --check",
+    "json_parse": "python -m json.tool agents/project/MEMBERSHIP-STAGING-DEPLOY-PREFLIGHT-CHECKLIST.json",
+    "unit_tests": "python -m pytest tests/unit/test_membership_staging_deploy_preflight_gate.py -q"
+  }
+}

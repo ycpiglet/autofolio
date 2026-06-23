@@ -38,13 +38,13 @@ def test_premarket_summary_api_requires_session(client):
     assert resp.status_code == 401
 
 
-def test_premarket_summary_api_loads_file(guest_client, tmp_path, mock_backend, monkeypatch):
+def test_premarket_summary_api_loads_file(member_client, tmp_path, mock_backend, monkeypatch):
     import app.services.premarket_summary as ps
 
     monkeypatch.setattr(ps, "PREMARKET_DIR", tmp_path)
     ps.generate_summary(target_date="2026-06-16", save=True)
 
-    resp = guest_client.get("/api/agents/premarket/summary")
+    resp = member_client.get("/api/agents/premarket/summary")
     assert resp.status_code == 200
     body = resp.json()
     assert body["date"] == "2026-06-16"
@@ -53,9 +53,14 @@ def test_premarket_summary_api_loads_file(guest_client, tmp_path, mock_backend, 
     assert body["agents"]
 
 
-def test_premarket_summary_api_404_when_missing(guest_client, tmp_path, monkeypatch):
+def test_premarket_summary_api_404_when_missing(member_client, tmp_path, monkeypatch):
     import app.services.premarket_summary as ps
 
     monkeypatch.setattr(ps, "PREMARKET_DIR", tmp_path)
-    resp = guest_client.get("/api/agents/premarket/summary")
+    resp = member_client.get("/api/agents/premarket/summary")
     assert resp.status_code == 404
+
+
+def test_premarket_summary_api_guest_403(guest_client):
+    resp = guest_client.get("/api/agents/premarket/summary")
+    assert resp.status_code == 403

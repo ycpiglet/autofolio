@@ -64,7 +64,7 @@ def test_build_holdings_handles_missing_avg_and_name_fallback():
     assert row["손익률"] == 0.0
     assert row["예상연배당"] == 0
     assert row["배당수익률"] == 0.0
-    assert row["종목"] == "005930"  # 화이트리스트 메타 없으면 티커로 폴백
+    assert row["종목"] == "삼성전자"  # 기본 별칭이 있으면 종목명으로 보강
 
 
 def test_build_holdings_adds_dividend_income_and_yield():
@@ -82,6 +82,8 @@ def test_build_holdings_adds_dividend_income_and_yield():
 
 
 def test_holdings_df_can_skip_dividend_calls(monkeypatch):
+    monkeypatch.setattr(backend, "_LAST_HOLDINGS_DF", None)
+
     class Repo:
         def list_whitelist_symbols(self):
             return [{"symbol": "005930", "name": "삼성전자", "role": "LARGE_CAP_TEST"}]
@@ -107,3 +109,51 @@ def test_holdings_df_can_skip_dividend_calls(monkeypatch):
     assert row["종목"] == "삼성전자"
     assert row["평가금액"] == 71000
     assert row["예상연배당"] == 0
+
+
+def test_holdings_df_returns_empty_schema_when_live_positions_fail_without_cache(monkeypatch):
+    monkeypatch.setattr(backend, "_LAST_HOLDINGS_DF", None)
+
+    class Repo:
+        def list_whitelist_symbols(self):
+            return [{"symbol": "005930", "name": "삼성전자", "role": "LARGE_CAP_TEST"}]
+
+    class FailingBroker:
+        def get_positions(self):
+            raise RuntimeError("KIS positions unavailable")
+
+    monkeypatch.setattr(backend, "_ctx", lambda: (Repo(), FailingBroker(), None, None))
+
+    df = backend.holdings_df(include_dividends=False)
+
+    assert list(df.columns) == HOLDINGS_COLUMNS
+    assert df.empty
+
+
+def test_holdings_df_uses_cached_snapshot_when_live_positions_fail(monkeypatch):
+    monkeypatch.setattr(backend, "_LAST_HOLDINGS_DF", None)
+
+    class Repo:
+        def list_whitelist_symbols(self):
+            return [{"symbol": "005930", "name": "삼성전자", "role": "LARGE_CAP_TEST"}]
+
+    class WorkingBroker:
+        def get_positions(self):
+            return [Position("005930", 2, 70000.0)]
+
+        def get_prices_batch(self, symbols):
+            return {"005930": 72000.0}
+
+    class FailingBroker:
+        def get_positions(self):
+            raise RuntimeError("KIS positions unavailable")
+
+    monkeypatch.setattr(backend, "_ctx", lambda: (Repo(), WorkingBroker(), None, None))
+    first = backend.holdings_df(include_dividends=False)
+    assert first.iloc[0]["평가금액"] == 144000
+
+    monkeypatch.setattr(backend, "_ctx", lambda: (Repo(), FailingBroker(), None, None))
+    cached = backend.holdings_df(include_dividends=False)
+
+    assert cached.iloc[0]["종목"] == "삼성전자"
+    assert cached.iloc[0]["평가금액"] == 144000

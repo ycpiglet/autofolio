@@ -1,4 +1,4 @@
-"""순수 인증 코어 — 로컬 ID/PW(해시) 로그인·가입.
+"""순수 인증 코어 — 로컬 ID/PW(해시) 로그인.
 
 Streamlit 의존이 없는 순수 함수만 포함한다.
 OIDC(Google st.login/st.user) 관련 함수는 app/ui/auth.py 에 남는다.
@@ -13,14 +13,40 @@ import os
 
 from app.ui import vault
 
-__all__ = ["login_or_register", "change_password", "MIN_PASSWORD_LEN"]
+__all__ = [
+    "login_or_register",
+    "change_password",
+    "create_or_update_user",
+    "verify_password",
+    "role_for_user",
+    "MIN_PASSWORD_LEN",
+]
 
 #: Minimum length for a (new) password. Kept conservative for a local vault.
 MIN_PASSWORD_LEN = 8
+_AUTO_REGISTER_ENV = "AUTOFOLIO_LOCAL_AUTO_REGISTER"
+
+
+def _auto_register_enabled() -> bool:
+    return (os.getenv(_AUTO_REGISTER_ENV) or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
 
 def _hash(password: str, salt: bytes) -> str:
     return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 200_000).hex()
+
+
+def _password_matches(record: dict, password: str) -> bool:
+    try:
+        salt = bytes.fromhex(str(record["salt"]))
+        expected_hash = str(record["hash"])
+    except (KeyError, TypeError, ValueError):
+        return False
+    return hmac.compare_digest(_hash(password or "", salt), expected_hash)
 
 
 def _users() -> dict:
@@ -33,21 +59,92 @@ def _save_users(users: dict) -> None:
     vault.save(data)
 
 
+def _normalize_username(username: str) -> str:
+    return " ".join((username or "").strip().split())
+
+
 def login_or_register(username: str, password: str) -> tuple[bool, str]:
-    """존재하면 검증, 없으면 가입. (성공여부, 메시지)."""
-    username = (username or "").strip()
+    """존재하면 검증, 없으면 기본 차단. (성공여부, 메시지).
+
+    First-run auto-registration is an explicit local/dev opt-in only. The
+    product membership model is approval-based, so unknown usernames fail
+    closed unless AUTOFOLIO_LOCAL_AUTO_REGISTER=1 is set.
+    """
+    username = _normalize_username(username)
     if not username or not password:
         return False, "ID와 비밀번호를 입력하세요."
     users = _users()
     if username in users:
         rec = users[username]
-        if hmac.compare_digest(_hash(password, bytes.fromhex(rec["salt"])), rec["hash"]):
+        if _password_matches(rec, password):
             return True, "로그인되었습니다."
         return False, "비밀번호가 일치하지 않습니다."
-    salt = os.urandom(16)
-    users[username] = {"salt": salt.hex(), "hash": _hash(password, salt)}
-    _save_users(users)
+    if not _auto_register_enabled():
+        return False, "승인된 계정이 아닙니다. 가입 승인 또는 계정 활성화 후 로그인하세요."
+    create_or_update_user(username, password, role="owner", source="local_auto_register")
     return True, "계정을 만들고 로그인했습니다."
+
+
+def role_for_user(username: str) -> str:
+    """Return the local account role, defaulting legacy records to owner."""
+    username = _normalize_username(username)
+    users = _users()
+    rec = users.get(username)
+    if not isinstance(rec, dict):
+        return "owner"
+    role = str(rec.get("role") or "owner").strip().lower()
+    return role if role in {"owner", "member"} else "owner"
+
+
+def verify_password(username: str, password: str) -> tuple[bool, str]:
+    """Verify a local account password without mutating account metadata."""
+    username = _normalize_username(username)
+    password = password or ""
+    if not username:
+        return False, "계정을 찾을 수 없습니다."
+    rec = _users().get(username)
+    if rec is None:
+        return False, "계정을 찾을 수 없습니다."
+    if not _password_matches(rec, password):
+        return False, "현재 비밀번호가 일치하지 않습니다."
+    return True, "비밀번호가 확인되었습니다."
+
+
+def create_or_update_user(
+    username: str,
+    password: str,
+    *,
+    role: str = "owner",
+    source: str = "membership_approval",
+    membership_request_id: str | None = None,
+) -> tuple[bool, str]:
+    """Create or reset a local approved account without storing plaintext."""
+    username = _normalize_username(username)
+    password = password or ""
+    role = (role or "owner").strip().lower()
+
+    if not username:
+        return False, "계정 ID를 입력하세요."
+    if len(username) > 160:
+        return False, "계정 ID가 너무 깁니다."
+    if not password:
+        return False, "임시 비밀번호를 입력하세요."
+    if len(password) < MIN_PASSWORD_LEN:
+        return False, f"임시 비밀번호는 최소 {MIN_PASSWORD_LEN}자 이상이어야 합니다."
+    if role not in {"owner", "member"}:
+        return False, "지원하지 않는 계정 권한입니다."
+
+    users = _users()
+    salt = os.urandom(16)
+    users[username] = {
+        "salt": salt.hex(),
+        "hash": _hash(password, salt),
+        "role": role,
+        "source": source,
+        "membership_request_id": membership_request_id,
+    }
+    _save_users(users)
+    return True, "계정이 활성화되었습니다."
 
 
 def change_password(
@@ -59,7 +156,7 @@ def change_password(
     validates ``new_password`` (non-empty, length, must differ from old), then
     stores a fresh salt + hash. Passwords are never logged.
     """
-    username = (username or "").strip()
+    username = _normalize_username(username)
     old_password = old_password or ""
     new_password = new_password or ""
 
@@ -73,8 +170,7 @@ def change_password(
         return False, "계정을 찾을 수 없습니다."
 
     # Verify the current password (constant-time comparison).
-    current_hash = _hash(old_password, bytes.fromhex(rec["salt"]))
-    if not hmac.compare_digest(current_hash, rec["hash"]):
+    if not _password_matches(rec, old_password):
         return False, "현재 비밀번호가 일치하지 않습니다."
 
     # Validate the new password.
@@ -87,6 +183,8 @@ def change_password(
 
     # Store a fresh salt + hash.
     salt = os.urandom(16)
-    users[username] = {"salt": salt.hex(), "hash": _hash(new_password, salt)}
+    updated = dict(rec)
+    updated.update({"salt": salt.hex(), "hash": _hash(new_password, salt)})
+    users[username] = updated
     _save_users(users)
     return True, "비밀번호가 변경되었습니다."

@@ -4,7 +4,6 @@ import { test, expect, type Page } from "@playwright/test";
 // Shared fixtures
 // ---------------------------------------------------------------------------
 
-const GUEST_SESSION = { role: "guest", username: null, data_source: "demo" };
 const OWNER_SESSION = { role: "owner", username: "admin", data_source: "live" };
 
 const ENGINE_STATUS = {
@@ -20,14 +19,18 @@ const ENGINE_STATUS = {
 };
 
 const EMPTY_TABLE = { columns: [], rows: [] };
-const EMPTY_SSO_PROVIDERS = { providers: [] };
-const GOOGLE_SSO_PROVIDERS = {
+
+type SsoProvider = { id: string; label: string; kind: string; enabled: boolean };
+type SsoProvidersBody = { providers: SsoProvider[] };
+
+const EMPTY_SSO_PROVIDERS: SsoProvidersBody = { providers: [] };
+const GOOGLE_SSO_PROVIDERS: SsoProvidersBody = {
   providers: [
     { id: "google", label: "Google", kind: "oidc", enabled: true },
     { id: "kakao", label: "Kakao", kind: "sns", enabled: false },
   ],
 };
-const MOCK_SSO_PROVIDERS = {
+const MOCK_SSO_PROVIDERS: SsoProvidersBody = {
   providers: [
     { id: "mock", label: "Mock SSO", kind: "mock", enabled: true },
     { id: "google", label: "Google", kind: "oidc", enabled: false },
@@ -41,7 +44,7 @@ const MOCK_SSO_PROVIDERS = {
  */
 async function mockBackgroundApis(
   page: Page,
-  session: typeof GUEST_SESSION | typeof OWNER_SESSION,
+  session: typeof OWNER_SESSION,
 ) {
   // All remaining GET /api/** → empty TableResponse
   await page.route(/\/api\//, (route) => {
@@ -74,7 +77,7 @@ async function mockBackgroundApis(
   );
 }
 
-async function mockSsoProviders(page: Page, body = EMPTY_SSO_PROVIDERS) {
+async function mockSsoProviders(page: Page, body: SsoProvidersBody = EMPTY_SSO_PROVIDERS) {
   await page.route(/\/api\/auth\/sso\/providers/, (route) =>
     route.fulfill({
       status: 200,
@@ -89,35 +92,16 @@ async function mockSsoProviders(page: Page, body = EMPTY_SSO_PROVIDERS) {
 // ---------------------------------------------------------------------------
 
 test.describe("Login flow", () => {
-  test("guest login — navigates to /home and shows AppShell", async ({
+  test("guest demo is not offered on the default login screen", async ({
     page,
   }) => {
-    // Background API mocks first (lower LIFO priority)
-    await mockBackgroundApis(page, GUEST_SESSION);
     await mockSsoProviders(page);
-
-    // Login POST mock last — takes LIFO priority over catch-all
-    await page.route(/\/api\/auth\/login/, (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(GUEST_SESSION),
-      }),
-    );
 
     await page.goto("/login");
 
-    // Click "게스트 데모 시작" (the guest button)
-    await page.getByRole("button", { name: /게스트 데모 시작/ }).click();
-
-    // Should navigate to /home
-    await expect(page).toHaveURL(/\/home/, { timeout: 10_000 });
-
-    // AppShell renders a nav element (SidebarNav)
-    await expect(page.getByRole("navigation")).toBeVisible();
-
-    // EmptyState is rendered inside AppShell (role=status)
-    await expect(page.getByRole("status")).toBeVisible();
+    await expect(page.getByRole("button", { name: /게스트 데모 시작/ })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /가입 승인 신청/ })).toBeVisible();
+    await expect(page.getByText(/Owner가 신청자와 입금 확인을 검증/)).toBeVisible();
   });
 
   test("local login — fill ID/PW and submit navigates to /home", async ({
@@ -160,7 +144,7 @@ test.describe("Login flow", () => {
       route.fulfill({
         status: 401,
         contentType: "application/json",
-        body: JSON.stringify({ detail: "Invalid credentials" }),
+        body: JSON.stringify({ detail: "아이디 또는 비밀번호가 올바르지 않습니다." }),
       }),
     );
 

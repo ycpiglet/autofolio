@@ -1,11 +1,11 @@
 """Account router contract + safety tests — /api/account/*
 
 Covers:
-- GET  /api/account              shape (no secrets), owner/guest, 401 no-session
+- GET  /api/account              shape (no secrets), owner/member, guest 403, 401 no-session
 - POST /api/account/password     happy path (owner + CSRF)
 - POST /api/account/password     wrong-old → 401
 - POST /api/account/password     weak-new → 400
-- POST /api/account/password     guest → 403 (require_owner)
+- POST /api/account/password     guest → 403 (require_app_user)
 - POST /api/account/password     no-session → 401
 - POST /api/account/password     missing CSRF → 403
 - POST /api/account/password     username comes from SESSION, not body
@@ -26,6 +26,17 @@ def _owner_session(username: str = "alice") -> str:
     return encode_session(
         {
             "role": "owner",
+            "username": username,
+            "data_source": "backend",
+            "csrf_token": CSRF,
+        }
+    )
+
+
+def _member_session(username: str = "member-alice") -> str:
+    return encode_session(
+        {
+            "role": "member",
             "username": username,
             "data_source": "backend",
             "csrf_token": CSRF,
@@ -59,15 +70,24 @@ class TestGetAccount:
             "is_owner": True,
         }
 
-    def test_guest_shape_is_owner_false(self):
+    def test_guest_returns_403(self):
         c = _client()
         c.cookies.set("af_session", _guest_session())
         resp = c.get("/api/account")
+        assert resp.status_code == 403
+
+    def test_member_shape_is_owner_false(self):
+        c = _client()
+        c.cookies.set("af_session", _member_session("member-alice"))
+        resp = c.get("/api/account")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["role"] == "guest"
-        assert body["is_owner"] is False
-        assert body["username"] is None
+        assert body == {
+            "username": "member-alice",
+            "role": "member",
+            "data_source": "backend",
+            "is_owner": False,
+        }
 
     def test_no_session_returns_401(self):
         c = _client()
@@ -117,6 +137,26 @@ class TestChangePassword:
         assert resp.json()["status"] == "changed"
         # username MUST come from session, not the body.
         assert captured["username"] == "alice"
+
+    def test_happy_path_member_self_password_change(self, monkeypatch):
+        captured: dict[str, Any] = {}
+
+        def fake_change(username, old, new):
+            captured["username"] = username
+            captured["old"] = old
+            captured["new"] = new
+            return True, "비밀번호가 변경되었습니다."
+
+        monkeypatch.setattr(
+            "app.services.auth_service.change_password", fake_change
+        )
+        c = _client()
+        c.cookies.set("af_session", _member_session("member-alice"))
+        resp = self._post(
+            c, {"old_password": "oldpass12", "new_password": "newpass34"}
+        )
+        assert resp.status_code == 200
+        assert captured["username"] == "member-alice"
 
     def test_username_from_session_not_body(self, monkeypatch):
         """Even if the body carries a username, the session's is used."""
@@ -211,6 +251,7 @@ class TestChangePasswordService:
     def _isolate_vault(self, tmp_path, monkeypatch):
         """Point the vault at a throwaway dir so we never touch real data."""
         monkeypatch.setenv("AUTOFOLIO_HOME", str(tmp_path))
+        monkeypatch.delenv("AUTOFOLIO_LOCAL_AUTO_REGISTER", raising=False)
         # Reset cached fernet/paths by reloading vault module-level dirs.
         import importlib
 
@@ -219,8 +260,36 @@ class TestChangePasswordService:
         importlib.reload(vault_mod)
         return vault_mod
 
+    def test_unknown_account_blocked_by_default(self, tmp_path, monkeypatch):
+        vault_mod = self._isolate_vault(tmp_path, monkeypatch)
+        import importlib
+
+        from app.services import auth_service as svc
+        importlib.reload(svc)
+
+        ok, msg = svc.login_or_register("bob", "origpass1")
+        assert ok is False
+        assert "승인된 계정" in msg
+        assert vault_mod.load().get("users", {}) == {}
+
+    def test_local_auto_register_requires_explicit_opt_in(self, tmp_path, monkeypatch):
+        vault_mod = self._isolate_vault(tmp_path, monkeypatch)
+        monkeypatch.setenv("AUTOFOLIO_LOCAL_AUTO_REGISTER", "1")
+        import importlib
+
+        from app.services import auth_service as svc
+        importlib.reload(svc)
+
+        ok, _ = svc.login_or_register("bob", "origpass1")
+        assert ok is True
+        assert "bob" in vault_mod.load().get("users", {})
+
+        monkeypatch.delenv("AUTOFOLIO_LOCAL_AUTO_REGISTER", raising=False)
+        assert svc.login_or_register("bob", "origpass1")[0] is True
+
     def test_full_roundtrip(self, tmp_path, monkeypatch):
         self._isolate_vault(tmp_path, monkeypatch)
+        monkeypatch.setenv("AUTOFOLIO_LOCAL_AUTO_REGISTER", "1")
         import importlib
 
         from app.services import auth_service as svc
@@ -249,3 +318,37 @@ class TestChangePasswordService:
         # Old password no longer works; new one does.
         assert svc.login_or_register("bob", "origpass1")[0] is False
         assert svc.login_or_register("bob", "brandnew9")[0] is True
+
+    def test_member_password_change_preserves_role(self, tmp_path, monkeypatch):
+        self._isolate_vault(tmp_path, monkeypatch)
+        import importlib
+
+        from app.services import auth_service as svc
+        importlib.reload(svc)
+
+        ok, _ = svc.create_or_update_user(
+            "member-alice",
+            "origpass1",
+            role="member",
+            source="membership_approval",
+            membership_request_id="req-1",
+        )
+        assert ok
+        assert svc.role_for_user("member-alice") == "member"
+
+        ok, _ = svc.change_password("member-alice", "origpass1", "brandnew9")
+        assert ok
+        assert svc.role_for_user("member-alice") == "member"
+        assert svc.login_or_register("member-alice", "brandnew9")[0] is True
+
+    def test_verify_password_does_not_mutate_role(self, tmp_path, monkeypatch):
+        self._isolate_vault(tmp_path, monkeypatch)
+        import importlib
+
+        from app.services import auth_service as svc
+        importlib.reload(svc)
+
+        ok, _ = svc.create_or_update_user("member-alice", "origpass1", role="member")
+        assert ok
+        assert svc.verify_password("member-alice", "origpass1")[0] is True
+        assert svc.role_for_user("member-alice") == "member"

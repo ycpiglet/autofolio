@@ -1,6 +1,6 @@
 """Trade router — /api/trade/*
 
-Endpoints (all require_session for reads):
+Endpoints (all require_app_user for reads):
   GET  /trade/fills/recent?limit=10
   GET  /trade/conditions
   GET  /trade/orders?limit=200
@@ -17,7 +17,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
-from app.api.deps import require_owner_csrf, require_session
+from app.api.deps import require_app_user, require_owner_csrf
 from app.api.schemas import (
     ConditionRequest,
     ConditionSavedResponse,
@@ -32,7 +32,7 @@ router = APIRouter(prefix="/trade", tags=["trade"])
 
 @router.get("/fills/recent", response_model=TableResponse)
 def recent_fills(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     limit: int = Query(default=10, ge=1, le=200),
 ) -> TableResponse:
     from app.services import backend
@@ -42,7 +42,7 @@ def recent_fills(
 
 @router.get("/conditions", response_model=TableResponse)
 def conditions(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> TableResponse:
     from app.services import backend
 
@@ -51,7 +51,7 @@ def conditions(
 
 @router.get("/orders", response_model=TableResponse)
 def orders(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     limit: int = Query(default=200, ge=1, le=1000),
 ) -> TableResponse:
     from app.services import backend

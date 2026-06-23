@@ -78,3 +78,32 @@
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Lead Engineer | Defer future maturity reassessment from ACT lane |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | Lead Engineer | Investor profile survey and satisfaction loop |
 | [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | UI/UX Designer | UI 비주얼 에셋(그래프·이미지·캐릭터) 확장 채택 |
+| [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | Lead Engineer | 웹 배포 + 구매자 한정 회원제 |
+| [TASK-098](TASK-098-membership-access-manual-deposit-plan.md) | 완료 | Lead Engineer | Membership access manual deposit plan |
+| [TASK-099](TASK-099-membership-local-autoregister-fail-closed.md) | 완료 | Backend Engineer | Membership local auto-register fail-closed |
+| [TASK-100](TASK-100-membership-local-request-approval-prototype.md) | 완료 | Backend Engineer | Membership local request approval prototype |
+| [TASK-101](TASK-101-membership-admin-settings-tab.md) | 완료 | UI/UX Designer | Membership admin settings tab |
+| [TASK-102](TASK-102-membership-local-account-grant.md) | 완료 | Backend Engineer | Membership local account grant |
+| [TASK-103](TASK-103-membership-local-deposit-recognition.md) | 완료 | Backend Engineer | Membership local deposit recognition |
+| [TASK-104](TASK-104-membership-member-admin-boundary.md) | 완료 | Backend Engineer | Membership member admin boundary |
+| [TASK-105](TASK-105-membership-guest-demo-fail-closed.md) | 완료 | Backend Engineer | Membership guest demo fail-closed |
+| [TASK-106](TASK-106-membership-app-user-read-boundary.md) | 완료 | Backend Engineer | Membership app-user read boundary |
+| [TASK-108](TASK-108-membership-production-readiness-gate.md) | 완료 | Backend Engineer | Membership production readiness gate |
+| [TASK-109](TASK-109-membership-supabase-rls-contract.md) | 완료 | Backend Engineer | Membership Supabase RLS production contract |
+| [TASK-110](TASK-110-membership-applicant-deposit-status-lookup.md) | 완료 | Backend Engineer | Membership applicant deposit status lookup |
+| [TASK-111](TASK-111-membership-payment-evidence-policy.md) | 완료 | Backend Engineer | Membership payment evidence policy gate |
+| [TASK-112](TASK-112-membership-production-secret-policy.md) | 완료 | Backend Engineer | Membership production secret policy |
+| [TASK-113](TASK-113-membership-per-user-engine-safety-contract.md) | 완료 | Lead Engineer | Membership per-user engine safety contract |
+| [TASK-114](TASK-114-membership-tenant-isolation-matrix.md) | 완료 | Backend Engineer | Membership tenant isolation matrix |
+| [TASK-115](TASK-115-membership-production-implementation-plan.md) | 완료 | Lead Engineer | Membership production implementation plan |
+| [TASK-116](TASK-116-membership-supabase-staging-schema-field-map.md) | 완료 | Backend Engineer | Membership Supabase staging schema/RLS field map |
+| [TASK-117](TASK-117-membership-payment-recognition-decision-packet.md) | 완료 | Regulatory Admin | Membership payment recognition decision packet |
+| [TASK-118](TASK-118-membership-production-secret-store-implementation-plan.md) | 완료 | Backend Engineer | Membership production secret store implementation plan |
+| [TASK-119](TASK-119-membership-staging-deploy-preflight-checklist.md) | 완료 | CI/CD Engineer | Membership staging deploy preflight checklist |
+| [TASK-120](TASK-120-membership-staging-env-inventory-template.md) | 완료 | CI/CD Engineer | Membership staging env inventory template |
+| [TASK-121](TASK-121-membership-railway-port-healthcheck-readiness.md) | 완료 | Backend Engineer | Membership Railway port and healthcheck readiness |
+| [TASK-122](TASK-122-membership-staging-persistent-storage-decision.md) | 완료 | Backend Engineer | Membership staging persistent storage decision |
+| [TASK-123](TASK-123-membership-supabase-staging-migration-rls-review-packet.md) | 완료 | Backend Engineer | Membership Supabase staging migration/RLS review packet |
+| [TASK-124](TASK-124-membership-supabase-backup-apply-evidence-checklist.md) | 완료 | Backend Engineer | Membership Supabase backup/apply evidence checklist |
+| [TASK-125](TASK-125-membership-kis-commercial-terms-review-packet.md) | 완료 | Compliance Officer | Membership KIS commercial terms review packet |
+| [TASK-126](TASK-126-membership-readiness-surface-sync.md) | 완료 | Lead Engineer | Membership readiness surface sync |

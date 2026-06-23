@@ -1,0 +1,249 @@
+{
+  "$schema": "autofolio.membership-staging-persistent-storage-decision/v1",
+  "status": "draft_decision_packet_not_applied",
+  "updated_at": "2026-06-19T21:42:53+09:00",
+  "owner": "Backend Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-109",
+    "TASK-112",
+    "TASK-116",
+    "TASK-118",
+    "TASK-119",
+    "TASK-122"
+  ],
+  "boundaries": {
+    "not_applied_to_staging": true,
+    "no_database_migration_created": true,
+    "no_supabase_apply": true,
+    "no_external_project_mutation": true,
+    "no_external_env_write": true,
+    "no_railway_volume_created": true,
+    "no_secret_values": true,
+    "no_production_data": true,
+    "no_public_url_publish": true,
+    "keeps_can_launch_false": true
+  },
+  "source_basis": [
+    {
+      "id": "supabase_database_overview",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/database/overview",
+      "note": "Supabase provides Postgres, connection options, tables, imports, and RLS-backed security guidance for application data."
+    },
+    {
+      "id": "supabase_rls",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "note": "RLS can combine with Supabase Auth for user-owned row isolation and is required before tenant tables are exposed."
+    },
+    {
+      "id": "supabase_backups",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/platform/backups",
+      "note": "Project backup and restore posture must be reviewed before staging is treated as persistent user data storage."
+    },
+    {
+      "id": "supabase_storage",
+      "authority": "Supabase",
+      "type": "official_documentation",
+      "url": "https://supabase.com/docs/guides/storage",
+      "note": "Supabase Storage is bucket/object storage with access policies; it is a future file-artifact option, not the structured membership source of truth."
+    },
+    {
+      "id": "railway_volumes",
+      "authority": "Railway",
+      "type": "official_documentation",
+      "url": "https://docs.railway.com/volumes/reference",
+      "note": "Railway volumes provide persistent files for a service, but they are not selected as Autofolio tenant account, membership, payment evidence, or integration-secret metadata source of truth."
+    },
+    {
+      "id": "railway_variables",
+      "authority": "Railway",
+      "type": "official_documentation",
+      "url": "https://docs.railway.com/variables",
+      "note": "External staging environment values are platform state and remain Owner/R3; this packet does not write them."
+    }
+  ],
+  "decision_summary": {
+    "selected_external_staging_source_of_truth": "supabase_postgres_auth_rls",
+    "selected_rationale": "External or member-facing staging needs Auth ownership, row policies, auditability, backups, migration review, and cross-user tests. The current local encrypted vault is a prototype store and is not a durable multi-tenant source of truth.",
+    "internal_smoke_limit": "local_vault_sqlite_or_runtime_files_are_allowed_only_for_single_operator_internal_smoke_with_no_external_users_no_real_customer_data_and_can_launch_false",
+    "not_selected_for_tenant_source_of_truth": "local_encrypted_vault, sqlite_file, railway_volume, runtime_filesystem",
+    "implementation_status": "decision_recorded_only_no_schema_or_external_apply"
+  },
+  "options": [
+    {
+      "id": "local_encrypted_vault",
+      "decision": "local_dev_only_not_external_staging_source_of_truth",
+      "current_repo_usage": "membership_requests, local approved users, and user_integrations prototype records use app.ui.vault under AUTOFOLIO_HOME.",
+      "external_action_required": false,
+      "owner_only_action_required": false,
+      "tenant_source_of_truth": false,
+      "allowed_scope": "single_operator_internal_smoke_only",
+      "multi_user_isolation": "application_convention_only",
+      "rls_available": false,
+      "backup_restore_posture": "manual_local_file_only",
+      "audit_strength": "weak_for_external_staging",
+      "implementation_status": "existing_local_prototype_only"
+    },
+    {
+      "id": "sqlite_file",
+      "decision": "local_or_internal_runtime_only_not_membership_staging_source_of_truth",
+      "current_repo_usage": "portfolio, order, execution, acknowledgement, and profile local repository paths use SQLite-backed local runtime data.",
+      "external_action_required": false,
+      "owner_only_action_required": false,
+      "tenant_source_of_truth": false,
+      "allowed_scope": "local_regression_and_internal_smoke_only",
+      "multi_user_isolation": "application_convention_only",
+      "rls_available": false,
+      "backup_restore_posture": "manual_file_or_process_backup_only",
+      "audit_strength": "weak_for_cross_user_membership_staging",
+      "implementation_status": "existing_local_runtime_only"
+    },
+    {
+      "id": "railway_volume",
+      "decision": "not_selected_for_tenant_data_may_hold_non_tenant_internal_artifacts_after_owner_setup",
+      "current_repo_usage": "not_configured",
+      "external_action_required": true,
+      "owner_only_action_required": true,
+      "tenant_source_of_truth": false,
+      "allowed_scope": "non_tenant_runtime_artifacts_or_internal_smoke_support_only",
+      "multi_user_isolation": "service_filesystem_not_row_policy",
+      "rls_available": false,
+      "backup_restore_posture": "platform_volume_operational_process_required",
+      "audit_strength": "insufficient_for_membership_identity_payment_or_secret_metadata",
+      "implementation_status": "blocked_until_owner_platform_setup_if_ever_needed"
+    },
+    {
+      "id": "supabase_postgres_auth_rls",
+      "decision": "selected_external_staging_source_of_truth",
+      "current_repo_usage": "field_map_and_contract_only",
+      "external_action_required": true,
+      "owner_only_action_required": true,
+      "tenant_source_of_truth": true,
+      "allowed_scope": "external_or_member_staging_after_migration_rls_advisors_and_cross_user_tests",
+      "multi_user_isolation": "auth_uid_owner_fields_and_rls_policies",
+      "rls_available": true,
+      "backup_restore_posture": "owner_reviewed_project_backup_restore_plan_required",
+      "audit_strength": "strong_after_append_only_audit_events_and_advisor_tests",
+      "implementation_status": "selected_not_created_not_applied"
+    },
+    {
+      "id": "supabase_storage_buckets",
+      "decision": "future_file_artifact_option_not_structured_membership_source_of_truth",
+      "current_repo_usage": "not_configured",
+      "external_action_required": true,
+      "owner_only_action_required": true,
+      "tenant_source_of_truth": false,
+      "allowed_scope": "future_user_uploaded_documents_or_exports_only_after_bucket_policy_review",
+      "multi_user_isolation": "bucket_policy_required_if_used",
+      "rls_available": true,
+      "backup_restore_posture": "storage_backup_and_retention_review_required_before_use",
+      "audit_strength": "depends_on_bucket_policy_and_metadata_audit",
+      "implementation_status": "not_selected_for_mvp_structured_data"
+    }
+  ],
+  "storage_surfaces": [
+    {
+      "id": "auth_identity_and_profile",
+      "current_local_surface": "vault.users via app.services.auth_service",
+      "selected_target": "supabase_auth_plus_profile_table",
+      "staging_rule": "External staging must not use local vault users as the durable account authority.",
+      "required_before_external_users": "Owner-selected Supabase staging project, migration review, profile RLS, auth callback/session tests."
+    },
+    {
+      "id": "membership_requests",
+      "current_local_surface": "vault.membership_requests via app.services.membership",
+      "selected_target": "supabase_postgres_membership_request_table",
+      "staging_rule": "Signup, status lookup, approval, deposit_pending, and active transitions require row ownership and audit events before external users.",
+      "required_before_external_users": "Membership tables, applicant lookup non-disclosure policy, approval event table, cross-user read/write tests."
+    },
+    {
+      "id": "subscription_grants",
+      "current_local_surface": "vault.membership_requests.subscription_grant",
+      "selected_target": "supabase_postgres_subscription_grant_table",
+      "staging_rule": "Grant state must be queryable by the owning user and Owner only.",
+      "required_before_external_users": "Grant table RLS, Owner/admin override policy, expiry tests."
+    },
+    {
+      "id": "payment_evidence",
+      "current_local_surface": "membership event evidence fields and TASK-111 policy",
+      "selected_target": "supabase_postgres_payment_evidence_table",
+      "staging_rule": "Only minimal masked payment evidence fields may persist; raw statements and real bank account values stay out.",
+      "required_before_external_users": "Payment evidence policy gate, redaction tests, non-disclosure tests, retention/delete plan."
+    },
+    {
+      "id": "integration_secret_metadata",
+      "current_local_surface": "vault.user_integrations via app.services.integrations",
+      "selected_target": "supabase_postgres_secret_metadata_plus_secret_store_payload",
+      "staging_rule": "Metadata may live in Supabase; raw provider tokens or payloads require the secret store plan and must not be returned through user APIs.",
+      "required_before_external_users": "Secret metadata table RLS, secret-store implementation plan, rotation/delete/audit tests, server-only key review."
+    },
+    {
+      "id": "portfolio_engine_trading_state",
+      "current_local_surface": "SQLite runtime tables and local service state",
+      "selected_target": "supabase_postgres_tenant_owned_runtime_tables_after_engine_safety_review",
+      "staging_rule": "External member staging cannot share local runtime files across tenants without owner fields, worker context, and order-intent isolation.",
+      "required_before_external_users": "Tenant isolation matrix, per-user engine safety contract, append-only intent/audit tables, no live KIS activation."
+    },
+    {
+      "id": "audit_events",
+      "current_local_surface": "membership events and local logs",
+      "selected_target": "supabase_postgres_append_only_audit_event_table",
+      "staging_rule": "Owner actions, member actions, approval transitions, secret lifecycle, and payment evidence references need append-only audit events.",
+      "required_before_external_users": "Audit table RLS, append-only policy, actor/subject/event timestamp tests."
+    }
+  ],
+  "required_staging_tests": [
+    "storage_decision_gate_passes",
+    "local_vault_not_external_staging_source_of_truth",
+    "railway_volume_not_tenant_data_source_of_truth",
+    "supabase_migration_review_packet_exists",
+    "rls_enabled_on_membership_and_secret_metadata_tables",
+    "cross_user_membership_request_read_blocked",
+    "cross_user_integration_metadata_read_blocked",
+    "applicant_lookup_requires_request_id_and_contact",
+    "service_role_or_secret_key_server_only",
+    "backup_restore_plan_owner_reviewed",
+    "no_external_users_until_supabase_apply_and_tests_pass",
+    "can_launch_false_until_r3_evidence"
+  ],
+  "launch_gates": [
+    "storage_decision_gate_passes",
+    "membership_supabase_field_map_gate_passes",
+    "membership_secret_store_plan_gate_passes",
+    "migration_review_packet_exists",
+    "owner_selected_supabase_staging_project",
+    "supabase_migration_rls_advisors_and_cross_user_tests_pass",
+    "backup_restore_plan_reviewed",
+    "local_vault_and_sqlite_limited_to_internal_smoke_or_replaced",
+    "railway_volume_not_tenant_source_of_truth",
+    "external_env_values_written_by_owner_outside_repo",
+    "no_real_secrets_or_customer_data_in_repo",
+    "can_launch_remains_false_until_r3_evidence"
+  ],
+  "owner_only_actions": [
+    "Select or create the Supabase staging project outside this repository.",
+    "Approve and apply any Supabase migration, RLS policy, grant, storage bucket, backup, or advisor remediation.",
+    "Write platform environment variables outside git.",
+    "Approve whether Railway volumes are needed for non-tenant artifacts.",
+    "Approve any staging use with external users or real customer data."
+  ],
+  "forbidden_actions": [
+    "Do not create Supabase, Railway, Vercel, database, storage bucket, or volume resources for this task.",
+    "Do not create or apply migrations.",
+    "Do not write external environment variables.",
+    "Do not store real customer data, payment evidence, provider tokens, KIS credentials, or secret material in repository files.",
+    "Do not make local vault, SQLite, Railway volume, or runtime filesystem the external staging tenant source of truth.",
+    "Do not publish a staging URL or mark can_launch true."
+  ],
+  "verification": {
+    "local_decision_gate": "python scripts/membership_staging_storage_decision_gate.py --check",
+    "json_parse": "python -m json.tool agents/project/MEMBERSHIP-STAGING-PERSISTENT-STORAGE-DECISION.json",
+    "unit_tests": "python -m pytest tests/unit/test_membership_staging_storage_decision_gate.py -q"
+  }
+}

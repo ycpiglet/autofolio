@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-19T22:18:00+09:00`
+> 생성 시각: `2026-06-23T18:24:44+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -29,12 +29,39 @@
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,circuit-breaker,pnl |
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
 | [TASK-065](TASK-065-feat-log-rotation.md) | 완료 | Medium | 낮 | 2 ph / ~12000 tok | Backend Engineer | ops,logging,maintenance |
+| [TASK-099](TASK-099-membership-local-autoregister-fail-closed.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Backend Engineer | auth,membership,approval,safety,tests |
+| [TASK-100](TASK-100-membership-local-request-approval-prototype.md) | 완료 | High | 상 | 2 ph / ~30000 tok | Backend Engineer | auth,membership,approval,signup,local-prototype,tests |
+| [TASK-102](TASK-102-membership-local-account-grant.md) | 완료 | High | 중 | 1 ph / ~22000 tok | Backend Engineer | auth,membership,approval,account-grant,subscription,local-prototype |
+| [TASK-103](TASK-103-membership-local-deposit-recognition.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,deposit-recognition,bank-transfer,approval,local-prototype |
+| [TASK-104](TASK-104-membership-member-admin-boundary.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Backend Engineer | auth,membership,authorization,member-boundary,local-prototype |
+| [TASK-105](TASK-105-membership-guest-demo-fail-closed.md) | 완료 | High | 중 | 1 ph / ~14000 tok | Backend Engineer | auth,membership,guest-demo,fail-closed,local-prototype |
+| [TASK-106](TASK-106-membership-app-user-read-boundary.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Backend Engineer | auth,membership,read-scope,app-user,local-prototype |
+| [TASK-108](TASK-108-membership-production-readiness-gate.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,readiness,deploy-gate,production,local-prototype |
+| [TASK-109](TASK-109-membership-supabase-rls-contract.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,supabase,rls,production-contract,deploy-gate |
+| [TASK-110](TASK-110-membership-applicant-deposit-status-lookup.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,signup,deposit-instructions,applicant-status,local-prototype |
+| [TASK-111](TASK-111-membership-payment-evidence-policy.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,payment-evidence,policy,quality-gate,production-readiness |
+| [TASK-112](TASK-112-membership-production-secret-policy.md) | 완료 | High | 중 | 1 ph / ~20000 tok | Backend Engineer | membership,secrets,policy,quality-gate,production-readiness |
+| [TASK-114](TASK-114-membership-tenant-isolation-matrix.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,supabase,rls,tenant-isolation,deploy-gate |
+| [TASK-116](TASK-116-membership-supabase-staging-schema-field-map.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Backend Engineer | membership,supabase,rls,schema,field-map,production-readiness |
+| [TASK-118](TASK-118-membership-production-secret-store-implementation-plan.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Backend Engineer | membership,secrets,oauth,kis,production-readiness |
+| [TASK-121](TASK-121-membership-railway-port-healthcheck-readiness.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | Backend Engineer | membership,deploy,railway,healthcheck,preflight |
+| [TASK-122](TASK-122-membership-staging-persistent-storage-decision.md) | 완료 | Medium | 중 | 2 ph / ~22000 tok | Backend Engineer | membership,deploy,storage,staging,preflight |
+| [TASK-123](TASK-123-membership-supabase-staging-migration-rls-review-packet.md) | 완료 | Medium | 중 | 2 ph / ~26000 tok | Backend Engineer | membership,supabase,staging,rls,migration-review |
+| [TASK-124](TASK-124-membership-supabase-backup-apply-evidence-checklist.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | Backend Engineer | membership,supabase,staging,backup,evidence |
+
+## CI/CD Engineer
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-119](TASK-119-membership-staging-deploy-preflight-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | CI/CD Engineer | membership,deploy,staging,preflight,vercel,railway,supabase |
+| [TASK-120](TASK-120-membership-staging-env-inventory-template.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | CI/CD Engineer | membership,deploy,staging,env,preflight |
 
 ## Compliance Officer
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+| [TASK-125](TASK-125-membership-kis-commercial-terms-review-packet.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Compliance Officer | membership,kis,open-api,terms,compliance |
 
 ## Data Engineer
 
@@ -89,6 +116,11 @@
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | authentication,sso,mock,dev-mode,ui-overhaul |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Medium | 낮 | 0.5 ph / ~6000 tok | Lead Engineer | backlog,governance,deferred,scheduling |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
+| [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | High | 상 | 24 ph / ~200000 tok | Lead Engineer | deploy,web,auth,membership,payment,multitenant,compliance,supabase,vercel |
+| [TASK-098](TASK-098-membership-access-manual-deposit-plan.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | membership,payment,bank-transfer,approval,signup,taskset |
+| [TASK-113](TASK-113-membership-per-user-engine-safety-contract.md) | 완료 | High | 중 | 1 ph / ~22000 tok | Lead Engineer | membership,engine-safety,multitenant,contract,production-readiness |
+| [TASK-115](TASK-115-membership-production-implementation-plan.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Lead Engineer | membership,production-readiness,implementation-plan,taskset |
+| [TASK-126](TASK-126-membership-readiness-surface-sync.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | membership,readiness,governance,owner-surface |
 
 ## Performance Analyst
 
@@ -115,6 +147,12 @@
 | [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
 | [TASK-039](TASK-039-backtest-research-report-hardening.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Quant Researcher | feature-landscape,backtest,research,reports,qa |
 
+## Regulatory Admin
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-117](TASK-117-membership-payment-recognition-decision-packet.md) | 완료 | Medium | 중 | 2 ph / ~35000 tok | Regulatory Admin | membership,payment,bank-transfer,recognition,decision-packet |
+
 ## Research Agent
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -135,5 +173,6 @@
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 완료 | High | 낮 | 1 ph / ~10000 tok | UI/UX Designer | bug,ui,history,pnl |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
+| [TASK-101](TASK-101-membership-admin-settings-tab.md) | 완료 | High | 중 | 1 ph / ~18000 tok | UI/UX Designer | auth,membership,approval,admin-ui,settings,local-prototype |
 | [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 

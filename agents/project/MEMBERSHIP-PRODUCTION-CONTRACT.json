@@ -1,0 +1,309 @@
+{
+  "$schema": "autofolio.membership-production-contract/v1",
+  "contract_version": 1,
+  "status": "draft_contract_not_applied",
+  "updated_at": "2026-06-19T19:46:50+09:00",
+  "owner": "Lead Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-098",
+    "TASK-100",
+    "TASK-102",
+    "TASK-103",
+    "TASK-104",
+    "TASK-106",
+    "TASK-107",
+    "TASK-108",
+    "TASK-109",
+    "TASK-111",
+    "TASK-112",
+    "TASK-113",
+    "TASK-114"
+  ],
+  "source_basis": [
+    "Owner direction: verified signup, manual/code-assisted bank-transfer approval, account-only web service, user-owned LLM/SNS/KIS tokens.",
+    "Supabase RLS guidance checked via Context7: enable RLS, use auth.uid() ownership policies, keep service/secret keys server-side only, use SECURITY DEFINER only with private schema and explicit search_path.",
+    "MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.json defines minimal retained payment evidence fields, forbidden raw evidence, redaction rules, and audit invariants.",
+    "MEMBERSHIP-TENANT-ISOLATION-MATRIX.json defines route groups, tenant surfaces, auth.uid() ownership expectations, and required staging isolation tests.",
+    "MEMBERSHIP-PRODUCTION-SECRET-POLICY.json defines user-owned LLM/SNS/OAuth/KIS token categories, write-only API boundary, redaction, deletion, rotation, and audit invariants before production secret storage is implemented.",
+    "MEMBERSHIP-ENGINE-SAFETY-CONTRACT.json defines per-user engine state, queue, kill switch, risk limit, circuit breaker, order intent, log, and notification boundaries before live-readiness implementation."
+  ],
+  "non_goals": [
+    "No production DB migration or schema apply in this contract.",
+    "No real bank account number, customer payment record, customer PII, or provider token in repository files.",
+    "No external deploy, payment provider, bank API, OAuth callback, KIS credential activation, or live order path change.",
+    "No public claim that Autofolio provides investment advice, guarantees returns, or operates user assets."
+  ],
+  "launch_gate": {
+    "can_launch_without_all_passed": false,
+    "required_before_external_users": [
+      "staging_supabase_project_created",
+      "schema_migration_reviewed_and_applied_in_staging",
+      "rls_enabled_on_all_tenant_owned_tables",
+      "tenant_isolation_tests_pass",
+      "service_or_secret_key_server_only",
+      "secret_rotation_and_deletion_policy_verified",
+      "payment_evidence_retention_policy_approved",
+      "per_user_engine_safety_contract_implemented",
+      "kis_terms_and_compliance_review_recorded",
+      "staging_deploy_smoke_passed"
+    ]
+  },
+  "roles": {
+    "anonymous": {
+      "can_request_signup": true,
+      "can_read_product": false,
+      "can_mutate_product": false
+    },
+    "authenticated_member": {
+      "can_read_own_product": true,
+      "can_mutate_own_profile_and_integrations": true,
+      "can_mutate_global_admin_or_engine": false
+    },
+    "owner_admin": {
+      "can_review_membership_requests": true,
+      "can_activate_memberships": true,
+      "can_bypass_user_scope_from_browser": false,
+      "requires_server_audit_for_privileged_actions": true
+    },
+    "backend_service": {
+      "can_use_service_or_secret_key": true,
+      "browser_exposure_forbidden": true,
+      "requires_audit_event": true
+    }
+  },
+  "client_exposure": {
+    "publishable_key_allowed_in_browser": true,
+    "service_role_or_secret_key": "forbidden",
+    "raw_provider_tokens": "forbidden",
+    "raw_bank_statement_text": "forbidden",
+    "raw_payment_records": "forbidden"
+  },
+  "admin_operations": {
+    "server_only": true,
+    "audited": true,
+    "allowed_mechanisms": [
+      "backend route using server-side secret key",
+      "reviewed SECURITY DEFINER function in private schema with explicit search_path"
+    ],
+    "forbidden_mechanisms": [
+      "service key in browser bundle",
+      "client-side direct privileged update",
+      "SECURITY DEFINER function in public API schema without explicit search_path",
+      "unlogged manual data patch"
+    ]
+  },
+  "security_invariants": [
+    {
+      "id": "tenant_rows_have_user_id",
+      "statement": "Every tenant-owned product, membership, secret-metadata, engine, safety, order-intent, and audit row must include a user_id or actor_user_id that references auth.users(id)."
+    },
+    {
+      "id": "rls_enabled_for_tenant_tables",
+      "statement": "RLS must be enabled on every tenant-owned table before staging or production launch."
+    },
+    {
+      "id": "self_access_uses_auth_uid",
+      "statement": "Member self-read/write policies must use auth.uid() equality against user_id or the table primary user id."
+    },
+    {
+      "id": "owner_admin_is_server_audited",
+      "statement": "Owner/admin actions that affect another user must run through a server-side audited route or reviewed SECURITY DEFINER function."
+    },
+    {
+      "id": "secret_values_never_return",
+      "statement": "LLM/SNS/KIS secret values are write-only at the API boundary and never returned to the browser after storage."
+    },
+    {
+      "id": "service_key_never_client",
+      "statement": "Supabase service role or secret keys must never be exposed to browser code, logs, reports, or repository files."
+    },
+    {
+      "id": "payment_evidence_minimized",
+      "statement": "Payment evidence stores only minimal masked evidence, deposit code, amount, source type, and audit event reference; raw bank statements are not persisted by default."
+    },
+    {
+      "id": "engine_state_is_user_scoped",
+      "statement": "Engine loop state, queues, risk limits, kill switch, and order intents must be user-scoped before external members can use live-readiness features."
+    },
+    {
+      "id": "recommendation_claims_are_compliance_gated",
+      "statement": "Recommendation and agent-output surfaces must keep investment-advice, paid-signal, model-portfolio, and performance claims behind compliance and professional review."
+    }
+  ],
+  "entities": [
+    {
+      "name": "profiles",
+      "tenant_owned": true,
+      "user_id_field": "id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own profile where auth.uid() = id",
+        "insert own profile where auth.uid() = id",
+        "update own profile where auth.uid() = id"
+      ],
+      "admin_policy": "server audited owner/admin route only"
+    },
+    {
+      "name": "membership_requests",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own request where auth.uid() = user_id",
+        "insert initial request with auth.uid() = user_id after auth user creation or controlled pre-auth intake"
+      ],
+      "admin_policy": "server audited owner/admin review and transition"
+    },
+    {
+      "name": "deposit_instructions",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own deposit instruction where auth.uid() = user_id"
+      ],
+      "admin_policy": "server audited owner/admin issuance",
+      "plaintext_bank_account_allowed_in_repo": false
+    },
+    {
+      "name": "approval_events",
+      "tenant_owned": true,
+      "user_id_field": "target_user_id",
+      "actor_id_field": "actor_user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "append_only": true,
+      "member_policies": [
+        "select own events where auth.uid() = target_user_id"
+      ],
+      "admin_policy": "server audited append only; no update/delete except retention process"
+    },
+    {
+      "name": "subscription_grants",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own grant where auth.uid() = user_id"
+      ],
+      "admin_policy": "server audited owner/admin grant or revoke"
+    },
+    {
+      "name": "integration_secrets",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "plaintext_allowed": false,
+      "response_redaction_required": true,
+      "member_policies": [
+        "select own secret metadata only where auth.uid() = user_id",
+        "insert/update/delete own secret reference via backend route where auth.uid() = user_id"
+      ],
+      "admin_policy": "no routine admin read of plaintext; deletion/rotation audited"
+    },
+    {
+      "name": "portfolio_accounts",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own account where auth.uid() = user_id",
+        "update own non-admin display metadata only"
+      ],
+      "admin_policy": "server audited support action only"
+    },
+    {
+      "name": "holdings_snapshots",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own holdings where auth.uid() = user_id"
+      ],
+      "admin_policy": "server audited ingestion only"
+    },
+    {
+      "name": "risk_settings",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own risk settings where auth.uid() = user_id",
+        "update own allowed limits within server validation"
+      ],
+      "admin_policy": "server audited override only"
+    },
+    {
+      "name": "engine_state",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "member_policies": [
+        "select own engine state where auth.uid() = user_id",
+        "update own requested run mode only through backend validation"
+      ],
+      "admin_policy": "server audited operations only"
+    },
+    {
+      "name": "order_intents",
+      "tenant_owned": true,
+      "user_id_field": "user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "append_only": true,
+      "member_policies": [
+        "select own intents where auth.uid() = user_id",
+        "insert own intent only through backend risk gate"
+      ],
+      "admin_policy": "server audited support read only"
+    },
+    {
+      "name": "audit_events",
+      "tenant_owned": true,
+      "user_id_field": "target_user_id",
+      "actor_id_field": "actor_user_id",
+      "references_auth_users": true,
+      "rls_required": true,
+      "append_only": true,
+      "member_policies": [
+        "select own events where auth.uid() = target_user_id or auth.uid() = actor_user_id"
+      ],
+      "admin_policy": "server audited append only; retention policy required before delete"
+    }
+  ],
+  "verification_required": {
+    "local_contract_gate": "python scripts/membership_contract_gate.py --check",
+    "payment_policy_gate": "python scripts/membership_payment_policy_gate.py --check",
+    "tenant_isolation_matrix_gate": "python scripts/membership_tenant_isolation_gate.py --check",
+    "secret_policy_gate": "python scripts/membership_secret_policy_gate.py --check",
+    "engine_safety_contract_gate": "python scripts/membership_engine_safety_gate.py --check",
+    "api_tests": ".venv\\Scripts\\python.exe -m pytest tests/api/test_membership.py -q",
+    "tenant_isolation_tests_future": [
+      "anonymous cannot read product data",
+      "guest cannot read product data",
+      "member A cannot read or mutate member B data",
+      "member cannot call owner/admin routes",
+      "service/admin action creates immutable audit event",
+      "secret write returns only metadata and masked hint",
+      "engine queue and kill switch are user scoped"
+    ],
+    "supabase_staging_future": [
+      "RLS enabled on all tenant-owned tables",
+      "all owner/member policies reviewed",
+      "security advisor findings reviewed",
+      "performance advisor findings reviewed",
+      "SECURITY DEFINER functions have private schema and explicit search_path",
+      "service/secret key exists only in server-side environment"
+    ]
+  }
+}

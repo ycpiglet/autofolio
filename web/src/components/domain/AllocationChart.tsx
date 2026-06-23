@@ -11,17 +11,9 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import type { TableResponse } from "@/lib/api";
+import { chartSeriesPalette } from "@/lib/design-tokens";
 
-const CHART_COLORS = [
-  "#3182F6",
-  "#F04452",
-  "#34C759",
-  "#FF9500",
-  "#8E8E93",
-  "#AF52DE",
-  "#5AC8FA",
-  "#FFCC00",
-];
+const CHART_COLORS = chartSeriesPalette;
 
 interface AllocationChartProps {
   data?: TableResponse;
@@ -81,9 +73,10 @@ export function AllocationChart({
     );
   }
 
-  // Determine name column (first col) and value column (prefer "비중" or "현재비중")
+  // Determine name column (first col) and value column (prefer current weight).
   const nameCol = data.columns[0];
   const valueCol =
+    data.columns.find((c) => c.includes("현재")) ??
     data.columns.find((c) => c.includes("비중") || c.toLowerCase().includes("weight")) ??
     data.columns[1] ??
     data.columns[0];
@@ -101,7 +94,7 @@ export function AllocationChart({
       aria-label="자산 배분 차트"
       data-testid="allocation-chart"
     >
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={240}>
         <PieChart>
           <Pie
             data={chartData}

@@ -14,25 +14,40 @@ import { ConfirmModal } from "@/components/safety/ConfirmModal";
 import {
   putRiskLimits,
   getAccount,
+  getIntegrations,
   getInvestorProfile,
+  getMembershipReadiness,
+  getMembershipRequests,
   getSsoProviders,
+  deleteIntegrationCredential,
+  postMembershipDepositRecognition,
+  postMembershipTransition,
   postProfileCheckin,
   postPasswordChange,
   postLogout,
+  putIntegrationCredential,
   ApiError,
   type AccountResponse,
+  type IntegrationCredentialResponse,
+  type IntegrationProviderInfo,
+  type IntegrationSettingsResponse,
   type InvestorProfileResponse,
+  type MembershipDepositMatchResponse,
+  type MembershipReadinessResponse,
+  type MembershipRequestResponse,
+  type MembershipStatus,
   type ProfileCheckinPayload,
   type SsoProviderInfo,
 } from "@/lib/api";
 import { clearCsrfCache } from "@/lib/csrf";
 import { cn } from "@/lib/utils";
 
-type Tab = "risk" | "profile" | "account" | "display" | "safety" | "about";
+type Tab = "risk" | "profile" | "membership" | "account" | "display" | "safety" | "about";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "risk", label: "리스크 한도" },
   { id: "profile", label: "투자 프로필" },
+  { id: "membership", label: "회원 승인" },
   { id: "account", label: "계정/연결" },
   { id: "display", label: "표시" },
   { id: "safety", label: "안전" },
@@ -346,10 +361,446 @@ function ScoreInput({
   );
 }
 
+// ── Membership Tab ───────────────────────────────────────────────────────────
+
+type MembershipState =
+  | { kind: "loading" }
+  | { kind: "error"; message: string }
+  | { kind: "ready"; requests: MembershipRequestResponse[]; busyId: string | null };
+
+type DepositRecognitionState =
+  | { kind: "idle" }
+  | { kind: "checking" }
+  | { kind: "ready"; matches: MembershipDepositMatchResponse[]; scannedLines: number; candidateRequests: number }
+  | { kind: "error"; message: string };
+
+type ReadinessState =
+  | { kind: "loading" }
+  | { kind: "error"; message: string }
+  | { kind: "ready"; data: MembershipReadinessResponse };
+
+const MEMBERSHIP_STATUS_LABELS: Record<MembershipStatus, string> = {
+  requested: "신청 접수",
+  verification_pending: "검증 대기",
+  deposit_pending: "입금 대기",
+  active: "활성",
+  rejected: "거절",
+  expired: "만료",
+};
+
+function membershipErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    const detail = (err.body as { detail?: unknown } | undefined)?.detail;
+    if (typeof detail === "string") return detail;
+    if (err.status === 401) return "로그인이 필요합니다.";
+    if (err.status === 403) return "회원 승인 관리는 Owner만 사용할 수 있습니다.";
+  }
+  return "회원 승인 목록을 불러오지 못했습니다.";
+}
+
+function MembershipTab() {
+  const [state, setState] = useState<MembershipState>({ kind: "loading" });
+  const [recognitionText, setRecognitionText] = useState("");
+  const [recognitionState, setRecognitionState] = useState<DepositRecognitionState>({ kind: "idle" });
+
+  async function load() {
+    setState({ kind: "loading" });
+    try {
+      const result = await getMembershipRequests();
+      setState({ kind: "ready", requests: result.requests, busyId: null });
+    } catch (err) {
+      setState({ kind: "error", message: membershipErrorMessage(err) });
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    getMembershipRequests()
+      .then((result) => {
+        if (!cancelled) {
+          setState({ kind: "ready", requests: result.requests, busyId: null });
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setState({ kind: "error", message: membershipErrorMessage(err) });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function transition(
+    request: MembershipRequestResponse,
+    status: MembershipStatus,
+    evidenceType: string,
+    grantDays?: number,
+    loginUsername?: string,
+    initialPassword?: string,
+  ) {
+    if (state.kind !== "ready") return;
+    setState({ ...state, busyId: request.request_id });
+    try {
+      const updated = await postMembershipTransition(request.request_id, {
+        status,
+        evidence_type: evidenceType,
+        grant_days: grantDays,
+        login_username: loginUsername || undefined,
+        initial_password: initialPassword || undefined,
+      });
+      setState((prev) =>
+        prev.kind === "ready"
+          ? {
+              ...prev,
+              busyId: null,
+              requests: prev.requests.map((item) =>
+                item.request_id === updated.request_id ? updated : item,
+              ),
+            }
+          : prev,
+      );
+    } catch (err) {
+      setState({ kind: "error", message: membershipErrorMessage(err) });
+    }
+  }
+
+  async function recognizeDeposits() {
+    const sourceText = recognitionText.trim();
+    if (!sourceText) {
+      setRecognitionState({ kind: "error", message: "은행 입금내역 텍스트를 붙여넣으세요." });
+      return;
+    }
+    setRecognitionState({ kind: "checking" });
+    try {
+      const result = await postMembershipDepositRecognition({
+        source_text: sourceText,
+        min_confidence: 50,
+      });
+      setRecognitionState({
+        kind: "ready",
+        matches: result.matches,
+        scannedLines: result.scanned_lines,
+        candidateRequests: result.candidate_requests,
+      });
+    } catch (err) {
+      setRecognitionState({ kind: "error", message: membershipErrorMessage(err) });
+    }
+  }
+
+  if (state.kind === "loading") {
+    return <div className="h-36 max-w-4xl animate-pulse rounded-lg bg-muted" />;
+  }
+
+  if (state.kind === "error") {
+    return (
+      <div className="max-w-2xl space-y-3">
+        <p role="alert" className="text-sm text-destructive">{state.message}</p>
+        <Button variant="outline" onClick={() => void load()}>다시 불러오기</Button>
+      </div>
+    );
+  }
+
+  const recognitionByRequest = new Map<string, MembershipDepositMatchResponse>();
+  if (recognitionState.kind === "ready") {
+    for (const match of recognitionState.matches) {
+      recognitionByRequest.set(match.request_id, match);
+    }
+  }
+
+  return (
+    <div className="max-w-5xl space-y-5">
+      <MembershipReadinessPanel />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          `/signup`으로 접수된 신청을 검증하고, 입금대기 또는 활성 상태로 전환합니다.
+        </p>
+        <Button variant="outline" onClick={() => void load()} disabled={state.busyId !== null}>
+          새로고침
+        </Button>
+      </div>
+
+      <section className="rounded-lg border border-border p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">입금코드 인식</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              은행앱/인터넷뱅킹 입금내역을 붙여넣으면 입금코드, 금액, 이름으로 대기 신청을 찾습니다.
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => void recognizeDeposits()}
+            disabled={recognitionState.kind === "checking"}
+          >
+            {recognitionState.kind === "checking" ? "인식 중…" : "입금 인식"}
+          </Button>
+        </div>
+        <textarea
+          aria-label="은행 입금내역 붙여넣기"
+          className="mt-3 min-h-24 w-full resize-y rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          value={recognitionText}
+          onChange={(event) => setRecognitionText(event.target.value)}
+          placeholder="예: 2026-06-19 홍길동 AF-1A2B3C 입금 20,000원"
+        />
+        {recognitionState.kind === "ready" && (
+          <div className="mt-3 text-xs text-muted-foreground">
+            {recognitionState.scannedLines}줄에서 {recognitionState.candidateRequests}건의 입금대기 신청을 비교했고,
+            {recognitionState.matches.length}건을 찾았습니다.
+          </div>
+        )}
+        {recognitionState.kind === "error" && (
+          <p role="alert" className="mt-3 text-sm text-destructive">{recognitionState.message}</p>
+        )}
+      </section>
+
+      {state.requests.length === 0 ? (
+        <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+          접수된 가입 승인 신청이 없습니다.
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-border">
+          <div className="grid grid-cols-[1.2fr_1fr_1fr_1.4fr] gap-3 border-b border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+            <div>신청자</div>
+            <div>상태</div>
+            <div>입금</div>
+            <div>액션</div>
+          </div>
+          <div className="divide-y divide-border">
+            {state.requests.map((request) => (
+              <MembershipRow
+                key={request.request_id}
+                request={request}
+                busy={state.busyId === request.request_id}
+                recognition={recognitionByRequest.get(request.request_id)}
+                onTransition={transition}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MembershipReadinessPanel() {
+  const [state, setState] = useState<ReadinessState>({ kind: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    getMembershipReadiness()
+      .then((data) => {
+        if (!cancelled) setState({ kind: "ready", data });
+      })
+      .catch((err) => {
+        if (!cancelled) setState({ kind: "error", message: membershipErrorMessage(err) });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (state.kind === "loading") {
+    return <div className="h-28 animate-pulse rounded-lg bg-muted" />;
+  }
+
+  if (state.kind === "error") {
+    return (
+      <div className="rounded-lg border border-border p-4">
+        <p role="alert" className="text-sm text-destructive">{state.message}</p>
+      </div>
+    );
+  }
+
+  const { data } = state;
+  const blocked = data.items.filter((item) => item.state === "block").length;
+  const watched = data.items.filter((item) => item.state === "watch").length;
+
+  return (
+    <section className="rounded-lg border border-border p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">운영 전환 체크</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{data.summary}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant={data.can_launch ? "default" : "secondary"}>
+            {data.can_launch ? "출시 가능" : "로컬 프로토타입"}
+          </Badge>
+          <span className="text-sm font-medium text-foreground">{data.score}/100</span>
+        </div>
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        {data.items.map((item) => (
+          <div key={item.id} className="rounded-md border border-border bg-muted/30 p-3 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="font-medium text-foreground">{item.label}</div>
+              <Badge variant={item.state === "pass" ? "default" : "secondary"}>
+                {item.state === "pass" ? "통과" : item.state === "watch" ? "확인" : "차단"}
+              </Badge>
+            </div>
+            <p className="mt-1 text-muted-foreground">{item.detail}</p>
+            <div className="mt-2 text-muted-foreground">{item.gate} · {item.evidence}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 text-xs text-muted-foreground">
+        차단 {blocked}건 · 확인 {watched}건
+      </div>
+    </section>
+  );
+}
+
+function MembershipRow({
+  request,
+  busy,
+  recognition,
+  onTransition,
+}: {
+  request: MembershipRequestResponse;
+  busy: boolean;
+  recognition?: MembershipDepositMatchResponse;
+  onTransition: (
+    request: MembershipRequestResponse,
+    status: MembershipStatus,
+    evidenceType: string,
+    grantDays?: number,
+    loginUsername?: string,
+    initialPassword?: string,
+  ) => void;
+}) {
+  const instruction = request.deposit_instruction;
+  const isTerminal = ["active", "rejected", "expired"].includes(request.status);
+  const [loginUsername, setLoginUsername] = useState(request.contact);
+  const [initialPassword, setInitialPassword] = useState("");
+  const canActivateWithAccount = initialPassword.length >= 8;
+  const recognitionEvidence =
+    recognition && recognition.confidence >= 80
+      ? "code_assisted_deposit_match"
+      : "manual_bank_app_check";
+
+  return (
+    <div className="grid grid-cols-[1.2fr_1fr_1fr_1.4fr] gap-3 px-3 py-3 text-sm">
+      <div className="min-w-0">
+        <div className="truncate font-medium text-foreground">{request.display_name}</div>
+        <div className="truncate text-xs text-muted-foreground">{request.contact}</div>
+        <div className="mt-1 font-mono text-[11px] text-muted-foreground">{request.request_id}</div>
+      </div>
+      <div>
+        <Badge variant={request.status === "active" ? "default" : "secondary"}>
+          {MEMBERSHIP_STATUS_LABELS[request.status]}
+        </Badge>
+        <div className="mt-1 text-xs text-muted-foreground">{formatDateTime(request.updated_at)}</div>
+      </div>
+      <div className="text-xs text-muted-foreground">
+        <div className="font-medium text-foreground">{request.price_krw.toLocaleString("ko-KR")}원</div>
+        {instruction ? (
+          <div className="mt-1 space-y-1">
+            <div>코드 <span className="font-mono text-foreground">{instruction.deposit_code}</span></div>
+            <div>{instruction.account_configured ? "계좌 설정됨" : "계좌 설정 필요"}</div>
+            {recognition && (
+              <div className="rounded-md border border-border bg-muted/40 p-2">
+                <div className="font-medium text-foreground">인식 {recognition.confidence}%</div>
+                <div>{recognition.reasons.join(", ")}</div>
+                <div className="truncate">{recognition.matched_text_excerpt}</div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-1">검증 후 입금 안내</div>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {request.status === "requested" && (
+          <>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => onTransition(request, "verification_pending", "owner_review")}>
+              검증 대기
+            </Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => onTransition(request, "deposit_pending", "owner_verified_person")}>
+              입금 안내
+            </Button>
+          </>
+        )}
+        {request.status === "verification_pending" && (
+          <Button size="sm" variant="outline" disabled={busy} onClick={() => onTransition(request, "deposit_pending", "owner_verified_person")}>
+            입금 안내
+          </Button>
+        )}
+        {request.status === "deposit_pending" && (
+          <div className="flex w-full flex-col gap-1.5">
+            <Input
+              aria-label={`${request.display_name} 로그인 ID`}
+              value={loginUsername}
+              onChange={(event) => setLoginUsername((event.target as HTMLInputElement).value)}
+              placeholder="로그인 ID"
+              className="h-8 text-xs"
+            />
+            <Input
+              aria-label={`${request.display_name} 임시 비밀번호`}
+              type="password"
+              value={initialPassword}
+              onChange={(event) => setInitialPassword((event.target as HTMLInputElement).value)}
+              placeholder="임시 비밀번호 8자 이상"
+              className="h-8 text-xs"
+            />
+            <Button
+              size="sm"
+              disabled={busy || !canActivateWithAccount}
+              onClick={() =>
+                onTransition(
+                  request,
+                  "active",
+                  recognitionEvidence,
+                  30,
+                  loginUsername.trim(),
+                  initialPassword,
+                )
+              }
+            >
+              {recognitionEvidence === "code_assisted_deposit_match"
+                ? "인식 승인 + 계정 활성화"
+                : "입금 확인 + 계정 활성화"}
+            </Button>
+          </div>
+        )}
+        {!isTerminal && (
+          <>
+            <Button size="sm" variant="destructive" disabled={busy} onClick={() => onTransition(request, "rejected", "owner_rejected")}>
+              거절
+            </Button>
+            <Button size="sm" variant="ghost" disabled={busy} onClick={() => onTransition(request, "expired", "owner_expired")}>
+              만료
+            </Button>
+          </>
+        )}
+        {isTerminal && (
+          <span className="text-xs text-muted-foreground">
+            {request.account_grant ? `${request.account_grant.username} 활성화됨` : "처리 완료"}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function formatDateTime(value: string | null): string {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("ko-KR", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 // ── Account Tab ──────────────────────────────────────────────────────────────
 
 const ROLE_LABELS: Record<string, string> = {
   owner: "오너",
+  member: "회원",
   guest: "게스트",
 };
 
@@ -380,7 +831,7 @@ type PwStatus =
   | { kind: "saved" }
   | { kind: "error"; message: string };
 
-function PasswordChangeForm({ isOwner }: { isOwner: boolean }) {
+function PasswordChangeForm({ canChangePassword }: { canChangePassword: boolean }) {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -435,7 +886,7 @@ function PasswordChangeForm({ isOwner }: { isOwner: boolean }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-sm font-semibold text-foreground">비밀번호 변경</h2>
-      {!isOwner && (
+      {!canChangePassword && (
         <p className="text-xs text-muted-foreground">
           게스트 계정은 비밀번호를 변경할 수 없습니다. 로그인 후 이용하세요.
         </p>
@@ -446,7 +897,7 @@ function PasswordChangeForm({ isOwner }: { isOwner: boolean }) {
         maskedPlaceholder="현재 비밀번호"
         value={current}
         onChange={setCurrent}
-        disabled={!isOwner || status.kind === "saving"}
+        disabled={!canChangePassword || status.kind === "saving"}
       />
       <SecretField
         id="pw-new"
@@ -454,7 +905,7 @@ function PasswordChangeForm({ isOwner }: { isOwner: boolean }) {
         maskedPlaceholder="새 비밀번호"
         value={next}
         onChange={setNext}
-        disabled={!isOwner || status.kind === "saving"}
+        disabled={!canChangePassword || status.kind === "saving"}
       />
       <SecretField
         id="pw-confirm"
@@ -462,9 +913,9 @@ function PasswordChangeForm({ isOwner }: { isOwner: boolean }) {
         maskedPlaceholder="새 비밀번호 확인"
         value={confirm}
         onChange={setConfirm}
-        disabled={!isOwner || status.kind === "saving"}
+        disabled={!canChangePassword || status.kind === "saving"}
       />
-      <Button type="submit" disabled={!isOwner || status.kind === "saving"}>
+      <Button type="submit" disabled={!canChangePassword || status.kind === "saving"}>
         {status.kind === "saving" ? "변경 중…" : "비밀번호 변경"}
       </Button>
       {status.kind === "saved" && (
@@ -575,6 +1026,240 @@ function SsoNote() {
   );
 }
 
+type IntegrationState =
+  | { kind: "loading" }
+  | { kind: "error"; message: string }
+  | { kind: "ready"; data: IntegrationSettingsResponse };
+
+type IntegrationSaveStatus =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "saved" }
+  | { kind: "error"; message: string };
+
+function integrationErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    const detail = (err.body as { detail?: unknown } | undefined)?.detail;
+    if (typeof detail === "string") return detail;
+    if (err.status === 401) return "로그인이 필요합니다.";
+    if (err.status === 403) return "승인된 계정만 연동을 관리할 수 있습니다.";
+  }
+  return "연동 정보를 불러오지 못했습니다.";
+}
+
+function IntegrationsSection() {
+  const [state, setState] = useState<IntegrationState>({ kind: "loading" });
+  const [providerId, setProviderId] = useState("openai");
+  const [accountLabel, setAccountLabel] = useState("");
+  const [secretValue, setSecretValue] = useState("");
+  const [scopes, setScopes] = useState("");
+  const [enabled, setEnabled] = useState(true);
+  const [status, setStatus] = useState<IntegrationSaveStatus>({ kind: "idle" });
+
+  async function load() {
+    setState({ kind: "loading" });
+    try {
+      const data = await getIntegrations();
+      setState({ kind: "ready", data });
+      if (!data.providers.find((provider) => provider.id === providerId)) {
+        setProviderId(data.providers[0]?.id ?? "openai");
+      }
+    } catch (err) {
+      setState({ kind: "error", message: integrationErrorMessage(err) });
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    getIntegrations()
+      .then((data) => {
+        if (cancelled) return;
+        setState({ kind: "ready", data });
+        setProviderId((current) =>
+          data.providers.find((provider) => provider.id === current)
+            ? current
+            : data.providers[0]?.id ?? "openai",
+        );
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setState({ kind: "error", message: integrationErrorMessage(err) });
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function handleSave(event: React.FormEvent) {
+    event.preventDefault();
+    setStatus({ kind: "saving" });
+    try {
+      await putIntegrationCredential(providerId, {
+        secret_value: secretValue.trim() || undefined,
+        account_label: accountLabel.trim() || undefined,
+        scopes: scopes
+          .split(",")
+          .map((scope) => scope.trim())
+          .filter(Boolean),
+        enabled,
+      });
+      setSecretValue("");
+      setStatus({ kind: "saved" });
+      await load();
+    } catch (err) {
+      setStatus({ kind: "error", message: integrationErrorMessage(err) });
+    }
+  }
+
+  async function handleDelete(provider: IntegrationCredentialResponse) {
+    setStatus({ kind: "saving" });
+    try {
+      await deleteIntegrationCredential(provider.provider_id);
+      if (provider.provider_id === providerId) {
+        setSecretValue("");
+      }
+      setStatus({ kind: "saved" });
+      await load();
+    } catch (err) {
+      setStatus({ kind: "error", message: integrationErrorMessage(err) });
+    }
+  }
+
+  if (state.kind === "loading") {
+    return <div className="h-32 animate-pulse rounded-lg bg-muted" />;
+  }
+
+  if (state.kind === "error") {
+    return (
+      <div className="space-y-3 rounded-lg border border-border p-4">
+        <p role="alert" className="text-sm text-destructive">{state.message}</p>
+        <Button variant="outline" onClick={() => void load()}>다시 불러오기</Button>
+      </div>
+    );
+  }
+
+  const selectedProvider = state.data.providers.find((provider) => provider.id === providerId)
+    ?? state.data.providers[0];
+  const selectedIntegration = state.data.integrations.find(
+    (integration) => integration.provider_id === selectedProvider?.id,
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-foreground">사용자 연동</h2>
+        <Button variant="outline" size="sm" onClick={() => void load()}>
+          새로고침
+        </Button>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        {state.data.integrations.map((integration) => (
+          <div key={integration.provider_id} className="rounded-lg border border-border p-3 text-sm">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <div className="font-medium text-foreground">{integration.label}</div>
+                <div className="text-xs text-muted-foreground">{integration.kind.toUpperCase()}</div>
+              </div>
+              <Badge variant={integration.configured && integration.enabled ? "default" : "secondary"}>
+                {integration.configured ? (integration.enabled ? "설정됨" : "비활성") : "미설정"}
+              </Badge>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              {integration.account_label ?? "계정 라벨 없음"}
+              {integration.secret_hint ? ` · ${integration.secret_hint}` : ""}
+            </div>
+            {integration.configured && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-2"
+                onClick={() => void handleDelete(integration)}
+                disabled={status.kind === "saving"}
+              >
+                삭제
+              </Button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {selectedProvider && (
+        <form onSubmit={handleSave} className="space-y-3 rounded-lg border border-border p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="integration-provider">Provider</Label>
+              <select
+                id="integration-provider"
+                className="h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                value={providerId}
+                onChange={(event) => {
+                  const nextProvider = event.target.value;
+                  const next = state.data.integrations.find((item) => item.provider_id === nextProvider);
+                  setProviderId(nextProvider);
+                  setAccountLabel(next?.account_label ?? "");
+                  setScopes(next?.scopes.join(", ") ?? "");
+                  setEnabled(next?.enabled ?? true);
+                }}
+              >
+                {state.data.providers.map((provider: IntegrationProviderInfo) => (
+                  <option key={provider.id} value={provider.id}>
+                    {provider.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="integration-account">계정 라벨</Label>
+              <Input
+                id="integration-account"
+                value={accountLabel}
+                onChange={(event) => setAccountLabel((event.target as HTMLInputElement).value)}
+                placeholder={selectedProvider.account_label_hint}
+              />
+            </div>
+          </div>
+          <SecretField
+            id="integration-secret"
+            label={selectedProvider.secret_label}
+            maskedPlaceholder={selectedIntegration?.secret_set ? "새 값 입력 시 교체" : selectedProvider.secret_label}
+            value={secretValue}
+            onChange={setSecretValue}
+          />
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="integration-scopes">Scopes</Label>
+            <Input
+              id="integration-scopes"
+              value={scopes}
+              onChange={(event) => setScopes((event.target as HTMLInputElement).value)}
+              placeholder="analysis, notification"
+            />
+          </div>
+          <label className="flex items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={(event) => setEnabled(event.target.checked)}
+              className="size-4 rounded border-input"
+            />
+            활성화
+          </label>
+          <Button type="submit" disabled={status.kind === "saving"}>
+            {status.kind === "saving" ? "저장 중…" : "연동 저장"}
+          </Button>
+          {status.kind === "saved" && (
+            <p role="status" className="text-sm text-muted-foreground">저장되었습니다.</p>
+          )}
+          {status.kind === "error" && (
+            <p role="alert" className="text-sm text-destructive">{status.message}</p>
+          )}
+        </form>
+      )}
+    </div>
+  );
+}
+
 type AccountState =
   | { kind: "loading" }
   | { kind: "error"; message: string }
@@ -630,7 +1315,7 @@ function AccountTab() {
       </section>
 
       <section>
-        <PasswordChangeForm isOwner={account.is_owner} />
+        <PasswordChangeForm canChangePassword={account.role !== "guest"} />
       </section>
 
       <section>
@@ -639,6 +1324,10 @@ function AccountTab() {
 
       <section>
         <KisKeysSection />
+      </section>
+
+      <section>
+        <IntegrationsSection />
       </section>
 
       <SsoNote />
@@ -746,6 +1435,7 @@ export default function SettingsPage() {
               <>
                 {id === "risk" && <RiskTab />}
                 {id === "profile" && <ProfileTab />}
+                {id === "membership" && <MembershipTab />}
                 {id === "account" && <AccountTab />}
                 {id === "display" && <DisplayTab />}
                 {id === "safety" && <SafetyTab />}

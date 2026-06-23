@@ -1,0 +1,430 @@
+{
+  "$schema": "autofolio.membership-supabase-staging-field-map/v1",
+  "map_version": 1,
+  "status": "draft_field_map_not_applied",
+  "updated_at": "2026-06-19T20:20:16+09:00",
+  "owner": "Backend Engineer",
+  "related_tasks": [
+    "TASK-087",
+    "TASK-109",
+    "TASK-111",
+    "TASK-112",
+    "TASK-113",
+    "TASK-114",
+    "TASK-115",
+    "TASK-116"
+  ],
+  "related_taskset": "TASKSET-MEMBERSHIP-PROD-IMPLEMENTATION-PLANNING",
+  "source_contracts": [
+    "agents/project/MEMBERSHIP-PRODUCTION-CONTRACT.json",
+    "agents/project/MEMBERSHIP-TENANT-ISOLATION-MATRIX.json",
+    "agents/project/MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.json",
+    "agents/project/MEMBERSHIP-PRODUCTION-SECRET-POLICY.json",
+    "agents/project/MEMBERSHIP-ENGINE-SAFETY-CONTRACT.json"
+  ],
+  "supabase_docs_checked": {
+    "checked_at": "2026-06-19T20:20:16+09:00",
+    "retrieval_method": "read-only curl fetch of official Supabase documentation",
+    "official_sources": [
+      "https://supabase.com/changelog.md",
+      "https://supabase.com/docs/guides/database/postgres/row-level-security.md",
+      "https://supabase.com/docs/guides/api/securing-your-api.md",
+      "https://supabase.com/docs/guides/security/product-security.md"
+    ],
+    "changelog_items": [
+      "2026-04-28 Data/API exposure breaking change: new public schema tables are not automatically exposed to the Data/GraphQL API for new projects.",
+      "RLS guidance: use policy TO clauses such as TO authenticated plus auth.uid() ownership predicates.",
+      "RLS update guidance: UPDATE policies need both USING and WITH CHECK.",
+      "Security guidance: do not use user-editable user_metadata for authorization, and never expose service key, service_role, or secret keys to clients."
+    ]
+  },
+  "non_goals": [
+    "No SQL migration file is created.",
+    "No app/database/schema.sql change is made.",
+    "No Supabase project is connected or mutated.",
+    "No production DB, staging DB, Edge Function, storage bucket, or Data API setting is changed.",
+    "No real customer PII, payment record, bank account number, provider token, KIS key, OAuth secret, or runtime secret is stored."
+  ],
+  "global_invariants": [
+    "Every tenant-owned table has RLS enabled before any Data API grant or exposure is used for external users.",
+    "Member policies combine TO authenticated with (select auth.uid()) ownership checks.",
+    "Role-only policies are forbidden for tenant-private, financial, control, trading, product, secret metadata, and audit tables.",
+    "UPDATE policies include both USING and WITH CHECK so a user cannot reassign user_id or target_user_id.",
+    "Authorization data must come from auth.uid(), server session context, or app_metadata, never client-editable user_metadata.",
+    "Owner/admin cross-tenant operations are server-audited and never rely on browser service keys.",
+    "Data API exposure is explicit: table grants and exposed-table settings must be reviewed separately from RLS.",
+    "SECURITY DEFINER is avoided by default; if required later, it must live outside public API schemas, set an explicit search_path, check auth.uid(), and be advisor-reviewed.",
+    "can_launch remains false until staging schema/RLS/apply, cross-user tests, security advisors, and deploy smoke evidence exist."
+  ],
+  "data_api_access_model": {
+    "default_for_tenant_tables": "not_exposed_until_rls_and_grants_reviewed",
+    "anon": "no tenant table grants; public pre-auth routes use backend APIs only",
+    "authenticated": "least privilege per table after RLS policies exist",
+    "service_role_or_secret_key": "server runtime only; no browser exposure",
+    "grant_order": [
+      "create/review table design",
+      "enable RLS",
+      "create ownership policies",
+      "add staging cross-user tests",
+      "review Data API exposure settings",
+      "grant least privilege to anon/authenticated only when needed",
+      "run security and performance advisors"
+    ]
+  },
+  "entities": [
+    {
+      "table": "profiles",
+      "source_surface": "profiles",
+      "data_class": "tenant_private",
+      "owner_field": "id",
+      "auth_reference": "id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select", "insert", "update"],
+        "service_role": ["select", "insert", "update", "delete"]
+      },
+      "policies": [
+        {"name": "profiles_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = id"},
+        {"name": "profiles_insert_own", "operation": "insert", "to": "authenticated", "with_check": "(select auth.uid()) = id"},
+        {"name": "profiles_update_own", "operation": "update", "to": "authenticated", "using": "(select auth.uid()) = id", "with_check": "(select auth.uid()) = id"}
+      ],
+      "server_admin_path": "server-audited support action only"
+    },
+    {
+      "table": "membership_requests",
+      "source_surface": "membership_requests",
+      "data_class": "tenant_private",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select", "insert"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "membership_requests_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"},
+        {"name": "membership_requests_insert_own", "operation": "insert", "to": "authenticated", "with_check": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "server-audited owner review/transition route",
+      "public_pre_auth_note": "pre-auth signup/status lookup remains a backend route and must not expose this table directly"
+    },
+    {
+      "table": "deposit_instructions",
+      "source_surface": "deposit_instructions",
+      "data_class": "tenant_payment_instruction",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "repo_secret_boundary": "real bank account values are runtime/server configuration, not repo data",
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "deposit_instructions_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "server-audited owner issuance/update route"
+    },
+    {
+      "table": "approval_events",
+      "source_surface": "approval_events",
+      "data_class": "tenant_audit",
+      "owner_field": "target_user_id",
+      "actor_field": "actor_user_id",
+      "auth_reference": "target_user_id and actor_user_id reference auth.users(id)",
+      "rls_required": true,
+      "append_only": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "approval_events_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = target_user_id or (select auth.uid()) = actor_user_id"}
+      ],
+      "server_admin_path": "server-audited append-only owner/admin route"
+    },
+    {
+      "table": "subscription_grants",
+      "source_surface": "subscription_grants",
+      "data_class": "tenant_private",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "subscription_grants_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "server-audited grant/revoke route"
+    },
+    {
+      "table": "integration_secret_metadata",
+      "source_surface": "integration_records",
+      "data_class": "tenant_secret_metadata",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "plaintext_secret_allowed": false,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert", "update", "delete"]
+      },
+      "policies": [
+        {"name": "integration_secret_metadata_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "member write/rotate/delete goes through backend route; response metadata only"
+    },
+    {
+      "table": "payment_evidence",
+      "source_surface": "payment_evidence_policy",
+      "data_class": "tenant_payment_evidence",
+      "owner_field": "target_user_id",
+      "actor_field": "actor_user_id",
+      "auth_reference": "target_user_id and actor_user_id reference auth.users(id)",
+      "rls_required": true,
+      "allowed_fields_source": "MEMBERSHIP-PAYMENT-EVIDENCE-POLICY.json retained_fields",
+      "raw_source_persisted": false,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "payment_evidence_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = target_user_id"}
+      ],
+      "server_admin_path": "server-audited owner approval route; no automatic activation from evidence alone"
+    },
+    {
+      "table": "portfolio_accounts",
+      "source_surface": "portfolio_accounts",
+      "data_class": "tenant_financial",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "portfolio_accounts_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "server-audited support/ingestion only"
+    },
+    {
+      "table": "holdings_snapshots",
+      "source_surface": "holdings_snapshots",
+      "data_class": "tenant_financial",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "holdings_snapshots_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "server-audited ingestion/support only"
+    },
+    {
+      "table": "risk_settings",
+      "source_surface": "risk_settings",
+      "data_class": "tenant_control",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select", "update"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "risk_settings_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"},
+        {"name": "risk_settings_update_own", "operation": "update", "to": "authenticated", "using": "(select auth.uid()) = user_id", "with_check": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "backend validates allowed limit changes; owner overrides are server-audited"
+    },
+    {
+      "table": "engine_state",
+      "source_surface": "engine_state",
+      "data_class": "tenant_control",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "engine_state_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "engine changes go through backend validation and audited worker context"
+    },
+    {
+      "table": "engine_run_queue",
+      "source_surface": "engine_run_queue",
+      "data_class": "tenant_control",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select", "insert"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "engine_run_queue_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"},
+        {"name": "engine_run_queue_insert_own", "operation": "insert", "to": "authenticated", "with_check": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "worker claim includes user_id and queue item id"
+    },
+    {
+      "table": "trade_conditions",
+      "source_surface": "trade_conditions",
+      "data_class": "tenant_trading",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select", "insert", "update"],
+        "service_role": ["select", "insert", "update"]
+      },
+      "policies": [
+        {"name": "trade_conditions_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"},
+        {"name": "trade_conditions_insert_own", "operation": "insert", "to": "authenticated", "with_check": "(select auth.uid()) = user_id"},
+        {"name": "trade_conditions_update_own", "operation": "update", "to": "authenticated", "using": "(select auth.uid()) = user_id", "with_check": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "backend validates trading/safety preconditions before accepting changes"
+    },
+    {
+      "table": "order_intents",
+      "source_surface": "order_intents",
+      "data_class": "tenant_trading",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "append_only": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "order_intents_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "insert only through backend risk gate and append-only order-intent pipeline"
+    },
+    {
+      "table": "order_logs",
+      "source_surface": "order_logs",
+      "data_class": "tenant_trading_audit",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "append_only": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "order_logs_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "broker/order worker appends with matching user_id and order_intent_id"
+    },
+    {
+      "table": "execution_logs",
+      "source_surface": "execution_logs",
+      "data_class": "tenant_trading_audit",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "append_only": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "execution_logs_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "execution worker appends with inherited user_id from order log"
+    },
+    {
+      "table": "notifications",
+      "source_surface": "notifications",
+      "data_class": "tenant_product",
+      "owner_field": "user_id",
+      "auth_reference": "user_id references auth.users(id)",
+      "rls_required": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "notifications_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = user_id"}
+      ],
+      "server_admin_path": "notification destination resolved from same user's integration metadata"
+    },
+    {
+      "table": "audit_events",
+      "source_surface": "audit_events",
+      "data_class": "tenant_audit",
+      "owner_field": "target_user_id",
+      "actor_field": "actor_user_id",
+      "auth_reference": "target_user_id and actor_user_id reference auth.users(id)",
+      "rls_required": true,
+      "append_only": true,
+      "data_api": {
+        "anon": "none",
+        "authenticated": ["select"],
+        "service_role": ["select", "insert"]
+      },
+      "policies": [
+        {"name": "audit_events_select_own", "operation": "select", "to": "authenticated", "using": "(select auth.uid()) = target_user_id or (select auth.uid()) = actor_user_id"}
+      ],
+      "server_admin_path": "append-only audit writer; retention/delete requires separate reviewed policy"
+    }
+  ],
+  "required_staging_tests": [
+    {"id": "anon_has_no_tenant_table_access", "assertion": "anon cannot select, insert, update, or delete tenant-owned rows through Data API"},
+    {"id": "member_a_cannot_read_member_b", "assertion": "member A cannot select member B rows for every tenant-owned table"},
+    {"id": "member_a_cannot_update_member_b", "assertion": "member A cannot update member B rows and update returns no affected rows or fails"},
+    {"id": "member_cannot_reassign_user_id", "assertion": "UPDATE with user_id changed to another user is blocked by WITH CHECK"},
+    {"id": "member_cannot_call_owner_admin", "assertion": "member cannot execute membership approval, grant, engine override, or support admin paths"},
+    {"id": "owner_admin_routes_create_audit_events", "assertion": "owner/admin cross-tenant actions append audit_events with actor_user_id and target_user_id"},
+    {"id": "secret_metadata_never_returns_plaintext", "assertion": "secret create/update/delete returns only metadata, configured state, and masked hint"},
+    {"id": "payment_evidence_minimized", "assertion": "payment evidence rows contain retained allowlist fields only and no raw pasted statement"},
+    {"id": "engine_queue_user_scope", "assertion": "worker queue claim cannot select or mutate another user's queue item"},
+    {"id": "order_intent_append_only", "assertion": "members cannot update/delete order_intents, order_logs, or execution_logs"}
+  ],
+  "advisor_checklist": [
+    "Run Supabase security advisors after staging schema exists.",
+    "Run Supabase performance advisors after staging schema exists.",
+    "Review any missing RLS, exposed table, function privilege, or SECURITY DEFINER finding before launch.",
+    "Confirm Data API table exposure settings and grants match this map."
+  ],
+  "launch_blockers_remaining": [
+    "No staging migration exists.",
+    "No staging Supabase schema/RLS apply exists.",
+    "No staging cross-user test evidence exists.",
+    "No advisor output exists.",
+    "No production secret store implementation exists.",
+    "No payment recognition decision is approved.",
+    "No per-user engine safety implementation exists.",
+    "No deploy preflight smoke evidence exists."
+  ]
+}

@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
-const GUEST_SESSION = { role: "guest", username: null, data_source: "demo" };
+const MEMBER_SESSION = { role: "member", username: "member1", data_source: "backend" };
 
 const ENGINE_STATUS = {
   env: "paper",
@@ -25,10 +25,38 @@ const KPI_RESPONSE = {
 };
 
 const HOLDINGS_TABLE = {
-  columns: ["종목명", "수량", "평균단가", "현재가", "평가손익"],
+  columns: ["종목", "티커", "자산군", "수량", "평단", "현재가", "평가금액", "평가손익", "손익률", "비중"],
   rows: [
-    { 종목명: "삼성전자", 수량: 10, 평균단가: 72000, 현재가: 74000, 평가손익: 20000 },
-    { 종목명: "SK하이닉스", 수량: 5, 평균단가: 140000, 현재가: 145000, 평가손익: 25000 },
+    {
+      종목: "삼성전자",
+      티커: "005930",
+      자산군: "국내주식",
+      지역: "한국",
+      섹터: "반도체",
+      전략: "핵심",
+      수량: 10,
+      평단: 72000,
+      현재가: 74000,
+      평가금액: 740000,
+      평가손익: 20000,
+      손익률: 2.78,
+      비중: 60,
+    },
+    {
+      종목: "SK하이닉스",
+      티커: "000660",
+      자산군: "국내주식",
+      지역: "한국",
+      섹터: "반도체",
+      전략: "위성",
+      수량: 5,
+      평단: 140000,
+      현재가: 145000,
+      평가금액: 725000,
+      평가손익: 25000,
+      손익률: 3.57,
+      비중: 40,
+    },
   ],
 };
 
@@ -47,6 +75,55 @@ const ALLOCATION_TABLE = {
     { 자산군: "채권", 현재비중: 20.0, 목표비중: 25.0 },
     { 자산군: "현금", 현재비중: 15.0, 목표비중: 15.0 },
   ],
+};
+
+const PORTFOLIO_OVERVIEW = {
+  kpis: {
+    total_assets: 12345678,
+    total_market_value: 1465000,
+    cash: 10880678,
+    daily_pnl: 34567,
+    daily_return_pct: 1.23,
+    monthly_return_pct: 3.45,
+    unrealized_pnl: 45000,
+    total_return_pct: 3.16,
+    cash_ratio_pct: 88.1,
+    holdings_count: 2,
+    as_of: "2026-06-19T09:30:00+09:00",
+  },
+  holdings: HOLDINGS_TABLE,
+  groups: {
+    automatic: [
+      {
+        id: "asset-class",
+        title: "자산군 노출",
+        rows: [
+          { name: "국내주식", weight_pct: 100, pnl: 45000 },
+        ],
+      },
+      {
+        id: "sector",
+        title: "섹터 노출",
+        rows: [
+          { name: "반도체", weight_pct: 100, pnl: 45000 },
+        ],
+      },
+    ],
+    manual: [],
+    saved: [],
+  },
+  diagnostics: [],
+  top_movers: {
+    contributors: HOLDINGS_TABLE.rows,
+    detractors: [],
+  },
+  concentration: {
+    top1_weight_pct: 60,
+    top3_weight_pct: 100,
+    top5_weight_pct: 100,
+  },
+  allocation_gap: ALLOCATION_TABLE,
+  data_quality: {},
 };
 
 const INDICES_TABLE = {
@@ -99,11 +176,20 @@ async function mockDashboardApis(page: Page) {
     route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify(GUEST_SESSION),
+      body: JSON.stringify(MEMBER_SESSION),
     }),
   );
 
   // 4. Portfolio KPIs (plain dict)
+  await page.route(/\/api\/portfolio\/overview/, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(PORTFOLIO_OVERVIEW),
+    }),
+  );
+
+  // 5. Portfolio KPIs (plain dict)
   await page.route(/\/api\/portfolio\/kpis/, (route) =>
     route.fulfill({
       status: 200,
@@ -112,7 +198,7 @@ async function mockDashboardApis(page: Page) {
     }),
   );
 
-  // 5. Holdings
+  // 6. Holdings
   await page.route(/\/api\/portfolio\/holdings/, (route) =>
     route.fulfill({
       status: 200,
@@ -121,7 +207,7 @@ async function mockDashboardApis(page: Page) {
     }),
   );
 
-  // 6. Asset curve
+  // 7. Asset curve
   await page.route(/\/api\/portfolio\/asset-curve/, (route) =>
     route.fulfill({
       status: 200,
@@ -130,7 +216,7 @@ async function mockDashboardApis(page: Page) {
     }),
   );
 
-  // 7. Allocation gap
+  // 8. Allocation gap
   await page.route(/\/api\/portfolio\/allocation-gap/, (route) =>
     route.fulfill({
       status: 200,
@@ -139,7 +225,7 @@ async function mockDashboardApis(page: Page) {
     }),
   );
 
-  // 8. Market indices
+  // 9. Market indices
   await page.route(/\/api\/market\/indices/, (route) =>
     route.fulfill({
       status: 200,
@@ -148,7 +234,7 @@ async function mockDashboardApis(page: Page) {
     }),
   );
 
-  // 9. Recent fills
+  // 10. Recent fills
   await page.route(/\/api\/trade\/fills\/recent/, (route) =>
     route.fulfill({
       status: 200,
@@ -157,21 +243,12 @@ async function mockDashboardApis(page: Page) {
     }),
   );
 
-  // 10. Login POST (catch-all won't match POST; add explicit mock)
-  await page.route(/\/api\/auth\/login/, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify(GUEST_SESSION),
-    }),
-  );
 }
 
-// ── Shared: log in as guest and reach /home ──────────────────────────────────
+// ── Shared: reach /home as an already approved member session ────────────────
 
-async function loginAsGuest(page: Page) {
-  await page.goto("/login");
-  await page.getByRole("button", { name: /게스트 데모 시작/ }).click();
+async function openHomeAsMember(page: Page) {
+  await page.goto("/home");
   await expect(page).toHaveURL(/\/home/, { timeout: 15_000 });
 }
 
@@ -180,7 +257,7 @@ async function loginAsGuest(page: Page) {
 test.describe("Dashboard — Home", () => {
   test("shows a KPI value on /home", async ({ page }) => {
     await mockDashboardApis(page);
-    await loginAsGuest(page);
+    await openHomeAsMember(page);
 
     // KPI value should contain the formatted total (₩12,345,678)
     // Use a broad text match so minor formatting differences don't break it
@@ -189,11 +266,11 @@ test.describe("Dashboard — Home", () => {
 
   test("renders holdings table with Korean header on /home", async ({ page }) => {
     await mockDashboardApis(page);
-    await loginAsGuest(page);
+    await openHomeAsMember(page);
 
-    // Holdings table should show Korean column header "종목명"
+    // Holdings table should show Korean column header "종목"
     // Use .first() because multiple tables on the page share this header name
-    await expect(page.getByRole("columnheader", { name: "종목명" }).first()).toBeVisible({
+    await expect(page.getByRole("columnheader", { name: "종목" }).first()).toBeVisible({
       timeout: 10_000,
     });
 
@@ -205,7 +282,7 @@ test.describe("Dashboard — Home", () => {
 
   test("shows AppShell navigation on /home", async ({ page }) => {
     await mockDashboardApis(page);
-    await loginAsGuest(page);
+    await openHomeAsMember(page);
 
     await expect(page.getByRole("navigation")).toBeVisible();
   });
@@ -214,20 +291,22 @@ test.describe("Dashboard — Home", () => {
 test.describe("Dashboard — Portfolio", () => {
   test("renders HoldingsTable on /portfolio", async ({ page }) => {
     await mockDashboardApis(page);
-    await loginAsGuest(page);
+    await openHomeAsMember(page);
 
     // Navigate to /portfolio
     await page.goto("/portfolio");
 
+    await page.getByRole("button", { name: "보유", exact: true }).click();
+
     // HoldingsTable: Korean column header visible
-    await expect(page.getByRole("columnheader", { name: "종목명" }).first()).toBeVisible({
+    await expect(page.getByRole("columnheader", { name: "종목" }).first()).toBeVisible({
       timeout: 10_000,
     });
   });
 
   test("renders allocation chart container on /portfolio", async ({ page }) => {
     await mockDashboardApis(page);
-    await loginAsGuest(page);
+    await openHomeAsMember(page);
 
     await page.goto("/portfolio");
 
@@ -239,10 +318,10 @@ test.describe("Dashboard — Portfolio", () => {
 
   test("AppShell navigation visible on /portfolio", async ({ page }) => {
     await mockDashboardApis(page);
-    await loginAsGuest(page);
+    await openHomeAsMember(page);
 
     await page.goto("/portfolio");
 
-    await expect(page.getByRole("navigation")).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "사이드바 내비게이션" })).toBeVisible();
   });
 });

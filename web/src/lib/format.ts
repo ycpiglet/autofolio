@@ -15,6 +15,8 @@
  * track the toggle via CSS variables defined in globals.css.
  */
 
+import { pnlColorTokens } from "@/lib/design-tokens";
+
 // ── Currency ───────────────────────────────────────────────────────────────
 
 /** Format a KRW amount: ₩1,234,567 */
@@ -107,17 +109,17 @@ export function pnlColorClass(value: number): string {
 export function pnlColor(value: number): string {
   if (typeof document === "undefined") {
     // SSR fallback — return KR defaults
-    if (value > 0) return "#F04452";
-    if (value < 0) return "#3182F6";
-    return "#8B95A1";
+    if (value > 0) return pnlColorTokens.kr.up;
+    if (value < 0) return pnlColorTokens.kr.down;
+    return pnlColorTokens.flat;
   }
 
   const isWestern =
     document.documentElement.getAttribute("data-pnl") === "western";
 
-  if (value > 0) return isWestern ? "#34C759" : "#F04452";
-  if (value < 0) return isWestern ? "#F04452" : "#3182F6";
-  return "#8B95A1";
+  if (value > 0) return isWestern ? pnlColorTokens.western.up : pnlColorTokens.kr.up;
+  if (value < 0) return isWestern ? pnlColorTokens.western.down : pnlColorTokens.kr.down;
+  return pnlColorTokens.flat;
 }
 
 // ── Tabular numbers ────────────────────────────────────────────────────────

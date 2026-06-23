@@ -9,6 +9,7 @@ from fastapi import Cookie, Depends, Header, HTTPException, status
 from app.api.security import COOKIE_NAME, decode_session
 
 _CSRF_HEADER = "X-CSRF-Token"
+_APP_USER_ROLES = {"owner", "member"}
 
 
 def get_session(
@@ -32,13 +33,22 @@ def require_session(
     return session
 
 
+def require_app_user(
+    session: Annotated[dict[str, Any], Depends(require_session)],
+) -> dict[str, Any]:
+    """Raise 403 if the caller is not an approved app user (guest -> 403)."""
+    if session.get("role") not in _APP_USER_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Approved account required",
+        )
+    return session
+
+
 def require_owner(
     session: Annotated[dict[str, Any], Depends(require_session)],
 ) -> dict[str, Any]:
-    """Raise 403 if the caller is not an owner (guest → 403).
-
-    This is the safety seam for Phase 3 state-changing endpoints.
-    """
+    """Raise 403 unless the caller is the service Owner/admin."""
     if session.get("role") != "owner":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -47,16 +57,10 @@ def require_owner(
     return session
 
 
-def require_csrf(
-    session: Annotated[dict[str, Any], Depends(require_owner)],
-    x_csrf_token: Annotated[str | None, Header(alias=_CSRF_HEADER)] = None,
-) -> dict[str, Any]:
-    """Validate X-CSRF-Token header against the session's csrf_token.
+require_admin = require_owner
 
-    Raises 403 if header is missing, empty, or does not match.
-    Must be composed after require_owner so guests are already rejected
-    before we bother checking CSRF.
-    """
+
+def _validate_csrf(session: dict[str, Any], x_csrf_token: str | None) -> dict[str, Any]:
     expected = session.get("csrf_token")
     if not expected or not hmac.compare_digest(x_csrf_token or "", expected):
         raise HTTPException(
@@ -66,5 +70,21 @@ def require_csrf(
     return session
 
 
-# Convenience alias — apply both owner gate and CSRF gate together
-require_owner_csrf = require_csrf
+def require_app_user_csrf(
+    session: Annotated[dict[str, Any], Depends(require_app_user)],
+    x_csrf_token: Annotated[str | None, Header(alias=_CSRF_HEADER)] = None,
+) -> dict[str, Any]:
+    """Validate CSRF for approved-user self-service mutations."""
+    return _validate_csrf(session, x_csrf_token)
+
+
+def require_owner_csrf(
+    session: Annotated[dict[str, Any], Depends(require_owner)],
+    x_csrf_token: Annotated[str | None, Header(alias=_CSRF_HEADER)] = None,
+) -> dict[str, Any]:
+    """Validate CSRF for Owner/admin-only mutations."""
+    return _validate_csrf(session, x_csrf_token)
+
+
+require_admin_csrf = require_owner_csrf
+require_csrf = require_app_user_csrf

@@ -28,6 +28,9 @@ SAMPLE_HOLDINGS = pd.DataFrame(
             "티커": "005930",
             "자산군": "주식",
             "지역": "KR",
+            "섹터": "반도체",
+            "전략": "코어",
+            "위험버킷": "코어",
             "수량": 10,
             "평단": 70_000,
             "현재가": 75_000,
@@ -201,6 +204,14 @@ def owner_cookies(username: str = "testuser") -> dict[str, str]:
     }
 
 
+def member_cookies(username: str = "member1") -> dict[str, str]:
+    return {
+        "af_session": encode_session(
+            {"role": "member", "username": username, "data_source": "backend"}
+        )
+    }
+
+
 # ── App fixture ───────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="session")
@@ -234,6 +245,17 @@ def owner_client(app):
 
 
 @pytest.fixture()
+def member_client(app):
+    """TestClient with a valid approved member session cookie."""
+    c = TestClient(app, raise_server_exceptions=True)
+    c.cookies.set(
+        "af_session",
+        encode_session({"role": "member", "username": "member1", "data_source": "backend"}),
+    )
+    return c
+
+
+@pytest.fixture()
 def error_client(app):
     """TestClient with guest session that does NOT re-raise server exceptions.
 
@@ -242,6 +264,17 @@ def error_client(app):
     """
     c = TestClient(app, raise_server_exceptions=False)
     c.cookies.set("af_session", encode_session({"role": "guest", "data_source": "demo"}))
+    return c
+
+
+@pytest.fixture()
+def error_member_client(app):
+    """Approved member TestClient that does NOT re-raise server exceptions."""
+    c = TestClient(app, raise_server_exceptions=False)
+    c.cookies.set(
+        "af_session",
+        encode_session({"role": "member", "username": "member1", "data_source": "backend"}),
+    )
     return c
 
 

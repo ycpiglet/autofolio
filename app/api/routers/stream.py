@@ -1,7 +1,7 @@
 """Stream router — /api/stream/*
 
 Endpoints:
-  GET /stream/events (require_session) → SSE: new events.jsonl lines + demo ticker
+  GET /stream/events (require_app_user) → SSE: new events.jsonl lines + demo ticker
 
 SSE event types:
   engine  — new lines from logs/events.jsonl
@@ -27,7 +27,7 @@ from typing import Annotated, Any, AsyncGenerator
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
 
-from app.api.deps import require_session
+from app.api.deps import require_app_user
 
 router = APIRouter(prefix="/stream", tags=["stream"])
 
@@ -40,7 +40,7 @@ _MAX_EVENTS: int | None = None  # None = infinite (production); set to N in test
 @router.get("/events")
 async def stream_events(
     request: Request,
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     opt_in_kis_ws: bool = Query(default=False),
 ) -> StreamingResponse:
     """SSE stream: new events.jsonl entries + periodic demo ticker.

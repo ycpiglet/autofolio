@@ -1,6 +1,6 @@
 """Market router — /api/market/*
 
-Endpoints (all require_session):
+Endpoints (all require_app_user):
   GET /market/indices
   GET /market/watchlist
   GET /market/price?symbol=
@@ -16,7 +16,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.api.deps import require_session
+from app.api.deps import require_app_user
 from app.api.schemas import TableResponse
 from app.api.serializers import df_records
 
@@ -37,7 +37,7 @@ def _validate_symbol(symbol: str) -> str:
 
 @router.get("/indices", response_model=TableResponse)
 def indices(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> TableResponse:
     from app.services import backend
 
@@ -46,7 +46,7 @@ def indices(
 
 @router.get("/watchlist", response_model=TableResponse)
 def watchlist(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> TableResponse:
     from app.services import backend
 
@@ -55,7 +55,7 @@ def watchlist(
 
 @router.get("/price")
 def price(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: str = Query(..., description="종목 코드"),
 ) -> dict[str, Any]:
     from app.services import backend
@@ -67,7 +67,7 @@ def price(
 
 @router.get("/fundamental")
 def fundamental(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: str = Query(..., description="종목 코드"),
 ) -> dict[str, Any]:
     from app.services import backend
@@ -78,7 +78,7 @@ def fundamental(
 
 @router.get("/order-book", response_model=TableResponse)
 def order_book(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: str = Query(..., description="종목 코드"),
     market: str = Query(default="J", description="시장 구분 (J=KRX)"),
 ) -> TableResponse:
@@ -90,7 +90,7 @@ def order_book(
 
 @router.get("/intraday", response_model=TableResponse)
 def intraday(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: str = Query(..., description="종목 코드"),
     time_unit: str = Query(default="1", description="분봉 단위 (1/3/5/10/30/60)"),
     count: int = Query(default=120, ge=1, le=400),
@@ -103,7 +103,7 @@ def intraday(
 
 @router.get("/sectors", response_model=TableResponse)
 def sectors(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> TableResponse:
     from app.services import backend
 
@@ -112,7 +112,7 @@ def sectors(
 
 @router.get("/disclosures", response_model=TableResponse)
 def disclosures(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
     symbol: str = Query(..., description="종목 코드"),
     days: int = Query(default=1, ge=1, le=30),
 ) -> TableResponse:
@@ -124,7 +124,7 @@ def disclosures(
 
 @router.get("/symbols")
 def symbols(
-    _session: Annotated[dict[str, Any], Depends(require_session)],
+    _session: Annotated[dict[str, Any], Depends(require_app_user)],
 ) -> dict[str, str]:
     """Return {code: name} map for all whitelist symbols."""
     from app.services import backend

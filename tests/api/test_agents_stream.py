@@ -39,6 +39,10 @@ def _guest_session() -> str:
     return encode_session({"role": "guest", "data_source": "demo"})
 
 
+def _member_session() -> str:
+    return encode_session({"role": "member", "username": "member1", "data_source": "backend"})
+
+
 def _csrf_headers(csrf: str = CSRF) -> dict[str, str]:
     return {"X-CSRF-Token": csrf}
 
@@ -65,6 +69,13 @@ def guest_client(app):
 
 
 @pytest.fixture()
+def member_client(app):
+    c = TestClient(app, raise_server_exceptions=True)
+    c.cookies.set("af_session", _member_session())
+    return c
+
+
+@pytest.fixture()
 def anon_client(app):
     return TestClient(app, raise_server_exceptions=True)
 
@@ -72,29 +83,33 @@ def anon_client(app):
 # ── GET /api/agents/list ──────────────────────────────────────────────────────
 
 class TestAgentsList:
-    def test_returns_200_for_guest(self, guest_client):
+    def test_returns_200_for_member(self, member_client):
         with patch("app.services.agents.available", return_value=(False, "no key")), \
              patch("app.services.agents.list_agent_infos", return_value=[
                  {"name": "macro-strategist", "role": "매크로 전략", "category": "투자 리더십", "expert": True},
                  {"name": "cio", "role": "CIO", "category": "투자 리더십", "expert": True},
              ]):
-            resp = guest_client.get("/api/agents/list")
+            resp = member_client.get("/api/agents/list")
         assert resp.status_code == 200
 
-    def test_response_shape(self, guest_client):
+    def test_guest_403(self, guest_client):
+        resp = guest_client.get("/api/agents/list")
+        assert resp.status_code == 403
+
+    def test_response_shape(self, member_client):
         with patch("app.services.agents.available", return_value=(False, "demo")), \
              patch("app.services.agents.list_agent_infos", return_value=[
                  {"name": "cio", "role": "CIO", "category": "투자 리더십", "expert": True},
                  {"name": "risk-manager", "role": "리스크 매니저", "category": "투자 리더십", "expert": True},
              ]):
-            body = guest_client.get("/api/agents/list").json()
+            body = member_client.get("/api/agents/list").json()
         assert body["available"] is False
         assert body["message"] == "demo"
         assert body["agents"][0]["name"] == "cio"
         assert body["agents"][0]["expert"] is True
         assert body["agents"][1]["name"] == "risk-manager"
 
-    def test_experts_only_forwarded(self, guest_client):
+    def test_experts_only_forwarded(self, member_client):
         captured: dict[str, bool] = {}
 
         def fake_infos(*, experts_only: bool = False) -> list[dict]:
@@ -103,7 +118,7 @@ class TestAgentsList:
 
         with patch("app.services.agents.available", return_value=(False, "demo")), \
              patch("app.services.agents.list_agent_infos", side_effect=fake_infos):
-            resp = guest_client.get("/api/agents/list?experts_only=true")
+            resp = member_client.get("/api/agents/list?experts_only=true")
         assert resp.status_code == 200
         assert captured["experts_only"] is True
 
@@ -216,11 +231,11 @@ class TestIcStream:
         assert resp.status_code == 202
         return resp.json()["job_id"]
 
-    def test_stream_404_for_unknown_job(self, guest_client):
-        resp = guest_client.get(f"/api/agents/ic/stream/{uuid.uuid4()}")
+    def test_stream_404_for_unknown_job(self, member_client):
+        resp = member_client.get(f"/api/agents/ic/stream/{uuid.uuid4()}")
         assert resp.status_code == 404
 
-    def test_stream_replays_completed_job(self, owner_client, guest_client):
+    def test_stream_replays_completed_job(self, owner_client, member_client):
         """After run_ic finishes, stream should replay steps + emit done."""
         steps = ["전문가 의견 · macro-strategist", "악마의 변호인", "CIO 결정"]
         job_id = self._submit_job(owner_client, steps)
@@ -230,7 +245,7 @@ class TestIcStream:
 
         # Stream — all steps should be replayed immediately since job is done
         data_lines: list[str] = []
-        with guest_client.stream("GET", f"/api/agents/ic/stream/{job_id}") as resp:
+        with member_client.stream("GET", f"/api/agents/ic/stream/{job_id}") as resp:
             assert resp.status_code == 200
             assert "text/event-stream" in resp.headers.get("content-type", "")
             for line in resp.iter_lines():
@@ -248,15 +263,22 @@ class TestIcStream:
         done_payload = parsed[-1]
         assert "decision" in done_payload or "topic" in done_payload
 
-    def test_stream_guest_allowed(self, owner_client, guest_client):
-        """Stream requires session; guest is allowed."""
+    def test_stream_member_allowed(self, owner_client, member_client):
+        """Stream requires an approved app user."""
         steps = ["step-a"]
         job_id = self._submit_job(owner_client, steps)
         time.sleep(0.5)
-        with guest_client.stream("GET", f"/api/agents/ic/stream/{job_id}") as resp:
+        with member_client.stream("GET", f"/api/agents/ic/stream/{job_id}") as resp:
             assert resp.status_code == 200
             for _ in resp.iter_lines():
                 break  # Just confirm it opens OK
+
+    def test_stream_guest_403(self, owner_client, guest_client):
+        steps = ["step-a"]
+        job_id = self._submit_job(owner_client, steps)
+        time.sleep(0.5)
+        resp = guest_client.get(f"/api/agents/ic/stream/{job_id}")
+        assert resp.status_code == 403
 
     def test_stream_401_for_anon(self, anon_client, owner_client):
         steps = ["x"]
@@ -268,16 +290,16 @@ class TestIcStream:
 # ── GET /api/agents/ic/decisions ─────────────────────────────────────────────
 
 class TestIcDecisions:
-    def test_returns_list_for_guest(self, guest_client):
+    def test_returns_list_for_member(self, member_client):
         fake = [{"file": "IC_20260615.md", "path": "/tmp/IC_20260615.md"}]
         with patch("app.services.agents.list_decisions", return_value=fake):
-            resp = guest_client.get("/api/agents/ic/decisions")
+            resp = member_client.get("/api/agents/ic/decisions")
         assert resp.status_code == 200
         body = resp.json()
         assert isinstance(body, list)
         assert body[0]["file"] == "IC_20260615.md"
 
-    def test_limit_param_forwarded(self, guest_client):
+    def test_limit_param_forwarded(self, member_client):
         captured: dict = {}
 
         def fake_list(limit: int = 10) -> list:
@@ -285,7 +307,7 @@ class TestIcDecisions:
             return []
 
         with patch("app.services.agents.list_decisions", side_effect=fake_list):
-            guest_client.get("/api/agents/ic/decisions?limit=5")
+            member_client.get("/api/agents/ic/decisions?limit=5")
         assert captured["limit"] == 5
 
     def test_401_without_session(self, anon_client):
@@ -298,7 +320,7 @@ class TestIcDecisions:
 class TestStreamEvents:
     """Tests for the events.jsonl tail + demo ticker SSE."""
 
-    def test_returns_200_for_guest(self, guest_client, tmp_path):
+    def test_returns_200_for_member(self, member_client, tmp_path):
         """SSE endpoint responds with 200 and correct content-type."""
         fake_log = tmp_path / "events.jsonl"
         fake_log.write_text("", encoding="utf-8")
@@ -327,7 +349,7 @@ class TestStreamEvents:
              patch("app.api.routers.stream._DEMO_TICKER_INTERVAL", 999.0), \
              patch("app.api.routers.stream._MAX_EVENTS", 1):
             thread.start()
-            with guest_client.stream("GET", "/api/stream/events") as resp:
+            with member_client.stream("GET", "/api/stream/events") as resp:
                 assert resp.status_code == 200
                 assert "text/event-stream" in resp.headers.get("content-type", "")
                 for line in resp.iter_lines():
@@ -345,7 +367,11 @@ class TestStreamEvents:
         resp = anon_client.get("/api/stream/events")
         assert resp.status_code == 401
 
-    def test_engine_events_emitted(self, guest_client, tmp_path):
+    def test_guest_403(self, guest_client):
+        resp = guest_client.get("/api/stream/events")
+        assert resp.status_code == 403
+
+    def test_engine_events_emitted(self, member_client, tmp_path):
         """New lines written to events.jsonl after connect are streamed."""
         fake_log = tmp_path / "events.jsonl"
         fake_log.write_text("", encoding="utf-8")
@@ -353,7 +379,7 @@ class TestStreamEvents:
         event_payload = {"event": "condition_processed", "symbol": "005930"}
         collected: list[str] = []
 
-        # Continuous appends (see test_returns_200_for_guest) to avoid the
+        # Continuous appends (see test_returns_200_for_member) to avoid the
         # connect-vs-write race that flakes/hangs under CI load.
         stop = threading.Event()
 
@@ -370,7 +396,7 @@ class TestStreamEvents:
              patch("app.api.routers.stream._DEMO_TICKER_INTERVAL", 999.0), \
              patch("app.api.routers.stream._MAX_EVENTS", 1):
             thread.start()
-            with guest_client.stream("GET", "/api/stream/events") as resp:
+            with member_client.stream("GET", "/api/stream/events") as resp:
                 for line in resp.iter_lines():
                     if line.startswith("data:"):
                         collected.append(line)
@@ -382,7 +408,7 @@ class TestStreamEvents:
         payload = json.loads(collected[0][len("data:"):].strip())
         assert payload.get("event") == "condition_processed"
 
-    def test_opt_in_kis_ws_accepted(self, guest_client, tmp_path):
+    def test_opt_in_kis_ws_accepted(self, member_client, tmp_path):
         """opt_in_kis_ws query param is accepted without crashing."""
         import pathlib
         # Use demo ticker (interval=0 → fires immediately) to produce 1 event and terminate.
@@ -390,7 +416,7 @@ class TestStreamEvents:
              patch("app.api.routers.stream._TAIL_POLL_INTERVAL", 0.05), \
              patch("app.api.routers.stream._DEMO_TICKER_INTERVAL", 0.0), \
              patch("app.api.routers.stream._MAX_EVENTS", 1):
-            with guest_client.stream("GET", "/api/stream/events?opt_in_kis_ws=true") as resp:
+            with member_client.stream("GET", "/api/stream/events?opt_in_kis_ws=true") as resp:
                 assert resp.status_code == 200
                 for _ in resp.iter_lines():
                     break
