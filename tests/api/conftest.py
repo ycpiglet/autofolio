@@ -87,14 +87,13 @@ SAMPLE_CB = {
 SAMPLE_CONDITIONS = pd.DataFrame(
     [
         {
-            "id": 1,
-            "symbol": "005930",
-            "side": "BUY",
-            "target_price": 70000.0,
-            "quantity": 10,
-            "order_type": "LIMIT",
-            "auto_enabled": False,
-            "created_by": "USER",
+            "종목": "005930",
+            "구분": "BUY",
+            "목표가": 70000.0,
+            "수량": 10,
+            "주문유형": "LIMIT",
+            "상태": "ACTIVE",
+            "등록일시": "2026-06-23 09:00:00",
         }
     ]
 )

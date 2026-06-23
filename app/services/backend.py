@@ -360,10 +360,35 @@ def recent_fills(limit: int = 10) -> pd.DataFrame:
     return result.reset_index(drop=True)
 
 
+# 등록된 조건 표 — 화면에 표시할 핵심 컬럼과 한글 라벨 매핑.
+# 모든 원시 컬럼은 DataTable 확장 행(expand row)으로 계속 제공된다.
+_CONDITIONS_DISPLAY_COLUMNS: dict[str, str] = {
+    "symbol": "종목",
+    "side": "구분",
+    "target_price": "목표가",
+    "quantity": "수량",
+    "order_type": "주문유형",
+    "status": "상태",
+    "created_at": "등록일시",
+}
+
+
 def list_conditions() -> pd.DataFrame:
+    """등록된 조건 목록 — 핵심 컬럼만 한글 라벨로 반환.
+
+    원시 snake_case 컬럼 전체는 TableResponse 확장 행(expand row)에서
+    볼 수 있도록 DataTable 이 지원한다. 화면 표시용으로는 7개 핵심 컬럼만
+    한글로 반환해 헤더 압축/겹침을 방지한다.
+    """
     repo, *_ = _ctx()
     rows = repo.list_conditions()
-    return pd.DataFrame(rows) if rows else pd.DataFrame()
+    if not rows:
+        return pd.DataFrame(columns=list(_CONDITIONS_DISPLAY_COLUMNS.values()))
+    df = pd.DataFrame(rows)
+    # 핵심 컬럼만 선택한 뒤 한글 라벨로 이름 변경
+    available = [c for c in _CONDITIONS_DISPLAY_COLUMNS if c in df.columns]
+    df = df[available].rename(columns=_CONDITIONS_DISPLAY_COLUMNS)
+    return df
 
 
 def add_condition(symbol: str, side: str, target_price: float, quantity: int,
