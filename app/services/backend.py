@@ -361,7 +361,7 @@ def recent_fills(limit: int = 10) -> pd.DataFrame:
 
 
 # 등록된 조건 표 — 화면에 표시할 핵심 컬럼과 한글 라벨 매핑.
-# 모든 원시 컬럼은 DataTable 확장 행(expand row)으로 계속 제공된다.
+# list_conditions()는 이 7개 컬럼만 반환하므로 메인 표·확장 행 모두 이 컬럼만 보인다.
 _CONDITIONS_DISPLAY_COLUMNS: dict[str, str] = {
     "symbol": "종목",
     "side": "구분",
@@ -374,11 +374,12 @@ _CONDITIONS_DISPLAY_COLUMNS: dict[str, str] = {
 
 
 def list_conditions() -> pd.DataFrame:
-    """등록된 조건 목록 — 핵심 컬럼만 한글 라벨로 반환.
+    """등록된 조건 목록 — 핵심 7개 컬럼만 한글 라벨로 반환.
 
-    원시 snake_case 컬럼 전체는 TableResponse 확장 행(expand row)에서
-    볼 수 있도록 DataTable 이 지원한다. 화면 표시용으로는 7개 핵심 컬럼만
-    한글로 반환해 헤더 압축/겹침을 방지한다.
+    원시 snake_case 컬럼(15개)을 그대로 내보내면 DataTable 헤더가 압축·겹쳐
+    읽기 어려우므로, 거래 파악에 필요한 핵심 7개 컬럼만 한글 라벨로 골라 반환한다.
+    반환되는 컬럼이 곧 화면에 보이는 전부다(메인 표·확장 행 동일). 나머지 원시
+    컬럼(rationale·risk_note·cooldown_until 등)은 현재 화면에 노출하지 않는다.
     """
     repo, *_ = _ctx()
     rows = repo.list_conditions()
