@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-17T22:14:31+09:00`
+> 생성 시각: `2026-06-19T22:18:00+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -50,6 +50,7 @@
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 
 ## Medium
 

@@ -556,3 +556,19 @@
 추가 closeout(2026-06-17T16:21:08+09:00): owner_governance stop-hook 실패 원인은 TASKSET resolution enum 불일치였고 `resolution: done`으로 수정해 재실행 pass. `web/src/app/login/page.tsx`는 TASK-070 SSO/SNS 보강으로 포함 판단: 미설정 Google/Kakao/Naver setup shell과 Owner setup 안내만 추가하며 secret/live OAuth/prod 주문은 활성화하지 않는다.
 CI follow-up(2026-06-17T16:40:51+09:00): PR #92 frontend CI에서 기존 `web/e2e/login.spec.ts`가 disabled Kakao 숨김과 mock 버튼명을 구 UX 기준으로 기대해 실패했다. 새 UX 계약에 맞게 setup shell 노출과 `Mock SSO (개발용)` 버튼명을 검증하도록 수정. 로컬 검증: `npm run lint` pass, `npm run build` successful, `npm run test:e2e -- e2e/login.spec.ts --reporter=line` -> 5 passed.
 남은 리스크: PR/merge packaging이 남아 있다. TASK-069는 2026-12-14 scheduled 보류 유지. R3 prod 실주문 활성화와 실제 외부 OAuth credential/live callback 검증은 별도 Owner-managed 단계다.
+
+### AUDIT-2026-06-19-040
+
+시각: 2026-06-19T22:04:43+09:00
+기록 시각: 2026-06-19T22:04:43+09:00
+요청자: Owner ("즉시 승격하고, 내가 승인해야할 것들을 정리해서 알려줘")
+수행자: Lead Engineer + UI/UX Designer perspective
+의도: 확장 비주얼 에셋 리서치 Top-12 후보(E1~E12)를 정식 TASK로 승격해 추적 가능하게 한다.
+대상: TASK-140, docs/research/ 확장 리서치 묶음, ui-improvement-backlog.md, PR #95, PR #96
+작업: 동시 세션이 TASK 레지스트리(075~123, AUDIT 035+)를 미커밋 churn 중이라 충돌·손상을 피해 main 기준 격리 worktree에서 버퍼 번호 TASK-140 umbrella 1건으로 승격. INDEX 행 + 본 AUDIT 엔트리 추가, 게이트 통과 확인. 커밋은 main 기준 PR로 분리(공유 dirty 거버넌스 무접촉).
+방법: governance record only (TASK/AUDIT/INDEX). 코드·의존성·secret·deploy·order/risk 변경 없음. 신규 web 의존성은 Owner 승인 게이트.
+결과: TASK-140 등록(대기). 번호는 레지스트리 안정 시 재조정 가능.
+검증: worktree 기준 `python scripts/check_agent_docs.py` 0 error.
+관련 기록: TASK-140, PR #95, PR #96, docs/research/2026-06-19-open-source-visual-assets-expanded.md
+남은 리스크: 신규 의존성(uPlot/DiceBear/vitest 등) Owner 승인 대기; UI 배선은 dev 환경·design-tokens 동시 편집 정리 후; 번호 reconciliation은 레지스트리 커밋 후.
+경계: 코드·의존성·secret·deploy·KIS/payment/order/risk/prod 변경 없음.
