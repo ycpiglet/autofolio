@@ -10,10 +10,10 @@ import {
   apiGet,
   apiTable,
   getInvestorProfile,
-  ApiError,
   type InvestorProfileResponse,
   type TableResponse,
 } from "@/lib/api";
+import { useAuthSession, isUnauthorized } from "@/hooks/useAuthSession";
 import { fmtWon, fmtPct } from "@/lib/format";
 import { holdingsToTreemapItems } from "@/lib/holdings-treemap";
 import { AppShell } from "@/components/layout/AppShell";
@@ -30,12 +30,6 @@ const EquityChart = dynamic(
   { ssr: false, loading: () => <div className="h-60 animate-pulse rounded-xl bg-muted" /> },
 );
 
-interface SessionResponse {
-  role: string;
-  username: string | null;
-  data_source: string;
-}
-
 interface KpiResponse {
   총평가금액?: number;
   일간손익?: number;
@@ -47,56 +41,59 @@ interface KpiResponse {
 export default function HomePage() {
   const router = useRouter();
 
-  // ── Auth guard ───────────────────────────────────────────────────────────
-  const { error: authError, isError: isAuthError, isPending: isAuthPending } =
-    useQuery<SessionResponse>({
-      queryKey: ["auth-me"],
-      queryFn: () => apiGet<SessionResponse>("/api/auth/me"),
-      retry: false,
-      staleTime: 60_000,
-    });
+  // ── Auth guard — shared hook; query key ["auth-me"] deduplicates with ────
+  // TopStatusBar and other consumers. Data queries below are gated on this.
+  const { isAuthenticated, isPending: isAuthPending, isAuthError, authError } =
+    useAuthSession();
 
   useEffect(() => {
-    if (isAuthError && authError instanceof ApiError && authError.status === 401) {
+    if (isAuthError && isUnauthorized(authError)) {
       router.replace("/login");
     }
   }, [isAuthError, authError, router]);
 
-  // ── Data queries ─────────────────────────────────────────────────────────
+  // ── Data queries — all gated on confirmed session (enabled: isAuthenticated)
+  // so no fetch fires while unauthenticated or while the auth check is pending.
   const kpiQuery = useQuery<KpiResponse>({
     queryKey: ["portfolio-kpis"],
     queryFn: () => apiGet<KpiResponse>("/api/portfolio/kpis"),
     staleTime: 30_000,
+    enabled: isAuthenticated,
   });
 
   const curveQuery = useQuery<TableResponse>({
     queryKey: ["asset-curve"],
     queryFn: () => apiTable("/api/portfolio/asset-curve?days=90"),
     staleTime: 60_000,
+    enabled: isAuthenticated,
   });
 
   const indicesQuery = useQuery<TableResponse>({
     queryKey: ["market-indices"],
     queryFn: () => apiTable("/api/market/indices"),
     staleTime: 30_000,
+    enabled: isAuthenticated,
   });
 
   const holdingsQuery = useQuery<TableResponse>({
     queryKey: ["portfolio-holdings"],
     queryFn: () => apiTable("/api/portfolio/holdings"),
     staleTime: 30_000,
+    enabled: isAuthenticated,
   });
 
   const fillsQuery = useQuery<TableResponse>({
     queryKey: ["fills-recent"],
     queryFn: () => apiTable("/api/trade/fills/recent?limit=10"),
     staleTime: 30_000,
+    enabled: isAuthenticated,
   });
 
   const profileQuery = useQuery<InvestorProfileResponse>({
     queryKey: ["investor-profile"],
     queryFn: getInvestorProfile,
     staleTime: 60_000,
+    enabled: isAuthenticated,
   });
 
   // ── Loading / auth pending ───────────────────────────────────────────────
