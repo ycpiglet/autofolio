@@ -12,10 +12,14 @@ from app.services.backend import (  # noqa: F401
     account_summary,
     allocation_gap,
     asset_curve,
+    create_portfolio_group,
     daily_pnl_series,
+    delete_portfolio_group,
     holdings_df,
     kpis,
+    list_portfolio_groups,
     positions,
+    update_portfolio_group,
 )
 
 __all__ = [
@@ -25,8 +29,12 @@ __all__ = [
     "account_summary",
     "allocation_gap",
     "asset_curve",
+    "create_portfolio_group",
     "daily_pnl_series",
+    "delete_portfolio_group",
     "holdings_df",
     "kpis",
+    "list_portfolio_groups",
     "positions",
+    "update_portfolio_group",
 ]
