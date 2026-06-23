@@ -1020,24 +1020,60 @@ def daily_pnl_series() -> "pd.DataFrame":
     return pd.DataFrame([dict(r) for r in rows]) if rows else pd.DataFrame(columns=["date", "pnl"])
 
 
+# ── 데모 자산추이 생성 ────────────────────────────────────────────────────────
+# mock/demo 환경에서 체결 내역 없이 0원이 반환될 때 사용하는 시드값 및 초기 자본.
+# 이 값들은 DEMO 전용이며 실거래/실계정 경로에 영향을 주지 않는다.
+_DEMO_RNG_SEED: int = 7          # 결정적 재현성 보장 (numpy.random.default_rng)
+_DEMO_INITIAL_CAPITAL: float = 1_500_000.0  # 데모 시작 자본 (₩150만)
+
+
+def _generate_demo_asset_curve(days: int, end_value: float) -> pd.DataFrame:
+    """데모 전용 — 결정적(고정 시드) 일별 자산추이를 생성한다.
+
+    실거래·실계정 경로에서는 절대 호출되지 않는다.
+    시작값은 _DEMO_INITIAL_CAPITAL, 끝값은 end_value(0이면 _DEMO_INITIAL_CAPITAL) 에 맞춘다.
+    일별 수익률은 뮤 0.09% / 시그마 1.1% 의 정규분포 (KOSPI 장기 일평균 근사).
+    """
+    import datetime as dt
+    import numpy as np
+
+    target_end = end_value if end_value > 0 else _DEMO_INITIAL_CAPITAL
+    rng = np.random.default_rng(_DEMO_RNG_SEED)
+    steps = rng.normal(0.0009, 0.011, days)
+    series = np.cumprod(1 + steps)
+    # 시작값을 _DEMO_INITIAL_CAPITAL, 끝값을 target_end에 고정
+    series = series / series[0] * _DEMO_INITIAL_CAPITAL
+    series = series * (target_end / series[-1])
+    idx = pd.date_range(end=dt.date.today(), periods=days, name="date")
+    return pd.DataFrame({"자산": series.round()}, index=idx)
+
+
 def asset_curve(days: int = 90) -> pd.DataFrame:
     """누적 자산 곡선 — execution_logs 기반 일별 누적 손익 + 현재 보유 자산.
 
-    컬럼: date (index), 자산 (float).
-    체결 내역이 없으면 현재 보유 평가금액 단일 값으로 반환.
+    컬럼: date (index, name="date"), 자산 (float).
+
+    폴백 우선순위:
+    1. execution_logs 체결 내역 있음 → 실 누적 손익 곡선.
+    2. 체결 내역 없음 + base_value > 0 → 단일 관측값 (실 보유지만 거래 이력 없음).
+    3. 체결 내역 없음 + base_value == 0 → 데모 시드 곡선 (_generate_demo_asset_curve).
+       KIS_ENV=mock(기본값)에서 MockBrokerClient 잔고가 비어있을 때 해당.
     """
     pnl_df = daily_pnl_series()
     holdings = holdings_df(include_dividends=False)
     base_value = float(holdings["평가금액"].sum()) if not holdings.empty else 0.0
 
     if pnl_df.empty:
+        if base_value == 0.0:
+            # 데모/mock 환경 — 현실적인 샘플 곡선 반환 (실데이터 아님)
+            return _generate_demo_asset_curve(days, end_value=0.0)
         import datetime as dt
         today = dt.date.today().isoformat()
-        return pd.DataFrame({"자산": [base_value]}, index=[today])
+        return pd.DataFrame({"자산": [base_value]}, index=pd.Index([today], name="date"))
 
     # 최근 days 일치만
     pnl_df = pnl_df.tail(days).copy()
     pnl_df["cumulative_pnl"] = pnl_df["pnl"].cumsum()
     pnl_df["자산"] = base_value + pnl_df["cumulative_pnl"] - pnl_df["cumulative_pnl"].iloc[-1]
-    pnl_df.index = pnl_df["date"]
+    pnl_df.index = pd.Index(pnl_df["date"], name="date")
     return pnl_df[["자산"]]
