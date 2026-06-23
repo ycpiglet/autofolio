@@ -1,7 +1,7 @@
 // web/src/app/agents/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuthSession, isUnauthorized } from "@/hooks/useAuthSession";
 import { useSymbols } from "@/hooks/useSymbols";
 import { fmtWon } from "@/lib/format";
 import {
-  apiGet,
   apiAgentsList,
   apiAgentAsk,
   apiAgentResearch,
@@ -94,12 +94,13 @@ function ExpertAgentsPanel({ agents }: { agents: AgentInfo[] }) {
 
 // ── Saved pre-market summary ───────────────────────────────────────────────
 
-function PremarketSummaryPanel() {
+function PremarketSummaryPanel({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { data, isPending, error } = useQuery<PremarketSummaryResponse>({
     queryKey: ["premarket-summary"],
     queryFn: () => apiPremarketSummary(),
     retry: false,
     staleTime: 30_000,
+    enabled: isAuthenticated,
   });
 
   return (
@@ -144,22 +145,8 @@ function PremarketSummaryPanel() {
 }
 
 // ── Owner detection (for owner-only AI insight) ─────────────────────────────
-
-interface SessionResponse {
-  role: string;
-  username: string | null;
-  data_source: string;
-}
-
-function useIsOwner(): boolean {
-  const { data } = useQuery<SessionResponse>({
-    queryKey: ["auth-me"],
-    queryFn: () => apiGet<SessionResponse>("/api/auth/me"),
-    retry: false,
-    staleTime: 60_000,
-  });
-  return data?.role === "owner";
-}
+// Derived from the shared ["auth-me"] session — no extra request.
+// useIsOwner is kept as a helper used only by AgentsPage (passed as isOwner prop).
 
 // ── Fundamental key labels (Korean) ─────────────────────────────────────────
 
@@ -670,11 +657,12 @@ function IcPanel() {
 
 // ── Past decisions list ────────────────────────────────────────────────────
 
-function PastDecisions() {
+function PastDecisions({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { data, isPending, error } = useQuery<IcDecision[]>({
     queryKey: ["ic-decisions"],
     queryFn: () => apiIcDecisions(10),
     staleTime: 60_000,
+    enabled: isAuthenticated,
   });
 
   return (
@@ -729,15 +717,41 @@ function PastDecisions() {
 // ── Main page ──────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
-  const isOwner = useIsOwner();
+  const router = useRouter();
+
+  // ── Auth guard — shared hook; query key ["auth-me"] deduplicates with ────
+  // TopStatusBar and other consumers. Data queries below are gated on this.
+  const { isAuthenticated, isPending: isAuthPending, isAuthError, authError, session } =
+    useAuthSession();
+
+  useEffect(() => {
+    if (isAuthError && isUnauthorized(authError)) {
+      router.replace("/login");
+    }
+  }, [isAuthError, authError, router]);
+
+  // Derive isOwner from the shared session — no extra request.
+  const isOwner = session?.role === "owner";
+
+  // ── Data queries — all gated on confirmed session (enabled: isAuthenticated)
   const { data, isPending, error } = useQuery<AgentsListResponse>({
     queryKey: ["agents-list"],
     queryFn: apiAgentsList,
     staleTime: 60_000,
     retry: 1,
+    enabled: isAuthenticated,
   });
 
-  // Loading skeleton
+  // ── Loading / auth pending ───────────────────────────────────────────────
+  if (isAuthPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-page">
+        <div className="h-8 w-8 animate-pulse rounded-full bg-muted" aria-label="로딩 중" />
+      </div>
+    );
+  }
+
+  // Loading skeleton (agents-list fetch in progress after auth confirmed)
   if (isPending) {
     return (
       <AppShell>
@@ -779,7 +793,7 @@ export default function AgentsPage() {
         </section>
 
         <section aria-label="프리마켓 핵심 요약">
-          <PremarketSummaryPanel />
+          <PremarketSummaryPanel isAuthenticated={isAuthenticated} />
         </section>
 
         {/* ── 1. 종목 전문가 브리핑 (manual primary) ── */}
@@ -797,7 +811,7 @@ export default function AgentsPage() {
         </section>
 
         <section aria-label="과거 결정">
-          <PastDecisions />
+          <PastDecisions isAuthenticated={isAuthenticated} />
         </section>
 
         {/* ── 3. 에이전트에게 질문(Ask) (secondary) ── */}
