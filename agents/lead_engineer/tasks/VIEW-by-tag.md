@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-23T18:24:44+09:00`
+> 생성 시각: `2026-06-23T20:42:26+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -13,6 +13,15 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-102](TASK-102-membership-local-account-grant.md) | 완료 | High | 중 | 1 ph / ~22000 tok | Backend Engineer | auth,membership,approval,account-grant,subscription,local-prototype |
+
+## #accounting
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## #acknowledgement
 
@@ -46,6 +55,10 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-048](TASK-048-ui-overhaul-phase4-agents-sse.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | Backend Engineer | ui-overhaul,sse,agents,ic,notifications,phase4 |
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Lead Engineer | business-plan,agents,regulatory-admin,marketing,hwpx,governance |
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Business Planner | sales,revenue,go-to-market,agents,pricing,crm |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | High | 중 | 2 ph / ~25000 tok | Lead Engineer | marketing,agents,operating-model,routing,go-to-market |
 
 ## #alerts
 
@@ -121,7 +134,18 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,gate |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,preview |
 | [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
+
+## #audit-log
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Medium | 상 | 8 ph / ~80000 tok | Marketing Growth | marketing,sns,external-api,publishing,automation,audit-log |
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,sns,publishing,state-machine,audit-log |
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Backend Engineer | marketing,sns,publishing,dry-run,audit-log |
 
 ## #auth
 
@@ -150,6 +174,13 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-104](TASK-104-membership-member-admin-boundary.md) | 완료 | High | 중 | 1 ph / ~16000 tok | Backend Engineer | auth,membership,authorization,member-boundary,local-prototype |
 
+## #automation
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Medium | 상 | 8 ph / ~80000 tok | Marketing Growth | marketing,sns,external-api,publishing,automation,audit-log |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
+
 ## #avatar
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -162,6 +193,7 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
 
 ## #backlog
 
@@ -240,6 +272,33 @@
 | [TASK-064](TASK-064-fix-condition-toctou-race.md) | 완료 | Critical | 상 | 8 ph / ~60000 tok | Backend Engineer | bug,safety,race-condition,database,order-flow |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 
+## #business-admin
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Medium | 중 | 1 ph / ~18000 tok | Regulatory Admin | business-admin,document-packet,hwpx,business-registration,governance |
+
+## #business-plan
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Lead Engineer | business-plan,agents,regulatory-admin,marketing,hwpx,governance |
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | High | 중-상 | 4 ph / ~60000 tok | Business Planner | business-plan,vision,strategy,owner-interview,go-to-market,marketing |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
+
+## #business-registration
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Medium | 중 | 1 ph / ~18000 tok | Regulatory Admin | business-admin,document-packet,hwpx,business-registration,governance |
+
+## #campaign
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | High | 중 | 4 ph / ~50000 tok | Marketing Growth | marketing,go-to-market,campaign,pdf,pptx,early-users |
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,campaign,content-calendar,claim-bank,early-users |
+
 ## #capability
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -271,6 +330,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-063](TASK-063-fix-circuit-breaker-pnl-logic.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,circuit-breaker,pnl |
 
+## #claim-bank
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,campaign,content-calendar,claim-bank,early-users |
+
 ## #compatibility
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -285,13 +350,21 @@
 | [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
 | [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | High | 상 | 24 ph / ~200000 tok | Lead Engineer | deploy,web,auth,membership,payment,multitenant,compliance,supabase,vercel |
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | High | 상 | 16 ph / ~120000 tok | Lead Engineer | compliance,regulatory,legal,gate,deferred,deploy |
 | [TASK-125](TASK-125-membership-kis-commercial-terms-review-packet.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Compliance Officer | membership,kis,open-api,terms,compliance |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
 
 ## #concentration
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
+
+## #content-calendar
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,campaign,content-calendar,claim-bank,early-users |
 
 ## #contract
 
@@ -310,6 +383,13 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-066](TASK-066-test-coverage-60pct.md) | 완료 | High | 중 | 12 ph / ~80000 tok | QA | testing,coverage,safety |
+
+## #crm
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Business Planner | sales,revenue,go-to-market,agents,pricing,crm |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
 
 ## #cycle
 
@@ -362,12 +442,14 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-069](TASK-069-product-maturity-reassessment-2026-12.md) | 보류 | Medium | 중 | 2 ph / ~15000 tok | Lead Engineer | assessment,metrics,reporting,semi-annual,deferred,scheduled |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Medium | 낮 | 0.5 ph / ~6000 tok | Lead Engineer | backlog,governance,deferred,scheduling |
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | High | 상 | 16 ph / ~120000 tok | Lead Engineer | compliance,regulatory,legal,gate,deferred,deploy |
 
 ## #deploy
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | High | 상 | 24 ph / ~200000 tok | Lead Engineer | deploy,web,auth,membership,payment,multitenant,compliance,supabase,vercel |
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | High | 상 | 16 ph / ~120000 tok | Lead Engineer | compliance,regulatory,legal,gate,deferred,deploy |
 | [TASK-119](TASK-119-membership-staging-deploy-preflight-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | CI/CD Engineer | membership,deploy,staging,preflight,vercel,railway,supabase |
 | [TASK-120](TASK-120-membership-staging-env-inventory-template.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | CI/CD Engineer | membership,deploy,staging,env,preflight |
 | [TASK-121](TASK-121-membership-railway-port-healthcheck-readiness.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | Backend Engineer | membership,deploy,railway,healthcheck,preflight |
@@ -428,17 +510,36 @@
 | [TASK-041](TASK-041-broker-capability-feature-parity-matrix.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Lead Engineer | feature-landscape,broker-capability,parity,docs,qa |
 | [TASK-044](TASK-044-external-api-owner-setup-manual.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Doc Steward | docs,external-api,integrations,owner-manual,setup,secrets |
 
+## #document-packet
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Medium | 중 | 1 ph / ~18000 tok | Regulatory Admin | business-admin,document-packet,hwpx,business-registration,governance |
+
 ## #dogfooding
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-068](TASK-068-agent-runtime-eval-pilot.md) | 완료 | Medium | 중 | 3 ph / ~20000 tok | Performance Analyst | agent-runtime,eval,benchmark,pilot,dogfooding |
 
+## #dry-run
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Backend Engineer | marketing,sns,publishing,dry-run,audit-log |
+
 ## #e2e
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-023](TASK-023-kis-engine-e2e-validation.md) | 완료 | High | 중 | 2 ph / ~50000 tok | KIS API Engineer | kis,engine,e2e,validation |
+
+## #early-users
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | High | 중 | 4 ph / ~50000 tok | Marketing Growth | marketing,go-to-market,campaign,pdf,pptx,early-users |
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,campaign,content-calendar,claim-bank,early-users |
 
 ## #elw
 
@@ -503,6 +604,9 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
 | [TASK-044](TASK-044-external-api-owner-setup-manual.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Doc Steward | docs,external-api,integrations,owner-manual,setup,secrets |
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Medium | 상 | 8 ph / ~80000 tok | Marketing Growth | marketing,sns,external-api,publishing,automation,audit-log |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Marketing Growth | marketing,sns,external-api,publishing,policy,research |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
 
 ## #fail-closed
 
@@ -552,6 +656,15 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-116](TASK-116-membership-supabase-staging-schema-field-map.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Backend Engineer | membership,supabase,rls,schema,field-map,production-readiness |
 
+## #finance
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+
 ## #fix
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -593,6 +706,17 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-051](TASK-051-fix-compliance-gate-fail-open.md) | 완료 | High | 중 | 4 ph / ~30000 tok | Backend Engineer | bug,safety,compliance,gate,fail-open,trading |
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | High | 상 | 16 ph / ~120000 tok | Lead Engineer | compliance,regulatory,legal,gate,deferred,deploy |
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,gate |
+
+## #go-to-market
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | High | 중-상 | 4 ph / ~60000 tok | Business Planner | business-plan,vision,strategy,owner-interview,go-to-market,marketing |
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | High | 중 | 4 ph / ~50000 tok | Marketing Growth | marketing,go-to-market,campaign,pdf,pptx,early-users |
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Business Planner | sales,revenue,go-to-market,agents,pricing,crm |
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | High | 중 | 2 ph / ~25000 tok | Lead Engineer | marketing,agents,operating-model,routing,go-to-market |
 
 ## #governance
 
@@ -601,7 +725,9 @@
 | [TASK-007](TASK-007-roles-due-alignment.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | roles,governance |
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Medium | 낮 | 0.5 ph / ~6000 tok | Lead Engineer | backlog,governance,deferred,scheduling |
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Lead Engineer | business-plan,agents,regulatory-admin,marketing,hwpx,governance |
 | [TASK-126](TASK-126-membership-readiness-surface-sync.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | membership,readiness,governance,owner-surface |
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Medium | 중 | 1 ph / ~18000 tok | Regulatory Admin | business-admin,document-packet,hwpx,business-registration,governance |
 
 ## #guest-demo
 
@@ -614,6 +740,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+
+## #handoff
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
 
 ## #healthcheck
 
@@ -658,6 +790,13 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
+
+## #hwpx
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Lead Engineer | business-plan,agents,regulatory-admin,marketing,hwpx,governance |
+| [TASK-127](TASK-127-business-admin-document-packet-schema.md) | 완료 | Medium | 중 | 1 ph / ~18000 tok | Regulatory Admin | business-admin,document-packet,hwpx,business-registration,governance |
 
 ## #ic
 
@@ -753,6 +892,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
 
+## #legal
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | High | 상 | 16 ph / ~120000 tok | Lead Engineer | compliance,regulatory,legal,gate,deferred,deploy |
+
 ## #license
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -820,6 +965,26 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-035](TASK-035-market-hours-kis-ui-verification.md) | 완료 | High | 중 | 2 ph / ~30000 tok | QA | qa,kis,ui,paper,market-hours,verification |
+
+## #marketing
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Lead Engineer | business-plan,agents,regulatory-admin,marketing,hwpx,governance |
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | High | 중-상 | 4 ph / ~60000 tok | Business Planner | business-plan,vision,strategy,owner-interview,go-to-market,marketing |
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | High | 중 | 4 ph / ~50000 tok | Marketing Growth | marketing,go-to-market,campaign,pdf,pptx,early-users |
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Medium | 상 | 8 ph / ~80000 tok | Marketing Growth | marketing,sns,external-api,publishing,automation,audit-log |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Marketing Growth | marketing,sns,external-api,publishing,policy,research |
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,sns,publishing,state-machine,audit-log |
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Backend Engineer | marketing,sns,publishing,dry-run,audit-log |
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,gate |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,preview |
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | High | 중 | 2 ph / ~25000 tok | Lead Engineer | marketing,agents,operating-model,routing,go-to-market |
+| [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,campaign,content-calendar,claim-bank,early-users |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
 
 ## #member-boundary
 
@@ -944,6 +1109,18 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 
+## #operating-model
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | High | 중 | 2 ph / ~25000 tok | Lead Engineer | marketing,agents,operating-model,routing,go-to-market |
+
+## #operations
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
+
 ## #ops
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -998,6 +1175,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-071](TASK-071-stop-hook-owner-governance-host-mode.md) | 완료 | High | 중 | 1 ph / ~12000 tok | Lead Engineer | governance,hooks,owner-gate,host-mode |
 
+## #owner-interview
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | High | 중-상 | 4 ph / ~60000 tok | Business Planner | business-plan,vision,strategy,owner-interview,go-to-market,marketing |
+
 ## #owner-manual
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -1051,6 +1234,15 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-111](TASK-111-membership-payment-evidence-policy.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,payment-evidence,policy,quality-gate,production-readiness |
+
+## #pdf
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | High | 중 | 4 ph / ~50000 tok | Marketing Growth | marketing,go-to-market,campaign,pdf,pptx,early-users |
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,gate |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,preview |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
 
 ## #performance
 
@@ -1114,6 +1306,8 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-037](TASK-037-feature-landscape-research.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,feature-landscape,backlog,planning |
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
 
 ## #pnl
 
@@ -1128,6 +1322,7 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-111](TASK-111-membership-payment-evidence-policy.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,payment-evidence,policy,quality-gate,production-readiness |
 | [TASK-112](TASK-112-membership-production-secret-policy.md) | 완료 | High | 중 | 1 ph / ~20000 tok | Backend Engineer | membership,secrets,policy,quality-gate,production-readiness |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Marketing Growth | marketing,sns,external-api,publishing,policy,research |
 
 ## #portfolio
 
@@ -1137,6 +1332,19 @@
 | [TASK-040](TASK-040-portfolio-performance-tax-lot-reporting.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Performance Analyst | feature-landscape,portfolio,performance,reporting,read-only |
 | [TASK-046](TASK-046-ui-overhaul-phase2-home-portfolio.md) | 완료 | Medium | 중 | 12 ph / ~90000 tok | UI/UX Designer | ui-overhaul,next-js,home,portfolio,phase2 |
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+
+## #pptx
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-095](TASK-095-marketing-materials-v1.md) | 완료 | High | 중 | 4 ph / ~50000 tok | Marketing Growth | marketing,go-to-market,campaign,pdf,pptx,early-users |
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,gate |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,preview |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
 
 ## #preflight
 
@@ -1153,11 +1361,24 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-070](TASK-070-sso-sns-premarket-agent-summary.md) | 완료 | High | 중-상 | 5 ph / ~45000 tok | Lead Engineer | authentication,sso,sns-login,agents,premarket,lint,ui-overhaul |
 
+## #preview
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,preview |
+
 ## #price
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-013](TASK-013-kis-batch-price.md) | 완료 | Medium | 낮 | 2 ph / ~50000 tok | KIS API Engineer | kis,price,performance |
+
+## #pricing
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Business Planner | sales,revenue,go-to-market,agents,pricing,crm |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
 
 ## #production
 
@@ -1193,6 +1414,16 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-055](TASK-055-fix-home-proposal-buttons-noop.md) | 완료 | High | 중 | 3 ph / ~20000 tok | UI/UX Designer | bug,ui,home,ic,proposals |
+
+## #publishing
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Medium | 상 | 8 ph / ~80000 tok | Marketing Growth | marketing,sns,external-api,publishing,automation,audit-log |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Marketing Growth | marketing,sns,external-api,publishing,policy,research |
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,sns,publishing,state-machine,audit-log |
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Backend Engineer | marketing,sns,publishing,dry-run,audit-log |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
 
 ## #qa
 
@@ -1246,6 +1477,12 @@
 | [TASK-119](TASK-119-membership-staging-deploy-preflight-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | CI/CD Engineer | membership,deploy,staging,preflight,vercel,railway,supabase |
 | [TASK-121](TASK-121-membership-railway-port-healthcheck-readiness.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | Backend Engineer | membership,deploy,railway,healthcheck,preflight |
 
+## #read-model
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+
 ## #read-only
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -1265,6 +1502,8 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-108](TASK-108-membership-production-readiness-gate.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Backend Engineer | membership,readiness,deploy-gate,production,local-prototype |
 | [TASK-126](TASK-126-membership-readiness-surface-sync.md) | 완료 | Medium | 낮 | 1 ph / ~12000 tok | Lead Engineer | membership,readiness,governance,owner-surface |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
 
 ## #readme
 
@@ -1291,11 +1530,32 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-117](TASK-117-membership-payment-recognition-decision-packet.md) | 완료 | Medium | 중 | 2 ph / ~35000 tok | Regulatory Admin | membership,payment,bank-transfer,recognition,decision-packet |
 
+## #regulatory
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | High | 상 | 16 ph / ~120000 tok | Lead Engineer | compliance,regulatory,legal,gate,deferred,deploy |
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
+
+## #regulatory-admin
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Lead Engineer | business-plan,agents,regulatory-admin,marketing,hwpx,governance |
+
 ## #reit
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-026](TASK-026-krx-alternative-products-test-support.md) | 완료 | Medium | 상 | 5 ph / ~50000 tok | KIS API Engineer | kis,qa,asset-class,bond,reit,elw,etn |
+
+## #rendering
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,gate |
+| [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,assets,pdf,pptx,rendering,preview |
+| [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
 
 ## #reporting
 
@@ -1320,6 +1580,14 @@
 | [TASK-039](TASK-039-backtest-research-report-hardening.md) | 완료 | Medium | 중 | 4 ph / ~45000 tok | Quant Researcher | feature-landscape,backtest,research,reports,qa |
 | [TASK-042](TASK-042-asset-universe-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,asset-universe,approval-record,capability,backlog |
 | [TASK-043](TASK-043-external-app-api-decision-record.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Research Agent | research,external-api,integrations,approval-record,capability,backlog |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Marketing Growth | marketing,sns,external-api,publishing,policy,research |
+
+## #revenue
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Business Planner | sales,revenue,go-to-market,agents,pricing,crm |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
 
 ## #review
 
@@ -1343,11 +1611,25 @@
 | [TASK-116](TASK-116-membership-supabase-staging-schema-field-map.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Backend Engineer | membership,supabase,rls,schema,field-map,production-readiness |
 | [TASK-123](TASK-123-membership-supabase-staging-migration-rls-review-packet.md) | 완료 | Medium | 중 | 2 ph / ~26000 tok | Backend Engineer | membership,supabase,staging,rls,migration-review |
 
+## #roadmap
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+
 ## #roles
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-007](TASK-007-roles-due-alignment.md) | 완료 | Low | 중 | 1 ph / ~10000 tok | Lead Engineer | roles,governance |
+
+## #routing
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
+| [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | High | 중 | 2 ph / ~25000 tok | Lead Engineer | marketing,agents,operating-model,routing,go-to-market |
 
 ## #safety
 
@@ -1367,6 +1649,19 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-047](TASK-047-ui-overhaul-phase3-trade-settings-gates.md) | 완료 | High | 상 | 20 ph / ~150000 tok | Backend Engineer | ui-overhaul,fastapi,trade,settings,safety-gates,phase3,r3-adjacent |
+
+## #sales
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-097](TASK-097-sales-revenue-lane-decision.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Business Planner | sales,revenue,go-to-market,agents,pricing,crm |
+| [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
+
+## #scenario
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
 
 ## #scenario-catalog
 
@@ -1475,6 +1770,16 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-033](TASK-033-portfolio-reality-model-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Performance Analyst | qa,portfolio,cash,fees,slippage,concentration |
 
+## #sns
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-096](TASK-096-promotion-publishing-pipeline.md) | 완료 | Medium | 상 | 8 ph / ~80000 tok | Marketing Growth | marketing,sns,external-api,publishing,automation,audit-log |
+| [TASK-129](TASK-129-promotion-channel-policy-matrix.md) | 완료 | Medium | 중 | 2 ph / ~30000 tok | Marketing Growth | marketing,sns,external-api,publishing,policy,research |
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,sns,publishing,state-machine,audit-log |
+| [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Backend Engineer | marketing,sns,publishing,dry-run,audit-log |
+| [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
+
 ## #sns-login
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -1522,6 +1827,12 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-032](TASK-032-data-quality-corporate-action-tests.md) | 완료 | Medium | 중 | 5 ph / ~45000 tok | Data Engineer | qa,data-quality,corporate-actions,holiday,stale-data |
 
+## #state-machine
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-130](TASK-130-promotion-publishing-state-machine-contract.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Marketing Growth | marketing,sns,publishing,state-machine,audit-log |
+
 ## #stop
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
@@ -1539,6 +1850,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-034](TASK-034-scheduled-strategy-pattern-tests.md) | 완료 | Medium | 중 | 6 ph / ~55000 tok | Quant Researcher | qa,strategy,scheduler,dca,pairs,volatility,rebalance |
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | High | 중-상 | 4 ph / ~60000 tok | Business Planner | business-plan,vision,strategy,owner-interview,go-to-market,marketing |
 
 ## #streamlit
 
@@ -1660,6 +1972,7 @@
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
 | [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## #ui-overhaul
 
@@ -1715,6 +2028,12 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-031](TASK-031-market-halt-vi-risk-gates.md) | 완료 | High | 중 | 5 ph / ~50000 tok | Compliance Officer | qa,risk,compliance,halt,vi,disclosure |
+
+## #vision
+
+| ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
+|----|------|----------|--------|-----------|-------|------|
+| [TASK-093](TASK-093-business-plan-v1.md) | 완료 | High | 중-상 | 4 ph / ~60000 tok | Business Planner | business-plan,vision,strategy,owner-interview,go-to-market,marketing |
 
 ## #volatility
 

@@ -1,0 +1,168 @@
+{
+  "$schema": "autofolio.sales-revenue-lane-decision/v1",
+  "decision_id": "SALES-REVENUE-LANE-DECISION-2026-06-19-001",
+  "status": "local_decision_role_deferred_not_active",
+  "created_at": "2026-06-19T23:32:08+09:00",
+  "updated_at": "2026-06-19T23:32:08+09:00",
+  "owner": "Business Planner",
+  "related_tasks": ["TASK-093", "TASK-095", "TASK-096", "TASK-097"],
+  "related_taskset": "TASKSET-MARKETING-GROWTH",
+  "decision": {
+    "create_sales_revenue_role_now": false,
+    "activate_sales_revenue_lane_now": false,
+    "current_operating_mode": "marketing_growth_only_with_owner_approved_external_actions",
+    "decision_summary": "Do not create or activate a Sales/Revenue role yet. Keep pricing, CRM, customer records, customer contact, payment collection, and conversion operations outside Marketing Growth until support/refund, privacy, CRM, payment, compliance, and Owner approval inputs exist.",
+    "reason": [
+      "Business Plan v1 has a selected subscription direction and low-price hypothesis, but support/refund and exact payment/customer-record operations still need Owner decisions.",
+      "Current early-user flow is verified signup request and Owner-approved account activation, not sales outreach or broad paid conversion.",
+      "Marketing Growth can continue draft education and awareness material, but should not own pricing, customer contracting, payment collection, CRM, or retention operations.",
+      "Recommendation, paid signal, model portfolio, and personalized advice claims remain blocked until Compliance Officer and professional/regulator review."
+    ]
+  },
+  "current_readiness": {
+    "pricing_hypothesis": {
+      "state": "selected_hypothesis_internal_only",
+      "evidence": "BUSINESS-PLAN.md low-price pilot around KRW 20000",
+      "blocks_role_activation": true
+    },
+    "pilot_flow": {
+      "state": "verified_signup_request_owner_approved",
+      "evidence": "BUSINESS-PLAN.md verified signup / payment approval interpretation",
+      "blocks_role_activation": false
+    },
+    "support_refund_policy": {
+      "state": "owner_decision_missing",
+      "evidence": "BUSINESS-PLAN.md Owner Decision List",
+      "blocks_role_activation": true
+    },
+    "crm_or_customer_record_policy": {
+      "state": "not_defined",
+      "evidence": "MARKETING-BRIEF.md Sales Handoff",
+      "blocks_role_activation": true
+    },
+    "payment_collection_policy": {
+      "state": "manual_owner_approval_only",
+      "evidence": "MEMBERSHIP-ACCESS-PLAN and payment evidence policy",
+      "blocks_role_activation": true
+    },
+    "compliance_sales_claim_review": {
+      "state": "required_before_public_or_paid_sales_claims",
+      "evidence": "MARKETING-BRIEF.md claim bank and Compliance routing",
+      "blocks_role_activation": true
+    }
+  },
+  "marketing_growth_scope_until_activation": [
+    "positioning",
+    "claim bank maintenance",
+    "campaign briefs",
+    "landing copy draft source",
+    "PDF/PPTX source drafts",
+    "SNS draft bundles",
+    "support FAQ draft",
+    "disclaimer draft",
+    "no-contact educational material"
+  ],
+  "future_sales_revenue_scope_after_activation": [
+    "pricing packaging",
+    "lead qualification",
+    "demo request handling",
+    "CRM or customer-record workflow",
+    "conversion handoff",
+    "payment and receipt coordination",
+    "support and refund handoff",
+    "retention and renewal workflow"
+  ],
+  "activation_triggers": [
+    "owner_approves_sales_revenue_role_activation",
+    "support_refund_policy_defined",
+    "privacy_and_customer_record_policy_defined",
+    "payment_collection_and_receipt_policy_defined",
+    "crm_or_no_crm_decision_defined",
+    "compliance_review_for_sales_claims_complete",
+    "customer_contact_workflow_owner_approved",
+    "business_registration_or_admin_posture_recorded_for_paid_offer"
+  ],
+  "future_role_contract_if_activated": {
+    "role_id": "sales-revenue",
+    "aliases": ["sales", "revenue", "sales-revenue"],
+    "required_inputs": [
+      "AGENTS.md",
+      "agents/project/BUSINESS-PLAN.md",
+      "agents/project/MARKETING-BRIEF.md",
+      "agents/project/SALES-REVENUE-LANE-DECISION.md",
+      "approved pricing/payment/support/refund/customer-record policy",
+      "Compliance Officer sales-claim review"
+    ],
+    "forbidden_inputs": [
+      "unredacted private customer data in repo files",
+      "bank account values or payment identifiers",
+      "provider, CRM, payment, SNS, or KIS secrets",
+      "unapproved investment-advice, paid-signal, or performance claims"
+    ],
+    "output_contract": [
+      "pricing/package decision brief",
+      "lead qualification and demo intake draft",
+      "CRM/customer-record policy proposal",
+      "conversion handoff checklist",
+      "support/refund handoff checklist",
+      "Compliance Officer review flags"
+    ],
+    "audit_gate": true
+  },
+  "boundaries": {
+    "decision_record_only": true,
+    "not_role_activation": true,
+    "no_role_registry_change": true,
+    "no_customer_contact": true,
+    "no_customer_private_data": true,
+    "no_crm_account_creation": true,
+    "no_payment_request": true,
+    "no_payment_provider_action": true,
+    "no_bank_or_receipt_action": true,
+    "no_public_sales_claim": true,
+    "no_paid_ads": true,
+    "no_lead_scraping": true,
+    "no_bulk_outreach": true,
+    "no_external_account_action": true,
+    "no_oauth_flow": true,
+    "no_secret_or_token_storage": true,
+    "no_investment_advice_or_paid_signal_sales": true,
+    "owner_approval_required_before_customer_contact": true,
+    "compliance_review_required_before_paid_or_public_sales_claims": true
+  },
+  "prohibited_sales_automation": [
+    "cold email or direct message",
+    "customer contact without Owner approval",
+    "CRM account creation or sync",
+    "payment request or checkout creation",
+    "bank or receipt action",
+    "lead scraping",
+    "bulk outreach",
+    "paid ads",
+    "retargeting pixel setup",
+    "viewbot or fake engagement",
+    "investment advice sales claim",
+    "paid signal sales claim",
+    "model portfolio sales claim",
+    "performance guarantee",
+    "KIS commercial clearance claim"
+  ],
+  "taskset_handoff": {
+    "task_097_complete": true,
+    "taskset_marketing_growth_complete": true,
+    "sales_revenue_lane_active": false,
+    "next_allowed_no_owner_slice": "draft-only asset rendering/source-packaging taskset, still without public export, customer contact, paid ads, CRM, payment, or external account actions",
+    "owner_r3_required_for": [
+      "real customer contact",
+      "CRM or customer-record system activation",
+      "payment request or provider setup",
+      "support/refund policy finalization",
+      "public sales copy approval",
+      "paid ads or billing setup"
+    ]
+  },
+  "verification": {
+    "local_gate": "python scripts/sales_revenue_lane_decision_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_sales_revenue_lane_decision_gate.py -q"
+  }
+}

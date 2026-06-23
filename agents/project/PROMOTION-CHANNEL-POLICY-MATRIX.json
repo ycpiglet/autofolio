@@ -1,0 +1,318 @@
+{
+  "$schema": "autofolio.promotion-channel-policy-matrix/v1",
+  "packet_id": "PROMOTION-CHANNEL-POLICY-MATRIX-2026-06-19",
+  "status": "research_packet_not_publish_ready",
+  "created_at": "2026-06-19T22:58:13+09:00",
+  "updated_at": "2026-06-19T23:08:29+09:00",
+  "owner": "Marketing Growth",
+  "related_tasks": ["TASK-095", "TASK-096", "TASK-129"],
+  "related_taskset": "TASKSET-MARKETING-GROWTH",
+  "source_of_truth": {
+    "business_plan": "agents/project/BUSINESS-PLAN.md",
+    "marketing_brief": "agents/project/MARKETING-BRIEF.md",
+    "marketing_materials_v1": "agents/project/MARKETING-MATERIALS-V1.json",
+    "evidence_note": "agents/research_agent/notes/EVIDENCE-2026-06-19-008-promotion-channel-policy.md",
+    "publishing_policy_packet": "agents/project/PROMOTION-PUBLISHING-POLICY-PACKET.json"
+  },
+  "boundaries": {
+    "research_only": true,
+    "not_publish_ready": true,
+    "no_live_publication": true,
+    "no_external_account_action": true,
+    "no_oauth_flow": true,
+    "no_platform_api_call": true,
+    "no_secret_or_token_storage": true,
+    "no_paid_ads": true,
+    "no_customer_contact": true,
+    "no_scraping_or_lead_harvesting": true,
+    "no_bulk_dm_or_spam": true,
+    "no_viewbots_or_fake_engagement": true,
+    "no_terms_evasion": true,
+    "no_investment_or_performance_claim_publication": true,
+    "owner_approval_required_before_live_action": true
+  },
+  "channel_selection": {
+    "initial_channels": ["owner_blog", "x", "linkedin", "instagram", "naver_blog"],
+    "preferred_v1_mode": "manual_export_or_dry_run_preview_only",
+    "live_api_mode": "blocked_until_owner_r3_approval_and_channel_credentials_policy_review",
+    "unsupported_live_auto_posting": ["naver_blog"],
+    "defer_paid_ads": true
+  },
+  "channels": [
+    {
+      "id": "owner_blog",
+      "display_name": "Owner-controlled blog or product dev log",
+      "publication_status": "manual_export_candidate_not_approved",
+      "live_action": false,
+      "owner_r3_required_for_live": true,
+      "api_posting_possible": "not_assessed_external_api_not_required_for_v1",
+      "official_refs": [
+        {
+          "authority": "Autofolio repo",
+          "url": "agents/project/MARKETING-BRIEF.md",
+          "note": "Local source-of-truth for claim bank and review gates."
+        }
+      ],
+      "capabilities": {
+        "create": "Manual copy/export after review only.",
+        "update": "Manual correction after review only.",
+        "delete_or_rollback": "Remove or archive the post from the owner-controlled surface; keep source hash and withdrawal note."
+      },
+      "auth_or_access": "Owner controls the surface. No repository-stored account credential is allowed.",
+      "policy_risks": [
+        "public marketing claim may imply investment advice, paid signals, performance, or KIS clearance",
+        "manual publish still needs Owner and Compliance Officer approval"
+      ],
+      "required_before_live": [
+        "Owner approves exact destination",
+        "Compliance Officer reviews final public copy",
+        "source hash and rollback note are recorded"
+      ],
+      "recommendation": "Use as the first preview destination only after claim review; keep automated publication out of v1."
+    },
+    {
+      "id": "x",
+      "display_name": "X",
+      "publication_status": "policy_researched_not_approved",
+      "live_action": false,
+      "owner_r3_required_for_live": true,
+      "api_posting_possible": "possible_after_owner_developer_setup_and_policy_review",
+      "official_refs": [
+        {
+          "authority": "X Developer Platform",
+          "url": "https://docs.x.com/x-api/posts/manage-tweets/introduction",
+          "note": "Manage Posts endpoints cover creating and deleting posts for authenticated users."
+        },
+        {
+          "authority": "X Developer Platform",
+          "url": "https://docs.x.com/fundamentals/authentication/guides/v2-authentication-mapping",
+          "note": "Posting and deleting posts require user-context auth with read/write/user scopes."
+        },
+        {
+          "authority": "X Help Center",
+          "url": "https://help.x.com/en/rules-and-policies/x-automation",
+          "note": "Automation must comply with X rules and developer policy; spam, API abuse, rate-limit evasion, and non-API website scripting are high-risk."
+        }
+      ],
+      "capabilities": {
+        "create": "Create a post through X API only after Owner app setup, user authorization, and publication approval.",
+        "update": "Post editing support depends on current X endpoint and access tier; treat as not guaranteed.",
+        "delete_or_rollback": "Delete only posts authored by the authenticated user; also record withdrawal text and local source hash."
+      },
+      "auth_or_access": "Requires Owner-controlled X developer app and user authorization. No token, app key, or callback secret may be stored in repo artifacts.",
+      "policy_risks": [
+        "spam or unsolicited automated posts",
+        "rate-limit or API policy evasion",
+        "automated-account disclosure and human-account linkage requirements",
+        "public investment or performance claims"
+      ],
+      "required_before_live": [
+        "Owner creates or approves the developer app and connected account",
+        "minimal write scope and callback policy are reviewed",
+        "Compliance Officer approves the exact public copy",
+        "dry-run audit queue records source hash, approver, planned text, and deletion path"
+      ],
+      "recommendation": "Eligible for future approval-queue design, but live X posting remains Owner/R3."
+    },
+    {
+      "id": "linkedin",
+      "display_name": "LinkedIn",
+      "publication_status": "policy_researched_not_approved",
+      "live_action": false,
+      "owner_r3_required_for_live": true,
+      "api_posting_possible": "possible_after_owner_page_app_permission_and_version_review",
+      "official_refs": [
+        {
+          "authority": "LinkedIn Marketing API",
+          "url": "https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api?view=li-lms-2026-06",
+          "note": "Posts API supports post lifecycle operations with versioned REST headers and delete behavior."
+        },
+        {
+          "authority": "LinkedIn Marketing API",
+          "url": "https://learn.microsoft.com/en-us/linkedin/marketing/community-management/community-management-overview?view=li-lms-2026-06",
+          "note": "Community Management APIs cover organization and brand post management use cases."
+        },
+        {
+          "authority": "LinkedIn Marketing API",
+          "url": "https://learn.microsoft.com/en-us/linkedin/marketing/integrations/recent-changes?view=li-lms-2026-05",
+          "note": "LinkedIn Marketing APIs are versioned and older versions sunset on a schedule."
+        }
+      ],
+      "capabilities": {
+        "create": "Create personal or organization posts only with the applicable permission and page/admin role.",
+        "update": "Partial updates depend on post type and API version; require per-release review.",
+        "delete_or_rollback": "Delete through the versioned Posts API where permitted; batch delete is not a v1 assumption."
+      },
+      "auth_or_access": "Requires Owner-approved developer app, OAuth permission, and the correct member or organization role. No credential or app verification material belongs in the repo.",
+      "policy_risks": [
+        "API version sunset and migration drift",
+        "organization posting requires appropriate page role",
+        "private or restricted permissions may require platform approval",
+        "professional-network public claims need compliance review"
+      ],
+      "required_before_live": [
+        "Owner chooses personal profile versus organization page",
+        "required permission and page role are confirmed",
+        "current API version is refreshed before implementation",
+        "Compliance Officer approves public copy and CTA"
+      ],
+      "recommendation": "Good candidate for professional dev-log distribution after manual preview; live API work remains Owner/R3."
+    },
+    {
+      "id": "instagram",
+      "display_name": "Instagram",
+      "publication_status": "policy_researched_not_approved",
+      "live_action": false,
+      "owner_r3_required_for_live": true,
+      "api_posting_possible": "possible_for_supported_professional_accounts_after_owner_meta_setup",
+      "official_refs": [
+        {
+          "authority": "Meta for Developers",
+          "url": "https://developers.facebook.com/docs/instagram-platform/content-publishing/",
+          "note": "Instagram Platform content publishing covers supported media publishing flows."
+        },
+        {
+          "authority": "Meta for Developers",
+          "url": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media_publish/",
+          "note": "Media publish endpoint is part of the publishing flow."
+        },
+        {
+          "authority": "Meta for Developers",
+          "url": "https://developers.facebook.com/docs/instagram-platform/changelog/",
+          "note": "Platform capabilities change; delete behavior and version changes must be checked before implementation."
+        }
+      ],
+      "capabilities": {
+        "create": "Content publishing may be possible through Meta's Instagram Platform for supported account types and media.",
+        "update": "Treat post editing as unsupported in v1 unless official docs for the selected account type prove otherwise.",
+        "delete_or_rollback": "Delete capability must be confirmed for the selected API version and media type before scheduling any publish."
+      },
+      "auth_or_access": "Requires Owner Meta app/account setup, account-type confirmation, permissions, and app review where applicable. No tokens or account data may be committed.",
+      "policy_risks": [
+        "requires correct Instagram account type and Meta app setup",
+        "media asset requirements may force a separate asset pipeline",
+        "platform version and permission review may change",
+        "visual public claims can still imply performance or financial-service promises"
+      ],
+      "required_before_live": [
+        "Owner confirms Instagram account type and Meta app path",
+        "media asset rules are converted into a separate rendering gate",
+        "delete or withdrawal behavior is verified in a sandbox or non-public test path",
+        "Compliance Officer approves captions and visual claims"
+      ],
+      "recommendation": "Defer live API publishing; keep Instagram as manual caption/image draft source until a media pipeline exists."
+    },
+    {
+      "id": "naver_blog",
+      "display_name": "Naver Blog",
+      "publication_status": "auto_posting_unsupported_research_only",
+      "live_action": false,
+      "owner_r3_required_for_live": true,
+      "api_posting_possible": "unsupported_for_auto_posting",
+      "official_refs": [
+        {
+          "authority": "NAVER Developers",
+          "url": "https://developers.naver.com/notice/article/7527",
+          "note": "NAVER announced the shutdown of the login-based Blog Open API write function effective 2020-05-06."
+        },
+        {
+          "authority": "NAVER Developers",
+          "url": "https://developers.naver.com/docs/share/share/",
+          "note": "Naver Blog sharing flow is user-driven through a login/share popup, not an automated post API for v1."
+        },
+        {
+          "authority": "NAVER Developers",
+          "url": "https://developers.naver.com/docs/serviceapi/search/blog/blog.md",
+          "note": "Current public Blog API surface is search-oriented, not write automation."
+        }
+      ],
+      "capabilities": {
+        "create": "Automated write API should be treated as unavailable. Owner may manually write or use Naver share UI after review.",
+        "update": "Manual only.",
+        "delete_or_rollback": "Manual deletion or correction by Owner in Naver account UI."
+      },
+      "auth_or_access": "Do not implement automated Naver Blog posting in v1. No Naver login session, credential, or browser automation is allowed.",
+      "policy_risks": [
+        "terminated write API",
+        "bulk or repetitive automated posting was part of the shutdown rationale",
+        "browser automation or login scripting would cross platform and Owner/R3 boundaries"
+      ],
+      "required_before_live": [
+        "Owner manually reviews and posts if desired",
+        "no API or browser automation path is built",
+        "Compliance Officer approves final public text"
+      ],
+      "recommendation": "Classify as manual-only. Use Naver Blog as a copy draft target, not as an automated publishing channel."
+    }
+  ],
+  "approval_queue_requirements": [
+    "campaign_id",
+    "channel",
+    "copy_surface",
+    "source_artifact",
+    "source_hash",
+    "claim_review_status",
+    "compliance_reviewer",
+    "owner_approval_required",
+    "owner_approval_record",
+    "dry_run_preview",
+    "scheduled_at",
+    "live_action_blocked_by_default",
+    "external_post_id_after_live_only",
+    "external_url_after_live_only",
+    "rollback_or_delete_instruction"
+  ],
+  "required_preflight_checks_before_any_future_live_post": [
+    "refresh current official docs for the chosen channel",
+    "confirm platform account type and permission path",
+    "confirm deletion or correction path",
+    "run local prohibited-claim and prohibited-automation gates",
+    "record source hash and dry-run preview",
+    "obtain Owner approval for the exact channel and content",
+    "obtain Compliance Officer review for public financial, performance, recommendation, KIS, legal, tax, or regulatory wording"
+  ],
+  "forbidden_actions": [
+    "public posting",
+    "paid campaign",
+    "customer email or direct message",
+    "external account login",
+    "OAuth authorization flow",
+    "external API upload",
+    "SNS auto-posting",
+    "browser automation against social platforms",
+    "lead scraping",
+    "viewbot or fake engagement",
+    "platform manipulation",
+    "rate-limit evasion",
+    "unauthorized bulk posting",
+    "spam",
+    "secret or token storage",
+    "investment advice claim",
+    "performance guarantee",
+    "KIS commercial readiness claim"
+  ],
+  "next_local_slices": [
+    {
+      "candidate": "promotion_publish_state_machine_contract",
+      "owner": "Marketing Growth",
+      "safe_without_owner": true,
+      "scope": "Define draft -> review -> approved -> scheduled -> blocked -> live-recorded states with live action disabled by default."
+    },
+    {
+      "candidate": "promotion_dry_run_audit_preview",
+      "owner": "Backend Engineer",
+      "safe_without_owner": true,
+      "scope": "Create local dry-run preview records from approved draft inputs without network calls or token handling."
+    },
+    {
+      "candidate": "channel_asset_rendering_requirements",
+      "owner": "Marketing Growth",
+      "safe_without_owner": true,
+      "scope": "Convert per-channel text/media limits into local rendering requirements without exporting final public assets."
+    }
+  ],
+  "verification": {
+    "local_gate": "python scripts/promotion_channel_policy_gate.py --check",
+    "focused_tests": "python -m pytest tests/unit/test_promotion_channel_policy_gate.py -q"
+  }
+}
