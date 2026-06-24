@@ -1,4 +1,5 @@
 import { defineConfig } from "vitest/config";
+import path from "path";
 
 // Unit-test runner for the web/ package.
 //
@@ -10,6 +11,11 @@ import { defineConfig } from "vitest/config";
 // Playwright E2E specs live under tests/ and are run separately via
 // `npm run test:e2e`; the `include` glob below scopes vitest to unit tests only.
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
+  },
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],
