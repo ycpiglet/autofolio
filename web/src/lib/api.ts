@@ -23,6 +23,8 @@ export interface TableResponse<
 > {
   columns: string[];
   rows: TRow[];
+  /** True when the server returned a synthetic demo curve (non-prod + sparse history). */
+  is_demo?: boolean;
 }
 
 /** Structured API error */

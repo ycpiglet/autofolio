@@ -135,8 +135,8 @@ class TestAssetCurve:
             df = backend.asset_curve()
         assert (df["자산"] > 0).all(), "데모 곡선에 0 이하 값이 있음"
 
-    def test_real_holdings_no_trades_returns_single_point(self):
-        """체결 내역 없음 + 보유 잔고 있음 → 단일 관측값 (실계정 경로 유지)."""
+    def test_prod_no_trades_returns_single_point(self):
+        """prod 환경 + 체결 내역 없음 + 보유 잔고 있음 → 단일 관측값 (실계정 경로 유지)."""
         from app.services.backend import HOLDINGS_COLUMNS
 
         holdings = pd.DataFrame(
@@ -149,21 +149,26 @@ class TestAssetCurve:
         with (
             patch("app.services.backend.daily_pnl_series", return_value=self._empty_pnl()),
             patch("app.services.backend.holdings_df", return_value=holdings),
+            patch("app.services.backend.env", return_value="prod"),
         ):
             from app.services import backend
             df = backend.asset_curve()
         assert len(df) == 1
         assert float(df["자산"].iloc[0]) == 750_000.0
+        assert df.attrs.get("is_demo") is False
 
     def test_real_trades_path_uses_cumulative_pnl(self):
-        """체결 내역 있음 → 실 누적손익 경로를 사용한다."""
-        from app.services.backend import HOLDINGS_COLUMNS
+        """체결 내역 충분(>=14) → 실 누적손익 경로를 사용한다."""
+        import datetime
+        from app.services.backend import HOLDINGS_COLUMNS, _DEMO_MIN_REAL_POINTS
 
-        pnl_df = pd.DataFrame([
-            {"date": "2026-06-01", "pnl": 10_000.0},
-            {"date": "2026-06-02", "pnl": 5_000.0},
-            {"date": "2026-06-03", "pnl": -3_000.0},
-        ])
+        # 14행 이상의 PNL 데이터를 생성 (자동전환 임계값 충족)
+        base_date = datetime.date(2026, 5, 1)
+        pnl_rows = [
+            {"date": str(base_date + datetime.timedelta(days=i)), "pnl": 1_000.0 * (i + 1)}
+            for i in range(_DEMO_MIN_REAL_POINTS)
+        ]
+        pnl_df = pd.DataFrame(pnl_rows)
         holdings = pd.DataFrame(
             [{"종목": "삼성전자", "티커": "005930", "자산군": "주식", "지역": "KR",
               "섹터": "반도체", "전략": "", "위험버킷": "", "수량": 10,
@@ -172,11 +177,154 @@ class TestAssetCurve:
             columns=HOLDINGS_COLUMNS,
         )
         with (
+            # 임계값 math가 아니라 명시적으로 non-prod rich-history 경로를 고정한다
+            # (_DEMO_MIN_REAL_POINTS 변경에도 이 테스트가 실 데이터 경로를 검증하도록).
+            patch("app.services.backend.env", return_value="paper"),
             patch("app.services.backend.daily_pnl_series", return_value=pnl_df),
             patch("app.services.backend.holdings_df", return_value=holdings),
         ):
             from app.services import backend
             df = backend.asset_curve(days=90)
-        assert len(df) == 3  # tail(90) of 3 rows = 3 rows
+        assert len(df) == _DEMO_MIN_REAL_POINTS  # tail(90) of 14 rows = 14 rows
         # 끝값 == base_value (750_000) 확인
         assert float(df["자산"].iloc[-1]) == pytest.approx(750_000.0)
+        # 실 데이터 경로 — is_demo=False
+        assert df.attrs.get("is_demo") is False
+
+
+# ---------------------------------------------------------------------------
+# Task 3-2: sparse-history 데모 곡선 — 비-prod 한정·prod 제외·앵커·자동전환
+# ---------------------------------------------------------------------------
+
+
+class TestAssetCurveSparseDemo:
+    """비-prod sparse-history 시나리오: 4조건 검증."""
+
+    def _empty_pnl(self) -> pd.DataFrame:
+        return pd.DataFrame(columns=["date", "pnl"])
+
+    def _sparse_pnl(self, n: int = 3) -> pd.DataFrame:
+        """n개의 실 PNL 행 (n < _DEMO_MIN_REAL_POINTS)."""
+        import datetime
+        base_date = datetime.date(2026, 6, 1)
+        rows = [{"date": str(base_date + datetime.timedelta(days=i)), "pnl": 1_000.0} for i in range(n)]
+        return pd.DataFrame(rows)
+
+    def _rich_pnl(self) -> pd.DataFrame:
+        """_DEMO_MIN_REAL_POINTS 이상의 실 PNL 행."""
+        import datetime
+        from app.services.backend import _DEMO_MIN_REAL_POINTS
+        base_date = datetime.date(2026, 5, 1)
+        rows = [{"date": str(base_date + datetime.timedelta(days=i)), "pnl": 1_000.0} for i in range(_DEMO_MIN_REAL_POINTS)]
+        return pd.DataFrame(rows)
+
+    def _holdings_with_value(self, value: float = 7_800_000.0) -> "pd.DataFrame":
+        from app.services.backend import HOLDINGS_COLUMNS
+        return pd.DataFrame(
+            [{"종목": "삼성전자", "티커": "005930", "자산군": "주식", "지역": "KR",
+              "섹터": "반도체", "전략": "", "위험버킷": "", "수량": 10,
+              "평단": 70_000, "현재가": 780_000, "평가금액": value,
+              "평가손익": 100_000, "손익률": 1.3, "예상연배당": 0, "배당수익률": 0.0, "비중": 100.0}],
+            columns=HOLDINGS_COLUMNS,
+        )
+
+    def _empty_holdings(self) -> "pd.DataFrame":
+        from app.services.backend import HOLDINGS_COLUMNS
+        return pd.DataFrame(columns=HOLDINGS_COLUMNS)
+
+    # ── 조건 1 & 2: sparse + 비-prod → 데모 발동 ─────────────────────────
+
+    def test_paper_sparse_fires_demo(self):
+        """KIS_ENV=paper + sparse(3포인트) → is_demo=True 데모 곡선 발동."""
+        with (
+            patch("app.services.backend.daily_pnl_series", return_value=self._sparse_pnl(3)),
+            patch("app.services.backend.holdings_df", return_value=self._holdings_with_value()),
+            patch("app.services.backend.env", return_value="paper"),
+        ):
+            from app.services import backend
+            df = backend.asset_curve(days=90)
+        assert df.attrs.get("is_demo") is True
+        assert len(df) == 90
+
+    def test_mock_sparse_fires_demo(self):
+        """KIS_ENV=mock + sparse → is_demo=True."""
+        with (
+            patch("app.services.backend.daily_pnl_series", return_value=self._empty_pnl()),
+            patch("app.services.backend.holdings_df", return_value=self._holdings_with_value()),
+            patch("app.services.backend.env", return_value="mock"),
+        ):
+            from app.services import backend
+            df = backend.asset_curve(days=90)
+        assert df.attrs.get("is_demo") is True
+        assert len(df) == 90
+
+    # ── 조건 3: 실 현재총액 앵커 ─────────────────────────────────────────
+
+    def test_sparse_demo_anchored_to_base_value(self):
+        """비-prod sparse + base_value > 0 → 데모 곡선 끝점이 base_value에 고정."""
+        base_value = 7_800_000.0
+        with (
+            patch("app.services.backend.daily_pnl_series", return_value=self._sparse_pnl(3)),
+            patch("app.services.backend.holdings_df", return_value=self._holdings_with_value(base_value)),
+            patch("app.services.backend.env", return_value="paper"),
+        ):
+            from app.services import backend
+            df = backend.asset_curve(days=90)
+        last = float(df["자산"].iloc[-1])
+        assert abs(last - base_value) < 1.0, f"끝점 {last} != base_value {base_value}"
+
+    def test_mock_empty_nominal_preserved(self):
+        """mock-empty (base_value==0) → 기존 nominal ₩150만 유지."""
+        from app.services.backend import _DEMO_INITIAL_CAPITAL
+        with (
+            patch("app.services.backend.daily_pnl_series", return_value=self._empty_pnl()),
+            patch("app.services.backend.holdings_df", return_value=self._empty_holdings()),
+            patch("app.services.backend.env", return_value="mock"),
+        ):
+            from app.services import backend
+            df = backend.asset_curve(days=90)
+        last = float(df["자산"].iloc[-1])
+        assert abs(last - _DEMO_INITIAL_CAPITAL) < 1.0
+        assert df.attrs.get("is_demo") is True
+
+    # ── 조건 2: prod 절대 미발동 ────────────────────────────────────────
+
+    def test_prod_sparse_never_fires_demo(self):
+        """prod 환경에서는 실 포인트가 sparse해도 데모 곡선 미발동."""
+        with (
+            patch("app.services.backend.daily_pnl_series", return_value=self._sparse_pnl(3)),
+            patch("app.services.backend.holdings_df", return_value=self._holdings_with_value()),
+            patch("app.services.backend.env", return_value="prod"),
+        ):
+            from app.services import backend
+            df = backend.asset_curve(days=90)
+        # prod: 실 데이터 경로 사용 (3행)
+        assert df.attrs.get("is_demo") is False
+        assert len(df) == 3  # sparse 실데이터 그대로
+
+    def test_prod_empty_pnl_no_demo(self):
+        """prod 환경에서 체결 내역 없음 → 단일 관측값(데모 아님)."""
+        with (
+            patch("app.services.backend.daily_pnl_series", return_value=self._empty_pnl()),
+            patch("app.services.backend.holdings_df", return_value=self._holdings_with_value()),
+            patch("app.services.backend.env", return_value="prod"),
+        ):
+            from app.services import backend
+            df = backend.asset_curve(days=90)
+        assert df.attrs.get("is_demo") is False
+        assert len(df) == 1
+
+    # ── 조건 1: 자동전환 (auto-yield) ───────────────────────────────────
+
+    def test_auto_yield_rich_history_uses_real_data(self):
+        """비-prod + 실 포인트 >= _DEMO_MIN_REAL_POINTS → 자동전환하여 실 데이터 반환."""
+        with (
+            patch("app.services.backend.daily_pnl_series", return_value=self._rich_pnl()),
+            patch("app.services.backend.holdings_df", return_value=self._holdings_with_value()),
+            patch("app.services.backend.env", return_value="paper"),
+        ):
+            from app.services import backend
+            df = backend.asset_curve(days=90)
+        assert df.attrs.get("is_demo") is False
+        # 실 누적 PnL 경로 사용 확인 (is_demo=False, 끝점 = base_value)
+        assert float(df["자산"].iloc[-1]) == pytest.approx(7_800_000.0)

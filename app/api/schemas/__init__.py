@@ -296,6 +296,7 @@ class IntegrationDeleteResponse(BaseModel):
 class TableResponse(BaseModel):
     columns: list[str]
     rows: list[dict[str, Any]]
+    is_demo: bool = False
 
 
 # ── Engine ────────────────────────────────────────────────────────────────────
