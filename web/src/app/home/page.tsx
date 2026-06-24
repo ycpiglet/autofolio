@@ -165,6 +165,7 @@ export default function HomePage() {
             data={curveQuery.data}
             isLoading={curveQuery.isPending}
             error={curveQuery.error as Error | null}
+            isDemo={curveQuery.data?.is_demo}
           />
         </section>
 

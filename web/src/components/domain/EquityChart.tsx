@@ -11,6 +11,7 @@ interface EquityChartProps {
   isLoading?: boolean;
   error?: Error | null;
   className?: string;
+  isDemo?: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export function EquityChart({
   isLoading,
   error,
   className,
+  isDemo,
 }: EquityChartProps) {
   if (error) {
     return (
@@ -59,7 +61,15 @@ export function EquityChart({
   }
 
   return (
-    <div data-testid="equity-chart">
+    <div data-testid="equity-chart" className="relative">
+      {isDemo && (
+        <span
+          aria-label="합성 데모 데이터"
+          className="absolute right-2 top-2 z-10 inline-flex items-center rounded-full border border-amber-400/60 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-500/40 dark:bg-amber-900/30 dark:text-amber-300"
+        >
+          데모 데이터
+        </span>
+      )}
       <EquityChartUplot
         points={tableToEquityPoints(data)}
         height={240}

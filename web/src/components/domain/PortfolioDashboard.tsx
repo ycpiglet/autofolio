@@ -370,7 +370,7 @@ function AssetTrendCard() {
           />
           <TrendStat label="변화율" value={stats ? fmtPct(stats.changePct) : "-"} className={stats ? portfolioPnlColorClass(stats.changePct) : undefined} />
         </div>
-        <EquityChart data={curveQuery.data} isLoading={curveQuery.isPending} error={curveQuery.error as Error | null} />
+        <EquityChart data={curveQuery.data} isLoading={curveQuery.isPending} error={curveQuery.error as Error | null} isDemo={curveQuery.data?.is_demo} />
         {stats && (
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-muted-foreground">
             <span>

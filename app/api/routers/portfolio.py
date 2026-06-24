@@ -283,14 +283,19 @@ def kpis(
     return backend.kpis()
 
 
-@router.get("/asset-curve", response_model=TableResponse)
+@router.get("/asset-curve")
 def asset_curve(
     _session: Annotated[dict[str, Any], Depends(require_app_user)],
     days: int = Query(default=90, ge=1, le=3650),
-) -> TableResponse:
+) -> dict[str, Any]:
     from app.services import backend
 
-    return df_records(backend.asset_curve(days))
+    df = backend.asset_curve(days)
+    is_demo: bool = bool(df.attrs.get("is_demo", False))
+    payload = df_records(df)
+    result: dict[str, Any] = payload.model_dump() if hasattr(payload, "model_dump") else payload.dict()
+    result["is_demo"] = is_demo
+    return result
 
 
 @router.get("/allocation-gap", response_model=TableResponse)

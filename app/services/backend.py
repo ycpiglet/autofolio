@@ -1025,6 +1025,7 @@ def daily_pnl_series() -> "pd.DataFrame":
 # 이 값들은 DEMO 전용이며 실거래/실계정 경로에 영향을 주지 않는다.
 _DEMO_RNG_SEED: int = 7          # 결정적 재현성 보장 (numpy.random.default_rng)
 _DEMO_INITIAL_CAPITAL: float = 1_500_000.0  # 데모 시작 자본 (₩150만)
+_DEMO_MIN_REAL_POINTS: int = 14  # 실데이터 포인트가 이 값 이상이면 데모 미발동 (≈ 2주)
 
 
 def _generate_demo_asset_curve(days: int, end_value: float) -> pd.DataFrame:
@@ -1052,28 +1053,46 @@ def asset_curve(days: int = 90) -> pd.DataFrame:
     """누적 자산 곡선 — execution_logs 기반 일별 누적 손익 + 현재 보유 자산.
 
     컬럼: date (index, name="date"), 자산 (float).
+    df.attrs["is_demo"] = True 이면 합성 데모 곡선(라벨 필수).
 
     폴백 우선순위:
-    1. execution_logs 체결 내역 있음 → 실 누적 손익 곡선.
-    2. 체결 내역 없음 + base_value > 0 → 단일 관측값 (실 보유지만 거래 이력 없음).
-    3. 체결 내역 없음 + base_value == 0 → 데모 시드 곡선 (_generate_demo_asset_curve).
-       KIS_ENV=mock(기본값)에서 MockBrokerClient 잔고가 비어있을 때 해당.
+    1. prod 환경(KIS_ENV=prod) → 항상 실 경로(데모 미발동).
+    2. 비-prod(mock/paper) + 실 포인트 < _DEMO_MIN_REAL_POINTS → 데모 시드 곡선.
+       base_value > 0이면 끝점을 실 현재총액에 고정(현재 상태는 진실).
+       base_value == 0이면 nominal(₩150만) 유지 (기존 mock-empty 동작).
+    3. 비-prod + 실 포인트 >= _DEMO_MIN_REAL_POINTS → 실 누적 손익 경로.
+    4. prod + 실 포인트 >= 1 → 실 누적 손익 경로.
+    5. prod + 체결 내역 없음 + base_value > 0 → 단일 관측값.
     """
     pnl_df = daily_pnl_series()
     holdings = holdings_df(include_dividends=False)
     base_value = float(holdings["평가금액"].sum()) if not holdings.empty else 0.0
 
+    # real_points: 이용 가능한 실 데이터 포인트 수
+    real_points = len(pnl_df.tail(days)) if not pnl_df.empty else 0
+
+    is_non_prod = env() in {"mock", "paper"}
+    sparse = real_points < _DEMO_MIN_REAL_POINTS
+
+    if is_non_prod and sparse:
+        # 비-prod sparse → 데모 곡선 (끝점을 실 현재총액에 앵커)
+        df = _generate_demo_asset_curve(days, end_value=base_value)
+        df.attrs["is_demo"] = True
+        return df
+
     if pnl_df.empty:
-        if base_value == 0.0:
-            # 데모/mock 환경 — 현실적인 샘플 곡선 반환 (실데이터 아님)
-            return _generate_demo_asset_curve(days, end_value=0.0)
+        # prod + 체결 내역 없음 + base_value > 0 → 단일 관측값
         import datetime as dt
         today = dt.date.today().isoformat()
-        return pd.DataFrame({"자산": [base_value]}, index=pd.Index([today], name="date"))
+        df = pd.DataFrame({"자산": [base_value]}, index=pd.Index([today], name="date"))
+        df.attrs["is_demo"] = False
+        return df
 
-    # 최근 days 일치만
+    # 실 누적 손익 경로 (비-prod 충분한 데이터 또는 prod)
     pnl_df = pnl_df.tail(days).copy()
     pnl_df["cumulative_pnl"] = pnl_df["pnl"].cumsum()
     pnl_df["자산"] = base_value + pnl_df["cumulative_pnl"] - pnl_df["cumulative_pnl"].iloc[-1]
     pnl_df.index = pd.Index(pnl_df["date"], name="date")
-    return pnl_df[["자산"]]
+    df = pnl_df[["자산"]]
+    df.attrs["is_demo"] = False
+    return df
