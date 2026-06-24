@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/AppShell";
 import { OrderForm } from "@/components/domain/OrderForm";
@@ -17,6 +17,7 @@ import {
   type InvestorProfileResponse,
   type TableResponse,
 } from "@/lib/api";
+import { useAuthSession, isUnauthorized } from "@/hooks/useAuthSession";
 import { useSymbols } from "@/hooks/useSymbols";
 
 type RunOnceStatus =
@@ -27,10 +28,22 @@ type RunOnceStatus =
   | { kind: "error"; message: string };
 
 function TradePageInner() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const symbolMap = useSymbols();
   const searchParams = useSearchParams();
   const [previewSymbol, setPreviewSymbol] = useState("");
+
+  // ── Auth guard — shared hook; query key ["auth-me"] deduplicates with ────
+  // TopStatusBar and other consumers. Data queries below are gated on this.
+  const { isAuthenticated, isPending: isAuthPending, isAuthError, authError } =
+    useAuthSession();
+
+  useEffect(() => {
+    if (isAuthError && isUnauthorized(authError)) {
+      router.replace("/login");
+    }
+  }, [isAuthError, authError, router]);
 
   // Prefill from an agent research proposal (querystring). Pre-fills the
   // OrderForm only — saving still goes through the Phase-3 gate.
@@ -42,10 +55,13 @@ function TradePageInner() {
   const [runOnceStatus, setRunOnceStatus] = useState<RunOnceStatus>({ kind: "idle" });
   const [runOnceConfirmOpen, setRunOnceConfirmOpen] = useState(false);
 
+  // ── Data queries — all gated on confirmed session (enabled: isAuthenticated)
+  // so no fetch fires while unauthenticated or while the auth check is pending.
   const profileQuery = useQuery<InvestorProfileResponse>({
     queryKey: ["investor-profile"],
     queryFn: getInvestorProfile,
     staleTime: 60_000,
+    enabled: isAuthenticated,
   });
   const profileKnownIncomplete = profileQuery.isSuccess && profileQuery.data?.completed === false;
   const profileCompleted = !profileKnownIncomplete;
@@ -55,6 +71,7 @@ function TradePageInner() {
     queryKey: ["trade-conditions"],
     queryFn: () => apiTable("/api/trade/conditions"),
     staleTime: 15_000,
+    enabled: isAuthenticated,
   });
 
   async function handleRunOnce() {
@@ -81,6 +98,15 @@ function TradePageInner() {
         message: err instanceof Error ? err.message : "알 수 없는 오류",
       });
     }
+  }
+
+  // ── Loading / auth pending ───────────────────────────────────────────────
+  if (isAuthPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-page">
+        <div className="h-8 w-8 animate-pulse rounded-full bg-muted" aria-label="로딩 중" />
+      </div>
+    );
   }
 
   return (

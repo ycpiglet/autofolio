@@ -13,6 +13,7 @@
 !.env.example
 .pytest_cache/
 .streamlit/secrets.toml
+.superpowers/
 .tmp/
 .tmp/
 .venv/

@@ -10,6 +10,7 @@ import {
   postLogout,
   type InvestorProfileResponse,
 } from "@/lib/api";
+import { useAuthSession } from "@/hooks/useAuthSession";
 import { clearCsrfCache } from "@/lib/csrf";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,17 +38,25 @@ interface TopStatusBarProps {
 export function TopStatusBar({ className }: TopStatusBarProps) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+
+  // Gate data queries on confirmed session so TopStatusBar does not fire
+  // /api/engine/status or /api/profile/investor while unauthenticated.
+  // Shares the ["auth-me"] cache with home/page.tsx — zero extra requests.
+  const { isAuthenticated } = useAuthSession();
+
   const { data: status, refetch } = useQuery<EngineStatus>({
     queryKey: ["engine-status"],
     queryFn: () => apiGet<EngineStatus>("/api/engine/status"),
     staleTime: 30_000,
     retry: 1,
+    enabled: isAuthenticated,
   });
   const { data: profile } = useQuery<InvestorProfileResponse>({
     queryKey: ["investor-profile"],
     queryFn: getInvestorProfile,
     staleTime: 60_000,
     retry: 1,
+    enabled: isAuthenticated,
   });
 
   async function handleLogout() {

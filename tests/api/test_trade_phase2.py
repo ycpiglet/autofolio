@@ -14,7 +14,10 @@ class TestConditions:
     def test_conditions_shape(self, member_client, mock_backend):
         body = member_client.get("/api/trade/conditions").json()
         assert "columns" in body and "rows" in body
-        assert "symbol" in body["columns"]
+        # list_conditions() now returns Korean column labels (핵심 컬럼 한글화)
+        assert "종목" in body["columns"]
+        assert "구분" in body["columns"]
+        assert "목표가" in body["columns"]
 
     def test_conditions_unauthenticated_401(self, client, mock_backend):
         client.cookies.clear()
