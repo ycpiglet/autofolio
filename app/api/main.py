@@ -16,7 +16,12 @@ SAFETY invariants enforced here:
 """
 from __future__ import annotations
 
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
+_logger = logging.getLogger(__name__)
 
 from app.api.routers import (
     account,
@@ -38,6 +43,17 @@ from app.api.routers import (
 from app.api.schemas import HealthResponse
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI):  # noqa: ARG001
+    try:
+        from app.services.backend import _ctx
+        _ctx()
+        _logger.info("backend _ctx warmed up at startup")
+    except Exception:
+        _logger.warning("backend _ctx warm-up failed; lazy init will retry on first request", exc_info=True)
+    yield
+
+
 def create_app() -> FastAPI:
     """Application factory consumed by uvicorn --factory."""
     app = FastAPI(
@@ -47,6 +63,7 @@ def create_app() -> FastAPI:
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
+        lifespan=_lifespan,
     )
 
     # Health — no auth required
