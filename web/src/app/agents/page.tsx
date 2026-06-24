@@ -717,7 +717,7 @@ export default function AgentsPage() {
 
   // ── Auth guard — shared hook; query key ["auth-me"] deduplicates with ────
   // TopStatusBar and other consumers. Data queries below are gated on this.
-  const { isAuthenticated, isPending: isAuthPending, isAuthError, authError, session } =
+  const { isAuthenticated, isPending: isAuthPending, isAuthError, authError, session, refetchAuth } =
     useAuthSession();
 
   useEffect(() => {
@@ -743,6 +743,31 @@ export default function AgentsPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-page">
         <div className="h-8 w-8 animate-pulse rounded-full bg-muted" aria-label="로딩 중" />
+      </div>
+    );
+  }
+
+  // ── Non-401 auth error (backend down / 500) — show recovery UI, not data body ──
+  if (isAuthError && !isUnauthorized(authError)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-page">
+        <div
+          role="alert"
+          data-testid="auth-connection-error"
+          className="flex max-w-sm flex-col items-center gap-4 rounded-xl border border-destructive/40 bg-destructive/5 p-8 text-center"
+        >
+          <p className="text-sm font-medium text-destructive">연결 오류</p>
+          <p className="text-xs text-muted-foreground">
+            서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.
+          </p>
+          <Button
+            size="sm"
+            onClick={refetchAuth}
+            data-testid="auth-retry-btn"
+          >
+            재시도
+          </Button>
+        </div>
       </div>
     );
   }

@@ -22,14 +22,16 @@ interface SessionResponse {
 export interface AuthSession {
   /** True once the session check completed successfully. */
   isAuthenticated: boolean;
-  /** True while the initial /api/auth/me request is in-flight. */
+  /** True while the initial /api/auth/me request is in-flight (including retries). */
   isPending: boolean;
-  /** True when /api/auth/me returned 401 (or another error). */
+  /** True when /api/auth/me returned 401 (or another error) after all retries. */
   isAuthError: boolean;
   /** The raw auth error, if any. */
   authError: Error | null;
   /** Session payload, available once authenticated. */
   session: SessionResponse | undefined;
+  /** Manually retry the auth check (e.g. from an error recovery UI). */
+  refetchAuth: () => void;
 }
 
 export function useAuthSession(): AuthSession {
@@ -38,10 +40,15 @@ export function useAuthSession(): AuthSession {
     isPending,
     isError: isAuthError,
     error: authError,
+    refetch,
   } = useQuery<SessionResponse>({
     queryKey: ["auth-me"],
     queryFn: () => apiGet<SessionResponse>("/api/auth/me"),
-    retry: false,
+    // Retry transient (non-401) errors up to 2 times with backoff.
+    // Never retry 401 — those mean "not logged in" and must redirect immediately.
+    retry: (failureCount, err) =>
+      !isUnauthorized(err instanceof Error ? err : null) && failureCount < 2,
+    retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 8_000),
     staleTime: 60_000,
   });
 
@@ -54,6 +61,7 @@ export function useAuthSession(): AuthSession {
     isAuthError,
     authError: authError instanceof Error ? authError : null,
     session,
+    refetchAuth: () => void refetch(),
   };
 }
 
