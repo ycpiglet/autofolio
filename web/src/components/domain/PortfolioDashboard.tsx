@@ -345,7 +345,7 @@ function OverviewPanel({
 
 function AssetTrendCard() {
   const curveQuery = useQuery({
-    queryKey: ["asset-curve"],
+    queryKey: ["asset-curve", 180],
     queryFn: () => apiTable("/api/portfolio/asset-curve?days=180"),
     staleTime: 60_000,
   });
