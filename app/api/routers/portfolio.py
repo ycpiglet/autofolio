@@ -292,8 +292,7 @@ def asset_curve(
 
     df = backend.asset_curve(days)
     is_demo: bool = bool(df.attrs.get("is_demo", False))
-    payload = df_records(df)
-    result: dict[str, Any] = payload.model_dump() if hasattr(payload, "model_dump") else payload.dict()
+    result: dict[str, Any] = df_records(df).model_dump()  # Pydantic v2
     result["is_demo"] = is_demo
     return result
 

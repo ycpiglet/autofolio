@@ -177,6 +177,9 @@ class TestAssetCurve:
             columns=HOLDINGS_COLUMNS,
         )
         with (
+            # 임계값 math가 아니라 명시적으로 non-prod rich-history 경로를 고정한다
+            # (_DEMO_MIN_REAL_POINTS 변경에도 이 테스트가 실 데이터 경로를 검증하도록).
+            patch("app.services.backend.env", return_value="paper"),
             patch("app.services.backend.daily_pnl_series", return_value=pnl_df),
             patch("app.services.backend.holdings_df", return_value=holdings),
         ):
