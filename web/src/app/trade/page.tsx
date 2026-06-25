@@ -19,6 +19,7 @@ import {
 } from "@/lib/api";
 import { useAuthSession, isUnauthorized } from "@/hooks/useAuthSession";
 import { useSymbols } from "@/hooks/useSymbols";
+import { SymbolSearch } from "@/components/domain/SymbolSearch";
 
 type RunOnceStatus =
   | { kind: "idle" }
@@ -207,12 +208,11 @@ function TradePageInner() {
               <label htmlFor="ladder-symbol" className="text-sm font-medium text-muted-foreground">
                 호가 조회 종목
               </label>
-              <input
+              <SymbolSearch
                 id="ladder-symbol"
-                className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 placeholder="종목 코드"
                 value={previewSymbol}
-                onChange={(e) => setPreviewSymbol(e.target.value.toUpperCase())}
+                onChange={(code) => setPreviewSymbol(code.toUpperCase())}
               />
             </div>
             <OrderBookLadder symbol={previewSymbol} />
