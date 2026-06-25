@@ -26,7 +26,6 @@ export function SymbolSearch({
   const [open, setOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const listboxId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Filtered options based on current input value
@@ -121,7 +120,6 @@ export function SymbolSearch({
   return (
     <div className="relative w-full">
       <input
-        ref={inputRef}
         id={id}
         role="combobox"
         aria-expanded={showDropdown}
