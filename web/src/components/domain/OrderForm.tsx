@@ -148,6 +148,8 @@ export function OrderForm({
         {/* Symbol */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="order-symbol">종목 코드</Label>
+          {/* SymbolSearch has no native `required`; empty-symbol submission is
+              guarded by the `if (!symbol.trim() || ...)` check in handleSubmit. */}
           <SymbolSearch
             id="order-symbol"
             placeholder="예: 005930"

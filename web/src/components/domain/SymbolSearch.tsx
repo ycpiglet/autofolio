@@ -1,7 +1,7 @@
 // web/src/components/domain/SymbolSearch.tsx
 "use client";
 
-import { useState, useRef, useId, useCallback } from "react";
+import { useState, useRef, useId, useMemo } from "react";
 import { useSymbols } from "@/hooks/useSymbols";
 import { symbolLabel } from "@/lib/format";
 
@@ -30,7 +30,7 @@ export function SymbolSearch({
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Filtered options based on current input value
-  const filteredOptions = useCallback((): string[] => {
+  const options = useMemo<string[]>(() => {
     const entries = Object.keys(map);
     if (!entries.length) return [];
     const query = value.toLowerCase();
@@ -45,8 +45,6 @@ export function SymbolSearch({
     return matched.slice(0, MAX_OPTIONS);
   }, [map, value]);
 
-  const options = filteredOptions();
-
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const typed = e.target.value;
     onChange(typed);
@@ -60,6 +58,9 @@ export function SymbolSearch({
 
   function handleBlur() {
     // Delay close to allow click on option to register first
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+    }
     closeTimerRef.current = setTimeout(() => {
       setOpen(false);
       setHighlightedIndex(-1);
@@ -73,7 +74,6 @@ export function SymbolSearch({
     onChange(code);
     setOpen(false);
     setHighlightedIndex(-1);
-    inputRef.current?.focus();
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -125,7 +125,7 @@ export function SymbolSearch({
         id={id}
         role="combobox"
         aria-expanded={showDropdown}
-        aria-controls={showDropdown ? listboxId : undefined}
+        aria-controls={listboxId}
         aria-autocomplete="list"
         aria-activedescendant={
           highlightedIndex >= 0
