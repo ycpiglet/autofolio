@@ -31,8 +31,9 @@ export function NoResults({ size = 160, className }: IllustrationProps) {
       <rect x="58" y="58" width="56" height="6" rx="3" fill="#8B95A1" />
       <rect x="58" y="74" width="40" height="6" rx="3" fill="#8B95A1" opacity="0.7" />
       <rect x="58" y="90" width="48" height="6" rx="3" fill="#8B95A1" opacity="0.5" />
-      {/* magnifier */}
-      <circle cx="120" cy="92" r="30" fill="#FFFFFF" />
+      {/* magnifier — transparent lens (visible blue ring on any surface; white fill
+          would vanish on white cards) */}
+      <circle cx="120" cy="92" r="30" fill="none" />
       <circle
         cx="120"
         cy="92"

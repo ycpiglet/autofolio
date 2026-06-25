@@ -47,6 +47,6 @@
 ## 결론 / 액션
 - **신규 도입 거의 없음** — 목록 대부분이 이미 설치·사용 또는 이미 연구(asset-curation-matrix)됨.
 - **실행 액션 2건**(TASK-140 범위, 본 PR에서 진행):
-  1. **사이드바 이모지 → Lucide** (의존성 0, stroke 일관성). 매핑: 홈`Home`·포트폴리오`PieChart`·매매`ArrowLeftRight`·내역`ReceiptText`·분석`TrendingUp`·에이전트`Bot`·알림`Bell`·성향진단`Compass`·설정`Settings`·매뉴얼`BookOpen`.
+  1. **사이드바 이모지 → Lucide** (의존성 0, stroke 일관성). 매핑: 홈`Home`·포트폴리오`PieChart`·매매`ArrowLeftRight`·내역`ReceiptText`·분석`Search`·에이전트`Bot`·알림`Bell`·성향진단`Compass`·설정`Settings`·매뉴얼`BookOpen`. (분석은 기존 🔍에 부합하는 `Search` 채택 — `TrendingUp`은 차트 테마와 중복.)
   2. **unDraw 빈/에러 일러스트**(브랜드 리컬러, `web/public/illustrations/` 자체호스팅) → EmptyState·에러 패널 연결.
 - 보류 후보(향후): Open Peeps/Humaaans(온보딩), 글로벌 데이터 API(자산 확장 시).
