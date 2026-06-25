@@ -4,6 +4,7 @@ import { useState, Fragment } from "react";
 import { cn } from "@/lib/utils";
 import { symbolLabel } from "@/lib/format";
 import type { TableResponse } from "@/lib/api";
+import { ErrorState as ErrorIllustration } from "@/components/ui/illustrations/ErrorState";
 
 interface DataTableProps {
   data?: TableResponse;
@@ -85,10 +86,11 @@ export function DataTable({
     return (
       <div
         role="alert"
-        className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive"
+        className="flex flex-col items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 p-6 text-center text-sm text-destructive"
       >
+        <ErrorIllustration size={80} />
         <strong>데이터를 불러오지 못했습니다.</strong>
-        <p className="mt-1 text-xs opacity-80">{error.message}</p>
+        <p className="text-xs opacity-80">{error.message}</p>
       </div>
     );
   }

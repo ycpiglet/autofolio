@@ -1,18 +1,36 @@
+import type React from "react";
 import { cn } from "@/lib/utils";
+import type { EmptyIllustration } from "@/lib/empty-illustration";
+import { NoData } from "@/components/ui/illustrations/NoData";
+import { NoResults } from "@/components/ui/illustrations/NoResults";
+import { ErrorState as ErrorIllustration } from "@/components/ui/illustrations/ErrorState";
+
+const ILLUSTRATIONS = {
+  "no-data": NoData,
+  "no-results": NoResults,
+  error: ErrorIllustration,
+} as const satisfies Record<EmptyIllustration, React.ComponentType<{ size?: number }>>;
 
 interface EmptyStateProps {
+  /** Which built-in illustration to show. Default "no-data". */
+  illustration?: EmptyIllustration;
   title?: string;
   description?: string;
   phase?: string;
   className?: string;
+  /** Illustration size in px. Default 120. */
+  size?: number;
 }
 
 export function EmptyState({
+  illustration = "no-data",
   title = "준비 중",
   description,
   phase,
   className,
+  size = 120,
 }: EmptyStateProps) {
+  const Illustration = ILLUSTRATIONS[illustration];
   return (
     <div
       className={cn(
@@ -22,9 +40,7 @@ export function EmptyState({
       role="status"
       aria-label={title}
     >
-      <div className="text-4xl" aria-hidden>
-        🏗️
-      </div>
+      <Illustration size={size} />
       <h2 className="text-base font-medium text-foreground">{title}</h2>
       {description && (
         <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
