@@ -76,6 +76,9 @@ export function SymbolSearch({
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // Ignore keys fired while a Korean (or other) IME composition is active,
+    // so Enter commits the in-progress syllable instead of selecting an option.
+    if (e.nativeEvent.isComposing) return;
     if (!open || !options.length) {
       if (e.key === "ArrowDown" && options.length > 0) {
         setOpen(true);
@@ -145,6 +148,7 @@ export function SymbolSearch({
         <ul
           id={listboxId}
           role="listbox"
+          aria-label="종목 검색 결과"
           className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground shadow-md"
         >
           {options.map((code, index) => {
