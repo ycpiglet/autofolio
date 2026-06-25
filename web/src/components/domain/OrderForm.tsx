@@ -15,6 +15,7 @@ import {
   type NeedsAckResponse,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { SymbolSearch } from "@/components/domain/SymbolSearch";
 
 type FormStatus =
   | { kind: "idle" }
@@ -147,13 +148,14 @@ export function OrderForm({
         {/* Symbol */}
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="order-symbol">종목 코드</Label>
-          <Input
+          {/* SymbolSearch has no native `required`; empty-symbol submission is
+              guarded by the `if (!symbol.trim() || ...)` check in handleSubmit. */}
+          <SymbolSearch
             id="order-symbol"
             placeholder="예: 005930"
             value={symbol}
-            onChange={(e) => setSymbol((e.target as HTMLInputElement).value)}
+            onChange={setSymbol}
             disabled={isSubmitting}
-            required
           />
         </div>
 

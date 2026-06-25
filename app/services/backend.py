@@ -24,9 +24,38 @@ from app.database.sqlite_db import initialize_database
 from app.engine.live_trading_engine import LiveTradingEngine
 
 _SEED = [
-    ("005930", "삼성전자", "LARGE_CAP_TEST"),
-    ("069500", "KODEX 200", "ETF_TEST"),
-    ("360750", "TIGER 미국S&P500", "LONG_TERM_CANDIDATE"),
+    # KR 대형주
+    ("005930", "삼성전자", "LARGE_CAP"),
+    ("000660", "SK하이닉스", "LARGE_CAP"),
+    ("005380", "현대차", "LARGE_CAP"),
+    ("005490", "POSCO홀딩스", "LARGE_CAP"),
+    ("035420", "NAVER", "LARGE_CAP"),
+    ("035720", "카카오", "LARGE_CAP"),
+    ("051910", "LG화학", "LARGE_CAP"),
+    ("006400", "삼성SDI", "LARGE_CAP"),
+    ("068270", "셀트리온", "LARGE_CAP"),
+    ("000270", "기아", "LARGE_CAP"),
+    ("105560", "KB금융", "LARGE_CAP"),
+    ("055550", "신한지주", "LARGE_CAP"),
+    ("086790", "하나금융지주", "LARGE_CAP"),
+    ("012330", "현대모비스", "LARGE_CAP"),
+    ("028260", "삼성물산", "LARGE_CAP"),
+    ("066570", "LG전자", "LARGE_CAP"),
+    ("096770", "SK이노베이션", "LARGE_CAP"),
+    ("034730", "SK", "LARGE_CAP"),
+    ("015760", "한국전력", "LARGE_CAP"),
+    ("017670", "SK텔레콤", "LARGE_CAP"),
+    ("009150", "삼성전기", "LARGE_CAP"),
+    ("010130", "고려아연", "LARGE_CAP"),
+    ("207940", "삼성바이오로직스", "LARGE_CAP"),
+    ("373220", "LG에너지솔루션", "LARGE_CAP"),
+    ("000810", "삼성화재", "LARGE_CAP"),
+    # ETF
+    ("069500", "KODEX 200", "ETF"),
+    ("102110", "TIGER 200", "ETF"),
+    ("360750", "TIGER 미국S&P500", "ETF"),
+    ("114260", "KODEX 국고채3년", "ETF"),
+    ("133690", "TIGER 미국나스닥100", "ETF"),
 ]
 
 _LOGGER = logging.getLogger(__name__)
@@ -50,8 +79,10 @@ def _ctx():
         # (동시 첫 호출 시 본문이 두 번 실행될 수 있으나 멱등)
         initialize_database(settings.db_path)
         repo = Repository(settings.db_path)
-        if not repo.list_whitelist_symbols():
-            for sym, name, role in _SEED:
+        # 항상 upsert — 기존 3종목 DB에서도 나머지 27종목이 추가된다.
+        existing = {r["symbol"] for r in repo.list_whitelist_symbols()}
+        for sym, name, role in _SEED:
+            if sym not in existing:
                 repo.add_whitelist_symbol(WhitelistSymbol(symbol=sym, name=name, market="KRX", role=role))
         broker = create_broker_client()
         engine = LiveTradingEngine(broker=broker, repo=repo)
@@ -125,19 +156,59 @@ HOLDINGS_COLUMNS = [
     "종목", "티커", "자산군", "지역", "섹터", "전략", "위험버킷", "수량", "평단", "현재가",
     "평가금액", "평가손익", "손익률", "예상연배당", "배당수익률", "비중",
 ]
-_ROLE_TO_ASSET_CLASS = {"ETF_TEST": "ETF", "LARGE_CAP_TEST": "주식", "LONG_TERM_CANDIDATE": "기타"}
-_DEFAULT_SYMBOL_META = {
-    "000660": {"name": "SK하이닉스", "asset_class": "주식", "sector": "반도체"},
-    "005380": {"name": "현대차", "asset_class": "주식", "sector": "자동차"},
+_ROLE_TO_ASSET_CLASS = {
+    "ETF_TEST": "ETF",
+    "LARGE_CAP_TEST": "주식",
+    "LONG_TERM_CANDIDATE": "기타",
+    "ETF": "ETF",
+    "LARGE_CAP": "주식",
+}
+# 종목 메타 — 화이트리스트 DB가 없거나 미등록 종목에 대한 폴백. _SEED와 동기화.
+_DEFAULT_SYMBOL_META: dict[str, dict] = {
+    # 반도체
     "005930": {"name": "삼성전자", "asset_class": "주식", "sector": "반도체"},
+    "000660": {"name": "SK하이닉스", "asset_class": "주식", "sector": "반도체"},
+    "009150": {"name": "삼성전기", "asset_class": "주식", "sector": "반도체"},
+    # 자동차
+    "005380": {"name": "현대차", "asset_class": "주식", "sector": "자동차"},
+    "000270": {"name": "기아", "asset_class": "주식", "sector": "자동차"},
+    "012330": {"name": "현대모비스", "asset_class": "주식", "sector": "자동차"},
+    # 인터넷
     "035420": {"name": "NAVER", "asset_class": "주식", "sector": "인터넷"},
     "035720": {"name": "카카오", "asset_class": "주식", "sector": "인터넷"},
+    # 금융
+    "105560": {"name": "KB금융", "asset_class": "주식", "sector": "금융"},
     "055550": {"name": "신한지주", "asset_class": "주식", "sector": "금융"},
+    "086790": {"name": "하나금융지주", "asset_class": "주식", "sector": "금융"},
+    "000810": {"name": "삼성화재", "asset_class": "주식", "sector": "금융"},
+    # 바이오
     "068270": {"name": "셀트리온", "asset_class": "주식", "sector": "바이오"},
+    "207940": {"name": "삼성바이오로직스", "asset_class": "주식", "sector": "바이오"},
+    # 2차전지
+    "051910": {"name": "LG화학", "asset_class": "주식", "sector": "2차전지"},
+    "006400": {"name": "삼성SDI", "asset_class": "주식", "sector": "2차전지"},
+    "373220": {"name": "LG에너지솔루션", "asset_class": "주식", "sector": "2차전지"},
+    # 에너지/화학
+    "096770": {"name": "SK이노베이션", "asset_class": "주식", "sector": "에너지"},
+    "015760": {"name": "한국전력", "asset_class": "주식", "sector": "에너지"},
+    # 소재
+    "005490": {"name": "POSCO홀딩스", "asset_class": "주식", "sector": "소재"},
+    "010130": {"name": "고려아연", "asset_class": "주식", "sector": "소재"},
+    # 통신/지주
+    "017670": {"name": "SK텔레콤", "asset_class": "주식", "sector": "통신"},
+    "034730": {"name": "SK", "asset_class": "주식", "sector": "지주"},
+    "028260": {"name": "삼성물산", "asset_class": "주식", "sector": "지주"},
+    "066570": {"name": "LG전자", "asset_class": "주식", "sector": "전자"},
+    # ETF
     "069500": {"name": "KODEX 200", "asset_class": "ETF", "sector": "국내지수"},
     "102110": {"name": "TIGER 200", "asset_class": "ETF", "sector": "국내지수"},
-    "105560": {"name": "KB금융", "asset_class": "주식", "sector": "금융"},
-    "114260": {"name": "KODEX 국고채3년", "asset_class": "채권", "sector": "채권"},
+    "360750": {"name": "TIGER 미국S&P500", "asset_class": "ETF", "sector": "해외지수"},
+    "114260": {"name": "KODEX 국고채3년", "asset_class": "ETF", "sector": "채권"},
+    "133690": {"name": "TIGER 미국나스닥100", "asset_class": "ETF", "sector": "해외지수"},
+    # 지수코드 (KIS index, not tradable)
+    "0001": {"name": "KOSPI", "asset_class": "지수", "sector": "지수"},
+    "1001": {"name": "KOSDAQ", "asset_class": "지수", "sector": "지수"},
+    "2001": {"name": "KOSPI200", "asset_class": "지수", "sector": "지수"},
 }
 
 
@@ -170,6 +241,50 @@ def _fallback_holdings_df_after_error() -> pd.DataFrame:
 
 def _fallback_symbol_meta(symbol: str) -> dict:
     return dict(_DEFAULT_SYMBOL_META.get(symbol, {}))
+
+
+# ── 종목명 resolver ─────────────────────────────────────────────────────────
+# 우선순위: 화이트리스트 DB → _DEFAULT_SYMBOL_META → 코드 폴백
+# 레이트리밋 고려: KIS 호출 없이 정적 메타만 사용 (whitelist에 등록된 모든 종목은 이미
+# 이름을 보유하고, _DEFAULT_SYMBOL_META가 30종목 전체를 커버하므로 KIS 호출 불필요)
+_name_cache_lock = threading.Lock()
+_name_cache: dict[str, str] = {}
+
+
+def resolve_symbol_name(symbol: str) -> str:
+    """종목 코드 → 한글 종목명 반환. 미지 종목이면 코드 그대로 반환.
+
+    캐시(프로세스 수명) → 화이트리스트 DB → _DEFAULT_SYMBOL_META 순서로 탐색.
+    KIS 네트워크 호출 없이 정적 메타만 사용해 레이트리밋을 보호한다.
+    """
+    code = str(symbol or "").strip()
+    if not code:
+        return code
+    with _name_cache_lock:
+        if code in _name_cache:
+            return _name_cache[code]
+    # 화이트리스트 DB 탐색
+    try:
+        repo, *_ = _ctx()
+        wl = {r["symbol"]: r.get("name", "") for r in repo.list_whitelist_symbols()}
+        with _name_cache_lock:
+            _name_cache.update({k: v for k, v in wl.items() if v})
+        if code in wl and wl[code]:
+            return wl[code]
+    except Exception:  # noqa: BLE001
+        pass
+    # 정적 메타 폴백
+    meta_name = _DEFAULT_SYMBOL_META.get(code, {}).get("name", "")
+    if meta_name:
+        with _name_cache_lock:
+            _name_cache[code] = meta_name
+        return meta_name
+    return code
+
+
+def resolve_symbol_name_map(symbols: list[str]) -> dict[str, str]:
+    """복수 종목 코드를 {code: name} 맵으로 반환."""
+    return {s: resolve_symbol_name(s) for s in symbols}
 
 
 def _build_holdings_df(positions_list, price_of, meta_of, dividend_of=None) -> pd.DataFrame:
@@ -357,6 +472,10 @@ def recent_fills(limit: int = 10) -> pd.DataFrame:
     result = filled[["시각", "symbol", "side", "수량", "체결가"]].rename(
         columns={"symbol": "종목", "side": "방향"}
     )
+    # 종목 코드 → 이름으로 변환
+    result["종목"] = result["종목"].apply(
+        lambda code: resolve_symbol_name(str(code)) if code else code
+    )
     return result.reset_index(drop=True)
 
 
@@ -389,6 +508,11 @@ def list_conditions() -> pd.DataFrame:
     # 핵심 컬럼만 선택한 뒤 한글 라벨로 이름 변경
     available = [c for c in _CONDITIONS_DISPLAY_COLUMNS if c in df.columns]
     df = df[available].rename(columns=_CONDITIONS_DISPLAY_COLUMNS)
+    # symbol 컬럼(이제 "종목" 라벨)을 이름으로 변환
+    if "종목" in df.columns:
+        df["종목"] = df["종목"].apply(
+            lambda code: resolve_symbol_name(str(code)) if code else code
+        )
     return df
 
 

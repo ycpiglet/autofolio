@@ -19,6 +19,8 @@ from app.services.backend import (  # noqa: F401
     list_whitelist,
     propose,
     recent_fills,
+    resolve_symbol_name,
+    resolve_symbol_name_map,
     run_engine_once,
     symbol_options,
 )
@@ -33,6 +35,8 @@ __all__ = [
     "list_whitelist",
     "propose",
     "recent_fills",
+    "resolve_symbol_name",
+    "resolve_symbol_name_map",
     "run_engine_once",
     "symbol_options",
     # Service-native (not re-exports from backend)
