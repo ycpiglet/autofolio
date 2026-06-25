@@ -165,13 +165,19 @@ class TestRecentFills:
         ])
 
     def test_only_filled_rows_returned(self):
-        """REQUESTED rows are excluded; only FILLED rows appear."""
+        """REQUESTED rows are excluded; only FILLED rows appear (종목 shows name, not code)."""
         logs = self._make_logs()
         with patch("app.services.backend.list_order_logs", return_value=logs):
             from app.services import backend
             result = backend.recent_fills(limit=10)
         assert len(result) == 2
-        assert set(result["종목"].tolist()) == {"005930", "360750"}
+        # resolve_symbol_name maps codes to names from _DEFAULT_SYMBOL_META
+        종목_values = set(result["종목"].tolist())
+        assert "005930" not in 종목_values, "Raw code should not appear — resolver must have run"
+        assert "360750" not in 종목_values, "Raw code should not appear — resolver must have run"
+        assert "삼성전자" in 종목_values
+        # 360750 → TIGER 미국S&P500 (from _DEFAULT_SYMBOL_META)
+        assert any("TIGER" in v for v in 종목_values)
 
     def test_output_columns(self):
         """Returned DataFrame has exactly the five expected columns."""

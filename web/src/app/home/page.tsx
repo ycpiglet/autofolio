@@ -15,6 +15,7 @@ import {
 } from "@/lib/api";
 import { useAuthSession, isUnauthorized } from "@/hooks/useAuthSession";
 import { fmtWon, fmtPct } from "@/lib/format";
+import { useSymbols } from "@/hooks/useSymbols";
 import { holdingsToTreemapItems } from "@/lib/holdings-treemap";
 import { AppShell } from "@/components/layout/AppShell";
 import { EmptyState } from "@/components/safety/EmptyState";
@@ -45,6 +46,8 @@ export default function HomePage() {
   // TopStatusBar and other consumers. Data queries below are gated on this.
   const { isAuthenticated, isPending: isAuthPending, isAuthError, authError, refetchAuth } =
     useAuthSession();
+
+  const symbolMap = useSymbols();
 
   useEffect(() => {
     if (isAuthError && isUnauthorized(authError)) {
@@ -204,6 +207,7 @@ export default function HomePage() {
             isLoading={indicesQuery.isPending}
             error={indicesQuery.error as Error | null}
             caption="주요 시장 지수"
+            symbolMap={symbolMap}
           />
         </section>
 
@@ -237,6 +241,7 @@ export default function HomePage() {
             isLoading={fillsQuery.isPending}
             error={fillsQuery.error as Error | null}
             caption="최근 체결 내역"
+            symbolMap={symbolMap}
           />
         </section>
 
