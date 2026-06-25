@@ -62,7 +62,7 @@ export default function HomePage() {
   });
 
   const curveQuery = useQuery<TableResponse>({
-    queryKey: ["asset-curve"],
+    queryKey: ["asset-curve", 90],
     queryFn: () => apiTable("/api/portfolio/asset-curve?days=90"),
     staleTime: 60_000,
     enabled: isAuthenticated,
