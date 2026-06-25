@@ -2,12 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Home,
+  PieChart,
+  ArrowLeftRight,
+  ReceiptText,
+  Search,
+  Bot,
+  Bell,
+  Compass,
+  Settings,
+  BookOpen,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
   label: string;
   href: string;
-  icon?: string;
+  icon?: LucideIcon;
 }
 
 interface NavGroup {
@@ -19,26 +32,26 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "운용",
     items: [
-      { label: "홈", href: "/home", icon: "🏠" },
-      { label: "포트폴리오", href: "/portfolio", icon: "📊" },
-      { label: "매매", href: "/trade", icon: "💱" },
-      { label: "내역", href: "/history", icon: "📋" },
+      { label: "홈", href: "/home", icon: Home },
+      { label: "포트폴리오", href: "/portfolio", icon: PieChart },
+      { label: "매매", href: "/trade", icon: ArrowLeftRight },
+      { label: "내역", href: "/history", icon: ReceiptText },
     ],
   },
   {
     label: "인텔리전스",
     items: [
-      { label: "분석", href: "/analysis", icon: "🔍" },
-      { label: "에이전트", href: "/agents", icon: "🤖" },
-      { label: "알림", href: "/alerts", icon: "🔔" },
+      { label: "분석", href: "/analysis", icon: Search },
+      { label: "에이전트", href: "/agents", icon: Bot },
+      { label: "알림", href: "/alerts", icon: Bell },
     ],
   },
   {
     label: "시스템",
     items: [
-      { label: "성향 진단", href: "/onboarding/investor-profile", icon: "🧭" },
-      { label: "설정", href: "/settings", icon: "⚙️" },
-      { label: "매뉴얼", href: "/manuals", icon: "📖" },
+      { label: "성향 진단", href: "/onboarding/investor-profile", icon: Compass },
+      { label: "설정", href: "/settings", icon: Settings },
+      { label: "매뉴얼", href: "/manuals", icon: BookOpen },
     ],
   },
 ];
@@ -92,9 +105,11 @@ export function SidebarNav({ className }: SidebarNavProps) {
                       )}
                     >
                       {item.icon && (
-                        <span aria-hidden className="text-base">
-                          {item.icon}
-                        </span>
+                        <item.icon
+                          size={18}
+                          aria-hidden
+                          className="shrink-0"
+                        />
                       )}
                       {item.label}
                     </Link>
