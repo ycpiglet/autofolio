@@ -202,9 +202,6 @@ test.describe("Phase 3 — Condition CAUTION 2-step", () => {
     await page.goto("/trade");
 
     await page.getByLabel("종목 코드").fill("005930");
-    // 종목 코드는 SymbolSearch combobox — 타이핑 시 열린 드롭다운이 아래 폼을 덮으므로
-    // 포커스된 입력에 Escape를 보내 닫은 뒤 다음 필드와 상호작용한다(값 "005930"은 유지).
-    await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "매수", exact: true }).click();
     await page.getByLabel("목표가 (원)").fill("74000");
     await page.getByLabel("수량 (주)").fill("10");

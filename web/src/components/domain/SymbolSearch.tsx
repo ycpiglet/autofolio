@@ -46,7 +46,11 @@ export function SymbolSearch({
 
   // Filtered options based on current input value
   const options = useMemo<string[]>(() => {
-    const entries = Object.keys(map);
+    // Guard against a malformed symbol map (e.g. an API/mocks shape like
+    // {columns:[],rows:[]}): only treat entries whose value is a string as
+    // real symbols, so `name.toLowerCase()` below can never throw and crash
+    // the page render.
+    const entries = Object.keys(map).filter((code) => typeof map[code] === "string");
     if (!entries.length) return [];
     const query = value.toLowerCase();
     if (!query) return entries.slice(0, MAX_OPTIONS);
