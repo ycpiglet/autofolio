@@ -1,7 +1,7 @@
 // web/src/components/domain/SymbolSearch.tsx
 "use client";
 
-import { useState, useRef, useId, useMemo } from "react";
+import { useState, useRef, useId, useMemo, useEffect } from "react";
 import { useSymbols } from "@/hooks/useSymbols";
 import { symbolLabel } from "@/lib/format";
 
@@ -27,6 +27,22 @@ export function SymbolSearch({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const listboxId = useId();
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close the dropdown on an outside pointer-down so it never traps clicks on
+  // the form below (e.g. 매수/매도). Mousedown (not click) so the closing
+  // happens before the same gesture's mouseup lands on the outside target.
+  useEffect(() => {
+    if (!open) return;
+    function onOutsidePointerDown(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setHighlightedIndex(-1);
+      }
+    }
+    document.addEventListener("mousedown", onOutsidePointerDown);
+    return () => document.removeEventListener("mousedown", onOutsidePointerDown);
+  }, [open]);
 
   // Filtered options based on current input value
   const options = useMemo<string[]>(() => {
@@ -121,7 +137,7 @@ export function SymbolSearch({
   const showDropdown = open && options.length > 0;
 
   return (
-    <div className="relative w-full">
+    <div ref={containerRef} className="relative w-full">
       <input
         id={id}
         role="combobox"
