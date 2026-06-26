@@ -4,10 +4,13 @@ work_id: TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT
 work_uid: ffcc4e32-0436-4557-8927-3af822fb39e5
 kind: taskset
 parent_id: INIT-FINANCE-ACCOUNTING
-status: active
+status: completed
 owner: Finance Accounting
 created_at: 2026-06-21T16:30:12+09:00
-updated_at: 2026-06-21T17:06:02+09:00
+updated_at: 2026-06-26T20:57:05+09:00
+completed_at: 2026-06-26T20:57:05+09:00
+resolution: done
+verification_status: passed
 origin_type: owner_request
 origin_ref: AUDIT-2026-06-21-001
 created_by: lead_engineer
@@ -42,8 +45,8 @@ financial advice, tax/accounting advice, payment execution, or production work.
 |---------|-------------|-------|--------|------|
 | TASK-171 | Finance/accounting planning-support lane foundation | Finance Accounting | 완료 | local docs/JSON/gate/tests only |
 | TASK-172 | Finance scenario input contract and sample fixture | Finance Accounting | 완료 | synthetic fixture only; no real customer/payment data |
-| TASK-173 | Portfolio goal-gap read model | Backend Engineer | 대기 | read-only derived model; no order path change |
-| TASK-174 | Finance roadmap UI preview | UI/UX Designer | 대기 | no recommendation wording |
+| TASK-173 | Portfolio goal-gap read model | Backend Engineer | 완료 | read-only derived model; no order path change |
+| TASK-174 | Finance roadmap UI preview | UI/UX Designer | 완료 | no recommendation wording |
 
 ## Dependency Map
 

@@ -3,10 +3,13 @@ schema_version: agent-runtime-work-item/v1
 work_id: INIT-FINANCE-ACCOUNTING
 work_uid: d698ea0c-f7aa-4fff-ae66-0f5a6144a78b
 kind: initiative
-status: active
+status: completed
 owner: Finance Accounting
 created_at: 2026-06-21T16:30:12+09:00
-updated_at: 2026-06-21T16:30:12+09:00
+updated_at: 2026-06-26T20:57:05+09:00
+completed_at: 2026-06-26T20:57:05+09:00
+resolution: done
+verification_status: reviewed
 origin_type: owner_request
 origin_ref: AUDIT-2026-06-21-001
 created_by: lead_engineer
@@ -29,7 +32,7 @@ behind explicit gates.
 
 | ID | Description | Status |
 |----|-------------|--------|
-| TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT | Role, packet contract, scenario inputs, read model, and UI preview | active |
+| TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT | Role, packet contract, scenario inputs, read model, and UI preview | completed |
 
 ## Boundary
 

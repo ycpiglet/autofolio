@@ -1,16 +1,23 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-17T22:16:02+09:00
+updated_at: 2026-06-26T21:17:23+09:00
 updated_by: lead-engineer
 current_state:
   signal: pass
   score: 94
   summary: >
-    Approved closeout is merged to main via PR #92. TASK-014/021/022/026/027/028/030/031/032
-    R3 order/risk surfaces and TASK-049 Streamlit retirement are implemented
-    and recorded. R3 production order execution remains hardguarded; no secret
-    or production data mutation was performed. The refreshed backlog has one
-    open item: TASK-069, intentionally deferred until 2026-12-14 unless the
-    Owner explicitly requests early reassessment.
+    UI backlog session complete on branch feat/ui-backlog-2026-06-26 (merge-base
+    d2671d3, 15 commits), pending merge. TASK-140 (visual-asset closeout),
+    TASK-173 (backend goal-gap read model, 50 tests), and TASK-174 (frontend
+    FinanceRoadmapPanel, vitest 136/lint/build green) are all task-reviewed and
+    Opus whole-branch reviewed with verdict "Ready to merge: Yes". TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT
+    and INIT-FINANCE-ACCOUNTING flipped to completed; views/index regenerated;
+    check_agent_docs 0 errors. Prod E2E for TASK-140/174 is env-blocked (EACCES
+    :3100 in Playwright sandbox) — recorded as [-]; must be re-run in a normal
+    CI environment post-merge. Remaining open backlog: TASK-087 (web deploy
+    membership gating) awaits Owner/R3 external steps (Supabase staging, secret
+    storage, Vercel/Railway deploy, KIS commercial terms, fintech-lawyer
+    비조치의견서); TASK-088 (presale regulatory clearance) deferred until product
+    maturity; TASK-069 scheduled 2026-12-14.
 active_work:
   contract: >
     This file is the live pointer for active agents, teams, and panes. When no
@@ -35,11 +42,16 @@ resume:
   task_set_id: none
   step_index: 0
   step_total: 0
-  status_text: No persistent active task; PR #92 merged and backlog refreshed
+  status_text: >
+    UI backlog (TASK-140/173/174) complete on feat/ui-backlog-2026-06-26,
+    Opus-reviewed merge-ready; PR pending. No active task.
   next_actions:
+    - Merge feat/ui-backlog-2026-06-26 PR (Opus whole-branch verdict: Ready to merge: Yes).
+    - After merge, re-run prod-mode E2E (CI=1, Playwright :3100) for TASK-140 CC2 and TASK-174 CC4 to clear env-blocked checkboxes.
+    - TASK-087 needs Owner external steps — Supabase staging apply, secret storage, Vercel/Railway deploy, KIS commercial-terms confirmation, fintech-lawyer 비조치의견서. No autonomous progress possible.
+    - Keep TASK-088 deferred until product maturity and presale regulatory clearance.
     - Keep TASK-069 deferred until 2026-12-14 unless Owner explicitly requests early reassessment.
     - Start only a new explicit Owner request or a newly registered ACT task.
-    - Treat production orders, secrets, production DB writes, and live OAuth callback validation as Owner-managed boundaries.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -76,7 +88,10 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-17 backlog refresh passed: backlog_sweep shows only TASK-069 open
-      and deferred, build_task_index regenerated 73 tasks, generate_views
-      regenerated BACKLOG and 5 views, and prior closeout checks/CI for PR #92
-      passed before merge.
+      2026-06-26 UI backlog session: per-task reviews + Opus whole-branch review
+      "Ready to merge: Yes" on feat/ui-backlog-2026-06-26. check_agent_docs 0
+      errors, owner_governance_gate --allow-empty-owner-docs pass,
+      continuity_contract_gate pass. Prod E2E env-blocked (EACCES :3100) —
+      honest [-] recorded; consolidated pytest total for this branch not
+      separately reported (individual task suites: TASK-173 50 tests, TASK-174
+      vitest 136, TASK-140 design_system_gate 18 tests).

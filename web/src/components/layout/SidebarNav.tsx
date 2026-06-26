@@ -13,6 +13,7 @@ import {
   Compass,
   Settings,
   BookOpen,
+  Map,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -44,6 +45,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: "분석", href: "/analysis", icon: Search },
       { label: "에이전트", href: "/agents", icon: Bot },
       { label: "알림", href: "/alerts", icon: Bell },
+      { label: "재무 로드맵", href: "/finance-roadmap", icon: Map },
     ],
   },
   {

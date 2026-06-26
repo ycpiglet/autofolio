@@ -1,7 +1,7 @@
 # VIEW — TASK by Owner
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-23T20:42:26+09:00`
+> 생성 시각: `2026-06-26T21:02:58+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -50,7 +50,7 @@
 | [TASK-124](TASK-124-membership-supabase-backup-apply-evidence-checklist.md) | 완료 | Medium | 중 | 1 ph / ~16000 tok | Backend Engineer | membership,supabase,staging,backup,evidence |
 | [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Medium | 중 | 3 ph / ~40000 tok | Backend Engineer | marketing,sns,publishing,dry-run,audit-log |
 | [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
 
 ## Business Planner
 
@@ -210,6 +210,6 @@
 | [TASK-058](TASK-058-fix-history-live-mode-early-return.md) | 완료 | High | 낮 | 1 ph / ~10000 tok | UI/UX Designer | bug,ui,history,pnl |
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 | [TASK-101](TASK-101-membership-admin-settings-tab.md) | 완료 | High | 중 | 1 ph / ~18000 tok | UI/UX Designer | auth,membership,approval,admin-ui,settings,local-prototype |
-| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 완료 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 

@@ -30,6 +30,7 @@ from app.api.routers import (
     acknowledgements,
     auth,
     engine,
+    finance_roadmap,
     integrations,
     market,
     manuals,
@@ -85,6 +86,7 @@ def create_app() -> FastAPI:
     app.include_router(trade.router, prefix="/api")
     app.include_router(settings.router, prefix="/api")
     app.include_router(analysis.router, prefix="/api")
+    app.include_router(finance_roadmap.router, prefix="/api")
     app.include_router(agents.router, prefix="/api")
     app.include_router(stream.router, prefix="/api")
 

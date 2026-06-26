@@ -119,7 +119,7 @@
 | [TASK-131](TASK-131-promotion-dry-run-audit-preview.md) | 완료 | Backend Engineer | Promotion Dry-run Audit Preview |
 | [TASK-132](TASK-132-promotion-asset-rendering-contract.md) | 완료 | Marketing Growth | Promotion Asset Rendering Contract |
 | [TASK-133](TASK-133-promotion-asset-preview-manifest.md) | 완료 | Marketing Growth | Promotion Asset Preview Manifest |
-| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | UI/UX Designer | UI 비주얼 에셋(그래프·이미지·캐릭터) 확장 채택 |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 완료 | UI/UX Designer | UI 비주얼 에셋(그래프·이미지·캐릭터) 확장 채택 |
 | [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | Lead Engineer | Marketing Team Operating Model |
 | [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | Marketing Growth | Promotion Campaign Backlog And Content Calendar V1 |
 | [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Doc Steward | Promotion Asset Generator Readiness Map |
@@ -127,5 +127,5 @@
 | [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Business Planner | Sales Handoff Readiness Checklist |
 | [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | Finance Accounting | Finance Accounting Planning Support Lane |
 | [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | Finance Accounting | Finance Scenario Input Contract And Sample Fixture |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Backend Engineer | Portfolio Goal-Gap Read Model |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | UI/UX Designer | Finance Roadmap UI Preview |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Backend Engineer | Portfolio Goal-Gap Read Model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | UI/UX Designer | Finance Roadmap UI Preview |

@@ -1,7 +1,7 @@
 # VIEW — TASK by Priority
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-23T20:42:26+09:00`
+> 생성 시각: `2026-06-26T21:02:58+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -76,7 +76,7 @@
 | [TASK-118](TASK-118-membership-production-secret-store-implementation-plan.md) | 완료 | High | 중 | 2 ph / ~30000 tok | Backend Engineer | membership,secrets,oauth,kis,production-readiness |
 | [TASK-125](TASK-125-membership-kis-commercial-terms-review-packet.md) | 완료 | High | 중 | 1 ph / ~18000 tok | Compliance Officer | membership,kis,open-api,terms,compliance |
 | [TASK-128](TASK-128-compliance-business-routing-alignment.md) | 완료 | High | 낮 | 1 ph / ~12000 tok | Lead Engineer | business-plan,compliance,agents,routing,marketing,regulatory |
-| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 대기 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
+| [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 완료 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
 | [TASK-166](TASK-166-marketing-team-operating-model.md) | 완료 | High | 중 | 2 ph / ~25000 tok | Lead Engineer | marketing,agents,operating-model,routing,go-to-market |
 | [TASK-167](TASK-167-promotion-campaign-backlog-calendar-v1.md) | 완료 | High | 중 | 3 ph / ~35000 tok | Marketing Growth | marketing,campaign,content-calendar,claim-bank,early-users |
 | [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
@@ -128,8 +128,8 @@
 | [TASK-168](TASK-168-promotion-asset-generator-readiness-map.md) | 완료 | Medium | 중 | 3 ph / ~35000 tok | Doc Steward | marketing,assets,pdf,pptx,rendering,readiness |
 | [TASK-169](TASK-169-sns-publishing-automation-readiness-backlog.md) | 완료 | Medium | 중-상 | 4 ph / ~45000 tok | Backend Engineer | marketing,sns,publishing,automation,external-api,readiness |
 | [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Medium | 중 | 2 ph / ~25000 tok | Business Planner | marketing,sales,revenue,handoff,crm,pricing |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## Low
 
