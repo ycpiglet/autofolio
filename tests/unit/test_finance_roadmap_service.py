@@ -230,6 +230,15 @@ class TestRuntimeAdviceGuard:
         with pytest.raises(ValueError):
             compute_goal_gap(tampered, as_of="fixture_static")
 
+    def test_korean_advice_wording_in_fixture_is_rejected(self, contract):
+        """Korean action terms (mirrored from frontend wording test) are also rejected."""
+        import copy
+        from app.services.finance_roadmap import compute_goal_gap
+        tampered = copy.deepcopy(contract)
+        tampered["portfolio_review_candidates"][0]["why_flagged"] = "지금 매수 시점입니다"
+        with pytest.raises(ValueError):
+            compute_goal_gap(tampered, as_of="fixture_static")
+
 
 class TestDeterminism:
     """Two calls with the same inputs produce identical output."""

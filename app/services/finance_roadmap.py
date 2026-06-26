@@ -23,6 +23,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_CONTRACT = REPO_ROOT / "agents" / "project" / "FINANCE-SCENARIO-INPUT-CONTRACT.json"
 
 _FORBIDDEN_OUTPUT_PHRASES = (
+    # English — original set
     "you should buy",
     "you should sell",
     "guaranteed return",
@@ -32,6 +33,14 @@ _FORBIDDEN_OUTPUT_PHRASES = (
     "accounting advice",
     "investment advice",
     "trade recommendation",
+    # Korean action/advice terms — mirrored from
+    # web/src/lib/finance-roadmap-wording.test.ts (TASK-173 symmetry)
+    "매수",
+    "매도",
+    "추천",
+    "주문",
+    "발주",
+    "사세요",
 )
 
 
