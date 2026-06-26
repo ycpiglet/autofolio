@@ -185,3 +185,37 @@ valid member or owner session. The response fields to render are:
 
 ## Concerns
 None. All 48 task-specific tests pass, 21 portfolio regression tests pass, boundary flags are Literal-locked, no wall-clock calls, no order path, no advice wording, no private data.
+
+## Final-review fix wave
+
+Commit: `82b387c` — fix(finance): TASK-173 final-review hardening — runtime no-advice guard + Literal owner-review lock + import hoist
+
+### Fix 1: Runtime no-advice guard (most important)
+
+Added `_FORBIDDEN_OUTPUT_PHRASES` tuple and `_assert_no_advice_wording(texts)` helper to `app/services/finance_roadmap.py` (after imports, before models). Called at the end of `compute_goal_gap` before the return, collecting all emitted free-text fields: `allocation_drift`, each `review_candidate.why_flagged`, each item in `review_candidate.missing_evidence`, each `timeline_candidate.trigger`, and each item in `timeline_candidate.required_evidence`. Raises `ValueError` if any forbidden phrase (e.g. "you should buy") appears.
+
+New unit test in `TestRuntimeAdviceGuard.test_advice_wording_in_fixture_is_rejected`: deep-copies the contract fixture, injects `"you should buy more now"` into the first review candidate's `why_flagged`, and asserts `compute_goal_gap` raises `ValueError`. PASSES.
+
+### Fix 2: Literal[True] lock on candidate_for_owner_review_only
+
+Changed both `ReviewCandidate.candidate_for_owner_review_only` and `TimelineCandidate.candidate_for_owner_review_only` from `bool = True` to `Literal[True] = True`. Updated both constructor sites in `compute_goal_gap` to pass `candidate_for_owner_review_only=True` literally (removed `bool(rc.get(...))` / `bool(tc.get(...))` passthrough) since the field is now a fixed invariant.
+
+### Fix 3: Import hoist in the router
+
+Moved `compute_goal_gap, load_contract` from the lazy in-body import inside `goal_gap()` to the top-level import line alongside `FinanceRoadmapResponse` in `app/api/routers/finance_roadmap.py`. Removed the now-redundant in-body import statement.
+
+### Test results
+
+**Focused run (49 tests — 1 new):**
+```
+.venv\Scripts\python.exe -m pytest tests/unit/test_finance_roadmap_service.py tests/api/test_finance_roadmap_api.py -v
+======================== 49 passed, 1 warning in 0.84s ========================
+```
+
+**Portfolio no-regression:**
+```
+.venv\Scripts\python.exe -m pytest tests/api/test_portfolio.py -q
+======================== 21 passed, 1 warning in 0.96s ========================
+```
+
+Both pristine. `TestRuntimeAdviceGuard::test_advice_wording_in_fixture_is_rejected` PASSED.
