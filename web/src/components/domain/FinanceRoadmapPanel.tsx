@@ -60,7 +60,7 @@ export function FinanceRoadmapPanel() {
       <EmptyState
         illustration="error"
         title={ROADMAP_LABELS.errorTitle}
-        description={ROADMAP_LABELS.unauthorizedText}
+        description={(authError as Error)?.message ?? ROADMAP_LABELS.errorTitle}
       />
     );
   }
@@ -81,7 +81,7 @@ export function FinanceRoadmapPanel() {
       <EmptyState
         illustration="error"
         title={ROADMAP_LABELS.errorTitle}
-        description={(roadmapQuery.error as Error).message}
+        description={(roadmapQuery.error as Error)?.message ?? ROADMAP_LABELS.errorTitle}
       />
     );
   }
@@ -97,7 +97,7 @@ export function FinanceRoadmapPanel() {
           className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-200"
           data-testid="preview-badge"
         >
-          {ROADMAP_LABELS.previewBadge}
+          {data.as_of === "fixture_static" ? ROADMAP_LABELS.previewBadge : data.as_of}
         </span>
         <p className="max-w-prose text-xs text-muted-foreground">
           {ROADMAP_LABELS.previewNote}

@@ -259,7 +259,15 @@ test.describe("Finance Roadmap — /finance-roadmap page (TASK-174)", () => {
   });
 
   test("panel error state shown when API returns 500", async ({ page }) => {
-    // Auth OK, but finance-roadmap endpoint fails
+    // Auth OK, but finance-roadmap endpoint fails.
+    // Routes are matched LIFO — register catch-all first so specific routes win.
+    await page.route(/\/api\//, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({}),
+      }),
+    );
     await page.route(/\/api\/auth\/me/, (route) =>
       route.fulfill({
         status: 200,
@@ -272,13 +280,6 @@ test.describe("Finance Roadmap — /finance-roadmap page (TASK-174)", () => {
         status: 500,
         contentType: "application/json",
         body: JSON.stringify({ detail: "Internal server error" }),
-      }),
-    );
-    await page.route(/\/api\//, (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({}),
       }),
     );
 
