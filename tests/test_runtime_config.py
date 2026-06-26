@@ -122,17 +122,17 @@ def test_kis_env_in_tracked_vars(monkeypatch):
     assert "KIS_ENV" in names
 
 
-# ── Internal get_config_flag (server-side only, not for API responses) ─────────
+# ── Internal _get_config_flag (server-side only, not for API responses) ─────────
 
 def test_get_config_flag_returns_actual_value(monkeypatch):
     monkeypatch.setenv("KIS_ENV", "mock")
     rc = _mod(monkeypatch)
-    val = rc.get_config_flag("KIS_ENV")
+    val = rc._get_config_flag("KIS_ENV")
     assert val == "mock"
 
 
 def test_get_config_flag_missing_returns_default(monkeypatch):
     monkeypatch.delenv("MISSING_VAR_XYZ", raising=False)
     rc = _mod(monkeypatch)
-    assert rc.get_config_flag("MISSING_VAR_XYZ") is None
-    assert rc.get_config_flag("MISSING_VAR_XYZ", "fallback") == "fallback"
+    assert rc._get_config_flag("MISSING_VAR_XYZ") is None
+    assert rc._get_config_flag("MISSING_VAR_XYZ", "fallback") == "fallback"

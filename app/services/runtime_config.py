@@ -44,7 +44,7 @@ def check_all() -> list[dict]:
     return [check_presence(name) for name in TRACKED_VARS]
 
 
-def get_config_flag(name: str, default=None):
+def _get_config_flag(name: str, default=None):
     """INTERNAL USE ONLY — returns the actual env var value for server-side use.
 
     WARNING: Never expose the return value in any API response, log message,
