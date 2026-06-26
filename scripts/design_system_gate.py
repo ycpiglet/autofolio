@@ -2,7 +2,7 @@
 
 Checks that the adopted visual-asset design system invariants hold in web/src:
 
-  1. No runtime CDN usage — self-host only.
+  1. No runtime CDN usage - self-host only.
        Rejects: @import url(https://...) in CSS,
                 <link rel=stylesheet href="https://..."> in HTML/JSX,
                 <script src="https://..."> in HTML/JSX.
@@ -12,7 +12,7 @@ Checks that the adopted visual-asset design system invariants hold in web/src:
      palette exports (namespace-separated so series colors never collide with
      up/down meaning).
 
-  3. format.ts single-sources number formatting — fmtWonShort is exported.
+  3. format.ts single-sources number formatting - fmtWonShort is exported.
 
   4. Third-party license notices file is present under docs/research/.
 
@@ -95,6 +95,8 @@ def check_no_runtime_cdn(web_src_dir: Path = WEB_SRC) -> list[str]:
 
 def check_palette_namespace(chart_palette_file: Path = CHART_PALETTE) -> list[str]:
     """Check chart-palette.ts exposes PnL, categorical, AND sequential exports."""
+    # Verifies STRUCTURAL namespace separation (pnl*/categorical*/sequential* exports exist),
+    # NOT WCAG contrast / CVD color-value quality (validated at original adoption, PR #98/#119).
     findings: list[str] = []
     if not chart_palette_file.is_file():
         return [f"chart-palette.ts not found: {chart_palette_file}"]
@@ -175,6 +177,10 @@ def main(argv: list[str] | None = None) -> int:
         help="validate design system invariants; exit non-zero on findings",
     )
     args = parser.parse_args(argv)
+
+    if not args.check:
+        parser.print_help()
+        return 0
 
     findings = run_all_checks()
     if findings:

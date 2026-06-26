@@ -64,11 +64,12 @@ Owner: UI/UX Designer
   - 근거: `web/src/lib/format.ts`에 `fmtWonShort` export 확인; vitest 119/119 PASS (format.test.ts 포함). `verify:format` 27/27 PASS (2026-06-26T19:16:37+09:00 확인 — `format.ts` import를 `./design-tokens.ts` 상대경로로 수정). `design_system_gate.py --check` PASS.
 - [x] 신규 의존성은 Owner 승인 기록이 있다.
   - 근거: `docs/research/asset-adoption-candidates-2026-06-25.md` Owner 의존성 승인 증거 섹션 (2026-06-26 추가) — PR #98/#113/#122/#123 Owner 병합.
-- [x] prod 모드 E2E(CI=1)와 `scripts/design_system_gate.py --check`가 회귀 없이 통과한다.
+- [x] `scripts/design_system_gate.py --check`가 회귀 없이 통과한다.
   - `design_system_gate.py --check`: PASS (새로 생성, 18 unit tests GREEN).
   - `npm run build`: PASS.
   - `npm run lint`: PASS.
   - `vitest run`: 119/119 PASS.
+- [-] prod 모드 E2E(CI=1)는 환경 차단(Playwright webServer EACCES 127.0.0.1:3100)으로 미실행 — build PASS + vitest 119/119 + design_system_gate PASS를 대체 증거로 채택(#123 선례). 정규 환경에서 재검증 필요.
   - prod E2E(CI=1): 환경 차단 — 클로즈아웃 섹션 참조.
 
 ## 비고
