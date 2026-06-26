@@ -1,6 +1,8 @@
 ---
 type: task
 id: TASK-174
+started_at: 2026-06-21T16:30:12+09:00
+completed_at: 2026-06-26T20:57:05+09:00
 display_id: TASK-174
 task_uid: fdbdc675-6b4b-43a0-97f3-d331439e0b82
 registered_at: 2026-06-21T16:30:12+09:00
@@ -78,6 +80,16 @@ Start after TASK-173 is complete.
 - verify:format 27/27 PASS
 - lint PASS · build PASS
 - SidebarNav finance-roadmap 항목 추가 확인
+
+## 완료 내용
+
+- `web/src/components/domain/FinanceRoadmapPanel.tsx` — 시나리오/갭 표시 패널(추천 문구 없음).
+- `web/src/app/finance-roadmap/page.tsx` — auth-gated 페이지, as_of 프리뷰 레이블 렌더링.
+- `web/src/lib/api.ts` seam 추가.
+- 금지 문구 17개 vitest 워딩 테스트. `web/e2e/finance-roadmap.spec.ts` E2E 스펙(환경 차단 미실행).
+- SidebarNav finance-roadmap 항목 추가.
+
+결과: vitest 136/136 PASS (워딩 컴플라이언스 17 금지 문구 포함), verify:format 27/27 PASS, lint PASS, build PASS. CC2/CC4 환경 차단(EACCES :3100) → [-] 정직 기록.
 
 ## 리뷰
 

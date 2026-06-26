@@ -1,6 +1,8 @@
 ---
 type: task
 id: TASK-173
+started_at: 2026-06-21T16:30:12+09:00
+completed_at: 2026-06-26T20:57:05+09:00
 display_id: TASK-173
 task_uid: e8120499-841e-40a0-aadd-7887c610a48a
 registered_at: 2026-06-21T16:30:12+09:00
@@ -74,6 +76,15 @@ Start after TASK-172 is complete.
 - `app/main.py` — 라우터 등록
 - pytest 49/49 PASS — read-only 경계(주문 경로 없음, 어드바이스 문구 없음, 결제/개인정보 없음) + 출력 결정론성 + Owner 후보 전용 플래그 검증
 - TASK-174가 이 read model을 API seam을 통해 소비 (검증됨)
+
+## 완료 내용
+
+- `app/services/finance_roadmap.py` — GoalGapResult Pydantic 모델 (planned/expected/gap/timeline 필드), compliance boundary 이중 잠금(Pydantic Literal 플래그 + 런타임 `_assert_no_advice_wording` EN+KO 대칭 가드).
+- `app/api/routers/finance_roadmap.py` — auth-gated `GET /api/finance-roadmap/goal-gap`, as_of="fixture_static" 결정론적 응답.
+- `app/main.py` — 라우터 등록.
+- focused tests 50개 GREEN — read-only 경계(주문 경로 없음, 어드바이스 문구 없음, 결제/개인정보 없음) + 출력 결정론성 + Owner 후보 전용 플래그.
+
+결과: pytest 50/50 PASS. compliance boundary 확인. auth gate 확인.
 
 ## 리뷰
 

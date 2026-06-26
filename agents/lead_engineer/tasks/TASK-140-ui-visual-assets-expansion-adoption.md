@@ -1,6 +1,9 @@
 ---
 type: task
 id: TASK-140
+task_uid: 1f93b2da-35d1-47ef-90d4-181bddd3ea96
+started_at: 2026-06-19T22:04:43+09:00
+completed_at: 2026-06-26T19:03:59+09:00
 display_id: TASK-140
 registered_at: 2026-06-19T22:04:43+09:00
 created_at: 2026-06-19T22:04:43+09:00
@@ -90,8 +93,21 @@ Owner: UI/UX Designer
 - `tests/unit/test_design_system_gate.py` — TDD 18 tests GREEN
 - vitest: 119/119 PASS · lint: PASS · build: PASS
 
+## 완료 내용
+
+- `scripts/design_system_gate.py` 신규 작성 (4-invariant: CDN=0, palette namespace, format single-source, license notices). TDD: 18 tests GREEN.
+- `web/src/lib/format.ts` relative import 수정 + `tsconfig.json allowImportingTsExtensions: true` 추가 → `verify:format` 27/27 PASS.
+- Owner 의존성 승인 증거 기록 (`docs/research/asset-adoption-candidates-2026-06-25.md`에 PR #98/#113/#122/#123 병합 기록).
+- vitest 119/119 PASS · lint PASS · build PASS · design_system_gate PASS. prod E2E 환경 차단 → `[-]` 기록.
+
+## 검증
+
+결과: vitest 119/119 PASS, lint PASS, build PASS, design_system_gate.py 18/18 PASS, verify:format 27/27 PASS. prod E2E (CI=1) = EACCES :3100 환경 차단.
+
 ## 리뷰
 
+- Opus code-reviewer subagent (whole-branch dispatch, 2026-06-26): feat/ui-backlog-2026-06-26 전체 검토 — verdict "Ready to merge: Yes". TASK-140 완료 조건·CDN/팔레트/포맷/라이선스 불변식 확인.
+- 모델 라우팅: selected_model=claude-opus-4-8 (whole-branch code-review subagent dispatch).
 - Lead Engineer 클로즈아웃 검증: 완료 조건 5개 전부 확인. `design_system_gate.py --check` PASS, vitest 119 PASS, build PASS, lint PASS. CDN 런타임 참조 0건 확인. 환경 차단 2건(verify:format `@/` alias, prod E2E)은 클로즈아웃 섹션에 기록.
 - QA perspective: vitest 119/119 PASS (format.test.ts·chart-palette.test.ts·flags.test.ts·avatar.test.ts 등 포함). design_system_gate 18 unit tests GREEN.
 - 주의: ~~`verify:format` 스크립트는 `@/lib/design-tokens` import 문 때문에 plain Node.js에서 alias 미해결로 실패.~~ 2026-06-26 `format.ts` import를 `./design-tokens.ts`(상대 경로 + 명시적 `.ts` 확장자)로 수정하고 `tsconfig.json`에 `allowImportingTsExtensions: true` 추가하여 27/27 PASS 달성. vitest 119/119·lint·build도 함께 GREEN.

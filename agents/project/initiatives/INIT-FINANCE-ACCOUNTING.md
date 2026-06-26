@@ -8,6 +8,8 @@ owner: Finance Accounting
 created_at: 2026-06-21T16:30:12+09:00
 updated_at: 2026-06-26T20:57:05+09:00
 completed_at: 2026-06-26T20:57:05+09:00
+resolution: done
+verification_status: reviewed
 origin_type: owner_request
 origin_ref: AUDIT-2026-06-21-001
 created_by: lead_engineer
