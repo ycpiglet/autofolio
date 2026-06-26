@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+from app.services.flags import guest_demo_enabled, local_auto_register_enabled
+
 
 def readiness() -> dict[str, Any]:
     """Return the current production-readiness state for membership launch."""
@@ -630,8 +632,6 @@ def _environment_flags() -> dict[str, bool]:
                 "AUTOFOLIO_MEMBERSHIP_BANK_ACCOUNT",
             )
         ),
-        "guest_demo_enabled": (os.getenv("AUTOFOLIO_GUEST_DEMO_ENABLED") or "").strip().lower()
-        in {"1", "true", "yes", "on"},
-        "local_auto_register_enabled": (os.getenv("AUTOFOLIO_LOCAL_AUTO_REGISTER") or "").strip().lower()
-        in {"1", "true", "yes", "on"},
+        "guest_demo_enabled": guest_demo_enabled(),
+        "local_auto_register_enabled": local_auto_register_enabled(),
     }

@@ -12,6 +12,7 @@ import hmac
 import os
 
 from app.ui import vault
+from app.services.flags import local_auto_register_enabled as _auto_register_enabled
 
 __all__ = [
     "login_or_register",
@@ -24,16 +25,6 @@ __all__ = [
 
 #: Minimum length for a (new) password. Kept conservative for a local vault.
 MIN_PASSWORD_LEN = 8
-_AUTO_REGISTER_ENV = "AUTOFOLIO_LOCAL_AUTO_REGISTER"
-
-
-def _auto_register_enabled() -> bool:
-    return (os.getenv(_AUTO_REGISTER_ENV) or "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
 
 
 def _hash(password: str, salt: bytes) -> str:

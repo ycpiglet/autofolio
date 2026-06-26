@@ -8,7 +8,6 @@ Endpoints:
 from __future__ import annotations
 
 import secrets
-import os
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Cookie, HTTPException, Query, Response, status
@@ -25,18 +24,9 @@ from app.api.security import (
     encode_session,
 )
 from app.services import sso
+from app.services.flags import guest_demo_enabled
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-_GUEST_DEMO_ENV = "AUTOFOLIO_GUEST_DEMO_ENABLED"
-
-
-def guest_demo_enabled() -> bool:
-    return (os.getenv(_GUEST_DEMO_ENV) or "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
 
 
 @router.post("/login", response_model=SessionResponse)
