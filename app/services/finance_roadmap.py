@@ -108,12 +108,12 @@ class TimelineCandidate(BaseModel):
 class RoadmapBoundary(BaseModel):
     """Boundary flags carried in every response to make constraints machine-readable."""
 
-    synthetic_fixture_only: bool = True
-    read_only_planning_input_only: bool = True
-    not_investment_recommendation: bool = True
-    no_trade_instruction: bool = True
-    no_order_execution: bool = True
-    not_tax_accounting_final_advice: bool = True
+    synthetic_fixture_only: Literal[True] = True
+    read_only_planning_input_only: Literal[True] = True
+    not_investment_recommendation: Literal[True] = True
+    no_trade_instruction: Literal[True] = True
+    no_order_execution: Literal[True] = True
+    not_tax_accounting_final_advice: Literal[True] = True
 
 
 class FinanceRoadmapResponse(BaseModel):

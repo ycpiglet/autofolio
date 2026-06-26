@@ -149,30 +149,36 @@ class TestBoundaryFlags:
     """All review and timeline candidates carry the required safety flags."""
 
     def test_review_candidates_action_not_permitted(self, response):
+        assert len(response.review_candidates) >= 1
         for cand in response.review_candidates:
             assert cand.action_permitted_now is False, (
                 f"Candidate {cand.id!r} must have action_permitted_now=False"
             )
 
     def test_review_candidates_no_trade_instruction(self, response):
+        assert len(response.review_candidates) >= 1
         for cand in response.review_candidates:
             assert cand.no_trade_instruction is True, (
                 f"Candidate {cand.id!r} must have no_trade_instruction=True"
             )
 
     def test_review_candidates_owner_review_only(self, response):
+        assert len(response.review_candidates) >= 1
         for cand in response.review_candidates:
             assert cand.candidate_for_owner_review_only is True
 
     def test_timeline_candidates_owner_review_only(self, response):
+        assert len(response.timeline_candidates) >= 1
         for cand in response.timeline_candidates:
             assert cand.candidate_for_owner_review_only is True
 
     def test_timeline_candidates_action_not_permitted(self, response):
+        assert len(response.timeline_candidates) >= 1
         for cand in response.timeline_candidates:
             assert cand.action_permitted_now is False
 
     def test_timeline_candidates_have_required_evidence(self, response):
+        assert len(response.timeline_candidates) >= 1
         for cand in response.timeline_candidates:
             assert len(cand.required_evidence) >= 1
 
