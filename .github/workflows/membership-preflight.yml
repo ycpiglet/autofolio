@@ -1,0 +1,50 @@
+name: membership-preflight
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  membership-preflight:
+    name: Membership gate scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: membership_staging_deploy_preflight_gate
+        run: python scripts/membership_staging_deploy_preflight_gate.py --check
+      - name: membership_staging_env_inventory_gate
+        run: python scripts/membership_staging_env_inventory_gate.py --check
+      - name: membership_railway_backend_readiness_gate
+        run: python scripts/membership_railway_backend_readiness_gate.py --check
+      - name: membership_staging_storage_decision_gate
+        run: python scripts/membership_staging_storage_decision_gate.py --check
+      - name: membership_supabase_migration_review_gate
+        run: python scripts/membership_supabase_migration_review_gate.py --check
+      - name: membership_supabase_apply_evidence_gate
+        run: python scripts/membership_supabase_apply_evidence_gate.py --check
+      - name: membership_kis_terms_review_gate
+        run: python scripts/membership_kis_terms_review_gate.py --check
+      - name: membership_contract_gate
+        run: python scripts/membership_contract_gate.py --check
+      - name: membership_supabase_field_map_gate
+        run: python scripts/membership_supabase_field_map_gate.py --check
+      - name: membership_secret_store_plan_gate
+        run: python scripts/membership_secret_store_plan_gate.py --check
+      - name: membership_payment_recognition_decision_gate
+        run: python scripts/membership_payment_recognition_decision_gate.py --check
+      - name: membership_engine_safety_gate
+        run: python scripts/membership_engine_safety_gate.py --check
+      - name: membership_payment_policy_gate
+        run: python scripts/membership_payment_policy_gate.py --check
+      - name: membership_secret_policy_gate
+        run: python scripts/membership_secret_policy_gate.py --check
+      - name: membership_tenant_isolation_gate
+        run: python scripts/membership_tenant_isolation_gate.py --check
