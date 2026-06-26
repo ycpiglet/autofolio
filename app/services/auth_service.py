@@ -20,6 +20,7 @@ __all__ = [
     "create_or_update_user",
     "verify_password",
     "role_for_user",
+    "sso_role_for_email",
     "MIN_PASSWORD_LEN",
 ]
 
@@ -85,6 +86,38 @@ def role_for_user(username: str) -> str:
         return "owner"
     role = str(rec.get("role") or "owner").strip().lower()
     return role if role in {"owner", "member"} else "owner"
+
+
+def sso_role_for_email(email: str | None) -> str | None:
+    """3-way SSO role assignment: 'owner' | 'member' | None (deny).
+
+    Resolution order:
+    1. If the SSO email matches AUTOFOLIO_OWNER_EMAIL → 'owner'.
+       Fail-closed: if AUTOFOLIO_OWNER_EMAIL is unset, no SSO email is owner.
+    2. Elif the email maps to an approved local 'member' account → 'member'.
+    3. Else → None (caller must deny / return 403).
+
+    This prevents any allowlisted-but-unapproved email from silently receiving
+    owner privileges (TASK-087 A3 security fix).
+    """
+    if not email:
+        return None
+
+    owner_email = (os.getenv("AUTOFOLIO_OWNER_EMAIL") or "").strip().lower()
+    normalized = email.strip().lower()
+
+    # 1. Owner identity check (explicit designation required)
+    if owner_email and normalized == owner_email:
+        return "owner"
+
+    # 2. Approved member account lookup (username == SSO email)
+    users = _users()
+    rec = users.get(_normalize_username(email))
+    if isinstance(rec, dict) and str(rec.get("role") or "").strip().lower() == "member":
+        return "member"
+
+    # 3. Deny — allowlisted but no matching account
+    return None
 
 
 def verify_password(username: str, password: str) -> tuple[bool, str]:

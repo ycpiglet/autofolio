@@ -24,6 +24,7 @@ from app.api.security import (
     encode_session,
 )
 from app.services import sso
+from app.services.auth_service import sso_role_for_email
 from app.services.flags import guest_demo_enabled
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -193,13 +194,21 @@ async def sso_callback(
     if not sso.email_allowed(profile.email):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="SSO email is not allowed")
 
+    # 3-way role assignment: owner (designated only) | member (approved account) | deny
+    role = sso_role_for_email(profile.email)
+    if role is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="SSO 이메일이 승인된 계정(owner 또는 member)과 일치하지 않습니다.",
+        )
+
     csrf = secrets.token_hex(32)
     redirect_to = _frontend_redirect_url(str(state_payload.get("next") or "/home"))
     response = RedirectResponse(redirect_to, status_code=status.HTTP_303_SEE_OTHER)
     _set_cookie(
         response,
         {
-            "role": "owner",
+            "role": role,
             "username": profile.username,
             "data_source": f"sso:{provider.id}",
             "csrf_token": csrf,
