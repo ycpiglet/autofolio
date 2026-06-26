@@ -22,6 +22,34 @@ from pydantic import BaseModel
 REPO_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_CONTRACT = REPO_ROOT / "agents" / "project" / "FINANCE-SCENARIO-INPUT-CONTRACT.json"
 
+_FORBIDDEN_OUTPUT_PHRASES = (
+    "you should buy",
+    "you should sell",
+    "guaranteed return",
+    "execute order",
+    "place order",
+    "tax advice",
+    "accounting advice",
+    "investment advice",
+    "trade recommendation",
+)
+
+
+def _assert_no_advice_wording(texts: list[str]) -> None:
+    """Defense-in-depth: reject any free-text value that carries advice/order wording.
+
+    The read model is read-only and no-action. Even though the input fixture is a
+    gated artifact, enforce the no-advice boundary at runtime so it never depends
+    solely on test coverage.
+    """
+    for text in texts:
+        lowered = text.lower()
+        for phrase in _FORBIDDEN_OUTPUT_PHRASES:
+            if phrase in lowered:
+                raise ValueError(
+                    f"finance roadmap read model: forbidden advice/order wording in output: {phrase!r}"
+                )
+
 
 # ── Pydantic models ───────────────────────────────────────────────────────────
 
@@ -59,7 +87,7 @@ class ReviewCandidate(BaseModel):
     """Owner-review candidate only. No trade instruction. No action permitted now."""
 
     id: str
-    candidate_for_owner_review_only: bool = True
+    candidate_for_owner_review_only: Literal[True] = True
     action_permitted_now: Literal[False] = False
     no_trade_instruction: Literal[True] = True
     why_flagged: str
@@ -70,7 +98,7 @@ class TimelineCandidate(BaseModel):
     """Candidate review horizon. Requires evidence. No action permitted now."""
 
     id: str
-    candidate_for_owner_review_only: bool = True
+    candidate_for_owner_review_only: Literal[True] = True
     action_permitted_now: Literal[False] = False
     horizon: str
     trigger: str
@@ -171,7 +199,7 @@ def compute_goal_gap(
     review_candidates = [
         ReviewCandidate(
             id=str(rc["id"]),
-            candidate_for_owner_review_only=bool(rc.get("candidate_for_owner_review_only", True)),
+            candidate_for_owner_review_only=True,
             action_permitted_now=False,
             no_trade_instruction=True,
             why_flagged=str(rc.get("why_flagged", "")),
@@ -185,7 +213,7 @@ def compute_goal_gap(
     timeline_candidates = [
         TimelineCandidate(
             id=str(tc["id"]),
-            candidate_for_owner_review_only=bool(tc.get("candidate_for_owner_review_only", True)),
+            candidate_for_owner_review_only=True,
             action_permitted_now=False,
             horizon=str(tc.get("horizon", "")),
             trigger=str(tc.get("trigger", "")),
@@ -194,6 +222,14 @@ def compute_goal_gap(
         for tc in contract.get("timeline_candidates", [])
         if isinstance(tc, dict) and tc.get("id")
     ]
+
+    _assert_no_advice_wording(
+        [allocation_drift]
+        + [rc.why_flagged for rc in review_candidates]
+        + [ev for rc in review_candidates for ev in rc.missing_evidence]
+        + [tc.trigger for tc in timeline_candidates]
+        + [ev for tc in timeline_candidates for ev in tc.required_evidence]
+    )
 
     return FinanceRoadmapResponse(
         as_of=as_of,

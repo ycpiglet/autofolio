@@ -13,7 +13,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends
 
 from app.api.deps import require_app_user
-from app.services.finance_roadmap import FinanceRoadmapResponse
+from app.services.finance_roadmap import FinanceRoadmapResponse, compute_goal_gap, load_contract
 
 router = APIRouter(prefix="/finance-roadmap", tags=["finance-roadmap"])
 
@@ -37,6 +37,4 @@ def goal_gap(
     timeline candidates, review candidates. All marked Owner-review only.
     No order path. No trade instruction. No advice wording.
     """
-    from app.services.finance_roadmap import compute_goal_gap, load_contract
-
     return compute_goal_gap(load_contract())

@@ -213,6 +213,18 @@ class TestNoOrderPath:
             )
 
 
+class TestRuntimeAdviceGuard:
+    """Runtime _assert_no_advice_wording guard rejects forbidden wording in free-text fields."""
+
+    def test_advice_wording_in_fixture_is_rejected(self, contract):
+        import copy
+        from app.services.finance_roadmap import compute_goal_gap
+        tampered = copy.deepcopy(contract)
+        tampered["portfolio_review_candidates"][0]["why_flagged"] = "you should buy more now"
+        with pytest.raises(ValueError):
+            compute_goal_gap(tampered, as_of="fixture_static")
+
+
 class TestDeterminism:
     """Two calls with the same inputs produce identical output."""
 
