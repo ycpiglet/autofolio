@@ -60,8 +60,8 @@ class ReviewCandidate(BaseModel):
 
     id: str
     candidate_for_owner_review_only: bool = True
-    action_permitted_now: bool = False
-    no_trade_instruction: bool = True
+    action_permitted_now: Literal[False] = False
+    no_trade_instruction: Literal[True] = True
     why_flagged: str
     missing_evidence: list[str]
 
@@ -71,7 +71,7 @@ class TimelineCandidate(BaseModel):
 
     id: str
     candidate_for_owner_review_only: bool = True
-    action_permitted_now: bool = False
+    action_permitted_now: Literal[False] = False
     horizon: str
     trigger: str
     required_evidence: list[str]

@@ -164,6 +164,10 @@ class TestBoundaryFlags:
         for cand in response.review_candidates:
             assert cand.candidate_for_owner_review_only is True
 
+    def test_timeline_candidates_owner_review_only(self, response):
+        for cand in response.timeline_candidates:
+            assert cand.candidate_for_owner_review_only is True
+
     def test_timeline_candidates_action_not_permitted(self, response):
         for cand in response.timeline_candidates:
             assert cand.action_permitted_now is False
