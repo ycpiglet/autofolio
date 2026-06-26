@@ -573,8 +573,9 @@ class TestAutoExecLock:
         body = resp.json()
         assert body["detail"]["status"] == "auto_exec_locked"
 
-    def test_disable_allowed_when_flag_off(self, owner_client):
+    def test_disable_allowed_when_flag_off(self, owner_client, monkeypatch):
         """Flag OFF → disabling auto-trading is still permitted (kill-switch semantics)."""
+        monkeypatch.delenv("AUTOFOLIO_AUTO_EXEC_ENABLED", raising=False)
         with patch("app.services.backend.set_flag"), \
              patch("app.services.backend.get_flag", return_value=False):
             resp = owner_client.post(

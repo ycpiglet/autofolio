@@ -140,7 +140,6 @@ def test_auto_exec_flag_blocks(env, monkeypatch):
     r = checker.check(condition=_cond(), current_price=70000, now=datetime.now())
     assert not r.allowed
     assert (
-        "auto_exec" in r.reason.lower()
-        or "locked" in r.reason.lower()
+        "locked" in r.reason.lower()
         or "AUTOFOLIO_AUTO_EXEC_ENABLED" in r.reason
     )

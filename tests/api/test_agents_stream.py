@@ -494,3 +494,14 @@ class TestIcRecommendationLock:
         with patch("app.services.agents.list_decisions", return_value=[]):
             resp = member_client.get("/api/agents/ic/decisions")
         assert resp.status_code == 200
+
+    def test_ic_stream_blocked_when_flag_off(self, member_client, monkeypatch):
+        """Recommendation flag OFF → GET /agents/ic/stream/{job_id} returns 403 recommendation_locked.
+
+        The flag gate fires before the job-not-found check, so any random uuid
+        triggers the 403 without needing a real job in the registry.
+        """
+        monkeypatch.delenv("AUTOFOLIO_RECOMMENDATION_ENABLED", raising=False)
+        resp = member_client.get(f"/api/agents/ic/stream/{uuid.uuid4()}")
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["status"] == "recommendation_locked"

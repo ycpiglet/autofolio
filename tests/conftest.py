@@ -16,4 +16,5 @@ def _auto_exec_enabled(monkeypatch):
     ``monkeypatch.delenv("AUTOFOLIO_AUTO_EXEC_ENABLED", raising=False)``
     in their own body to override this fixture.
     """
+    # Override with monkeypatch.delenv("AUTOFOLIO_AUTO_EXEC_ENABLED", raising=False) within a test to exercise flag-OFF paths.
     monkeypatch.setenv("AUTOFOLIO_AUTO_EXEC_ENABLED", "1")
