@@ -15,7 +15,7 @@
  * track the toggle via CSS variables defined in globals.css.
  */
 
-import { pnlColorTokens } from "@/lib/design-tokens";
+import { pnlColorTokens } from "./design-tokens.ts";
 
 // ── Currency ───────────────────────────────────────────────────────────────
 

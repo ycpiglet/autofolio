@@ -61,7 +61,7 @@ Owner: UI/UX Designer
 - [x] PnL 의미색과 categorical/sequential 팔레트가 네임스페이스 분리된다(WCAG/CVD 검증).
   - 근거: `web/src/lib/chart-palette.ts`가 `pnlDivergingRampKR`, `categoricalPalette/categoricalOrder`, `sequentialViridis/sequentialBlues` 를 별도 named export로 분리. `design_system_gate.py --check` PASS.
 - [x] 숫자 포맷이 `format.ts` 경유로 일원화되고 `verify:format`이 통과한다.
-  - 근거: `web/src/lib/format.ts`에 `fmtWonShort` export 확인; vitest 119/119 PASS (format.test.ts 포함). `verify:format`(Node.js 직접 실행)은 `@/lib` 별칭 미해결로 환경 차단 — 동등한 vitest 커버리지가 대체 증거. `design_system_gate.py --check` PASS.
+  - 근거: `web/src/lib/format.ts`에 `fmtWonShort` export 확인; vitest 119/119 PASS (format.test.ts 포함). `verify:format` 27/27 PASS (2026-06-26T19:16:37+09:00 확인 — `format.ts` import를 `./design-tokens.ts` 상대경로로 수정). `design_system_gate.py --check` PASS.
 - [x] 신규 의존성은 Owner 승인 기록이 있다.
   - 근거: `docs/research/asset-adoption-candidates-2026-06-25.md` Owner 의존성 승인 증거 섹션 (2026-06-26 추가) — PR #98/#113/#122/#123 Owner 병합.
 - [x] prod 모드 E2E(CI=1)와 `scripts/design_system_gate.py --check`가 회귀 없이 통과한다.
@@ -93,7 +93,7 @@ Owner: UI/UX Designer
 
 - Lead Engineer 클로즈아웃 검증: 완료 조건 5개 전부 확인. `design_system_gate.py --check` PASS, vitest 119 PASS, build PASS, lint PASS. CDN 런타임 참조 0건 확인. 환경 차단 2건(verify:format `@/` alias, prod E2E)은 클로즈아웃 섹션에 기록.
 - QA perspective: vitest 119/119 PASS (format.test.ts·chart-palette.test.ts·flags.test.ts·avatar.test.ts 등 포함). design_system_gate 18 unit tests GREEN.
-- 주의: `verify:format` 스크립트는 `@/lib/design-tokens` import 문 때문에 plain Node.js에서 alias 미해결로 실패. 동등한 vitest 커버리지가 대체 증거이며, 향후 `verify-format.mjs` 수정 권장.
+- 주의: ~~`verify:format` 스크립트는 `@/lib/design-tokens` import 문 때문에 plain Node.js에서 alias 미해결로 실패.~~ 2026-06-26 `format.ts` import를 `./design-tokens.ts`(상대 경로 + 명시적 `.ts` 확장자)로 수정하고 `tsconfig.json`에 `allowImportingTsExtensions: true` 추가하여 27/27 PASS 달성. vitest 119/119·lint·build도 함께 GREEN.
 
 ## 클로즈아웃
 
@@ -108,7 +108,7 @@ Owner: UI/UX Designer
 | `npm run build` | PASS |
 | `vitest run` (119 tests, 15 files) | PASS |
 | `design_system_gate.py --check` | PASS |
-| `npm run verify:format` | 환경 차단 (아래 참조) |
+| `npm run verify:format` | PASS (27/27, 2026-06-26T19:16:37+09:00) |
 | prod E2E `CI=1` | 환경 차단 (아래 참조) |
 
 ### 신규 게이트: `scripts/design_system_gate.py`
@@ -125,9 +125,16 @@ TASK-140 완료 조건에 명시된 `scripts/design_system_gate.py --check` 가 
 - `format.ts` `fmtWonShort` export 존재
 - `docs/research/third-party-notices*` 파일 존재
 
+### Fix wave — verify:format (2026-06-26T19:16:37+09:00)
+
+`format.ts:18`을 `@/lib/design-tokens` → `./design-tokens.ts`(상대 경로 + 명시적 `.ts` 확장자)로 수정.  
+`tsconfig.json`에 `"allowImportingTsExtensions": true` 추가 (`noEmit: true` + `moduleResolution: bundler` 전제조건 이미 충족).  
+Node 24 TS-stripping이 `.ts` 확장자를 직접 해소 → `ERR_MODULE_NOT_FOUND` 해결 → 27/27 PASS.  
+lint · build(Turbopack) · vitest 119/119 동시 GREEN 확인.
+
 ### 환경 차단 항목
 
-**`npm run verify:format`**: `format.ts`가 `@/lib/design-tokens`를 import하는데, 스크립트가 plain Node.js로 실행되어 Next.js `@/` 경로 별칭을 해결하지 못함(`ERR_MODULE_NOT_FOUND`). 동등한 vitest 커버리지(format.test.ts 포함, 119 tests PASS)가 대체 증거. 향후 `verify-format.mjs`에서 `design-tokens` 의존성을 인라인하거나 `vitest --run` 으로 교체 권장.
+**`npm run verify:format`**: 해결됨 (위 Fix wave 참조). 27/27 PASS.
 
 **prod E2E (`CI=1 npm run test:e2e`)**: 이전 세션에서 기록된 바와 동일하게 Playwright webServer가 127.0.0.1:3100 바인딩에 실패할 수 있는 환경(메모리: "Playwright prod-mode verify"). 이 클로즈아웃 세션에서는 시도를 생략하고 `npm run build` PASS + vitest PASS + `design_system_gate.py --check` PASS를 대체 신호로 채택.
 
