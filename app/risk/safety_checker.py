@@ -40,6 +40,10 @@ class SafetyChecker:
         if self.repo.get_system_state("kill_switch_active", "false") == "true":
             return SafetyResult(False, "Kill switch is active.")
 
+        from app.services import flags as _flags
+        if not _flags.auto_exec_enabled():
+            return SafetyResult(False, "Auto-exec locked: AUTOFOLIO_AUTO_EXEC_ENABLED not set.")
+
         if self.repo.get_system_state("auto_trading_enabled", "false") != "true":
             return SafetyResult(False, "Auto trading is disabled.")
 

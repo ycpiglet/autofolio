@@ -128,3 +128,19 @@ def test_non_holiday_does_not_block(env, monkeypatch):
     monkeypatch.setattr(sc_mod, "is_krx_holiday", lambda d: False)
     r = checker.check(condition=_cond(), current_price=70000, now=datetime.now())
     assert r.allowed, r.reason
+
+
+# ---- TASK-087 A2: deployment env flag gate ----
+def test_auto_exec_flag_blocks(env, monkeypatch):
+    """Env flag OFF → SafetyChecker blocks even when auto_trading_enabled=true in DB."""
+    repo, checker = env
+    monkeypatch.delenv("AUTOFOLIO_AUTO_EXEC_ENABLED", raising=False)
+    import app.risk.safety_checker as sc_mod
+    monkeypatch.setattr(sc_mod, "is_within_trading_window", lambda *a, **kw: True)
+    r = checker.check(condition=_cond(), current_price=70000, now=datetime.now())
+    assert not r.allowed
+    assert (
+        "auto_exec" in r.reason.lower()
+        or "locked" in r.reason.lower()
+        or "AUTOFOLIO_AUTO_EXEC_ENABLED" in r.reason
+    )
