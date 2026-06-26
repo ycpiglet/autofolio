@@ -127,5 +127,5 @@
 | [TASK-170](TASK-170-sales-handoff-readiness-checklist.md) | 완료 | Business Planner | Sales Handoff Readiness Checklist |
 | [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | Finance Accounting | Finance Accounting Planning Support Lane |
 | [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | Finance Accounting | Finance Scenario Input Contract And Sample Fixture |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Backend Engineer | Portfolio Goal-Gap Read Model |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | UI/UX Designer | Finance Roadmap UI Preview |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Backend Engineer | Portfolio Goal-Gap Read Model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | UI/UX Designer | Finance Roadmap UI Preview |

@@ -1,7 +1,7 @@
 # VIEW — TASK by Tag
 
 > 이 파일은 `scripts/generate_views.py` 가 자동 생성한다. 직접 수정하지 말 것.
-> 생성 시각: `2026-06-26T19:31:10+09:00`
+> 생성 시각: `2026-06-26T21:02:58+09:00`
 > 원본: `agents/lead_engineer/tasks/TASK-*.md` 의 YAML frontmatter
 
 필터링은 `python scripts/query_tasks.py --help` 참조.
@@ -20,8 +20,8 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
 | [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## #acknowledgement
 
@@ -193,7 +193,7 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
 | [TASK-057](TASK-057-fix-kpi-returns-hardcoded-zero.md) | 완료 | High | 중-상 | 6 ph / ~40000 tok | Backend Engineer | bug,backend,kpi,performance |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
 
 ## #backlog
 
@@ -662,8 +662,8 @@
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
 | [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## #fix
 
@@ -1334,8 +1334,8 @@
 | [TASK-056](TASK-056-fix-backend-allocation-gap.md) | 완료 | High | 중 | 3 ph / ~25000 tok | Backend Engineer | bug,backend,portfolio,allocation |
 | [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
 | [TASK-172](TASK-172-finance-scenario-input-contract.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,scenario,portfolio,planning |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## #pptx
 
@@ -1481,7 +1481,7 @@
 
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
+| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | Backend Engineer | finance,accounting,portfolio,backend,read-model |
 
 ## #read-only
 
@@ -1616,7 +1616,7 @@
 | ID | 상태 | 우선순위 | 난이도 | 예상 비용 | Owner | Tags |
 |----|------|----------|--------|-----------|-------|------|
 | [TASK-171](TASK-171-finance-accounting-planning-support-lane.md) | 완료 | High | 중 | 3 ph / ~45000 tok | Finance Accounting | finance,accounting,portfolio,planning,operations,roadmap |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## #roles
 
@@ -1972,7 +1972,7 @@
 | [TASK-067](TASK-067-fix-intraday-no-try-except.md) | 완료 | High | 낮 | 2 ph / ~12000 tok | UI/UX Designer | bug,ui,analysis,error-handling |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | High | 중 | 4 ph / ~80000 tok | Lead Engineer | profile,survey,onboarding,personalization,database,ui,safety |
 | [TASK-140](TASK-140-ui-visual-assets-expansion-adoption.md) | 완료 | High | 상 | 16 ph / ~180000 tok | UI/UX Designer | ui,dataviz,assets,icons,fonts,illustration,avatar,opensource,license |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 대기 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
+| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | 완료 | Medium | 중 | 5 ph / ~70000 tok | UI/UX Designer | finance,accounting,portfolio,ui,roadmap |
 
 ## #ui-overhaul
 

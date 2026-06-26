@@ -6,7 +6,7 @@
 > `scripts/generate_views.py` 가 TASK frontmatter 에서 생성 → 드리프트 불가. **직접 수정 금지.**
 > **규칙(COMPOUND-032): 열린 작업은 전부 TASK 로 존재해야 한다** — 메모리·프로세 "다음:" 한 줄에만 두지 말 것
 > (로컬 메모리는 PC/사용자별이라 공유 불가 → 다른 세션이 못 봐서 중복작업이 생긴다).
-> 생성 시각: `2026-06-26T19:31:10+09:00` · 열린 작업 5건
+> 생성 시각: `2026-06-26T21:02:58+09:00` · 열린 작업 3건
 
 ---
 
@@ -22,22 +22,15 @@
 
 | 지표 | 값 | 해석 |
 |------|----|------|
-| 열린 작업 | 5건 / 52 ph | frontmatter 기준 |
+| 열린 작업 | 3건 / 42 ph | frontmatter 기준 |
 | 진행 중 WIP | 0건 | WIP 적정 |
-| 대기 | 3건 | 최상위 자율 후보: TASK-173 (portfolio goal gap read model) |
+| 대기 | 1건 | 최상위 자율 후보: 대기 중 ACT 후보 없음 |
 | 보류 | 2건 | Owner/외부 조건 또는 의도적 defer |
-| 실행성 | ACT 2 / REVIEW 1 / ASK 0 / DEFER 2 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
+| 실행성 | ACT 0 / REVIEW 1 / ASK 0 / DEFER 2 | ACT는 승인 없이 진행 가능, ASK/DEFER는 멈춤 |
 
-**빠른 판단:** 새로 하나를 고른다면 **TASK-173**. 다만 현재 WIP가 0건이라, 먼저 진행 중 항목을 줄이는 편이 흐름에 유리하다.
+**빠른 판단:** 새 착수보다 진행 중/게이트 항목 정리가 우선이다.
 
 ## 결정 레인
-
-### ACT — 자율 진행
-
-| Rank | Task | 결정 | 상태 | 중요도 | 시간 | 가치/이유 | 다음 행동 |
-|------|------|------|------|--------|------|-----------|-----------|
-| 1 | [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) portfolio goal gap read model | ACT | 대기 | Medium / score 27 | L · 5 ph | 중간 가치 | 바로 착수 후보 |
-| 2 | [TASK-174](TASK-174-finance-roadmap-ui-preview.md) finance roadmap ui preview | ACT | 대기 | Medium / score 27 | L · 5 ph | 중간 가치 | 바로 착수 후보 |
 
 ### REVIEW — 자율 가능 + 경계 확인
 
@@ -59,8 +52,6 @@
 | ID | 우선순위 | Owner | 예상 | 게이트 / 태그 |
 |----|----------|-------|------|----------------|
 | [TASK-087](TASK-087-web-deploy-membership-gating.md) | High | Lead Engineer | 24 ph / ~200000 tok | Owner direct request; NO live order, NO secret commit, NO production DB apply, NO external deploy without explicit approval |
-| [TASK-173](TASK-173-portfolio-goal-gap-read-model.md) | Medium | Backend Engineer | 5 ph / ~70000 tok | read-only derived model only; no order path change, no trade recommendation, no private payment data, no KIS/order/risk/prod/deploy |
-| [TASK-174](TASK-174-finance-roadmap-ui-preview.md) | Medium | UI/UX Designer | 5 ph / ~70000 tok | local UI preview only; no recommendation wording, no customer/payment action, no order/risk/prod/deploy |
 
 ### 보류 (게이트 — 외부/결정 대기)
 
