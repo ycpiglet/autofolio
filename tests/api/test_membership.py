@@ -260,6 +260,11 @@ def test_owner_can_read_membership_production_readiness(tmp_path, monkeypatch):
         "membership_bank_runtime_config_present",
         "guest_demo_enabled",
         "local_auto_register_enabled",
+        "owner_email_configured",
+        "auto_exec_enabled",
+        "recommendation_enabled",
+        "advice_enabled",
+        "multi_tenant_enabled",
     }
 
 

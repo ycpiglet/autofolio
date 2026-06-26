@@ -28,6 +28,13 @@ TRACKED_VARS: list[str] = [
     # Runtime / environment
     "AUTOFOLIO_ENV",
     "AUTOFOLIO_HOME",
+    # SSO owner designation (presence-only; value never returned)
+    "AUTOFOLIO_OWNER_EMAIL",
+    # Production capability locks (TASK-087 A — all default OFF / fail-closed)
+    "AUTOFOLIO_AUTO_EXEC_ENABLED",
+    "AUTOFOLIO_RECOMMENDATION_ENABLED",
+    "AUTOFOLIO_ADVICE_ENABLED",
+    "AUTOFOLIO_MULTI_TENANT_ENABLED",
 ]
 
 
