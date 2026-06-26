@@ -20,3 +20,23 @@ Before any apply: Owner/R3 must review this directory and pass the apply-evidenc
 python scripts/membership_supabase_migration_review_gate.py --check
 python scripts/membership_supabase_apply_evidence_gate.py --check
 ```
+
+## Apply-time backend contract (from A4 RLS review — MUST honor at BUCKET B apply)
+
+RLS ownership predicates use `(select auth.uid()) = user_id`. For rows where
+`user_id IS NULL` this evaluates to NULL → treated as FALSE → the row is
+INVISIBLE to an `authenticated` session. This is intentional tenant isolation,
+but it imposes a backend contract once these migrations are applied:
+
+- **Global/system state reads MUST use the `service_role` credential, not an
+  authenticated JWT.** Affected: `system_state` (kill-switch / auto / circuit
+  breaker keys), `risk_limits` where `scope = 'GLOBAL'`, and any legacy trading
+  row carrying `user_id IS NULL`. Querying these via an authenticated session
+  silently returns zero rows.
+- **Pre-auth inserts MUST use `service_role`.** Affected: `membership_requests`
+  intake (inserted with `user_id IS NULL` before an account exists) — the
+  `*_insert_own` WITH CHECK rejects a NULL `user_id` under an authenticated
+  session by design.
+- The cross-user test `member_a_cannot_read_member_b` does NOT cover the
+  authenticated-vs-NULL case; add an explicit "authenticated session cannot see
+  user_id IS NULL rows" test in the apply lane.
