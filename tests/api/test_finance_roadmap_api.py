@@ -112,7 +112,9 @@ class TestGoalGapShape:
 
     def test_review_candidates_action_not_permitted(self, member_client):
         body = member_client.get("/api/finance-roadmap/goal-gap").json()
-        for cand in body.get("review_candidates", []):
+        candidates = body.get("review_candidates", [])
+        assert len(candidates) >= 1, "Expected at least one review candidate"
+        for cand in candidates:
             assert cand["action_permitted_now"] is False
 
     def test_timeline_candidates_present(self, member_client):
