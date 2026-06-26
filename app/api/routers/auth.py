@@ -167,7 +167,13 @@ async def sso_callback(
     state: str,
     af_oauth_state: Annotated[str | None, Cookie(alias=OAUTH_STATE_COOKIE)] = None,
 ) -> RedirectResponse:
-    """Complete OAuth login, issue Autofolio owner session, then return to /home."""
+    """Complete OAuth login and redirect to /home.
+
+    3-way outcome:
+      - AUTOFOLIO_OWNER_EMAIL match → owner session
+      - Approved member vault account (username == SSO email) → member session
+      - Allowlisted but neither owner nor approved member → 403 Forbidden
+    """
     provider = sso.get_provider(provider_id)
     if provider is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown SSO provider")

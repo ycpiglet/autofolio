@@ -316,3 +316,36 @@ class TestSsoRoleHardening:
 
         # Must not issue an owner (or any) session — fail closed
         assert resp.status_code == 403
+
+    def test_sso_member_email_case_insensitive_match(self, client, monkeypatch):
+        """A3 follow-up: member vault key stored lowercase; SSO returns mixed-case email.
+
+        Provider returns 'Member@Example.com' but the vault key was stored as
+        'member@example.com'.  The lookup must be case-insensitive so the member
+        is not wrongly denied.
+        """
+        _configure_google(monkeypatch)
+        monkeypatch.setenv("AUTOFOLIO_OWNER_EMAIL", "owner@example.com")
+        monkeypatch.setenv("AUTOFOLIO_SSO_ALLOWED_EMAILS", "owner@example.com,member@example.com")
+
+        login = client.get("/api/auth/sso/google/login", follow_redirects=False)
+        state = parse_qs(urlparse(login.headers["location"]).query)["state"][0]
+
+        # Vault key stored in lowercase (typical registration path)
+        _member_vault = {"member@example.com": {"role": "member", "salt": "aa", "hash": "bb"}}
+        # SSO provider returns the email with different casing
+        profile = SsoProfile(
+            provider="google", subject="sub-member-ci", email="Member@Example.com", name="Member"
+        )
+        with patch("app.services.auth_service._users", return_value=_member_vault), \
+             patch("app.services.sso.exchange_code_for_profile", new=AsyncMock(return_value=profile)):
+            resp = client.get(
+                f"/api/auth/sso/google/callback?code=abc&state={state}",
+                follow_redirects=False,
+            )
+
+        assert resp.status_code == 303, f"Expected 303, got {resp.status_code}: {resp.text}"
+        session = decode_session(resp.cookies[COOKIE_NAME])
+        assert session is not None
+        assert session["role"] == "member", f"Expected member role, got: {session['role']}"
+        assert session["data_source"] == "sso:google"

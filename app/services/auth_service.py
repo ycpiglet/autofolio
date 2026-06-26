@@ -110,9 +110,17 @@ def sso_role_for_email(email: str | None) -> str | None:
     if owner_email and normalized == owner_email:
         return "owner"
 
-    # 2. Approved member account lookup (username == SSO email)
+    # 2. Approved member account lookup (username == SSO email, case-insensitive).
+    # Vault keys are stored via _normalize_username() which does NOT lowercase, so
+    # we must normalize both sides to avoid denying a legitimate member whose SSO
+    # provider returns a differently-cased email (e.g. Member@Example.com vs
+    # member@example.com stored at registration time).
     users = _users()
-    rec = users.get(_normalize_username(email))
+    normalized_email = _normalize_username(email.strip().lower())
+    rec = next(
+        (v for k, v in users.items() if _normalize_username(k).lower() == normalized_email),
+        None,
+    )
     if isinstance(rec, dict) and str(rec.get("role") or "").strip().lower() == "member":
         return "member"
 
