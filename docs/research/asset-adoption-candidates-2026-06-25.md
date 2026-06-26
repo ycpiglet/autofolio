@@ -50,3 +50,30 @@
   1. **사이드바 이모지 → Lucide** (의존성 0, stroke 일관성). 매핑: 홈`Home`·포트폴리오`PieChart`·매매`ArrowLeftRight`·내역`ReceiptText`·분석`Search`·에이전트`Bot`·알림`Bell`·성향진단`Compass`·설정`Settings`·매뉴얼`BookOpen`. (분석은 기존 🔍에 부합하는 `Search` 채택 — `TrendingUp`은 차트 테마와 중복.)
   2. **unDraw 빈/에러 일러스트**(브랜드 리컬러, `web/public/illustrations/` 자체호스팅) → EmptyState·에러 패널 연결.
 - 보류 후보(향후): Open Peeps/Humaaans(온보딩), 글로벌 데이터 API(자산 확장 시).
+
+---
+
+## Owner 의존성 승인 증거 — 2026-06-26
+
+> TASK-140 완료 조건 "신규 의존성은 Owner 승인 기록이 있다" 에 대한 클로즈아웃 증거.
+
+`web/package.json`에 포함된 TASK-140 범위 신규 의존성은 아래 **Owner 직접 병합 PR** 을 통해 채택되었다.
+Owner 병합 자체가 채택 승인 행위이며, 자체호스팅·퍼미시브 라이선스 검증은
+`docs/research/asset-curation-matrix.md`(2026-06-19) 에서 완료되었다.
+
+| 의존성 | 라이선스 | 도입 PR |
+|---|---|---|
+| `uplot` · `uplot-react` | MIT | #98 |
+| `klinecharts` | Apache-2.0 | #98 |
+| `@fnando/sparkline` | MIT | #98 |
+| `@dicebear/core` · `@dicebear/collection` | MIT (코어), CC0 (스타일) | #113 / #122 |
+| `lucide-react` (사이드바 Lucide 단일화) | ISC/MIT | #122 |
+| `@base-ui/react` | MIT | #122 |
+| `shadcn` | MIT | #122 |
+| `vitest` (devDep) | MIT | #123 |
+
+모든 PR은 Owner 계정(`Leo Gram17`)에 의해 `main` 브랜치에 병합되었으며,
+런타임 CDN 참조 0건 · 자체호스팅 · MIT/Apache/ISC/CC0 라이선스만 채택
+(핫링크·귀속 의무·상용 전용 제외) 조건을 만족한다.
+
+기록 작성: Lead Engineer — 2026-06-26T19:03:59+09:00
