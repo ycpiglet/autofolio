@@ -992,3 +992,80 @@ export function apiWhatif(symbol: string, weight: number): Promise<Record<string
 export function apiAttribution(): Promise<TableResponse> {
   return apiGet<TableResponse>("/api/analysis/attribution");
 }
+
+// ── Finance Roadmap domain types (TASK-173/174) ───────────────────────────
+
+export interface FinanceRoadmapGapRange {
+  low_pct_points: number;
+  high_pct_points: number;
+}
+
+export interface FinanceRoadmapPlanned {
+  planned_return_pct: number;
+  planning_horizon: string;
+}
+
+export interface FinanceRoadmapExpected {
+  low_pct: number;
+  high_pct: number;
+  confidence: string;
+  not_guaranteed: boolean;
+}
+
+export interface FinanceRoadmapMissingEvidence {
+  id: string;
+  owner_decision_required: boolean;
+}
+
+export interface FinanceRoadmapReviewCandidate {
+  id: string;
+  candidate_for_owner_review_only: true;
+  action_permitted_now: false;
+  no_trade_instruction: true;
+  why_flagged: string;
+  missing_evidence: string[];
+}
+
+export interface FinanceRoadmapTimelineCandidate {
+  id: string;
+  candidate_for_owner_review_only: true;
+  action_permitted_now: false;
+  horizon: string;
+  trigger: string;
+  required_evidence: string[];
+}
+
+export interface FinanceRoadmapBoundary {
+  synthetic_fixture_only: true;
+  read_only_planning_input_only: true;
+  not_investment_recommendation: true;
+  no_trade_instruction: true;
+  no_order_execution: true;
+  not_tax_accounting_final_advice: true;
+}
+
+/**
+ * Read-only finance roadmap planning preview.
+ * Returned by GET /api/finance-roadmap/goal-gap.
+ * as_of is always "fixture_static" (synthetic, never a date string).
+ */
+export interface FinanceRoadmapResponse {
+  preview_mode: true;
+  preview_label: string;
+  /** Always "fixture_static" for synthetic fixture data — render as label, not date. */
+  as_of: string;
+  fixture_id: string;
+  planned: FinanceRoadmapPlanned;
+  expected: FinanceRoadmapExpected;
+  gap: FinanceRoadmapGapRange;
+  allocation_drift: string;
+  data_quality_flags: FinanceRoadmapMissingEvidence[];
+  review_candidates: FinanceRoadmapReviewCandidate[];
+  timeline_candidates: FinanceRoadmapTimelineCandidate[];
+  boundary: FinanceRoadmapBoundary;
+}
+
+/** GET /api/finance-roadmap/goal-gap — read-only planning preview */
+export function getFinanceRoadmap(): Promise<FinanceRoadmapResponse> {
+  return apiGet<FinanceRoadmapResponse>("/api/finance-roadmap/goal-gap");
+}
