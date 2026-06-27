@@ -10,6 +10,7 @@ Strangler Migration — Phase 5:
 """
 from __future__ import annotations
 
+import collections as _collections
 import logging
 import threading
 from functools import lru_cache
@@ -70,8 +71,9 @@ _LAST_HOLDINGS_DF: pd.DataFrame | None = None
 # multi-tenant flag is ON and a user_id is supplied (see _ctx_for_user). When
 # the flag is OFF this dict stays empty and _ctx() (the lru_cache(maxsize=1)
 # singleton) is used exactly as before — byte-identical to the pre-Phase-3 path.
+_USER_CTX_MAX: int = 256  # max per-user engine contexts in memory
 _user_ctx_lock = threading.Lock()
-_user_ctx: dict[str, tuple] = {}
+_user_ctx: "_collections.OrderedDict[str, tuple]" = _collections.OrderedDict()
 
 
 @lru_cache(maxsize=1)
@@ -112,12 +114,15 @@ def _ctx_for_user(user_id: str):
     """
     repo, broker, _engine, agent = _ctx()  # ensures DB init + whitelist seed
     with _user_ctx_lock:
-        cached = _user_ctx.get(user_id)
-        if cached is not None:
-            return cached
+        if user_id in _user_ctx:
+            _user_ctx.move_to_end(user_id)
+            return _user_ctx[user_id]
         engine = LiveTradingEngine(broker=broker, repo=repo)
         ctx = (repo, broker, engine, agent)
         _user_ctx[user_id] = ctx
+        # Evict LRU (oldest) entries when over capacity
+        while len(_user_ctx) > _USER_CTX_MAX:
+            _user_ctx.popitem(last=False)  # pop oldest
         return ctx
 
 

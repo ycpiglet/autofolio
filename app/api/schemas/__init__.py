@@ -502,6 +502,21 @@ class IcRunResponse(BaseModel):
     job_id: str
 
 
+# ── Multitenant — per-user engine state + re-enable ─────────────────────────
+
+class UserEngineStateResponse(BaseModel):
+    user_id: str
+    auto_trading_enabled: bool
+    consecutive_failures: int
+
+
+class UserReenableResponse(BaseModel):
+    user_id: str
+    auto_trading_enabled: bool
+    consecutive_failures: int
+    status: str  # always "reenabled"
+
+
 # ── Per-symbol expert briefing (READ-ONLY research) ──────────────────────────
 
 class ResearchProposal(BaseModel):
