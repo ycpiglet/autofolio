@@ -1,3 +1,15 @@
+import os as _os
+
+# Force the SQLite backend for the ENTIRE test suite, independent of a
+# developer's local .env DATABASE_URL. get_connection() routes to Postgres
+# whenever DATABASE_URL is a postgres URL (and then ignores db_path), so a
+# populated .env would point every test at the staging Postgres — breaking the
+# SQLite-only DDL in fixtures and mutating staging data. We set DATABASE_URL=""
+# here, BEFORE any app import; settings.load_dotenv() uses override=False and so
+# will NOT overwrite this empty value. Tests needing Postgres must set it
+# explicitly against a throwaway database.
+_os.environ["DATABASE_URL"] = ""
+
 from pathlib import Path
 import sys
 
