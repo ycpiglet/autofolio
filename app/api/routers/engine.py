@@ -8,12 +8,13 @@ Endpoints:
 """
 from __future__ import annotations
 
+import collections as _collections
 import threading
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.api.deps import require_app_user, require_owner_csrf
+from app.api.deps import require_app_user, require_owner, require_owner_csrf
 from app.api.schemas import (
     AutoTradingRequest,
     AutoTradingResponse,
@@ -22,6 +23,8 @@ from app.api.schemas import (
     KillSwitchRequest,
     KillSwitchResponse,
     RunOnceResponse,
+    UserEngineStateResponse,
+    UserReenableResponse,
 )
 from app.services.investor_profile import investor_profile_completed, username_from_session
 
@@ -37,17 +40,36 @@ _run_once_lock = threading.Lock()
 # before — one global run-once is single-flighted process-wide (byte-identical
 # to today). When ON, each user gets an independent lock so one user's run does
 # not 409-block another user's run.
+_USER_LOCKS_MAX: int = 1024  # max per-user run locks in memory
 _user_run_locks_lock = threading.Lock()
-_user_run_locks: dict[str, threading.Lock] = {}
+_user_run_locks: "_collections.OrderedDict[str, threading.Lock]" = _collections.OrderedDict()
 
 
 def _run_lock_for(user_id: str) -> threading.Lock:
-    """Return (creating on first use) the per-user single-flight run lock."""
+    """Return (creating on first use) the per-user single-flight run lock.
+
+    Maintains an LRU-bounded pool of size _USER_LOCKS_MAX. When over capacity,
+    evicts the oldest idle (not currently held) lock. A lock that is currently
+    held (acquire fails immediately) is never evicted.
+    """
     with _user_run_locks_lock:
-        lock = _user_run_locks.get(user_id)
-        if lock is None:
-            lock = threading.Lock()
-            _user_run_locks[user_id] = lock
+        if user_id in _user_run_locks:
+            _user_run_locks.move_to_end(user_id)
+            return _user_run_locks[user_id]
+        lock = threading.Lock()
+        _user_run_locks[user_id] = lock
+        # Evict oldest idle locks when over capacity
+        while len(_user_run_locks) > _USER_LOCKS_MAX:
+            # Scan from oldest to find an evictable (idle) entry
+            evicted = False
+            for uid_to_evict, lock_to_evict in list(_user_run_locks.items()):
+                if lock_to_evict.acquire(blocking=False):
+                    lock_to_evict.release()   # immediately release; was idle
+                    del _user_run_locks[uid_to_evict]
+                    evicted = True
+                    break
+            if not evicted:
+                break  # all candidates are currently held; stop eviction
         return lock
 
 
@@ -163,3 +185,71 @@ def run_once(
         ) from exc
     finally:
         run_lock.release()
+
+
+_MULTITENANT_DISABLED_RESPONSE = {
+    "status": "multitenant_disabled",
+    "detail": "AUTOFOLIO_MULTI_TENANT_ENABLED is not enabled",
+}
+
+
+@router.get("/users/{user_id}/state", response_model=UserEngineStateResponse)
+def user_engine_state(
+    user_id: str,
+    _session: Annotated[dict[str, Any], Depends(require_owner)],
+) -> UserEngineStateResponse:
+    """Read per-user engine state (auto_trading_enabled, consecutive_failures).
+
+    Flag-gate: returns 409 when AUTOFOLIO_MULTI_TENANT_ENABLED is not set.
+    """
+    from app.services import backend
+    from app.services import flags as _flags
+
+    if not _flags.multi_tenant_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=_MULTITENANT_DISABLED_RESPONSE,
+        )
+    repo, *_ = backend._ctx()
+    auto_trading_enabled = (
+        repo.get_engine_state("auto_trading_enabled", "false", user_id=user_id) == "true"
+    )
+    consecutive_failures = repo.get_consecutive_failures(user_id=user_id)
+    return UserEngineStateResponse(
+        user_id=user_id,
+        auto_trading_enabled=auto_trading_enabled,
+        consecutive_failures=consecutive_failures,
+    )
+
+
+@router.post("/users/{user_id}/reenable", response_model=UserReenableResponse)
+def user_reenable(
+    user_id: str,
+    _session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
+) -> UserReenableResponse:
+    """Re-enable a user's auto-trading and reset their circuit-breaker failures.
+
+    Flag-gate: returns 409 when AUTOFOLIO_MULTI_TENANT_ENABLED is not set.
+    Does NOT mutate any state (global or per-user) when the flag is OFF.
+    """
+    from app.services import backend
+    from app.services import flags as _flags
+
+    if not _flags.multi_tenant_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=_MULTITENANT_DISABLED_RESPONSE,
+        )
+    repo, *_ = backend._ctx()
+    repo.set_engine_state("auto_trading_enabled", "true", user_id=user_id)
+    repo.reset_consecutive_failures(user_id=user_id)
+    auto_trading_enabled = (
+        repo.get_engine_state("auto_trading_enabled", "false", user_id=user_id) == "true"
+    )
+    consecutive_failures = repo.get_consecutive_failures(user_id=user_id)
+    return UserReenableResponse(
+        user_id=user_id,
+        auto_trading_enabled=auto_trading_enabled,
+        consecutive_failures=consecutive_failures,
+        status="reenabled",
+    )
