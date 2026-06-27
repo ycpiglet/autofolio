@@ -3,15 +3,26 @@ schema_version: agent-runtime-work-item/v1
 work_id: INIT-MULTITENANT-ENGINE
 work_uid: a9c4e712-58b3-4d7f-b081-3e6d2f1a0c95
 kind: initiative
-status: planned
+status: completed
 owner: Lead Engineer
 created_at: 2026-06-27T03:40:18+09:00
-updated_at: 2026-06-27T03:40:18+09:00
+updated_at: 2026-06-27T15:28:04+09:00
+completed_at: 2026-06-27T15:28:04+09:00
+resolution: done
+verification_status: passed
 origin_type: task_split
 origin_ref: TASK-087
 created_by: lead_engineer
 title: Multi-Tenant Engine Isolation
-summary: Per-user isolation of the trading engine, repository queries, risk context, and circuit-breaker state. Split from TASK-087 A8 as a safety-critical, flag-gated, sequenced initiative. Default OFF (AUTOFOLIO_MULTI_TENANT_ENABLED). Must not be partially rolled out.
+summary: >
+  Per-user isolation of the trading engine, repository queries, risk context,
+  and circuit-breaker state. Split from TASK-087 A8 as a safety-critical,
+  flag-gated, sequenced initiative. Default OFF (AUTOFOLIO_MULTI_TENANT_ENABLED).
+  Must not be partially rolled out. CODE-COMPLETE as of 2026-06-27: all four
+  phases merged (PRs #127-#130), full pytest 1766 passed / 0 failed.
+  Flag activation is the remaining Owner-gated step — see
+  agents/project/MULTITENANT-FLAG-ENABLE-READINESS.md. FLAG STAYS OFF until
+  those readiness items + Owner explicit approval.
 tags: [multitenant, engine, safety, isolation, membership, backend]
 priority: P1
 ---
@@ -39,7 +50,7 @@ Estimated scope: ~44 files, 1200–1500 LOC.
 
 | ID | Description | Status |
 |----|-------------|--------|
-| TASKSET-MULTITENANT-ENGINE | Four-phase isolation sequence | planned |
+| TASKSET-MULTITENANT-ENGINE | Four-phase isolation sequence | completed (PRs #127-#130, pytest 1766 passed) |
 
 ## Phase Sequence
 

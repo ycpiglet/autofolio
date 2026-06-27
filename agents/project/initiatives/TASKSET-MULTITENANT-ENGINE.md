@@ -4,15 +4,24 @@ work_id: TASKSET-MULTITENANT-ENGINE
 work_uid: c7f2a391-8de4-4b6c-9a15-7f0e3d9b2e48
 kind: taskset
 parent_id: INIT-MULTITENANT-ENGINE
-status: planned
+status: completed
 owner: Lead Engineer
 created_at: 2026-06-27T03:40:18+09:00
-updated_at: 2026-06-27T03:40:18+09:00
+updated_at: 2026-06-27T15:28:04+09:00
+completed_at: 2026-06-27T15:28:04+09:00
+resolution: done
+verification_status: passed
 origin_type: task_split
 origin_ref: TASK-087
 created_by: lead_engineer
 title: Multi-Tenant Engine Isolation — Four-Phase Sequence
-summary: Sequenced tasks for per-user repository scoping, risk context isolation, engine pool/queue, and cross-user characterization tests. All behind AUTOFOLIO_MULTI_TENANT_ENABLED (default OFF). Partial rollout is forbidden.
+summary: >
+  Sequenced tasks for per-user repository scoping, risk context isolation,
+  engine pool/queue, and cross-user characterization tests. All behind
+  AUTOFOLIO_MULTI_TENANT_ENABLED (default OFF). Partial rollout is forbidden.
+  ALL FOUR PHASES COMPLETE (PRs #127-#130, merged 2026-06-27). Full pytest
+  1766 passed / 0 failed. FLAG STAYS OFF in all environments until
+  MULTITENANT-FLAG-ENABLE-READINESS.md items + Owner approval.
 tags: [multitenant, engine, safety, isolation, membership, backend]
 priority: P1
 task_set_id: TASKSET-MULTITENANT-ENGINE
@@ -39,15 +48,16 @@ staging activation.
 
 ## Included Tasks
 
-| work_id | Phase | Description | Owner | Status | Gate |
-|---------|-------|-------------|-------|--------|------|
-| TBD-PHASE1 | 1 | Repository query-scoping: `WHERE user_id` on ~25 methods; flag-guard unscoped paths | Backend Engineer | planned | flag OFF; no DB migration apply; unit tests required |
-| TBD-PHASE2 | 2 | Per-user risk context: per-user `risk_limits` + per-user circuit-breaker PnL in `safety_checker.py` | Backend Engineer | planned | flag OFF; Phase 1 merged first |
-| TBD-PHASE3 | 3 | Per-user engine pool/queue: replace `_ctx()` singleton + `_run_once_lock` with per-user pool | Backend Engineer | planned | flag OFF; Phase 2 merged first |
-| TBD-PHASE4 | 4 | Cross-user isolation tests + flag-OFF characterization (byte-identical to single-owner behavior) | QA / Backend Engineer | planned | Phase 3 merged; Owner approval before flag ON in staging |
+| work_id | Phase | Description | Owner | Status | Gate | PR |
+|---------|-------|-------------|-------|--------|------|----|
+| PHASE1-PR127 | 1 | Repository query-scoping: 14 methods `WHERE user_id`; flag-guard unscoped paths | Backend Engineer | 완료 | flag OFF; unit tests pass | #127 |
+| PHASE2-PR128 | 2 | Per-user risk context: per-user `risk_limits` + per-user circuit-breaker PnL in `safety_checker.py` | Backend Engineer | 완료 | flag OFF; Phase 1 merged | #128 |
+| PHASE3-PR129 | 3 | Per-user engine pool/queue: per-user context pool + per-user run lock + per-user engine_state (auto_trading/kill-switch/both circuit-breakers; consecutive-failures cross-user hole closed) | Backend Engineer | 완료 | flag OFF; Phase 2 merged | #129 |
+| PHASE4-PR130 | 4 | Cross-user e2e isolation tests (6 layers) + flag-OFF characterization (byte-identical proven) + `MULTITENANT-FLAG-ENABLE-READINESS.md` | QA / Backend Engineer | 완료 | pytest 1766 passed; Owner approval before flag ON in staging | #130 |
 
-Task IDs will be assigned when each phase is scoped and registered in the
-backlog.
+**All four phases are complete. FLAG STAYS OFF** in all environments until the
+readiness items in `agents/project/MULTITENANT-FLAG-ENABLE-READINESS.md` are
+satisfied and the Owner explicitly approves staging activation.
 
 ## Dependency Map
 
