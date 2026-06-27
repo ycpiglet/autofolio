@@ -7,6 +7,7 @@ from typing import Any
 from uuid import uuid4
 
 from app.database.sqlite_db import get_connection
+from app.services import flags
 
 
 @dataclass(frozen=True)
@@ -68,53 +69,77 @@ class Repository:
         created_by: str = "USER",
         rationale: str | None = None,
         risk_note: str | None = None,
+        user_id: str | None = None,
     ) -> int:
         with get_connection(self.db_path) as conn:
-            cur = conn.execute(
-                '''
-                INSERT INTO trade_conditions(
-                    symbol, side, target_price, quantity, order_type,
-                    allow_market_fallback, auto_enabled, created_by,
-                    rationale, risk_note
+            if flags.multi_tenant_enabled() and user_id is not None:
+                cur = conn.execute(
+                    '''
+                    INSERT INTO trade_conditions(
+                        user_id, symbol, side, target_price, quantity, order_type,
+                        allow_market_fallback, auto_enabled, created_by,
+                        rationale, risk_note
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        user_id,
+                        symbol,
+                        side,
+                        target_price,
+                        quantity,
+                        order_type,
+                        int(allow_market_fallback),
+                        int(auto_enabled),
+                        created_by,
+                        rationale,
+                        risk_note,
+                    ),
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''',
-                (
-                    symbol,
-                    side,
-                    target_price,
-                    quantity,
-                    order_type,
-                    int(allow_market_fallback),
-                    int(auto_enabled),
-                    created_by,
-                    rationale,
-                    risk_note,
-                ),
-            )
+            else:
+                cur = conn.execute(
+                    '''
+                    INSERT INTO trade_conditions(
+                        symbol, side, target_price, quantity, order_type,
+                        allow_market_fallback, auto_enabled, created_by,
+                        rationale, risk_note
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        symbol,
+                        side,
+                        target_price,
+                        quantity,
+                        order_type,
+                        int(allow_market_fallback),
+                        int(auto_enabled),
+                        created_by,
+                        rationale,
+                        risk_note,
+                    ),
+                )
             return int(cur.lastrowid)
 
-    def list_active_conditions(self) -> list[dict[str, Any]]:
+    def list_active_conditions(self, *, user_id: str | None = None) -> list[dict[str, Any]]:
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = "SELECT * FROM trade_conditions WHERE status = 'ACTIVE' AND user_id = ? ORDER BY id"
+            params: list[Any] = [user_id]
+        else:
+            sql = "SELECT * FROM trade_conditions WHERE status = 'ACTIVE' ORDER BY id"
+            params = []
         with get_connection(self.db_path) as conn:
-            return [
-                dict(row)
-                for row in conn.execute(
-                    '''
-                    SELECT * FROM trade_conditions
-                    WHERE status = 'ACTIVE'
-                    ORDER BY id
-                    '''
-                ).fetchall()
-            ]
+            return [dict(row) for row in conn.execute(sql, params).fetchall()]
 
-    def list_conditions(self) -> list[dict[str, Any]]:
+    def list_conditions(self, *, user_id: str | None = None) -> list[dict[str, Any]]:
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = "SELECT * FROM trade_conditions WHERE user_id = ? ORDER BY id DESC"
+            params: list[Any] = [user_id]
+        else:
+            sql = "SELECT * FROM trade_conditions ORDER BY id DESC"
+            params = []
         with get_connection(self.db_path) as conn:
-            return [
-                dict(row)
-                for row in conn.execute(
-                    "SELECT * FROM trade_conditions ORDER BY id DESC"
-                ).fetchall()
-            ]
+            return [dict(row) for row in conn.execute(sql, params).fetchall()]
 
     def get_condition(self, condition_id: int) -> dict[str, Any] | None:
         with get_connection(self.db_path) as conn:
@@ -178,31 +203,58 @@ class Repository:
         order_status: str,
         fallback_to_market: bool = False,
         error_message: str | None = None,
+        user_id: str | None = None,
     ) -> int:
         with get_connection(self.db_path) as conn:
-            cur = conn.execute(
-                '''
-                INSERT INTO order_logs(
-                    condition_id, symbol, side, order_type, order_price,
-                    current_price, quantity, kis_order_id, order_status,
-                    fallback_to_market, error_message
+            if flags.multi_tenant_enabled() and user_id is not None:
+                cur = conn.execute(
+                    '''
+                    INSERT INTO order_logs(
+                        user_id, condition_id, symbol, side, order_type, order_price,
+                        current_price, quantity, kis_order_id, order_status,
+                        fallback_to_market, error_message
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        user_id,
+                        condition_id,
+                        symbol,
+                        side,
+                        order_type,
+                        order_price,
+                        current_price,
+                        quantity,
+                        kis_order_id,
+                        order_status,
+                        int(fallback_to_market),
+                        error_message,
+                    ),
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''',
-                (
-                    condition_id,
-                    symbol,
-                    side,
-                    order_type,
-                    order_price,
-                    current_price,
-                    quantity,
-                    kis_order_id,
-                    order_status,
-                    int(fallback_to_market),
-                    error_message,
-                ),
-            )
+            else:
+                cur = conn.execute(
+                    '''
+                    INSERT INTO order_logs(
+                        condition_id, symbol, side, order_type, order_price,
+                        current_price, quantity, kis_order_id, order_status,
+                        fallback_to_market, error_message
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''',
+                    (
+                        condition_id,
+                        symbol,
+                        side,
+                        order_type,
+                        order_price,
+                        current_price,
+                        quantity,
+                        kis_order_id,
+                        order_status,
+                        int(fallback_to_market),
+                        error_message,
+                    ),
+                )
             return int(cur.lastrowid)
 
     def update_order_status(self, order_log_id: int, status: str, error_message: str | None = None) -> None:
@@ -224,50 +276,86 @@ class Repository:
         filled_price: float | None,
         filled_quantity: int | None,
         raw_status: str | None = None,
+        user_id: str | None = None,
     ) -> int:
         with get_connection(self.db_path) as conn:
-            cur = conn.execute(
-                '''
-                INSERT INTO execution_logs(
-                    order_log_id, symbol, filled_price, filled_quantity, raw_status
+            if flags.multi_tenant_enabled() and user_id is not None:
+                cur = conn.execute(
+                    '''
+                    INSERT INTO execution_logs(
+                        user_id, order_log_id, symbol, filled_price, filled_quantity, raw_status
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    ''',
+                    (user_id, order_log_id, symbol, filled_price, filled_quantity, raw_status),
                 )
-                VALUES (?, ?, ?, ?, ?)
-                ''',
-                (order_log_id, symbol, filled_price, filled_quantity, raw_status),
-            )
+            else:
+                cur = conn.execute(
+                    '''
+                    INSERT INTO execution_logs(
+                        order_log_id, symbol, filled_price, filled_quantity, raw_status
+                    )
+                    VALUES (?, ?, ?, ?, ?)
+                    ''',
+                    (order_log_id, symbol, filled_price, filled_quantity, raw_status),
+                )
             return int(cur.lastrowid)
 
-    def list_order_logs(self, limit: int = 100) -> list[dict[str, Any]]:
-        with get_connection(self.db_path) as conn:
-            return [
-                dict(row)
-                for row in conn.execute(
-                    '''
+    def list_order_logs(self, limit: int = 100, *, user_id: str | None = None) -> list[dict[str, Any]]:
+        scope = flags.multi_tenant_enabled() and user_id is not None
+        if scope:
+            sql = '''
+                SELECT
+                    ol.*,
+                    ex.filled_price,
+                    ex.filled_quantity,
+                    ex.filled_at
+                FROM order_logs ol
+                LEFT JOIN (
                     SELECT
-                        ol.*,
-                        ex.filled_price,
-                        ex.filled_quantity,
-                        ex.filled_at
-                    FROM order_logs ol
-                    LEFT JOIN (
-                        SELECT
-                            order_log_id,
-                            CASE
-                                WHEN SUM(COALESCE(filled_quantity, 0)) > 0
-                                THEN SUM(COALESCE(filled_price, 0) * COALESCE(filled_quantity, 0))
-                                     / SUM(COALESCE(filled_quantity, 0))
-                                ELSE MAX(filled_price)
-                            END AS filled_price,
-                            SUM(COALESCE(filled_quantity, 0)) AS filled_quantity,
-                            MAX(filled_at) AS filled_at
-                        FROM execution_logs
-                        GROUP BY order_log_id
-                    ) ex ON ex.order_log_id = ol.id
-                    ORDER BY ol.id DESC LIMIT ?
-                    ''',
-                    (limit,),
-                ).fetchall()
-            ]
+                        order_log_id,
+                        CASE
+                            WHEN SUM(COALESCE(filled_quantity, 0)) > 0
+                            THEN SUM(COALESCE(filled_price, 0) * COALESCE(filled_quantity, 0))
+                                 / SUM(COALESCE(filled_quantity, 0))
+                            ELSE MAX(filled_price)
+                        END AS filled_price,
+                        SUM(COALESCE(filled_quantity, 0)) AS filled_quantity,
+                        MAX(filled_at) AS filled_at
+                    FROM execution_logs
+                    GROUP BY order_log_id
+                ) ex ON ex.order_log_id = ol.id
+                WHERE ol.user_id = ?
+                ORDER BY ol.id DESC LIMIT ?
+            '''
+            params: list[Any] = [user_id, limit]
+        else:
+            sql = '''
+                SELECT
+                    ol.*,
+                    ex.filled_price,
+                    ex.filled_quantity,
+                    ex.filled_at
+                FROM order_logs ol
+                LEFT JOIN (
+                    SELECT
+                        order_log_id,
+                        CASE
+                            WHEN SUM(COALESCE(filled_quantity, 0)) > 0
+                            THEN SUM(COALESCE(filled_price, 0) * COALESCE(filled_quantity, 0))
+                                 / SUM(COALESCE(filled_quantity, 0))
+                            ELSE MAX(filled_price)
+                        END AS filled_price,
+                        SUM(COALESCE(filled_quantity, 0)) AS filled_quantity,
+                        MAX(filled_at) AS filled_at
+                    FROM execution_logs
+                    GROUP BY order_log_id
+                ) ex ON ex.order_log_id = ol.id
+                ORDER BY ol.id DESC LIMIT ?
+            '''
+            params = [limit]
+        with get_connection(self.db_path) as conn:
+            return [dict(row) for row in conn.execute(sql, params).fetchall()]
 
     def get_system_state(self, key: str, default: str | None = None) -> str | None:
         with get_connection(self.db_path) as conn:
@@ -321,19 +409,29 @@ class Repository:
                 params,
             )
 
-    def today_order_amount(self) -> float:
-        with get_connection(self.db_path) as conn:
-            row = conn.execute(
-                '''
+    def today_order_amount(self, *, user_id: str | None = None) -> float:
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = '''
                 SELECT COALESCE(SUM(COALESCE(order_price, current_price, 0) * quantity), 0) AS amount
                 FROM order_logs
                 WHERE DATE(created_at, '+9 hours') = DATE('now', '+9 hours')
                   AND order_status IN ('REQUESTED', 'FILLED', 'PENDING')
-                '''
-            ).fetchone()
+                  AND user_id = ?
+            '''
+            params: list[Any] = [user_id]
+        else:
+            sql = '''
+                SELECT COALESCE(SUM(COALESCE(order_price, current_price, 0) * quantity), 0) AS amount
+                FROM order_logs
+                WHERE DATE(created_at, '+9 hours') = DATE('now', '+9 hours')
+                  AND order_status IN ('REQUESTED', 'FILLED', 'PENDING')
+            '''
+            params = []
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(sql, params).fetchone()
             return float(row["amount"] or 0.0)
 
-    def today_realized_pnl(self) -> float:
+    def today_realized_pnl(self, *, user_id: str | None = None) -> float:
         """오늘 SELL 체결 기준 실현 손익 합계.
 
         실현 손익 = Σ (매도체결가 − 종목별 평균매입가) × 매도수량
@@ -345,9 +443,37 @@ class Repository:
         Cost basis: 전체 기간 BUY 체결 가중평균 (average cost basis).
         SELL 체결이 없으면 realized PnL = 0 (매수만인 날 서킷브레이커 오발동 방지).
         """
-        with get_connection(self.db_path) as conn:
-            row = conn.execute(
-                '''
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = '''
+                WITH avg_cost AS (
+                    SELECT
+                        el.symbol,
+                        SUM(el.filled_price * el.filled_quantity) /
+                            SUM(el.filled_quantity) AS avg_buy_price
+                    FROM execution_logs el
+                    JOIN order_logs ol ON el.order_log_id = ol.id
+                    WHERE ol.side = 'BUY'
+                      AND el.filled_quantity > 0
+                      AND ol.user_id = ?
+                    GROUP BY el.symbol
+                )
+                SELECT COALESCE(
+                    SUM(
+                        (el.filled_price - COALESCE(ac.avg_buy_price, el.filled_price))
+                        * el.filled_quantity
+                    ), 0
+                ) AS realized_pnl
+                FROM execution_logs el
+                JOIN order_logs ol ON el.order_log_id = ol.id
+                LEFT JOIN avg_cost ac ON ac.symbol = el.symbol
+                WHERE ol.side = 'SELL'
+                  AND el.filled_quantity > 0
+                  AND DATE(el.filled_at, '+9 hours') = DATE('now', '+9 hours')
+                  AND ol.user_id = ?
+            '''
+            params: list[Any] = [user_id, user_id]
+        else:
+            sql = '''
                 WITH avg_cost AS (
                     -- 종목별 전체 기간 BUY 체결 가중평균 매입가
                     SELECT
@@ -372,11 +498,13 @@ class Repository:
                 WHERE ol.side = 'SELL'
                   AND el.filled_quantity > 0
                   AND DATE(el.filled_at, '+9 hours') = DATE('now', '+9 hours')
-                '''
-            ).fetchone()
+            '''
+            params = []
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(sql, params).fetchone()
             return float(row["realized_pnl"] or 0.0)
 
-    def total_realized_pnl(self) -> float:
+    def total_realized_pnl(self, *, user_id: str | None = None) -> float:
         """전체 기간 SELL 체결 기준 실현 손익 합계 (누적손익률 분자 사용).
 
         실현 손익 = Σ (매도체결가 − 종목별 평균매입가) × 매도수량
@@ -384,9 +512,36 @@ class Repository:
         체결 내역 없으면 0.0 반환.
         today_realized_pnl()과 동일한 로직이나 날짜 필터 없음.
         """
-        with get_connection(self.db_path) as conn:
-            row = conn.execute(
-                '''
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = '''
+                WITH avg_cost AS (
+                    SELECT
+                        el.symbol,
+                        SUM(el.filled_price * el.filled_quantity) /
+                            SUM(el.filled_quantity) AS avg_buy_price
+                    FROM execution_logs el
+                    JOIN order_logs ol ON el.order_log_id = ol.id
+                    WHERE ol.side = 'BUY'
+                      AND el.filled_quantity > 0
+                      AND ol.user_id = ?
+                    GROUP BY el.symbol
+                )
+                SELECT COALESCE(
+                    SUM(
+                        (el.filled_price - COALESCE(ac.avg_buy_price, el.filled_price))
+                        * el.filled_quantity
+                    ), 0
+                ) AS realized_pnl
+                FROM execution_logs el
+                JOIN order_logs ol ON el.order_log_id = ol.id
+                LEFT JOIN avg_cost ac ON ac.symbol = el.symbol
+                WHERE ol.side = 'SELL'
+                  AND el.filled_quantity > 0
+                  AND ol.user_id = ?
+            '''
+            params: list[Any] = [user_id, user_id]
+        else:
+            sql = '''
                 WITH avg_cost AS (
                     SELECT
                         el.symbol,
@@ -409,19 +564,20 @@ class Repository:
                 LEFT JOIN avg_cost ac ON ac.symbol = el.symbol
                 WHERE ol.side = 'SELL'
                   AND el.filled_quantity > 0
-                '''
-            ).fetchone()
+            '''
+            params = []
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(sql, params).fetchone()
             return float(row["realized_pnl"] or 0.0)
 
-    def total_buy_cost_basis(self) -> float:
+    def total_buy_cost_basis(self, *, user_id: str | None = None) -> float:
         """전체 기간 BUY 체결 원가 합계 (누적손익률 분모 사용).
 
         투자 원금 = Σ (매수체결가 × 매수수량) for all BUY fills ever.
         체결 내역 없으면 0.0 반환.
         """
-        with get_connection(self.db_path) as conn:
-            row = conn.execute(
-                '''
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = '''
                 SELECT COALESCE(
                     SUM(el.filled_price * el.filled_quantity), 0
                 ) AS total_cost
@@ -429,8 +585,22 @@ class Repository:
                 JOIN order_logs ol ON el.order_log_id = ol.id
                 WHERE ol.side = 'BUY'
                   AND el.filled_quantity > 0
-                '''
-            ).fetchone()
+                  AND ol.user_id = ?
+            '''
+            params: list[Any] = [user_id]
+        else:
+            sql = '''
+                SELECT COALESCE(
+                    SUM(el.filled_price * el.filled_quantity), 0
+                ) AS total_cost
+                FROM execution_logs el
+                JOIN order_logs ol ON el.order_log_id = ol.id
+                WHERE ol.side = 'BUY'
+                  AND el.filled_quantity > 0
+            '''
+            params = []
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(sql, params).fetchone()
             return float(row["total_cost"] or 0.0)
 
     def increment_consecutive_failures(self) -> None:
@@ -577,19 +747,29 @@ class Repository:
         self._save_json_state("portfolio_symbol_aliases", aliases)
         return row
     # ---- price alerts ----
-    def add_price_alert(self, symbol: str, target_price: float, direction: str) -> int:
+    def add_price_alert(self, symbol: str, target_price: float, direction: str, *, user_id: str | None = None) -> int:
         with get_connection(self.db_path) as conn:
-            cur = conn.execute(
-                'INSERT INTO price_alerts(symbol, target_price, direction) VALUES(?,?,?)',
-                (symbol, target_price, direction.upper()),
-            )
+            if flags.multi_tenant_enabled() and user_id is not None:
+                cur = conn.execute(
+                    'INSERT INTO price_alerts(user_id, symbol, target_price, direction) VALUES(?,?,?,?)',
+                    (user_id, symbol, target_price, direction.upper()),
+                )
+            else:
+                cur = conn.execute(
+                    'INSERT INTO price_alerts(symbol, target_price, direction) VALUES(?,?,?)',
+                    (symbol, target_price, direction.upper()),
+                )
             return cur.lastrowid
 
-    def list_active_alerts(self) -> list:
+    def list_active_alerts(self, *, user_id: str | None = None) -> list:
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = 'SELECT * FROM price_alerts WHERE active=1 AND user_id=? ORDER BY id'
+            params: list[Any] = [user_id]
+        else:
+            sql = 'SELECT * FROM price_alerts WHERE active=1 ORDER BY id'
+            params = []
         with get_connection(self.db_path) as conn:
-            return [dict(r) for r in conn.execute(
-                'SELECT * FROM price_alerts WHERE active=1 ORDER BY id'
-            ).fetchall()]
+            return [dict(r) for r in conn.execute(sql, params).fetchall()]
 
     def trigger_alert(self, alert_id: int) -> None:
         with get_connection(self.db_path) as conn:
@@ -607,21 +787,35 @@ class Repository:
         lesson: str = "",
         plan_followed: bool = True,
         emotion_flag: bool = False,
+        user_id: str | None = None,
     ) -> int:
         with get_connection(self.db_path) as conn:
-            cur = conn.execute(
-                """INSERT INTO trade_journal
+            if flags.multi_tenant_enabled() and user_id is not None:
+                cur = conn.execute(
+                    """INSERT INTO trade_journal
+                        (user_id, order_log_id, symbol, side, entry_reason, exit_reason,
+                         grade, lesson, plan_followed, emotion_flag)
+                        VALUES(?,?,?,?,?,?,?,?,?,?)""",
+                    (user_id, order_log_id, symbol, side, entry_reason, exit_reason,
+                     grade, lesson, int(plan_followed), int(emotion_flag)),
+                )
+            else:
+                cur = conn.execute(
+                    """INSERT INTO trade_journal
+                        (order_log_id, symbol, side, entry_reason, exit_reason,
+                         grade, lesson, plan_followed, emotion_flag)
+                        VALUES(?,?,?,?,?,?,?,?,?)""",
                     (order_log_id, symbol, side, entry_reason, exit_reason,
-                     grade, lesson, plan_followed, emotion_flag)
-                    VALUES(?,?,?,?,?,?,?,?,?)""",
-                (order_log_id, symbol, side, entry_reason, exit_reason,
-                 grade, lesson, int(plan_followed), int(emotion_flag)),
-            )
+                     grade, lesson, int(plan_followed), int(emotion_flag)),
+                )
             return cur.lastrowid
 
-    def list_journal_entries(self, limit: int = 100) -> list:
+    def list_journal_entries(self, limit: int = 100, *, user_id: str | None = None) -> list:
+        if flags.multi_tenant_enabled() and user_id is not None:
+            sql = "SELECT * FROM trade_journal WHERE user_id=? ORDER BY created_at DESC LIMIT ?"
+            params: list[Any] = [user_id, limit]
+        else:
+            sql = "SELECT * FROM trade_journal ORDER BY created_at DESC LIMIT ?"
+            params = [limit]
         with get_connection(self.db_path) as conn:
-            return [dict(r) for r in conn.execute(
-                "SELECT * FROM trade_journal ORDER BY created_at DESC LIMIT ?",
-                (limit,),
-            ).fetchall()]
+            return [dict(r) for r in conn.execute(sql, params).fetchall()]

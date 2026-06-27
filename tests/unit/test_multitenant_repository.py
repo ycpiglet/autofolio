@@ -104,3 +104,222 @@ def test_migration_preserves_existing_rows_with_null_user_id(tmp_path):
         row = conn.execute("SELECT * FROM price_alerts WHERE id = 1").fetchone()
         assert row["payload"] == "legacy"
         assert row["user_id"] is None
+
+
+# ---- Helpers ----
+
+def _seed_whitelist(repo_obj, symbol="005930"):
+    repo_obj.add_whitelist_symbol(
+        WhitelistSymbol(symbol=symbol, name="테스트", market="KRX", role="TEST")
+    )
+
+
+def _insert_filled_sell(repo_obj, user_id, symbol="005930", price=75_000.0, qty=1):
+    """Insert a complete BUY+SELL cycle for realized PnL testing."""
+    # BUY order
+    buy_cid = repo_obj.add_trade_condition(
+        symbol=symbol, side="BUY", target_price=price,
+        quantity=qty, user_id=user_id,
+    )
+    buy_order_id = repo_obj.create_order_log(
+        condition_id=buy_cid, symbol=symbol, side="BUY",
+        order_type="LIMIT", order_price=price, current_price=price,
+        quantity=qty, kis_order_id=None, order_status="FILLED",
+        user_id=user_id,
+    )
+    repo_obj.create_execution_log(
+        order_log_id=buy_order_id, symbol=symbol,
+        filled_price=price, filled_quantity=qty,
+        user_id=user_id,
+    )
+    # SELL order
+    sell_cid = repo_obj.add_trade_condition(
+        symbol=symbol, side="SELL", target_price=price + 1000,
+        quantity=qty, user_id=user_id,
+    )
+    sell_order_id = repo_obj.create_order_log(
+        condition_id=sell_cid, symbol=symbol, side="SELL",
+        order_type="LIMIT", order_price=price + 1000, current_price=price + 1000,
+        quantity=qty, kis_order_id=None, order_status="FILLED",
+        user_id=user_id,
+    )
+    repo_obj.create_execution_log(
+        order_log_id=sell_order_id, symbol=symbol,
+        filled_price=price + 1000, filled_quantity=qty,
+        user_id=user_id,
+    )
+    return buy_order_id, sell_order_id
+
+
+# ---- Flag-ON scoping tests ----
+
+@pytest.fixture
+def mt_repo(tmp_path, monkeypatch):
+    """Repo fixture with AUTOFOLIO_MULTI_TENANT_ENABLED=1."""
+    monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+    db = tmp_path / "mt_test.db"
+    initialize_database(db)
+    return Repository(db), db
+
+
+def test_flagoff_is_default(tmp_path):
+    """With no env var set, multi_tenant_enabled() returns False."""
+    from app.services.flags import multi_tenant_enabled
+    import os
+    os.environ.pop("AUTOFOLIO_MULTI_TENANT_ENABLED", None)
+    assert multi_tenant_enabled() is False
+
+
+class TestConditionScoping:
+    def test_list_conditions_scoped_to_user(self, mt_repo, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1, user_id="user_a"
+        )
+        repo.add_trade_condition(
+            symbol="005930", side="SELL", target_price=75_000, quantity=1, user_id="user_b"
+        )
+        rows_a = repo.list_conditions(user_id="user_a")
+        rows_b = repo.list_conditions(user_id="user_b")
+        assert len(rows_a) == 1 and rows_a[0]["side"] == "BUY"
+        assert len(rows_b) == 1 and rows_b[0]["side"] == "SELL"
+
+    def test_list_active_conditions_scoped(self, mt_repo, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1, user_id="user_a"
+        )
+        repo.add_trade_condition(
+            symbol="005930", side="SELL", target_price=75_000, quantity=1, user_id="user_b"
+        )
+        active_a = repo.list_active_conditions(user_id="user_a")
+        assert len(active_a) == 1
+        assert active_a[0]["side"] == "BUY"
+
+    def test_null_user_id_row_not_returned_in_scoped_query(self, mt_repo, monkeypatch):
+        """Legacy row with NULL user_id must NOT be returned to a scoped query."""
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        # Insert without user_id → NULL user_id
+        repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1
+        )
+        # Scoped query for user_a should not return the legacy row
+        rows = repo.list_conditions(user_id="user_a")
+        assert rows == []
+
+
+class TestOrderLogScoping:
+    def test_list_order_logs_scoped(self, mt_repo, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        cid_a = repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1, user_id="user_a"
+        )
+        cid_b = repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1, user_id="user_b"
+        )
+        repo.create_order_log(
+            condition_id=cid_a, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=70_000, current_price=70_000,
+            quantity=1, kis_order_id="A001", order_status="FILLED",
+            user_id="user_a",
+        )
+        repo.create_order_log(
+            condition_id=cid_b, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=70_000, current_price=70_000,
+            quantity=1, kis_order_id="B001", order_status="FILLED",
+            user_id="user_b",
+        )
+        logs_a = repo.list_order_logs(user_id="user_a")
+        assert len(logs_a) == 1 and logs_a[0]["kis_order_id"] == "A001"
+
+
+class TestAggregateScoping:
+    def test_today_order_amount_scoped(self, mt_repo, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        cid_a = repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1, user_id="user_a"
+        )
+        cid_b = repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1, user_id="user_b"
+        )
+        repo.create_order_log(
+            condition_id=cid_a, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=70_000, current_price=70_000,
+            quantity=2, kis_order_id=None, order_status="FILLED",
+            user_id="user_a",
+        )
+        repo.create_order_log(
+            condition_id=cid_b, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=90_000, current_price=90_000,
+            quantity=3, kis_order_id=None, order_status="FILLED",
+            user_id="user_b",
+        )
+        amt_a = repo.today_order_amount(user_id="user_a")
+        amt_b = repo.today_order_amount(user_id="user_b")
+        assert amt_a == pytest.approx(140_000.0)  # 70000 * 2
+        assert amt_b == pytest.approx(270_000.0)  # 90000 * 3
+
+    def test_total_buy_cost_basis_scoped(self, mt_repo, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        cid_a = repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=70_000, quantity=1, user_id="user_a"
+        )
+        order_a = repo.create_order_log(
+            condition_id=cid_a, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=70_000, current_price=70_000,
+            quantity=1, kis_order_id=None, order_status="FILLED",
+            user_id="user_a",
+        )
+        repo.create_execution_log(
+            order_log_id=order_a, symbol="005930",
+            filled_price=70_000, filled_quantity=1,
+            user_id="user_a",
+        )
+        cid_b = repo.add_trade_condition(
+            symbol="005930", side="BUY", target_price=80_000, quantity=1, user_id="user_b"
+        )
+        order_b = repo.create_order_log(
+            condition_id=cid_b, symbol="005930", side="BUY",
+            order_type="LIMIT", order_price=80_000, current_price=80_000,
+            quantity=1, kis_order_id=None, order_status="FILLED",
+            user_id="user_b",
+        )
+        repo.create_execution_log(
+            order_log_id=order_b, symbol="005930",
+            filled_price=80_000, filled_quantity=1,
+            user_id="user_b",
+        )
+        assert repo.total_buy_cost_basis(user_id="user_a") == pytest.approx(70_000.0)
+        assert repo.total_buy_cost_basis(user_id="user_b") == pytest.approx(80_000.0)
+
+
+class TestAlertScoping:
+    def test_list_active_alerts_scoped(self, mt_repo, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        repo.add_price_alert("005930", 70_000, "ABOVE", user_id="user_a")
+        repo.add_price_alert("000660", 80_000, "BELOW", user_id="user_b")
+        alerts_a = repo.list_active_alerts(user_id="user_a")
+        assert len(alerts_a) == 1 and alerts_a[0]["symbol"] == "005930"
+
+
+class TestJournalScoping:
+    def test_list_journal_entries_scoped(self, mt_repo, monkeypatch):
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        repo.add_journal_entry("005930", "BUY", entry_reason="value", user_id="user_a")
+        repo.add_journal_entry("000660", "SELL", entry_reason="momentum", user_id="user_b")
+        entries_a = repo.list_journal_entries(user_id="user_a")
+        assert len(entries_a) == 1 and entries_a[0]["symbol"] == "005930"
