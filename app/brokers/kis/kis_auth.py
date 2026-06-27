@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,7 +8,27 @@ from pathlib import Path
 import requests
 
 from app.common.errors import ConfigurationError, BrokerError
+from app.common.fileperms import restrict_to_user
 from app.config.settings import Settings
+
+
+def _safe_error_detail(response) -> str:
+    """Extract only non-secret KIS diagnostic fields from a response.
+
+    SECURITY: never returns ``response.text`` or the full parsed body — those
+    can echo bearer tokens / appkey / request context. Mirrors the safe pattern
+    in app/brokers/kis/kis_client.py (msg_cd + msg1 only).
+    """
+    try:
+        data = response.json()
+    except Exception:  # noqa: BLE001 — diagnostics only
+        return ""
+    if not isinstance(data, dict):
+        return ""
+    msg_cd = data.get("msg_cd")
+    msg1 = data.get("msg1")
+    parts = [str(p) for p in (msg_cd, msg1) if p]
+    return " ".join(parts)
 
 
 @dataclass
@@ -32,8 +51,14 @@ class KisAuth:
         self._load_cache()
 
     def _load_cache(self) -> None:
+        # SECURITY: the cache is Fernet-encrypted with the vault key (P0.3). A
+        # missing / old-cleartext / undecryptable file degrades gracefully to a
+        # cache miss → the token is simply re-issued.
         try:
-            data = json.loads(self._cache_path.read_text())
+            from app.ui.vault import decrypt_bytes
+
+            raw = decrypt_bytes(self._cache_path.read_bytes())
+            data = json.loads(raw.decode("utf-8"))
             t = KisToken(**data)
             if t.is_valid:
                 self._token = t
@@ -41,10 +66,20 @@ class KisAuth:
             pass
 
     def _save_cache(self, token: KisToken) -> None:
+        # SECURITY: encrypt the live bearer token before writing it to disk so
+        # the cache file is no longer cleartext. Round-trips with _load_cache via
+        # the shared vault key (AUTOFOLIO_VAULT_KEY → co-located fallback).
         try:
-            fd = os.open(self._cache_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-            with os.fdopen(fd, "w") as f:
-                json.dump({"access_token": token.access_token, "expires_at_epoch": token.expires_at_epoch}, f)
+            from app.ui.vault import encrypt_bytes
+
+            payload = json.dumps(
+                {
+                    "access_token": token.access_token,
+                    "expires_at_epoch": token.expires_at_epoch,
+                }
+            ).encode("utf-8")
+            self._cache_path.write_bytes(encrypt_bytes(payload))
+            restrict_to_user(self._cache_path)
         except Exception:
             pass
 
@@ -69,13 +104,22 @@ class KisAuth:
 
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code >= 400:
-            raise BrokerError(f"KIS token request failed: {response.status_code} {response.text}")
+            # SECURITY: do NOT include response.text (can echo tokens / request
+            # context) — only the status code + KIS msg_cd/msg1.
+            detail = _safe_error_detail(response)
+            raise BrokerError(
+                f"KIS token request failed: HTTP {response.status_code} {detail}".rstrip()
+            )
 
         data = response.json()
         access_token = data.get("access_token")
         expires_in = int(data.get("expires_in", 3600))
         if not access_token:
-            raise BrokerError(f"KIS token response missing access_token: {data}")
+            # SECURITY: do NOT dump the full parsed body — only safe diagnostics.
+            raise BrokerError(
+                "KIS token response missing access_token "
+                f"(msg_cd={data.get('msg_cd')} msg1={data.get('msg1')})"
+            )
 
         self._token = KisToken(access_token=access_token, expires_at_epoch=time.time() + expires_in)
         self._save_cache(self._token)

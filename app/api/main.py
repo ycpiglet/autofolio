@@ -57,6 +57,12 @@ async def _lifespan(app: FastAPI):  # noqa: ARG001
 
 def create_app() -> FastAPI:
     """Application factory consumed by uvicorn --factory."""
+    # SECURITY: install the root-logger redaction filter as early as possible so
+    # any credential-shaped value is scrubbed from logs (defence-in-depth).
+    from app.observability.redaction import install_redaction_filter
+
+    install_redaction_filter()
+
     app = FastAPI(
         title="Autofolio API",
         version="1.0.0",

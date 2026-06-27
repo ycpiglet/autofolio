@@ -6,25 +6,74 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from pathlib import Path
 
 from cryptography.fernet import Fernet
 
+from app.common.fileperms import restrict_to_user
+
+logger = logging.getLogger(__name__)
+
 _DIR = Path(os.getenv("AUTOFOLIO_HOME", ".autofolio"))
 _KEY = _DIR / "vault.key"
 _DATA = _DIR / "vault.enc"
 
+# Env var holding a urlsafe-base64 Fernet key. When set, the key is NEVER written
+# to disk — this is the production path. See scripts/rotate_vault_key.py for
+# rotation (decrypt-with-old → re-encrypt-with-new).
+_ENV_KEY_NAME = "AUTOFOLIO_VAULT_KEY"
 
-def _fernet() -> Fernet:
+# Emit the dev-fallback warning at most once per process to avoid log spam.
+_warned_colocated = False
+
+
+def _key_bytes() -> bytes:
+    """Return the Fernet key bytes, sourced by priority.
+
+    1. ``AUTOFOLIO_VAULT_KEY`` env var (production path — key never on disk).
+    2. Co-located ``.autofolio/vault.key`` file (DEV fallback). Generated if
+       absent and a LOUD one-time warning is emitted; this preserves the exact
+       historical local/test behaviour when the env var is unset, so existing
+       ``vault.enc`` data stays decryptable byte-identically.
+    """
+    env_key = os.environ.get(_ENV_KEY_NAME)
+    if env_key:
+        return env_key.encode("ascii") if isinstance(env_key, str) else env_key
+
+    global _warned_colocated
     _DIR.mkdir(parents=True, exist_ok=True)
     if not _KEY.exists():
         _KEY.write_bytes(Fernet.generate_key())
-        try:
-            os.chmod(_KEY, 0o600)
-        except OSError:
-            pass
-    return Fernet(_KEY.read_bytes())
+        restrict_to_user(_KEY)
+    if not _warned_colocated:
+        logger.warning(
+            "vault key is co-located on disk at %s — set %s for production "
+            "(the key is then never written to disk).",
+            _KEY,
+            _ENV_KEY_NAME,
+        )
+        _warned_colocated = True
+    return _KEY.read_bytes()
+
+
+def _fernet() -> Fernet:
+    return Fernet(_key_bytes())
+
+
+def encrypt_bytes(data: bytes) -> bytes:
+    """Encrypt arbitrary bytes with the vault Fernet key.
+
+    Shared so other on-disk secret caches (e.g. the KIS token cache) can reuse
+    the same key-sourcing precedence (AUTOFOLIO_VAULT_KEY → co-located file).
+    """
+    return _fernet().encrypt(data)
+
+
+def decrypt_bytes(token: bytes) -> bytes:
+    """Decrypt bytes produced by :func:`encrypt_bytes`. Raises on bad token."""
+    return _fernet().decrypt(token)
 
 
 def load() -> dict:
