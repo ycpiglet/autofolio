@@ -672,18 +672,52 @@ class Repository:
             row = conn.execute(sql, params).fetchone()
             return float(row["total_cost"] or 0.0)
 
-    def increment_consecutive_failures(self) -> None:
-        """연속 주문 실패 카운터를 1 증가시킨다."""
-        current = self.get_system_state("consecutive_order_failures", "0")
-        try:
-            count = int(current)
-        except (ValueError, TypeError):
-            count = 0
-        self.set_system_state("consecutive_order_failures", str(count + 1))
+    # ------------------------------------------------------------------
+    # Consecutive-failure counter helpers — per-user when flag ON.
+    #
+    # FLAG-OFF INVARIANT: when ``multi_tenant_enabled()`` is False OR
+    # ``user_id`` is None, all three methods use the GLOBAL
+    # ``consecutive_order_failures`` system_state key — byte-identical to
+    # the pre-Phase-3 path.  When flag ON + user_id, the counter is stored
+    # under the user-namespaced engine-state key so user A's failures never
+    # touch user B's counter (mirrors the daily-loss per-user path).
+    # ------------------------------------------------------------------
 
-    def reset_consecutive_failures(self) -> None:
-        """연속 주문 실패 카운터를 0으로 초기화한다."""
-        self.set_system_state("consecutive_order_failures", "0")
+    _CONSEC_FAIL_KEY = "consecutive_order_failures"
+
+    def get_consecutive_failures(self, *, user_id: str | None = None) -> int:
+        """Read the consecutive-failure counter, per-user when flag ON + user_id.
+
+        Per-user reads do NOT fall back to the global value (unlike
+        get_engine_state) so a fresh user always starts at 0 rather than
+        inheriting accumulated global failures.
+        """
+        if flags.multi_tenant_enabled() and user_id is not None:
+            raw = self.get_system_state(
+                self._user_state_key(user_id, self._CONSEC_FAIL_KEY), "0"
+            )
+        else:
+            raw = self.get_system_state(self._CONSEC_FAIL_KEY, "0")
+        try:
+            return int(raw)
+        except (ValueError, TypeError):
+            return 0
+
+    def increment_consecutive_failures(self, *, user_id: str | None = None) -> None:
+        """연속 주문 실패 카운터를 1 증가시킨다. Flag ON + user_id → per-user counter."""
+        count = self.get_consecutive_failures(user_id=user_id)
+        new_val = str(count + 1)
+        if flags.multi_tenant_enabled() and user_id is not None:
+            self.set_system_state(self._user_state_key(user_id, self._CONSEC_FAIL_KEY), new_val)
+        else:
+            self.set_system_state(self._CONSEC_FAIL_KEY, new_val)
+
+    def reset_consecutive_failures(self, *, user_id: str | None = None) -> None:
+        """연속 주문 실패 카운터를 0으로 초기화한다. Flag ON + user_id → per-user counter."""
+        if flags.multi_tenant_enabled() and user_id is not None:
+            self.set_system_state(self._user_state_key(user_id, self._CONSEC_FAIL_KEY), "0")
+        else:
+            self.set_system_state(self._CONSEC_FAIL_KEY, "0")
 
     def _load_json_state(self, key: str, default: Any) -> Any:
         raw = self.get_system_state(key)

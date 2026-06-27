@@ -119,7 +119,7 @@ class OrderFlow:
                 raw_status=result.message,
                 user_id=user_id,
             )
-            self.repo.reset_consecutive_failures()
+            self.repo.reset_consecutive_failures(user_id=user_id)
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(True, "Order filled.", order_log_id)
 
@@ -135,7 +135,7 @@ class OrderFlow:
             )
 
         if result.status == OrderStatus.FAILED:
-            self.repo.increment_consecutive_failures()
+            self.repo.increment_consecutive_failures(user_id=user_id)
             self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
             return OrderFlowResult(False, f"Order failed: {result.message}", order_log_id)
 
@@ -164,7 +164,7 @@ class OrderFlow:
                 raw_status=status.message,
                 user_id=user_id,
             )
-            self.repo.reset_consecutive_failures()
+            self.repo.reset_consecutive_failures(user_id=user_id)
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(True, "Pending order filled.", order_log_id)
 
@@ -175,7 +175,7 @@ class OrderFlow:
                 OrderStatus.FAILED.value,
                 "Failed to cancel pending order.",
             )
-            self.repo.increment_consecutive_failures()
+            self.repo.increment_consecutive_failures(user_id=user_id)
             self.repo.set_engine_state("auto_trading_enabled", "false", user_id=user_id)
             return OrderFlowResult(False, "Failed to cancel pending order. Auto trading disabled.", order_log_id)
 
@@ -227,7 +227,7 @@ class OrderFlow:
                 raw_status=result.message,
                 user_id=user_id,
             )
-            self.repo.reset_consecutive_failures()
+            self.repo.reset_consecutive_failures(user_id=user_id)
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(True, "Market fallback filled.", order_log_id)
 
@@ -239,7 +239,7 @@ class OrderFlow:
                 fallback_label="Market fallback", user_id=user_id,
             )
 
-        self.repo.increment_consecutive_failures()
+        self.repo.increment_consecutive_failures(user_id=user_id)
         self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
         return OrderFlowResult(False, f"Market fallback failed: {result.message}", order_log_id)
 
@@ -267,26 +267,26 @@ class OrderFlow:
                 raw_status=status.message,
                 user_id=user_id,
             )
-            self.repo.reset_consecutive_failures()
+            self.repo.reset_consecutive_failures(user_id=user_id)
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(True, f"{fallback_label} filled.", order_log_id)
 
         if status.status == OrderStatus.CANCELED:
             self.repo.update_order_status(order_log_id, OrderStatus.CANCELED.value)
             self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
-            self.repo.increment_consecutive_failures()
+            self.repo.increment_consecutive_failures(user_id=user_id)
             return OrderFlowResult(False, f"{fallback_label} canceled by exchange.", order_log_id)
 
         if status.status == OrderStatus.FAILED:
             self.repo.update_order_status(order_log_id, OrderStatus.FAILED.value)
             self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
-            self.repo.increment_consecutive_failures()
+            self.repo.increment_consecutive_failures(user_id=user_id)
             return OrderFlowResult(False, f"{fallback_label} failed: {status.message}", order_log_id)
 
         # 여전히 PENDING — 부분체결 포함, 다음 run_once에서 재판정하지 않도록 ERROR 처리
         self.repo.update_order_status(order_log_id, OrderStatus.PENDING.value)
         self.repo.update_condition_status(condition["id"], ConditionStatus.ERROR.value)
-        self.repo.increment_consecutive_failures()
+        self.repo.increment_consecutive_failures(user_id=user_id)
         return OrderFlowResult(
             False,
             f"{fallback_label} failed: still pending after timeout (filled={status.filled_quantity}).",

@@ -73,11 +73,9 @@ class SafetyChecker:
         condition["symbol_mode"] = symbol_mode
 
         # --- Circuit breaker: consecutive order failures ---
-        consecutive_failures_str = self.repo.get_system_state("consecutive_order_failures", "0")
-        try:
-            consecutive_failures = int(consecutive_failures_str)
-        except (ValueError, TypeError):
-            consecutive_failures = 0
+        # Phase 3: per-user counter when flag ON + _effective_uid so user A's
+        # failures cannot trip user B's breaker (closes the cross-user hole).
+        consecutive_failures = self.repo.get_consecutive_failures(user_id=_effective_uid)
         if consecutive_failures >= 3:
             self.repo.set_engine_state("auto_trading_enabled", "false", user_id=_effective_uid)
             return SafetyResult(False, "Circuit breaker: 3 consecutive order failures.")

@@ -324,3 +324,80 @@ def test_engine_run_once_flag_off_iterates_globally(tmp_path, monkeypatch):
     assert len(msgs) >= 1
     logs = repo.list_order_logs()
     assert len(logs) >= 1
+
+
+# ---------------------------------------------------------------------------
+# Consecutive-failures counter — per-user scoping (the Phase-3 cross-user hole)
+# ---------------------------------------------------------------------------
+
+def test_consecutive_failures_per_user__A_trips_B_still_trades(tmp_path, monkeypatch):
+    """THE consecutive-failures cross-user hole fix.
+
+    Flag ON: user_a accumulates 3 consecutive order failures — A's circuit
+    breaker trips and auto_trading is disabled for A.  User B has zero
+    failures and must STILL be allowed to trade (its per-user counter is
+    independent of A's counter).
+    """
+    monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+    repo, checker = _make_env(tmp_path, db_name="consec_peruser.db")
+    _patch_window(monkeypatch)
+
+    # user_a: accumulate 3 failures via the per-user counter.
+    for _ in range(3):
+        repo.increment_consecutive_failures(user_id="user_a")
+
+    # user_a's counter is 3 → trips.
+    r_a = checker.check(condition=_cond(), current_price=70_000, now=datetime.now(), user_id="user_a")
+    assert not r_a.allowed, f"user_a should be blocked by consecutive-failure CB, got: {r_a.reason}"
+    assert "consecutive" in r_a.reason.lower(), f"Expected 'consecutive' in reason: {r_a.reason}"
+
+    # The consequence is per-user: GLOBAL auto_trading is untouched.
+    assert repo.get_system_state("auto_trading_enabled") == "true"
+    # user_a's global consecutive_order_failures key is untouched (per-user key was used).
+    assert repo.get_system_state("consecutive_order_failures", "0") == "0"
+
+    # GAP CLOSED: user_b has 0 failures and must still trade.
+    r_b = checker.check(condition=_cond(), current_price=70_000, now=datetime.now(), user_id="user_b")
+    assert r_b.allowed, f"user_b should trade after user_a trips, got: {r_b.reason}"
+    # user_b's per-user counter is independent.
+    assert repo.get_consecutive_failures(user_id="user_b") == 0
+
+
+def test_consecutive_failures_flag_off_global_path_unchanged(tmp_path, monkeypatch):
+    """Flag OFF: byte-identical to pre-Phase-3.  Global counter drives both users."""
+    monkeypatch.delenv("AUTOFOLIO_MULTI_TENANT_ENABLED", raising=False)
+    repo, checker = _make_env(tmp_path, db_name="consec_global.db")
+    _patch_window(monkeypatch)
+
+    # Flag OFF → user_id is ignored; all calls use the GLOBAL key.
+    for _ in range(3):
+        repo.increment_consecutive_failures()
+
+    assert repo.get_system_state("consecutive_order_failures") == "3"
+
+    # Global counter ≥ 3 → tripped regardless of user_id (same as pre-Phase-3).
+    r = checker.check(condition=_cond(), current_price=70_000, now=datetime.now())
+    assert not r.allowed
+    assert "consecutive" in r.reason.lower()
+
+
+def test_consecutive_failures_reset_per_user_isolated(tmp_path, monkeypatch):
+    """Flag ON: resetting A's counter does not reset B's counter."""
+    monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+    db = tmp_path / "consec_reset.db"
+    initialize_database(db)
+    repo = Repository(db)
+
+    for _ in range(2):
+        repo.increment_consecutive_failures(user_id="user_a")
+    repo.increment_consecutive_failures(user_id="user_b")
+
+    assert repo.get_consecutive_failures(user_id="user_a") == 2
+    assert repo.get_consecutive_failures(user_id="user_b") == 1
+
+    repo.reset_consecutive_failures(user_id="user_a")
+
+    assert repo.get_consecutive_failures(user_id="user_a") == 0
+    assert repo.get_consecutive_failures(user_id="user_b") == 1  # unaffected
+    # GLOBAL key is untouched.
+    assert repo.get_system_state("consecutive_order_failures", "0") == "0"
