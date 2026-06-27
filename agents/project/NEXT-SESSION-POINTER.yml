@@ -1,27 +1,27 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-27T11:24:43+09:00
+updated_at: 2026-06-27T15:28:04+09:00
 updated_by: lead-engineer
 current_state:
   signal: pass
   score: 94
   summary: >
-    TASK-087 BUCKET A (reversible production-readiness code layer) merged to
-    main as PR #125: A1 central feature-flags (default-OFF), A2 auto-exec/
-    recommendation/advice OFF-locks (kill-switch first), A3 SSO role hardening
-    (AUTOFOLIO_OWNER_EMAIL fail-closed), A4 Supabase migration files+RLS,
-    A5/A6 metadata-only secret-store adapter + presence-only env loader, A7
-    deploy config + preflight CI. pytest 1704 passed; per-task + Opus
-    whole-branch reviews Approved. TASK-087 BUCKET B DB tier (PR #126,
-    feat/task087-staging-evidence, open): new Supabase project autofolio-staging
-    (rpdophwfgrwctaochewf, ap-northeast-2) created; migrations 0001-0003 applied
-    — 22 tables / 33 RLS policies / 0 RLS-without-policy / 0 security-advisor
-    lints. Evidence: agents/project/MEMBERSHIP-STAGING-DEPLOY-EVIDENCE.md.
-    INIT-MULTITENANT-ENGINE registered (deliberate trading-engine user_id
-    isolation; app-to-Supabase wiring depends on it). Remaining: app-tier deploy
-    (Railway backend + INIT-MULTITENANT-ENGINE wiring + Vercel web) and BUCKET C
-    legal (KIS commercial terms, 비조치의견서, 사업자등록, payment/privacy).
-    can_launch=false. Earlier: UI backlog TASK-140/173/174 + feat/ui-backlog-2026-06-26
-    merged (#124). TASK-088 deferred until product maturity; TASK-069
+    Full session close-out: 7 PRs merged this session. #124 UI backlog
+    (TASK-140/173/174). #125 TASK-087 BUCKET A (reversible production-readiness
+    code layer). #126 TASK-087 BUCKET B: Supabase autofolio-staging applied
+    (22 tables / 33 RLS / 0 advisor lints). #127-#130 INIT-MULTITENANT-ENGINE
+    Phases 1-4 ALL COMPLETE: Phase 1 = repo query-scoping (14 methods); Phase 2
+    = per-user risk context / circuit-breaker isolation; Phase 3 = per-user
+    engine context pool + per-user run lock + per-user engine_state
+    (auto_trading/kill-switch/both circuit-breakers per-user; consecutive-failures
+    cross-user hole closed); Phase 4 = cross-user e2e isolation tests (6 layers)
+    + flag-OFF characterization (byte-identical proven) +
+    MULTITENANT-FLAG-ENABLE-READINESS.md. Full pytest 1766 passed / 0 failed.
+    AUTOFOLIO_MULTI_TENANT_ENABLED flag stays OFF in all environments.
+    Remaining: (1) SQLite→Supabase Postgres backend swap, (2) Railway backend
+    host (external account — Owner/R3 gate), (3) flag-ON readiness items +
+    Owner approval (MULTITENANT-FLAG-ENABLE-READINESS.md), (4) BUCKET C legal
+    (KIS commercial terms, 비조치의견서, 사업자등록, payment/privacy).
+    can_launch=false. TASK-088 deferred until product maturity; TASK-069
     scheduled 2026-12-14.
 active_work:
   contract: >
@@ -48,17 +48,17 @@ resume:
   step_index: 0
   step_total: 0
   status_text: >
-    TASK-087 BUCKET A merged (#125). BUCKET B Supabase staging applied; PR #126
-    open on feat/task087-staging-evidence. INIT-MULTITENANT-ENGINE registered.
-    No active task — next is merge #126, then app-tier + BUCKET C (Owner/external).
+    INIT-MULTITENANT-ENGINE Phases 1-4 complete (PRs #127-#130, pytest 1766
+    passed). All 7 PRs from this session merged (#124-#130). Flag stays OFF.
+    No active task — next autonomous work requires new Owner request or ACT task.
   next_actions:
-    - Merge PR #126 (feat/task087-staging-evidence) — BUCKET B Supabase staging evidence.
-    - After merge: proceed with INIT-MULTITENANT-ENGINE for app-to-Supabase wiring (trading-engine user_id isolation).
-    - App-tier deploy: Railway backend host + INIT-MULTITENANT-ENGINE wiring + Vercel web deploy.
-    - BUCKET C legal is Owner/external — KIS commercial terms, 비조치의견서, 사업자등록, payment/privacy. No autonomous progress possible.
+    - SQLite→Supabase Postgres backend swap: app-layer connection wiring to autofolio-staging. Can be drafted autonomously but requires Owner/R3 for env secrets.
+    - Railway/Render backend deploy: external account access needed — Owner/R3 gate. No autonomous progress.
+    - AUTOFOLIO_MULTI_TENANT_ENABLED flag-ON: clear MULTITENANT-FLAG-ENABLE-READINESS.md items, then Owner explicit approval required.
+    - BUCKET C legal (KIS commercial terms, 비조치의견서, 사업자등록, payment/privacy) — Owner/external, no autonomous progress.
     - Keep TASK-088 deferred until product maturity and presale regulatory clearance.
     - Keep TASK-069 deferred until 2026-12-14 unless Owner explicitly requests early reassessment.
-    - Start only a new explicit Owner request or a newly registered ACT task.
+    - Start only on a new explicit Owner request or a newly registered ACT task.
 roles:
   accountable: Lead Engineer
   reviewers:
@@ -95,10 +95,9 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-27 TASK-087 BUCKET A+B session: BUCKET A merged (#125) with pytest
-      1704 passed + per-task + Opus whole-branch Approved; BUCKET B Supabase
-      staging autofolio-staging applied (22 tables/33 RLS/0 lints), PR #126 open.
-      App-tier deploy and BUCKET C legal remain env-blocked/Owner-external —
-      honestly recorded; can_launch=false. Gates: continuity_contract_gate pass,
-      check_agent_docs 0 errors, owner_governance_gate --allow-empty-owner-docs
-      pass (no new taskset-work-gate failures added).
+      2026-06-27 full session close-out: #124 UI; #125 TASK-087 BUCKET A (pytest
+      1704); #126 BUCKET B Supabase staging (22 tables/33 RLS/0 lints); #127-#130
+      INIT-MULTITENANT-ENGINE Phases 1-4 (pytest 1766 passed / 0 failed, flag OFF).
+      Records closed on chore/multitenant-closeout. Gates pending run at commit
+      time — pre-existing legacy taskset-work-gate failures on main confirmed;
+      no new failures from this branch. can_launch=false.

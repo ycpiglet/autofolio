@@ -7,7 +7,7 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-27T03:46:44+09:00
+generated_at: 2026-06-27T15:36:52+09:00
 record_count: 198
 ---
 
@@ -235,8 +235,8 @@ record_count: 198
 | 27.1.3 | Task 27.1.3 | task | `TASK-173` | `TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT` | 완료 | `agents/lead_engineer/tasks/TASK-173-portfolio-goal-gap-read-model.md` | 작업 ID: TASK-173 |
 | 27.1.4 | Task 27.1.4 | task | `TASK-174` | `TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT` | 완료 | `agents/lead_engineer/tasks/TASK-174-finance-roadmap-ui-preview.md` | 작업 ID: TASK-174 |
 | 28 | Initiative 28 | initiative | `TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT` | - | completed | `agents/project/initiatives/TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT.md` | TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT |
-| 29 | Initiative 29 | initiative | `INIT-MULTITENANT-ENGINE` | - | planned | `agents/project/initiatives/INIT-MULTITENANT-ENGINE.md` | INIT-MULTITENANT-ENGINE |
-| 30 | Initiative 30 | initiative | `TASKSET-MULTITENANT-ENGINE` | - | planned | `agents/project/initiatives/TASKSET-MULTITENANT-ENGINE.md` | TASKSET-MULTITENANT-ENGINE |
+| 29 | Initiative 29 | initiative | `INIT-MULTITENANT-ENGINE` | - | completed | `agents/project/initiatives/INIT-MULTITENANT-ENGINE.md` | INIT-MULTITENANT-ENGINE |
+| 30 | Initiative 30 | initiative | `TASKSET-MULTITENANT-ENGINE` | - | completed | `agents/project/initiatives/TASKSET-MULTITENANT-ENGINE.md` | TASKSET-MULTITENANT-ENGINE |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

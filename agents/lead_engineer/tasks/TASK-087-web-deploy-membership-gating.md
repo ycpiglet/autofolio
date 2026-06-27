@@ -265,6 +265,24 @@ Owner: Lead Engineer
 - 동일 세션에서 동시 작업 중인 다른 Autofolio 세션 존재(작업 트리에 다수 동시 변경). 충돌 주의.
 - 본 태스크는 Owner 대화 기록 기반 등록이며, 실제 착수는 위 선행 확인(특히 법적/약관) 이후.
 
+## INIT-MULTITENANT-ENGINE 코드 완료 기록 (2026-06-27T15:28:04+09:00)
+
+`INIT-MULTITENANT-ENGINE` 이니셔티브(앱↔per-user 배선) **코드 완료**. Phases 1-4 전부 머지됨
+(PRs #127 / #128 / #129 / #130). 전체 pytest **1766 passed / 0 failed**.
+`AUTOFOLIO_MULTI_TENANT_ENABLED` 플래그는 모든 환경에서 **OFF 유지**
+(`agents/project/MULTITENANT-FLAG-ENABLE-READINESS.md` 준비 항목 + Owner 명시 승인 전까지).
+
+이에 따른 앱-티어 배포 잔여 선결 조건은 다음 세 가지로 정리된다:
+
+1. **SQLite → Supabase Postgres 백엔드 스왑** — 로컬 SQLite/vault를 `autofolio-staging` Supabase로
+   전환하는 코드 레이어(앱 연결 배선). Railway/Render 배포 전 필수.
+2. **백엔드 호스트** — Railway(또는 Render) 외부 계정 env/secret 설정 + 배포 스모크. 외부 계정
+   접근권이 없어 자율 진행 불가(Owner/R3 게이트).
+3. **Flag-ON 준비 항목 + Owner 승인** — `MULTITENANT-FLAG-ENABLE-READINESS.md` 기재 항목 클리어
+   후 Owner 명시 결정 필요.
+
+BUCKET C(KIS 약관 · 비조치의견서 · 사업자등록 · 결제/개인정보)는 변동 없이 Owner/외부 게이트 유지.
+
 ## BUCKET B 진행 — Supabase staging 적용 (2026-06-27T11:19:52+09:00)
 
 Owner 승인(신규 프로젝트 + mock 스테이징 자동실행) 하에 BUCKET B의 DB 티어를 실행:
