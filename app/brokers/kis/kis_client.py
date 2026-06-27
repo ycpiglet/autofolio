@@ -677,7 +677,10 @@ class KisClient(BrokerClient):
         raw = output.get("stck_prpr")
         price = _as_float(raw)
         if price is None:
-            raise BrokerError(f"KIS price response missing stck_prpr for {symbol}: {data}")
+            raise BrokerError(
+                f"KIS price response missing stck_prpr for {symbol}: "
+                f"rt_cd={data.get('rt_cd')} msg_cd={data.get('msg_cd')} msg1={data.get('msg1')}"
+            )
         return PriceQuote(symbol=symbol, price=price)
 
     def get_finance_ratio_rank(
@@ -836,7 +839,10 @@ class KisClient(BrokerClient):
                 output = output[0] if output else {}
             price = _as_float(output.get("bstp_nmix_prpr"))
             if price is None:
-                raise BrokerError(f"KIS index response missing bstp_nmix_prpr for {code}: {data}")
+                raise BrokerError(
+                    f"KIS index response missing bstp_nmix_prpr for {code}: "
+                    f"rt_cd={data.get('rt_cd')} msg_cd={data.get('msg_cd')} msg1={data.get('msg1')}"
+                )
             return {
                 "index_code": code,
                 "price": price,
@@ -1258,7 +1264,10 @@ class KisClient(BrokerClient):
         output = data.get("output") or {}
         odno = output.get("ODNO")
         if not odno:
-            raise BrokerError(f"KIS order accepted but ODNO missing: {data}")
+            raise BrokerError(
+                f"KIS order accepted but ODNO missing: "
+                f"rt_cd={data.get('rt_cd')} msg_cd={data.get('msg_cd')} msg1={data.get('msg1')}"
+            )
         self._orders[odno] = {
             "org_no": output.get("KRX_FWDG_ORD_ORGNO"),
             "ord_dvsn": ord_dvsn,
@@ -1313,7 +1322,10 @@ class KisClient(BrokerClient):
         output = data.get("output") or {}
         odno = output.get("ODNO") or output.get("odno")
         if not odno:
-            raise BrokerError(f"KIS overseas order accepted but ODNO missing: {data}")
+            raise BrokerError(
+                f"KIS overseas order accepted but ODNO missing: "
+                f"rt_cd={data.get('rt_cd')} msg_cd={data.get('msg_cd')} msg1={data.get('msg1')}"
+            )
         self._orders[odno] = {
             "org_no": output.get("KRX_FWDG_ORD_ORGNO"),
             "ord_dvsn": _ORD_DVSN_LIMIT,
