@@ -212,6 +212,32 @@ def test_state_flag_on_api_endpoint(tmp_path, monkeypatch, owner_csrf_client):
 
 
 # ---------------------------------------------------------------------------
+# A-tests: anon (no session) → 401
+# ---------------------------------------------------------------------------
+
+@pytest.fixture()
+def anon_client(_app):
+    """Plain TestClient with no session cookie set."""
+    from fastapi.testclient import TestClient
+    return TestClient(_app, raise_server_exceptions=True)
+
+
+def test_anon_reenable_returns_401(anon_client):
+    """Unauthenticated POST /engine/users/{id}/reenable must return 401."""
+    resp = anon_client.post(
+        "/api/engine/users/user_a/reenable",
+        headers=_csrf_headers(),
+    )
+    assert resp.status_code == 401
+
+
+def test_anon_state_returns_401(anon_client):
+    """Unauthenticated GET /engine/users/{id}/state must return 401."""
+    resp = anon_client.get("/api/engine/users/user_a/state")
+    assert resp.status_code == 401
+
+
+# ---------------------------------------------------------------------------
 # B-tests: eviction
 # ---------------------------------------------------------------------------
 
@@ -248,21 +274,26 @@ def test_user_ctx_lru_eviction(tmp_path, monkeypatch):
 
 
 def test_user_run_locks_lru_eviction():
-    """_user_run_locks evicts oldest idle entries when _USER_LOCKS_MAX is exceeded."""
+    """_user_run_locks evicts oldest idle (fully released) entries when _USER_LOCKS_MAX is exceeded."""
     import app.api.routers.engine as engine_mod
 
     with engine_mod._user_run_locks_lock:
         engine_mod._user_run_locks.clear()
+        engine_mod._user_run_lock_checkouts.clear()
 
     try:
         for i in range(engine_mod._USER_LOCKS_MAX + 1):
+            # Simulate the full caller lifecycle: get lock, then immediately release
+            # the checkout so the entry becomes evictable by subsequent insertions.
             engine_mod._run_lock_for(f"evict_user_{i}")
+            engine_mod._release_run_lock(f"evict_user_{i}")
 
         with engine_mod._user_run_locks_lock:
             assert len(engine_mod._user_run_locks) <= engine_mod._USER_LOCKS_MAX
     finally:
         with engine_mod._user_run_locks_lock:
             engine_mod._user_run_locks.clear()
+            engine_mod._user_run_lock_checkouts.clear()
 
 
 def test_held_lock_not_evicted():
@@ -271,28 +302,36 @@ def test_held_lock_not_evicted():
 
     with engine_mod._user_run_locks_lock:
         engine_mod._user_run_locks.clear()
+        engine_mod._user_run_lock_checkouts.clear()
         old_max = engine_mod._USER_LOCKS_MAX
         engine_mod._USER_LOCKS_MAX = 2
 
     try:
         lock_a = engine_mod._run_lock_for("held_user_a")
-        # Acquire lock_a to simulate a running job
+        # Acquire lock_a to simulate a running job (checkout still open — matches
+        # real caller behaviour where _release_run_lock is called after lock.release()).
         assert lock_a.acquire(blocking=False), "Should acquire idle lock"
         try:
             engine_mod._run_lock_for("held_user_b")
-            # Now pool = {held_user_a (held), held_user_b (idle)}, size == max == 2
-            engine_mod._run_lock_for("held_user_c")  # triggers eviction
-            # held_user_a must NOT have been evicted (it's held)
+            # Release b's checkout so it becomes idle/evictable.
+            engine_mod._release_run_lock("held_user_b")
+            # Now pool = {held_user_a (held, checkout=1), held_user_b (idle, checkout=0)},
+            # size == max == 2.
+            engine_mod._run_lock_for("held_user_c")  # triggers eviction → b evicted
+            engine_mod._release_run_lock("held_user_c")
+            # held_user_a must NOT have been evicted (held + checkout > 0)
             with engine_mod._user_run_locks_lock:
                 assert "held_user_a" in engine_mod._user_run_locks, (
                     "Held lock must not be evicted"
                 )
         finally:
             lock_a.release()
+            engine_mod._release_run_lock("held_user_a")
     finally:
         with engine_mod._user_run_locks_lock:
             engine_mod._USER_LOCKS_MAX = old_max
             engine_mod._user_run_locks.clear()
+            engine_mod._user_run_lock_checkouts.clear()
 
 
 def test_held_lock_eviction_worst_case_keeps_new_lock():
@@ -301,6 +340,7 @@ def test_held_lock_eviction_worst_case_keeps_new_lock():
 
     with engine_mod._user_run_locks_lock:
         engine_mod._user_run_locks.clear()
+        engine_mod._user_run_lock_checkouts.clear()
     old_max = engine_mod._USER_LOCKS_MAX
     try:
         with engine_mod._user_run_locks_lock:
@@ -310,20 +350,74 @@ def test_held_lock_eviction_worst_case_keeps_new_lock():
         assert a.acquire(blocking=False)
         assert b.acquire(blocking=False)
         try:
-            # pool is full ({a held, b held}); inserting c triggers eviction,
-            # but every older lock is held → nothing evictable, and c must NOT self-evict.
+            # pool is full ({a held+co=1, b held+co=1}); inserting c triggers eviction,
+            # but every older lock is held/checked-out → nothing evictable.
+            # c must NOT self-evict.
             c = engine_mod._run_lock_for("worst_c")
             with engine_mod._user_run_locks_lock:
                 assert "worst_a" in engine_mod._user_run_locks
                 assert "worst_b" in engine_mod._user_run_locks
                 assert "worst_c" in engine_mod._user_run_locks, "new lock must not self-evict"
-            assert engine_mod._run_lock_for("worst_c") is c, (
-                "new lock must remain pooled (single-flight intact)"
-            )
+            c2 = engine_mod._run_lock_for("worst_c")
+            assert c2 is c, "new lock must remain pooled (single-flight intact)"
+            engine_mod._release_run_lock("worst_c")  # for the second _run_lock_for call
         finally:
             a.release()
+            engine_mod._release_run_lock("worst_a")
             b.release()
+            engine_mod._release_run_lock("worst_b")
+            engine_mod._release_run_lock("worst_c")  # for the first _run_lock_for call
     finally:
         with engine_mod._user_run_locks_lock:
             engine_mod._USER_LOCKS_MAX = old_max
             engine_mod._user_run_locks.clear()
+            engine_mod._user_run_lock_checkouts.clear()
+
+
+def test_checkout_protects_from_preacquire_eviction():
+    """Checkout refcount prevents eviction of a handed-out lock not yet acquired.
+
+    Models the TOCTOU window: _run_lock_for has returned a lock (checkout=1)
+    but the caller has not yet called acquire().  The lock is idle so the old
+    acquire-probe would have incorrectly flagged it as evictable; the checkout
+    count must shield it even in that window.
+    """
+    import app.api.routers.engine as engine_mod
+
+    with engine_mod._user_run_locks_lock:
+        engine_mod._user_run_locks.clear()
+        engine_mod._user_run_lock_checkouts.clear()
+        old_max = engine_mod._USER_LOCKS_MAX
+        engine_mod._USER_LOCKS_MAX = 2
+
+    try:
+        # Step 1: hand out lock for user_a — checkout incremented to 1.
+        # Do NOT call acquire() — this is exactly the TOCTOU window.
+        lock_a = engine_mod._run_lock_for("toctou_user_a")
+
+        # Step 2: hand out lock for user_b (pool now full at 2), then release
+        # its checkout immediately so it is genuinely idle and evictable.
+        engine_mod._run_lock_for("toctou_user_b")
+        engine_mod._release_run_lock("toctou_user_b")
+        # Pool: {toctou_user_a (idle, checkout=1), toctou_user_b (idle, checkout=0)}
+
+        # Step 3: request user_c → triggers eviction.
+        # toctou_user_a: checkout=1 → MUST be skipped (even though its lock is idle).
+        # toctou_user_b: checkout=0 + idle → should be evicted.
+        engine_mod._run_lock_for("toctou_user_c")
+        engine_mod._release_run_lock("toctou_user_c")
+
+        with engine_mod._user_run_locks_lock:
+            assert "toctou_user_a" in engine_mod._user_run_locks, (
+                "Checked-out lock must not be evicted even while idle (pre-acquire window)"
+            )
+            assert engine_mod._user_run_locks["toctou_user_a"] is lock_a, (
+                "Must return the original lock object — not a silently replaced fresh one"
+            )
+    finally:
+        # Simulate caller finally block: _release_run_lock is called even on 409 path.
+        engine_mod._release_run_lock("toctou_user_a")
+        with engine_mod._user_run_locks_lock:
+            engine_mod._USER_LOCKS_MAX = old_max
+            engine_mod._user_run_locks.clear()
+            engine_mod._user_run_lock_checkouts.clear()
