@@ -9,6 +9,8 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
+from app.config.settings import settings
+from app.database.pg_db import is_postgres_url
 from app.database.sqlite_db import get_connection
 
 SURVEY_VERSION = "investor-profile-v2"
@@ -611,6 +613,12 @@ def record_checkin(
 
 
 def _ensure_tables() -> None:
+    # On Postgres the schema is already applied via supabase/migrations/0004_aux_tables.sql.
+    # Running the SQLite-dialect CREATE TABLE here would crash (AUTOINCREMENT is not valid PG
+    # DDL), so the init is a no-op when the PG backend is active — matching
+    # initialize_database()'s PG no-op in app/database/sqlite_db.py.
+    if is_postgres_url(settings.database_url):
+        return
     with get_connection() as conn:
         conn.executescript(_TABLE_SQL)
 
