@@ -39,6 +39,11 @@ def _apply_multitenant_migration(conn: sqlite3.Connection) -> None:
     the columns are nullable and no code reads or writes them while the flag
     is OFF, so flag-OFF query results stay byte-identical. Only the schema
     shape (PRAGMA table_info) changes.
+
+    The matching indexes are created HERE, after the columns exist — not in
+    schema.sql. On an existing pre-multitenant DB, CREATE TABLE IF NOT EXISTS
+    skips the table, so an index DDL referencing user_id in schema.sql would
+    crash with "no such column" before this migration could add the column.
     """
     for table, column, col_type in _MULTITENANT_COLUMNS:
         try:
@@ -47,6 +52,12 @@ def _apply_multitenant_migration(conn: sqlite3.Connection) -> None:
             if "duplicate column name" not in str(exc).lower():
                 raise  # genuine error (missing table, disk full, …) — do not mask
             # column already exists — safe to ignore (re-entrant call)
+
+    # Indexes are created only after every user_id column is guaranteed present.
+    for table, column, _col_type in _MULTITENANT_COLUMNS:
+        conn.execute(
+            f"CREATE INDEX IF NOT EXISTS idx_{table}_{column} ON {table}({column})"
+        )
 
 
 def initialize_database(db_path: Path | None = None) -> None:

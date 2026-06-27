@@ -173,10 +173,10 @@ CREATE TABLE IF NOT EXISTS investor_checkins (
 CREATE INDEX IF NOT EXISTS idx_investor_checkins_user_created
 ON investor_checkins(username, created_at);
 
-CREATE INDEX IF NOT EXISTS idx_trade_conditions_user_id ON trade_conditions(user_id);
-CREATE INDEX IF NOT EXISTS idx_order_logs_user_id ON order_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_execution_logs_user_id ON execution_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_price_alerts_user_id ON price_alerts(user_id);
-CREATE INDEX IF NOT EXISTS idx_trade_journal_user_id ON trade_journal(user_id);
-CREATE INDEX IF NOT EXISTS idx_system_state_user_id ON system_state(user_id);
-CREATE INDEX IF NOT EXISTS idx_risk_limits_user_id ON risk_limits(user_id);
+-- NOTE: the per-table user_id indexes are intentionally NOT created here.
+-- On an EXISTING (pre-multitenant) database, CREATE TABLE IF NOT EXISTS skips
+-- the table and the user_id column would not yet exist when this script runs,
+-- so a CREATE INDEX ... (user_id) here would crash with "no such column".
+-- The user_id columns AND their indexes are created together, in the correct
+-- order, by _apply_multitenant_migration() in app/database/sqlite_db.py, which
+-- runs after this script. See that function for the index DDL.

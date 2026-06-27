@@ -75,6 +75,48 @@ def test_migration_adds_user_id_to_legacy_table_without_column(tmp_path):
             assert column in cols_after, f"{column} not added to legacy {table}"
 
 
+def test_initialize_database_on_legacy_db_does_not_crash(tmp_path):
+    """initialize_database must succeed on a pre-multitenant DB (regression).
+
+    Reproduces the ordering bug where user_id indexes lived in schema.sql and
+    ran (via executescript) BEFORE the migration added the columns: on an
+    existing DB, CREATE TABLE IF NOT EXISTS is skipped, so the index DDL hit
+    'no such column: user_id' and crashed init. The indexes now live in the
+    migration, created after the columns are added.
+    """
+    db = tmp_path / "legacy_init.db"
+    # Build a pre-multitenant trade_conditions table: no user_id, no user_id index.
+    with sqlite3.connect(db) as conn:
+        conn.execute(
+            """CREATE TABLE trade_conditions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                symbol TEXT NOT NULL,
+                side TEXT NOT NULL,
+                target_price REAL NOT NULL,
+                quantity INTEGER NOT NULL DEFAULT 1,
+                order_type TEXT NOT NULL DEFAULT 'LIMIT',
+                allow_market_fallback INTEGER NOT NULL DEFAULT 0,
+                auto_enabled INTEGER NOT NULL DEFAULT 0,
+                status TEXT NOT NULL DEFAULT 'ACTIVE',
+                cooldown_until TEXT,
+                created_by TEXT NOT NULL DEFAULT 'USER',
+                rationale TEXT,
+                risk_note TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+            )"""
+        )
+
+    # Must NOT raise — and must end up with the user_id column + index.
+    initialize_database(db)
+
+    with get_connection(db) as conn:
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(trade_conditions)")]
+        assert "user_id" in cols
+        idx = [r[1] for r in conn.execute("PRAGMA index_list(trade_conditions)")]
+        assert "idx_trade_conditions_user_id" in idx
+
+
 def test_migration_does_not_mask_genuine_errors(tmp_path):
     """A non-duplicate OperationalError (e.g. 'no such table') must NOT be swallowed.
 
