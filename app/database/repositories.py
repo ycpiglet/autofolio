@@ -1,13 +1,59 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import json
 from typing import Any
 from uuid import uuid4
 
+from app.config.settings import settings
+from app.database.pg_db import is_postgres_url
 from app.database.sqlite_db import get_connection
 from app.services import flags
+
+# Asia/Seoul is a fixed UTC+9 offset with no daylight-saving time, so a plain
+# timezone offset reproduces the exact KST-day semantics of the old SQLite-only
+# ``DATE(x, '+9 hours')`` expression without pulling in a tz database.
+_KST = timezone(timedelta(hours=9))
+
+
+def _active_backend_is_postgres() -> bool:
+    """True when the configured backend is Postgres (``DATABASE_URL`` is a PG URL).
+
+    The default (unset/empty ``database_url``) is SQLite, so this returns False
+    on the default path and every dialect branch below picks the SQLite form.
+    """
+    return is_postgres_url(settings.database_url)
+
+
+def _kst_today_utc_bounds() -> tuple[Any, Any]:
+    """Return the ``[start, end)`` UTC bounds of the *current* KST calendar day.
+
+    Portable, result-identical replacement for the SQLite-only filter
+    ``DATE(col, '+9 hours') = DATE('now', '+9 hours')``: a row matches iff its
+    UTC timestamp lies in the half-open interval ``[start, end)``. Proof of
+    equivalence — ``col_kst = col_utc + 9h`` and the old filter keeps rows whose
+    ``col_kst`` falls in ``[kst_midnight, kst_midnight + 24h)``; subtracting 9h
+    gives exactly ``col_utc ∈ [start, end)`` with ``start = kst_midnight - 9h``.
+
+    The bound *representation* is backend-specific so each driver compares
+    against its own stored column type, while the SQL text stays identical:
+
+    * SQLite stores naive-UTC text (``CURRENT_TIMESTAMP`` /
+      ``datetime(...)`` → ``'YYYY-MM-DD HH:MM:SS'``). The bounds are formatted as
+      the same fixed-width text, so ``col >= ? AND col < ?`` is the identical
+      lexical = chronological comparison the old ``DATE()`` filter produced.
+    * Postgres stores ``timestamptz``; the bounds are bound as aware-UTC
+      ``datetime`` objects so psycopg compares real instants.
+    """
+    now_kst = datetime.now(timezone.utc).astimezone(_KST)
+    kst_midnight = now_kst.replace(hour=0, minute=0, second=0, microsecond=0)
+    start_utc = kst_midnight.astimezone(timezone.utc)
+    end_utc = start_utc + timedelta(days=1)
+    if _active_backend_is_postgres():
+        return start_utc, end_utc
+    fmt = "%Y-%m-%d %H:%M:%S"
+    return start_utc.strftime(fmt), end_utc.strftime(fmt)
 
 
 @dataclass(frozen=True)
@@ -36,14 +82,17 @@ class Repository:
                     enabled = excluded.enabled,
                     updated_at = CURRENT_TIMESTAMP
                 ''',
-                (item.symbol, item.name, item.market, item.role, int(item.enabled)),
+                (item.symbol, item.name, item.market, item.role, bool(item.enabled)),
             )
 
     def list_whitelist_symbols(self, enabled_only: bool = False) -> list[dict[str, Any]]:
         sql = "SELECT * FROM whitelist_symbols"
         params: list[Any] = []
         if enabled_only:
-            sql += " WHERE enabled = 1"
+            # ``WHERE enabled`` is result-identical to ``enabled = 1`` for the
+            # only stored values (0/1) and is valid on both SQLite (truthy int)
+            # and Postgres (boolean), unlike ``= 1`` which fails on a PG boolean.
+            sql += " WHERE enabled"
         sql += " ORDER BY symbol"
         with get_connection(self.db_path) as conn:
             return [dict(row) for row in conn.execute(sql, params).fetchall()]
@@ -51,7 +100,7 @@ class Repository:
     def get_whitelist_symbol(self, symbol: str) -> dict[str, Any] | None:
         with get_connection(self.db_path) as conn:
             row = conn.execute(
-                "SELECT * FROM whitelist_symbols WHERE symbol = ? AND enabled = 1",
+                "SELECT * FROM whitelist_symbols WHERE symbol = ? AND enabled",
                 (symbol,),
             ).fetchone()
             return dict(row) if row else None
@@ -89,8 +138,8 @@ class Repository:
                         target_price,
                         quantity,
                         order_type,
-                        int(allow_market_fallback),
-                        int(auto_enabled),
+                        bool(allow_market_fallback),
+                        bool(auto_enabled),
                         created_by,
                         rationale,
                         risk_note,
@@ -112,8 +161,8 @@ class Repository:
                         target_price,
                         quantity,
                         order_type,
-                        int(allow_market_fallback),
-                        int(auto_enabled),
+                        bool(allow_market_fallback),
+                        bool(auto_enabled),
                         created_by,
                         rationale,
                         risk_note,
@@ -227,7 +276,7 @@ class Repository:
                         quantity,
                         kis_order_id,
                         order_status,
-                        int(fallback_to_market),
+                        bool(fallback_to_market),
                         error_message,
                     ),
                 )
@@ -251,7 +300,7 @@ class Repository:
                         quantity,
                         kis_order_id,
                         order_status,
-                        int(fallback_to_market),
+                        bool(fallback_to_market),
                         error_message,
                     ),
                 )
@@ -366,17 +415,36 @@ class Repository:
             return str(row["value"]) if row else default
 
     def set_system_state(self, key: str, value: str) -> None:
+        # ON CONFLICT target differs by engine: SQLite's ``system_state`` has a
+        # single-column PRIMARY KEY (key); the Postgres table (0002) has
+        # ``UNIQUE (user_id, key)``. The repository only ever writes global rows
+        # (user_id stays NULL), and a NULLS-DISTINCT ``(user_id, key)`` unique
+        # would never dedupe those, so 0004 adds a partial unique index
+        # ``(key) WHERE user_id IS NULL`` that this PG branch infers. The SQLite
+        # branch is byte-identical to the pre-existing statement.
         with get_connection(self.db_path) as conn:
-            conn.execute(
-                '''
-                INSERT INTO system_state(key, value)
-                VALUES (?, ?)
-                ON CONFLICT(key) DO UPDATE SET
-                    value = excluded.value,
-                    updated_at = CURRENT_TIMESTAMP
-                ''',
-                (key, value),
-            )
+            if _active_backend_is_postgres():
+                conn.execute(
+                    '''
+                    INSERT INTO system_state(key, value)
+                    VALUES (?, ?)
+                    ON CONFLICT (key) WHERE user_id IS NULL DO UPDATE SET
+                        value = excluded.value,
+                        updated_at = CURRENT_TIMESTAMP
+                    ''',
+                    (key, value),
+                )
+            else:
+                conn.execute(
+                    '''
+                    INSERT INTO system_state(key, value)
+                    VALUES (?, ?)
+                    ON CONFLICT(key) DO UPDATE SET
+                        value = excluded.value,
+                        updated_at = CURRENT_TIMESTAMP
+                    ''',
+                    (key, value),
+                )
 
     # ------------------------------------------------------------------
     # Per-user engine state (Multitenant Phase 3)
@@ -479,23 +547,25 @@ class Repository:
             )
 
     def today_order_amount(self, *, user_id: str | None = None) -> float:
+        # KST-day filter computed in Python (portable) — see _kst_today_utc_bounds.
+        lo, hi = _kst_today_utc_bounds()
         if flags.multi_tenant_enabled() and user_id is not None:
             sql = '''
                 SELECT COALESCE(SUM(COALESCE(order_price, current_price, 0) * quantity), 0) AS amount
                 FROM order_logs
-                WHERE DATE(created_at, '+9 hours') = DATE('now', '+9 hours')
+                WHERE created_at >= ? AND created_at < ?
                   AND order_status IN ('REQUESTED', 'FILLED', 'PENDING')
                   AND user_id = ?
             '''
-            params: list[Any] = [user_id]
+            params: list[Any] = [lo, hi, user_id]
         else:
             sql = '''
                 SELECT COALESCE(SUM(COALESCE(order_price, current_price, 0) * quantity), 0) AS amount
                 FROM order_logs
-                WHERE DATE(created_at, '+9 hours') = DATE('now', '+9 hours')
+                WHERE created_at >= ? AND created_at < ?
                   AND order_status IN ('REQUESTED', 'FILLED', 'PENDING')
             '''
-            params = []
+            params = [lo, hi]
         with get_connection(self.db_path) as conn:
             row = conn.execute(sql, params).fetchone()
             return float(row["amount"] or 0.0)
@@ -506,12 +576,15 @@ class Repository:
         실현 손익 = Σ (매도체결가 − 종목별 평균매입가) × 매도수량
         - SELL 체결만 집계 (BUY 체결은 실현 손익 없음 → 0).
         - 평균매입가: execution_logs 전체 BUY 체결의 가중평균 (포지션 테이블 없음).
-        - KST 당일 필터: DATE(filled_at, '+9 hours') = DATE('now', '+9 hours').
+        - KST 당일 필터: filled_at 이 KST 오늘의 [start, end) UTC 구간에 속하는지로
+          판정 (_kst_today_utc_bounds; SQLite/Postgres 양쪽에서 결과 동일).
         - 체결 내역 없으면 0.0 반환.
 
         Cost basis: 전체 기간 BUY 체결 가중평균 (average cost basis).
         SELL 체결이 없으면 realized PnL = 0 (매수만인 날 서킷브레이커 오발동 방지).
         """
+        # KST-day filter computed in Python (portable) — see _kst_today_utc_bounds.
+        lo, hi = _kst_today_utc_bounds()
         if flags.multi_tenant_enabled() and user_id is not None:
             sql = '''
                 WITH avg_cost AS (
@@ -537,10 +610,10 @@ class Repository:
                 LEFT JOIN avg_cost ac ON ac.symbol = el.symbol
                 WHERE ol.side = 'SELL'
                   AND el.filled_quantity > 0
-                  AND DATE(el.filled_at, '+9 hours') = DATE('now', '+9 hours')
+                  AND el.filled_at >= ? AND el.filled_at < ?
                   AND ol.user_id = ?
             '''
-            params: list[Any] = [user_id, user_id]
+            params: list[Any] = [user_id, lo, hi, user_id]
         else:
             sql = '''
                 WITH avg_cost AS (
@@ -566,9 +639,9 @@ class Repository:
                 LEFT JOIN avg_cost ac ON ac.symbol = el.symbol
                 WHERE ol.side = 'SELL'
                   AND el.filled_quantity > 0
-                  AND DATE(el.filled_at, '+9 hours') = DATE('now', '+9 hours')
+                  AND el.filled_at >= ? AND el.filled_at < ?
             '''
-            params = []
+            params = [lo, hi]
         with get_connection(self.db_path) as conn:
             row = conn.execute(sql, params).fetchone()
             return float(row["realized_pnl"] or 0.0)
@@ -866,10 +939,10 @@ class Repository:
 
     def list_active_alerts(self, *, user_id: str | None = None) -> list:
         if flags.multi_tenant_enabled() and user_id is not None:
-            sql = 'SELECT * FROM price_alerts WHERE active=1 AND user_id=? ORDER BY id'
+            sql = 'SELECT * FROM price_alerts WHERE active AND user_id=? ORDER BY id'
             params: list[Any] = [user_id]
         else:
-            sql = 'SELECT * FROM price_alerts WHERE active=1 ORDER BY id'
+            sql = 'SELECT * FROM price_alerts WHERE active ORDER BY id'
             params = []
         with get_connection(self.db_path) as conn:
             return [dict(r) for r in conn.execute(sql, params).fetchall()]
@@ -877,7 +950,7 @@ class Repository:
     def trigger_alert(self, alert_id: int) -> None:
         with get_connection(self.db_path) as conn:
             conn.execute(
-                "UPDATE price_alerts SET active=0, triggered_at=CURRENT_TIMESTAMP WHERE id=?",
+                "UPDATE price_alerts SET active=FALSE, triggered_at=CURRENT_TIMESTAMP WHERE id=?",
                 (alert_id,),
             )
     # ---- trade journal ----
@@ -900,7 +973,7 @@ class Repository:
                          grade, lesson, plan_followed, emotion_flag)
                         VALUES(?,?,?,?,?,?,?,?,?,?)""",
                     (user_id, order_log_id, symbol, side, entry_reason, exit_reason,
-                     grade, lesson, int(plan_followed), int(emotion_flag)),
+                     grade, lesson, bool(plan_followed), bool(emotion_flag)),
                 )
             else:
                 cur = conn.execute(
@@ -909,7 +982,7 @@ class Repository:
                          grade, lesson, plan_followed, emotion_flag)
                         VALUES(?,?,?,?,?,?,?,?,?)""",
                     (order_log_id, symbol, side, entry_reason, exit_reason,
-                     grade, lesson, int(plan_followed), int(emotion_flag)),
+                     grade, lesson, bool(plan_followed), bool(emotion_flag)),
                 )
             return cur.lastrowid
 
