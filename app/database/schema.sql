@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS whitelist_symbols (
 
 CREATE TABLE IF NOT EXISTS trade_conditions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
     target_price REAL NOT NULL,
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS trade_conditions (
 
 CREATE TABLE IF NOT EXISTS order_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     condition_id INTEGER REFERENCES trade_conditions(id) ON DELETE SET NULL,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
@@ -45,6 +47,7 @@ CREATE TABLE IF NOT EXISTS order_logs (
 
 CREATE TABLE IF NOT EXISTS execution_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     order_log_id INTEGER NOT NULL REFERENCES order_logs(id) ON DELETE CASCADE,
     symbol TEXT NOT NULL,
     filled_price REAL,
@@ -55,12 +58,14 @@ CREATE TABLE IF NOT EXISTS execution_logs (
 
 CREATE TABLE IF NOT EXISTS system_state (
     key TEXT PRIMARY KEY,
+    user_id TEXT,
     value TEXT NOT NULL,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS risk_limits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     scope TEXT NOT NULL DEFAULT 'GLOBAL',
     symbol TEXT,
     max_order_amount REAL NOT NULL,
@@ -75,6 +80,7 @@ CREATE INDEX IF NOT EXISTS idx_order_logs_symbol_created ON order_logs(symbol, c
 
 CREATE TABLE IF NOT EXISTS price_alerts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     symbol TEXT NOT NULL,
     target_price REAL NOT NULL,
     direction TEXT NOT NULL CHECK(direction IN ('ABOVE', 'BELOW')),
@@ -85,6 +91,7 @@ CREATE TABLE IF NOT EXISTS price_alerts (
 
 CREATE TABLE IF NOT EXISTS trade_journal (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     order_log_id INTEGER REFERENCES order_logs(id) ON DELETE SET NULL,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
@@ -165,3 +172,11 @@ CREATE TABLE IF NOT EXISTS investor_checkins (
 
 CREATE INDEX IF NOT EXISTS idx_investor_checkins_user_created
 ON investor_checkins(username, created_at);
+
+CREATE INDEX IF NOT EXISTS idx_trade_conditions_user_id ON trade_conditions(user_id);
+CREATE INDEX IF NOT EXISTS idx_order_logs_user_id ON order_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_execution_logs_user_id ON execution_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_price_alerts_user_id ON price_alerts(user_id);
+CREATE INDEX IF NOT EXISTS idx_trade_journal_user_id ON trade_journal(user_id);
+CREATE INDEX IF NOT EXISTS idx_system_state_user_id ON system_state(user_id);
+CREATE INDEX IF NOT EXISTS idx_risk_limits_user_id ON risk_limits(user_id);
