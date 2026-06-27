@@ -62,7 +62,7 @@ Until these endpoints exist, a tripped user can only be recovered by the **globa
 
 **Why it gates:**
 - `_user_ctx` in `app/services/backend.py` is an in-process dict that caches a full engine `BacktestContext` per `user_id`. It is populated on first access and **never evicted**.
-- `_user_run_locks` in `app/api/routers/engine.py` is an `asyncio.Lock` per `user_id`, also held in an unbounded dict forever.
+- `_user_run_locks` in `app/api/routers/engine.py` is a `threading.Lock` per `user_id`, also held in an unbounded dict forever.
 
 Under single-owner operation (flag OFF) this is harmless — there is exactly one entry. Under multi-user load, each distinct `user_id` that ever hits the engine adds a permanent entry. With hundreds or thousands of users, this is a **memory leak** and an unbounded growth vector.
 

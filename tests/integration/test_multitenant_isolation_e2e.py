@@ -358,7 +358,7 @@ def test_layer5_daily_loss_cb_trips_only_user_a(iso_env):
         user_id="user_a",
     )
     assert not r_a.allowed, f"user_a should be blocked by CB, got: {r_a.reason}"
-    assert "circuit breaker" in r_a.reason.lower() or "disabled" in r_a.reason.lower()
+    assert "daily loss" in r_a.reason.lower(), f"Expected daily-loss CB reason, got: {r_a.reason}"
 
     # GLOBAL auto_trading must be untouched
     assert repo.get_system_state("auto_trading_enabled") == "true"
@@ -406,6 +406,10 @@ def test_layer5_consecutive_failures_cb_trips_only_user_a(iso_env):
 
     # GLOBAL counter must be 0 (per-user counter was used, not global)
     assert repo.get_system_state("consecutive_order_failures", "0") == "0"
+
+    # Persisted per-user disable: user_a's auto_trading row is now false; user_b still GLOBAL true.
+    assert repo.get_engine_state("auto_trading_enabled", user_id="user_a") == "false"
+    assert repo.get_engine_state("auto_trading_enabled", user_id="user_b") == "true"
 
     r_b = checker.check(
         condition={
