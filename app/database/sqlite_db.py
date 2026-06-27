@@ -28,14 +28,25 @@ def _apply_multitenant_migration(conn: sqlite3.Connection) -> None:
     """Add user_id columns to trading tables for multi-tenant support.
 
     Idempotent: safe to call on both fresh and existing databases.
-    SQLite ALTER TABLE does not support IF NOT EXISTS; we catch
-    OperationalError ('duplicate column name') to make this re-entrant.
+    SQLite ALTER TABLE does not support IF NOT EXISTS, so we run ADD COLUMN
+    and swallow ONLY the "duplicate column name" OperationalError to make this
+    re-entrant. Any other OperationalError (e.g. "no such table", disk full)
+    is re-raised — silently masking those would leave the columns absent with
+    no trace, which is exactly the failure this migration exists to prevent.
+
+    Columns are added unconditionally, regardless of
+    AUTOFOLIO_MULTI_TENANT_ENABLED. This is a non-breaking additive change:
+    the columns are nullable and no code reads or writes them while the flag
+    is OFF, so flag-OFF query results stay byte-identical. Only the schema
+    shape (PRAGMA table_info) changes.
     """
     for table, column, col_type in _MULTITENANT_COLUMNS:
         try:
             conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
-        except sqlite3.OperationalError:
-            pass  # column already exists — safe to ignore
+        except sqlite3.OperationalError as exc:
+            if "duplicate column name" not in str(exc).lower():
+                raise  # genuine error (missing table, disk full, …) — do not mask
+            # column already exists — safe to ignore (re-entrant call)
 
 
 def initialize_database(db_path: Path | None = None) -> None:

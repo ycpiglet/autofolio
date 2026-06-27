@@ -75,11 +75,27 @@ def test_migration_adds_user_id_to_legacy_table_without_column(tmp_path):
             assert column in cols_after, f"{column} not added to legacy {table}"
 
 
+def test_migration_does_not_mask_genuine_errors(tmp_path):
+    """A non-duplicate OperationalError (e.g. 'no such table') must NOT be swallowed.
+
+    Guards against the catch being too broad: if the target table is missing,
+    the migration must surface the error rather than silently no-op and leave
+    the columns absent.
+    """
+    db = tmp_path / "no_tables.db"
+    with sqlite3.connect(db) as conn:
+        # No tables created — the first ALTER hits "no such table".
+        with pytest.raises(sqlite3.OperationalError, match="no such table"):
+            _apply_multitenant_migration(conn)
+
+
 def test_migration_preserves_existing_rows_with_null_user_id(tmp_path):
     """Existing rows survive the ALTER and receive NULL user_id (non-destructive)."""
     db = tmp_path / "legacy_rows.db"
+    # A realistic pre-migration DB has ALL 7 tables, just without user_id.
     with sqlite3.connect(db) as conn:
-        conn.execute("CREATE TABLE price_alerts (id INTEGER PRIMARY KEY, payload TEXT)")
+        for table, _column, _type in _MULTITENANT_COLUMNS:
+            conn.execute(f"CREATE TABLE {table} (id INTEGER PRIMARY KEY, payload TEXT)")
         conn.execute("INSERT INTO price_alerts(id, payload) VALUES (1, 'legacy')")
     with sqlite3.connect(db) as conn:
         _apply_multitenant_migration(conn)
