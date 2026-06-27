@@ -63,6 +63,8 @@ def _run_lock_for(user_id: str) -> threading.Lock:
             # Scan from oldest to find an evictable (idle) entry
             evicted = False
             for uid_to_evict, lock_to_evict in list(_user_run_locks.items()):
+                if uid_to_evict == user_id:
+                    continue  # never evict the lock we are about to return
                 if lock_to_evict.acquire(blocking=False):
                     lock_to_evict.release()   # immediately release; was idle
                     del _user_run_locks[uid_to_evict]

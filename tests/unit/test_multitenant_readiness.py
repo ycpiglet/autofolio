@@ -81,21 +81,17 @@ def test_reenable_flag_off_returns_409(monkeypatch, owner_csrf_client):
         headers=_csrf_headers(),
     )
     assert resp.status_code == 409
-    body = resp.json()
-    # FastAPI wraps detail in {"detail": ...}
-    detail = body.get("detail", body)
-    if isinstance(detail, dict):
-        assert detail.get("status") == "multitenant_disabled"
-    else:
-        # detail is the dict itself at top level
-        assert body.get("status") == "multitenant_disabled" or body.get("detail", {}).get("status") == "multitenant_disabled"
+    # FastAPI wraps HTTPException detail in {"detail": ...} — status is nested.
+    assert resp.json()["detail"]["status"] == "multitenant_disabled"
 
 
 def test_state_flag_off_returns_409(monkeypatch, owner_csrf_client):
-    """Flag OFF → GET state returns 409."""
+    """Flag OFF → GET state returns 409 with multitenant_disabled status."""
     monkeypatch.delenv("AUTOFOLIO_MULTI_TENANT_ENABLED", raising=False)
     resp = owner_csrf_client.get("/api/engine/users/user_a/state")
     assert resp.status_code == 409
+    # FastAPI wraps HTTPException detail in {"detail": ...} — status is nested.
+    assert resp.json()["detail"]["status"] == "multitenant_disabled"
 
 
 def test_reenable_member_forbidden(monkeypatch, member_csrf_client):
@@ -293,6 +289,40 @@ def test_held_lock_not_evicted():
                 )
         finally:
             lock_a.release()
+    finally:
+        with engine_mod._user_run_locks_lock:
+            engine_mod._USER_LOCKS_MAX = old_max
+            engine_mod._user_run_locks.clear()
+
+
+def test_held_lock_eviction_worst_case_keeps_new_lock():
+    """Worst case: ALL older locks held → new lock must not self-evict."""
+    import app.api.routers.engine as engine_mod
+
+    with engine_mod._user_run_locks_lock:
+        engine_mod._user_run_locks.clear()
+    old_max = engine_mod._USER_LOCKS_MAX
+    try:
+        with engine_mod._user_run_locks_lock:
+            engine_mod._USER_LOCKS_MAX = 2
+        a = engine_mod._run_lock_for("worst_a")
+        b = engine_mod._run_lock_for("worst_b")
+        assert a.acquire(blocking=False)
+        assert b.acquire(blocking=False)
+        try:
+            # pool is full ({a held, b held}); inserting c triggers eviction,
+            # but every older lock is held → nothing evictable, and c must NOT self-evict.
+            c = engine_mod._run_lock_for("worst_c")
+            with engine_mod._user_run_locks_lock:
+                assert "worst_a" in engine_mod._user_run_locks
+                assert "worst_b" in engine_mod._user_run_locks
+                assert "worst_c" in engine_mod._user_run_locks, "new lock must not self-evict"
+            assert engine_mod._run_lock_for("worst_c") is c, (
+                "new lock must remain pooled (single-flight intact)"
+            )
+        finally:
+            a.release()
+            b.release()
     finally:
         with engine_mod._user_run_locks_lock:
             engine_mod._USER_LOCKS_MAX = old_max
