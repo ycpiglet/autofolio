@@ -1,0 +1,12 @@
+# Optional Postgres backend dependency (TASK-087 / config-gated DB backend).
+#
+# Install ONLY when running the app against Supabase Postgres (DATABASE_URL set
+# to a postgres:// URL). The default SQLite path does NOT need this — keeping it
+# out of the base requirements.txt so SQLite-only deploys never fail on a
+# platform where the psycopg binary wheel is unavailable (e.g. some Alpine/ARM).
+#
+#   pip install -r requirements.txt -r requirements-postgres.txt
+#
+# psycopg is lazily imported inside app/database/pg_db.py and is never imported
+# in the SQLite code path.
+psycopg[binary]>=3.2.0
