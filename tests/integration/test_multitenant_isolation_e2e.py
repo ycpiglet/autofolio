@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -53,14 +52,15 @@ def _patch_trading_env(monkeypatch) -> None:
     monkeypatch.setattr(sc_mod, "is_krx_holiday", lambda d: False)
 
 
-def _seed_loss_cycle(
+def _seed_pnl_cycle(
     repo: Repository,
     user_id: str,
     buy_price: float = 75_000.0,
     sell_price: float = 60_000.0,
     qty: int = 1,
 ) -> None:
-    """Insert a BUY+SELL execution cycle where sell_price < buy_price → realized loss."""
+    """Insert a BUY+SELL execution cycle where realized PnL = (sell_price - buy_price) * qty
+    (positive when sell > buy, negative when sell < buy)."""
     buy_cid = repo.add_trade_condition(
         symbol="005930", side="BUY", target_price=buy_price, quantity=qty, user_id=user_id
     )
@@ -234,15 +234,22 @@ def test_layer3_realized_pnl_per_user(iso_env):
     """today_realized_pnl(user_id=A) only reflects A's executions."""
     repo, *_ = iso_env
     # A: profitable cycle (buy 60k, sell 70k)
-    _seed_loss_cycle(repo, "user_a", buy_price=60_000.0, sell_price=70_000.0, qty=1)
+    _seed_pnl_cycle(repo, "user_a", buy_price=60_000.0, sell_price=70_000.0, qty=1)
     # B: loss cycle (buy 75k, sell 60k) — should not affect A's PnL
-    _seed_loss_cycle(repo, "user_b", buy_price=75_000.0, sell_price=60_000.0, qty=1)
+    _seed_pnl_cycle(repo, "user_b", buy_price=75_000.0, sell_price=60_000.0, qty=1)
 
     pnl_a = repo.today_realized_pnl(user_id="user_a")
     pnl_b = repo.today_realized_pnl(user_id="user_b")
 
-    assert pnl_a > 0, f"user_a should have profit, got: {pnl_a}"
-    assert pnl_b < 0, f"user_b should have loss, got: {pnl_b}"
+    # Exact values: PnL = (sell - buy) * qty
+    # user_a: (70_000 - 60_000) * 1 = +10_000
+    # user_b: (60_000 - 75_000) * 1 = -15_000
+    assert pnl_a == pytest.approx(10_000, rel=1e-6), (
+        f"user_a expected profit +10_000 (buy 60k→sell 70k×1), got: {pnl_a}"
+    )
+    assert pnl_b == pytest.approx(-15_000, rel=1e-6), (
+        f"user_b expected loss -15_000 (buy 75k→sell 60k×1), got: {pnl_b}"
+    )
 
 
 def test_layer3_cost_basis_per_user(iso_env):
@@ -339,7 +346,7 @@ def test_layer5_daily_loss_cb_trips_only_user_a(iso_env):
     """A's daily-loss circuit breaker disables ONLY A's auto_trading; B still trades."""
     repo, _, _, checker = iso_env
     # Seed user_a with a loss >= 3% of max_daily_amount (300k). Loss = 15k > 9k (3%).
-    _seed_loss_cycle(repo, "user_a", buy_price=75_000.0, sell_price=60_000.0, qty=1)
+    _seed_pnl_cycle(repo, "user_a", buy_price=75_000.0, sell_price=60_000.0, qty=1)
 
     r_a = checker.check(
         condition={
@@ -355,6 +362,15 @@ def test_layer5_daily_loss_cb_trips_only_user_a(iso_env):
 
     # GLOBAL auto_trading must be untouched
     assert repo.get_system_state("auto_trading_enabled") == "true"
+
+    # Per-user disable must have been persisted for user_a (not just in-memory)
+    assert repo.get_engine_state("auto_trading_enabled", user_id="user_a") == "false", (
+        "user_a per-user auto_trading_enabled must be persisted as 'false' after CB trip"
+    )
+    # user_b has no per-user row → must fall back to GLOBAL "true" (no leak from user_a)
+    assert repo.get_engine_state("auto_trading_enabled", user_id="user_b") == "true", (
+        "user_b must still see GLOBAL 'true'; user_a CB must not leak to user_b"
+    )
 
     # user_b has no losses and must still be allowed
     r_b = checker.check(
