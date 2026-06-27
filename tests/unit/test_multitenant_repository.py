@@ -346,6 +346,44 @@ class TestAggregateScoping:
         assert repo.total_buy_cost_basis(user_id="user_a") == pytest.approx(70_000.0)
         assert repo.total_buy_cost_basis(user_id="user_b") == pytest.approx(80_000.0)
 
+    def test_today_realized_pnl_scoped(self, mt_repo, monkeypatch):
+        """Per-user realized PnL: both the avg_cost CTE and the outer SELL query
+        must be scoped to the user.
+
+        Both users trade the SAME symbol at DIFFERENT buy prices, so a CTE that
+        failed to scope by user_id would blend their cost bases and produce a
+        wrong number (not merely a wrong sum). Realized PnL per the helper is
+        (sell_price - avg_buy_price) * qty = 1000 * qty when correctly scoped.
+        """
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        _insert_filled_sell(repo, "user_a", symbol="005930", price=75_000.0, qty=1)
+        _insert_filled_sell(repo, "user_b", symbol="005930", price=50_000.0, qty=3)
+        # Correct scoping: A = (76000-75000)*1 = 1000 ; B = (51000-50000)*3 = 3000.
+        assert repo.today_realized_pnl(user_id="user_a") == pytest.approx(1_000.0)
+        assert repo.today_realized_pnl(user_id="user_b") == pytest.approx(3_000.0)
+
+    def test_total_realized_pnl_scoped(self, mt_repo, monkeypatch):
+        """total_realized_pnl (no date filter) must isolate per user, CTE included."""
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        _insert_filled_sell(repo, "user_a", symbol="005930", price=75_000.0, qty=1)
+        _insert_filled_sell(repo, "user_b", symbol="005930", price=50_000.0, qty=3)
+        assert repo.total_realized_pnl(user_id="user_a") == pytest.approx(1_000.0)
+        assert repo.total_realized_pnl(user_id="user_b") == pytest.approx(3_000.0)
+
+    def test_realized_pnl_excludes_null_user_id_legacy_rows(self, mt_repo, monkeypatch):
+        """A scoped realized-PnL query must ignore legacy NULL-user_id fills."""
+        monkeypatch.setenv("AUTOFOLIO_MULTI_TENANT_ENABLED", "1")
+        repo, _ = mt_repo
+        _seed_whitelist(repo)
+        # Legacy cycle with NO user_id (NULL) — must be invisible to scoped query.
+        _insert_filled_sell(repo, None, symbol="005930", price=10_000.0, qty=5)
+        _insert_filled_sell(repo, "user_a", symbol="005930", price=75_000.0, qty=1)
+        assert repo.total_realized_pnl(user_id="user_a") == pytest.approx(1_000.0)
+
 
 class TestAlertScoping:
     def test_list_active_alerts_scoped(self, mt_repo, monkeypatch):
