@@ -43,6 +43,13 @@ class Settings:
 
     db_path: Path = Path(os.getenv("DB_PATH", "trading_bot.db"))
 
+    # Optional Postgres backend selector. When this is a postgres://|postgresql://
+    # URL the database seam (app.database.sqlite_db.get_connection) returns the
+    # psycopg adapter; when unset/empty (the default) the SQLite path is used,
+    # byte-identical to the pre-existing behaviour. No secret value lives here —
+    # the URL is supplied via the DATABASE_URL environment variable at deploy time.
+    database_url: str = os.getenv("DATABASE_URL", "")
+
     default_poll_interval_sec: int = 3
     default_order_timeout_sec: int = 60
     default_cooldown_min: int = 30

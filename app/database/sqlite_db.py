@@ -2,9 +2,21 @@ import sqlite3
 from pathlib import Path
 
 from app.config.settings import settings
+from app.database.pg_db import is_postgres_url
 
 
-def get_connection(db_path: Path | None = None) -> sqlite3.Connection:
+def get_connection(db_path: Path | None = None):
+    """Return the database connection for the configured backend.
+
+    When ``settings.database_url`` is a Postgres URL → the psycopg adapter
+    (``app.database.pg_db``). Otherwise (the default; unset/empty) → the
+    SQLite path below, byte-identical to the pre-existing behaviour.
+    """
+    if is_postgres_url(settings.database_url):
+        from app.database import pg_db
+
+        return pg_db.connect(settings.database_url)
+
     path = db_path or settings.db_path
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
@@ -61,6 +73,11 @@ def _apply_multitenant_migration(conn: sqlite3.Connection) -> None:
 
 
 def initialize_database(db_path: Path | None = None) -> None:
+    if is_postgres_url(settings.database_url):
+        # The Postgres schema is owned by the pre-applied supabase/migrations/*.sql
+        # (assume the DB is already migrated). Do NOT run the SQLite-dialect
+        # schema.sql / PRAGMA / executescript / ALTER-based migration here.
+        return
     schema_path = Path(__file__).with_name("schema.sql")
     sql = schema_path.read_text(encoding="utf-8")
     with get_connection(db_path) as conn:
