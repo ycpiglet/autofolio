@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS whitelist_symbols (
 
 CREATE TABLE IF NOT EXISTS trade_conditions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
     target_price REAL NOT NULL,
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS trade_conditions (
 
 CREATE TABLE IF NOT EXISTS order_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     condition_id INTEGER REFERENCES trade_conditions(id) ON DELETE SET NULL,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
@@ -45,6 +47,7 @@ CREATE TABLE IF NOT EXISTS order_logs (
 
 CREATE TABLE IF NOT EXISTS execution_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     order_log_id INTEGER NOT NULL REFERENCES order_logs(id) ON DELETE CASCADE,
     symbol TEXT NOT NULL,
     filled_price REAL,
@@ -55,12 +58,14 @@ CREATE TABLE IF NOT EXISTS execution_logs (
 
 CREATE TABLE IF NOT EXISTS system_state (
     key TEXT PRIMARY KEY,
+    user_id TEXT,
     value TEXT NOT NULL,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS risk_limits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     scope TEXT NOT NULL DEFAULT 'GLOBAL',
     symbol TEXT,
     max_order_amount REAL NOT NULL,
@@ -75,6 +80,7 @@ CREATE INDEX IF NOT EXISTS idx_order_logs_symbol_created ON order_logs(symbol, c
 
 CREATE TABLE IF NOT EXISTS price_alerts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     symbol TEXT NOT NULL,
     target_price REAL NOT NULL,
     direction TEXT NOT NULL CHECK(direction IN ('ABOVE', 'BELOW')),
@@ -85,6 +91,7 @@ CREATE TABLE IF NOT EXISTS price_alerts (
 
 CREATE TABLE IF NOT EXISTS trade_journal (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT,
     order_log_id INTEGER REFERENCES order_logs(id) ON DELETE SET NULL,
     symbol TEXT NOT NULL,
     side TEXT NOT NULL,
@@ -165,3 +172,11 @@ CREATE TABLE IF NOT EXISTS investor_checkins (
 
 CREATE INDEX IF NOT EXISTS idx_investor_checkins_user_created
 ON investor_checkins(username, created_at);
+
+-- NOTE: the per-table user_id indexes are intentionally NOT created here.
+-- On an EXISTING (pre-multitenant) database, CREATE TABLE IF NOT EXISTS skips
+-- the table and the user_id column would not yet exist when this script runs,
+-- so a CREATE INDEX ... (user_id) here would crash with "no such column".
+-- The user_id columns AND their indexes are created together, in the correct
+-- order, by _apply_multitenant_migration() in app/database/sqlite_db.py, which
+-- runs after this script. See that function for the index DDL.
