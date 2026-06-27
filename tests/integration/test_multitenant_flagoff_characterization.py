@@ -18,13 +18,11 @@ from __future__ import annotations
 
 from datetime import datetime
 from pathlib import Path
-from tempfile import TemporaryDirectory
-
 import pytest
 
 from app.brokers.mock.mock_client import MockBrokerClient
 from app.database.repositories import Repository, WhitelistSymbol
-from app.database.sqlite_db import initialize_database, get_connection
+from app.database.sqlite_db import initialize_database
 from app.engine.live_trading_engine import LiveTradingEngine
 from app.risk.safety_checker import SafetyChecker
 
@@ -272,3 +270,4 @@ def test_flagoff_safety_checker_user_id_is_ignored(off_env):
     r_with_uid = checker.check(condition=cond, current_price=69_800, now=datetime.now(), user_id="user_a")
     r_no_uid = checker.check(condition=cond, current_price=69_800, now=datetime.now())
     assert r_with_uid.allowed == r_no_uid.allowed
+    assert r_with_uid.allowed is True
