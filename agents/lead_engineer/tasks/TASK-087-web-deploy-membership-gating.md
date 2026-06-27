@@ -293,3 +293,28 @@ Owner 승인(신규 프로젝트 + mock 스테이징 자동실행) 하에 BUCKET
 - 잔여(앱 티어): 백엔드 호스트(Railway/Render — 외부 계정), 앱↔Supabase 배선(= INIT-MULTITENANT-ENGINE),
   Vercel `web/` 배포. 공개 상용 런칭은 BUCKET C(법률) 게이트. `can_launch=false` 유지.
 - secret 미커밋(공개 URL/anon만). KIS_ENV=mock. 실주문/결제 없음.
+
+## Postgres DB-Layer 호환 + Multitenant Readiness 마감 (2026-06-27T18:13:55+09:00)
+
+PRs #132–#135 (이번 세션 추가 5건 포함 전체 12건: #124–#135) 완료 — 전체 pytest **1833 passed / 0 failed**.
+
+### 완료 항목
+
+| PR | 내용 | 검증 |
+|----|------|------|
+| #132 | `app/database/pg_db.py` config-gated Postgres 어댑터 (`DATABASE_URL`; 기본 SQLite 동일; psycopg optional) | pytest 통과 |
+| #133 | SQL 방언 호환 — boolean/KST-date/ON CONFLICT 포터블 + `supabase/migrations/0004_aux_tables.sql` | MCP live-verified vs `autofolio-staging` (whitelist + system_state-global + boolean upsert) |
+| #134 | Multitenant flag-ON 준비 — owner-only per-user re-enable/status 엔드포인트 + `_user_ctx`/`_user_run_locks` TTL/LRU 한정 + ghost-lock TOCTOU 수정. 전부 flag-gated | pytest 통과 |
+| #135 | `investor_profile.py` PG 준비 (PG 환경에서 SQLite table-init 스킵) | MCP live-verified (investor_profiles upsert + checkin RETURNING on real PG) |
+
+`MULTITENANT-FLAG-ENABLE-READINESS.md` 항목 (a)(b)(d) → **COMPLETE**.
+
+### 잔여 (Owner/외부 게이트 — 자율 진행 불가)
+
+- **(c) 유저별 브로커/KIS 자격증명**: 실제 per-user KIS app-key/secret/계정번호가 필요 = Owner 시크릿.
+- **앱↔Supabase 라이브 psycopg 연결**: DB 비밀번호(`DATABASE_URL`) = Owner 배포 시 시크릿.
+- **백엔드 호스트 Railway/Render**: 외부 계정 접근 = Owner/R3 게이트.
+- **Flag-ON 활성화** (`AUTOFOLIO_MULTI_TENANT_ENABLED=1`): 위 항목 + Owner 안전 승인 결정 필요.
+- **BUCKET C 법무**: KIS 상용 약관 · 비조치의견서 · 사업자등록 · 결제/개인정보 — 외부 인간 작업.
+
+`can_launch=false` 유지. `DATABASE_URL` 기본 미설정(SQLite). 플래그 기본 OFF.

@@ -1,27 +1,30 @@
 schema: agent-runtime-next-session-pointer/v1
-updated_at: 2026-06-27T15:28:04+09:00
+updated_at: 2026-06-27T18:13:55+09:00
 updated_by: lead-engineer
 current_state:
   signal: pass
-  score: 94
+  score: 96
   summary: >
-    Full session close-out: 7 PRs merged this session. #124 UI backlog
-    (TASK-140/173/174). #125 TASK-087 BUCKET A (reversible production-readiness
-    code layer). #126 TASK-087 BUCKET B: Supabase autofolio-staging applied
-    (22 tables / 33 RLS / 0 advisor lints). #127-#130 INIT-MULTITENANT-ENGINE
-    Phases 1-4 ALL COMPLETE: Phase 1 = repo query-scoping (14 methods); Phase 2
-    = per-user risk context / circuit-breaker isolation; Phase 3 = per-user
-    engine context pool + per-user run lock + per-user engine_state
-    (auto_trading/kill-switch/both circuit-breakers per-user; consecutive-failures
-    cross-user hole closed); Phase 4 = cross-user e2e isolation tests (6 layers)
-    + flag-OFF characterization (byte-identical proven) +
-    MULTITENANT-FLAG-ENABLE-READINESS.md. Full pytest 1766 passed / 0 failed.
-    AUTOFOLIO_MULTI_TENANT_ENABLED flag stays OFF in all environments.
-    Remaining: (1) SQLite→Supabase Postgres backend swap, (2) Railway backend
-    host (external account — Owner/R3 gate), (3) flag-ON readiness items +
-    Owner approval (MULTITENANT-FLAG-ENABLE-READINESS.md), (4) BUCKET C legal
-    (KIS commercial terms, 비조치의견서, 사업자등록, payment/privacy).
-    can_launch=false. TASK-088 deferred until product maturity; TASK-069
+    Full 12-PR session close-out (#124-#135). #124 UI backlog (TASK-140/173/174).
+    #125 TASK-087 BUCKET A (reversible production-readiness code). #126 BUCKET B:
+    Supabase autofolio-staging applied (22 tables / 33 RLS / 0 lints). #127-#130
+    INIT-MULTITENANT-ENGINE Phases 1-4 complete. #131 governance. #132
+    config-gated Postgres adapter (app/database/pg_db.py; DATABASE_URL; default
+    SQLite byte-identical; psycopg optional). #133 SQL dialect compat
+    (boolean/KST-date/ON CONFLICT portable + supabase/migrations/0004_aux_tables.sql)
+    — LIVE-verified via MCP against autofolio-staging. #134 multitenant flag-ON
+    readiness: owner-only per-user re-enable/status/toggle endpoints +
+    _user_ctx/_user_run_locks TTL/LRU eviction + ghost-lock TOCTOU fix; all
+    flag-gated. #135 investor_profile.py PG-readiness — LIVE-verified via MCP
+    (investor_profiles upsert + checkin RETURNING on real PG). Full pytest
+    1833 passed / 0 failed. DB layer is Postgres-compatible end-to-end and
+    live-verified against autofolio-staging. MULTITENANT-FLAG-ENABLE-READINESS.md
+    items (a)(b)(d) COMPLETE. Remaining (all Owner-gated): (c) per-user KIS
+    credentials (Owner real secrets), live psycopg connection (DB password at
+    deploy), Railway/Render backend host (external account), flag-ON Owner
+    approval, BUCKET C legal (KIS commercial terms, 비조치의견서, 사업자등록,
+    payment/privacy). AUTOFOLIO_MULTI_TENANT_ENABLED default OFF; DATABASE_URL
+    default unset (SQLite). can_launch=false. TASK-088 deferred; TASK-069
     scheduled 2026-12-14.
 active_work:
   contract: >
@@ -48,13 +51,14 @@ resume:
   step_index: 0
   step_total: 0
   status_text: >
-    INIT-MULTITENANT-ENGINE Phases 1-4 complete (PRs #127-#130, pytest 1766
-    passed). All 7 PRs from this session merged (#124-#130). Flag stays OFF.
-    No active task — next autonomous work requires new Owner request or ACT task.
+    12-PR session (#124-#135) complete. Postgres DB layer live-verified. Multitenant
+    code complete behind OFF flag. All autonomous code work done — remaining
+    items are Owner-gated secrets/decisions. No active task.
   next_actions:
-    - SQLite→Supabase Postgres backend swap: app-layer connection wiring to autofolio-staging. Can be drafted autonomously but requires Owner/R3 for env secrets.
-    - Railway/Render backend deploy: external account access needed — Owner/R3 gate. No autonomous progress.
-    - AUTOFOLIO_MULTI_TENANT_ENABLED flag-ON: clear MULTITENANT-FLAG-ENABLE-READINESS.md items, then Owner explicit approval required.
+    - Per-user KIS credentials (c): requires real per-user KIS app-key/secret/account — Owner secrets, not autonomous.
+    - Live psycopg connection to autofolio-staging: requires DATABASE_URL with DB password — Owner sets at deploy.
+    - Railway/Render backend host: external account access — Owner/R3 gate. No autonomous progress.
+    - AUTOFOLIO_MULTI_TENANT_ENABLED flag-ON: item (c) + DB password + Railway + Owner explicit safety approval.
     - BUCKET C legal (KIS commercial terms, 비조치의견서, 사업자등록, payment/privacy) — Owner/external, no autonomous progress.
     - Keep TASK-088 deferred until product maturity and presale regulatory clearance.
     - Keep TASK-069 deferred until 2026-12-14 unless Owner explicitly requests early reassessment.
@@ -95,9 +99,11 @@ verification:
   last_known:
     signal: pass
     detail: >
-      2026-06-27 full session close-out: #124 UI; #125 TASK-087 BUCKET A (pytest
-      1704); #126 BUCKET B Supabase staging (22 tables/33 RLS/0 lints); #127-#130
-      INIT-MULTITENANT-ENGINE Phases 1-4 (pytest 1766 passed / 0 failed, flag OFF).
-      Records closed on chore/multitenant-closeout. Gates pending run at commit
-      time — pre-existing legacy taskset-work-gate failures on main confirmed;
-      no new failures from this branch. can_launch=false.
+      2026-06-27 12-PR session close-out (#124-#135): #124 UI; #125 TASK-087
+      BUCKET A (pytest 1704); #126 BUCKET B Supabase staging (22 tables/33 RLS/0
+      lints); #127-#130 INIT-MULTITENANT-ENGINE Phases 1-4 (pytest 1766); #131
+      governance; #132-#135 Postgres DB-layer compat + multitenant readiness
+      (pytest 1833 passed / 0 failed, live-verified vs autofolio-staging, flag
+      OFF). Records closed on chore/pg-readiness-closeout. Pre-existing legacy
+      taskset-work-gate failures on main confirmed; no new failures from this
+      branch. can_launch=false.

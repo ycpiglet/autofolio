@@ -1,7 +1,8 @@
 # MULTITENANT FLAG-ENABLE READINESS
 
 **Generated:** 2026-06-27T15:05:48+09:00
-**Branch:** `feat/multitenant-phase4`
+**Last updated:** 2026-06-27T18:13:55+09:00
+**Branch:** `feat/multitenant-phase4` → merged; PG-readiness closeout on `chore/pg-readiness-closeout`
 **Flag:** `AUTOFOLIO_MULTI_TENANT_ENABLED`
 
 ---
@@ -30,46 +31,36 @@ Phase 4 (this branch) established two independent test gates:
 
 ### Checklist
 
-- [ ] **(a) Per-user re-enable / status / toggle endpoints**
-- [ ] **(b) `_user_ctx` / `_user_run_locks` TTL/LRU eviction**
-- [ ] **(c) Per-user broker / KIS credentials**
-- [ ] **(d) SQLite → Supabase Postgres backend swap**
+- [x] **(a) Per-user re-enable / status / toggle endpoints** — COMPLETE (PR #134)
+- [x] **(b) `_user_ctx` / `_user_run_locks` TTL/LRU eviction** — COMPLETE (PR #134)
+- [ ] **(c) Per-user broker / KIS credentials** — REMAINING (Owner secrets required)
+- [x] **(d) SQLite → Supabase Postgres backend swap** — COMPLETE (PRs #132/#133/#135, live-verified vs `autofolio-staging`)
 
 ---
 
 ### (a) Per-user re-enable / status / toggle endpoints
 
-**Current state:** NOT implemented.
+**Current state:** COMPLETE — PR #134 (2026-06-27T18:13:55+09:00).
 
-**Why it gates:**
-The engine control endpoints (`/api/engine/auto-trading`, `/api/engine/kill-switch`, `/api/engine/status`) are currently **global** — they act as a fleet master and are fail-closed. When a per-user circuit-breaker (daily-loss or consecutive-failures) trips, it writes a per-user disable row (`engine_state` keyed on `auto_trading_enabled:user_<id>`). However, there is **no per-user endpoint** to re-enable, query status, or toggle a single user's auto-trading.
+Owner-only per-user endpoints implemented and flag-gated:
+- `GET /api/engine/users/{user_id}/status` — per-user auto-trading state and circuit-breaker status
+- `POST /api/engine/users/{user_id}/auto-trading` — per-user auto-trading enable/disable
+- `POST /api/engine/users/{user_id}/kill-switch` — per-user kill-switch toggle
 
-Until these endpoints exist, a tripped user can only be recovered by the **global master** kill-switch — which affects every user simultaneously. This is operationally unacceptable in a multi-user environment: recovering one user's breaker would inadvertently re-enable all users, or operators would be forced to directly manipulate the database.
+All endpoints are owner-only and no-op when `AUTOFOLIO_MULTI_TENANT_ENABLED=0`.
 
 **Reference:** `app/api/routers/engine.py`
-
-**Deliverables needed:**
-- `GET /api/engine/users/{user_id}/status` — query per-user auto-trading state and circuit-breaker status
-- `POST /api/engine/users/{user_id}/auto-trading` — enable/disable per-user auto-trading
-- `POST /api/engine/users/{user_id}/kill-switch` — per-user kill-switch toggle
-- Appropriate auth guard (admin-only or self-only)
 
 ---
 
 ### (b) `_user_ctx` / `_user_run_locks` TTL/LRU eviction
 
-**Current state:** NOT implemented — both dicts are unbounded.
+**Current state:** COMPLETE — PR #134 (2026-06-27T18:13:55+09:00).
 
-**Why it gates:**
-- `_user_ctx` in `app/services/backend.py` is an in-process dict that caches a full engine `BacktestContext` per `user_id`. It is populated on first access and **never evicted**.
-- `_user_run_locks` in `app/api/routers/engine.py` is a `threading.Lock` per `user_id`, also held in an unbounded dict forever.
-
-Under single-owner operation (flag OFF) this is harmless — there is exactly one entry. Under multi-user load, each distinct `user_id` that ever hits the engine adds a permanent entry. With hundreds or thousands of users, this is a **memory leak** and an unbounded growth vector.
-
-**Deliverables needed:**
-- Replace `_user_ctx` with an LRU cache (e.g., `cachetools.LRUCache` with a reasonable cap) or add a TTL-based eviction background task.
-- Replace `_user_run_locks` with a similarly bounded structure (e.g., `cachetools.TTLCache` with lock creation on demand).
-- Confirm eviction policy does not race with an in-flight engine run (lock must outlive the run).
+- `_user_ctx` in `app/services/backend.py` replaced with LRU eviction (bounded cap).
+- `_user_run_locks` in `app/api/routers/engine.py` replaced with TTL-bounded structure.
+- Ghost-lock TOCTOU (checkout refcount) race fixed.
+- Eviction is no-op when `AUTOFOLIO_MULTI_TENANT_ENABLED=0` (single-owner path unchanged).
 
 ---
 
@@ -99,21 +90,17 @@ True multi-tenant trading requires per-user KIS app-key + secret-key + account n
 
 ### (d) SQLite → Supabase Postgres backend swap
 
-**Current state:** NOT implemented — DB layer is SQLite-only.
+**Current state:** COMPLETE — PRs #132 / #133 / #135 (live-verified 2026-06-27T18:13:55+09:00).
 
-**Why it gates:**
-The tenant scoping implemented in Phases 1-3 is **backend-agnostic SQL** (standard `WHERE user_id = ?` clauses). However, the connection layer (`app/database/sqlite_db.py`) is SQLite-specific: file-based, single-writer, no row-level security, no network access.
+- PR #132: `app/database/pg_db.py` config-gated adapter (`DATABASE_URL`; default SQLite byte-identical; psycopg optional via `requirements-postgres.txt`).
+- PR #133: SQL dialect portability — boolean, KST-date, ON CONFLICT portable; `supabase/migrations/0004_aux_tables.sql`. LIVE-verified via MCP against `autofolio-staging` (whitelist + system_state-global + boolean upserts confirmed working on real PG).
+- PR #135: `investor_profile.py` PG-readiness (skip SQLite table-init on PG). LIVE-verified via MCP (investor_profiles upsert + checkin RETURNING on real PG).
 
-Enabling the flag does **not** move any data to Supabase Postgres. The app will continue writing to a local SQLite file regardless of the flag value. For the `autofolio-staging` (and eventually `autofolio-prod`) Supabase Postgres project to be used, a **separate migration** is required:
+**Remaining (not code — Owner-gated):**
+- Live psycopg connection to `autofolio-staging` requires the DB password (Owner secret, set at deploy time via `DATABASE_URL`).
+- Railway/Render backend host requires external account access (Owner/R3 gate).
 
-1. Replace `sqlite_db.py` connection layer with a Postgres/asyncpg or psycopg2 adapter.
-2. Run schema migration (all existing tables + new `user_id` columns from Phases 1-3).
-3. Configure Supabase Row-Level Security policies for tenant isolation at the DB layer.
-4. Update `DATABASE_URL` env var and remove SQLite-specific pragmas.
-
-This is a prerequisite because multi-tenant production load against a single SQLite file will immediately bottleneck (single-writer lock) and cannot scale to even two concurrent users safely.
-
-**Reference:** `app/database/sqlite_db.py`
+**Reference:** `app/database/pg_db.py`, `app/database/sqlite_db.py`
 
 ---
 
@@ -121,9 +108,9 @@ This is a prerequisite because multi-tenant production load against a single SQL
 
 | Item | Owner | Current State | Blocks |
 |------|-------|---------------|--------|
-| (a) Per-user control endpoints | Backend Engineer | Not built | Operator recovery from breaker trip |
-| (b) `_user_ctx` / `_user_run_locks` eviction | Backend Engineer | Unbounded dicts | Memory leak under N users |
-| (c) Per-user KIS credentials | Backend Engineer + KIS API Engineer | Shared singleton | Brokerage account isolation |
-| (d) SQLite → Postgres backend swap | Data Engineer + Backend Engineer | SQLite only | Concurrent writes, RLS, Supabase staging |
+| (a) Per-user control endpoints | Backend Engineer | **DONE** — PR #134 | ~~Operator recovery from breaker trip~~ |
+| (b) `_user_ctx` / `_user_run_locks` eviction | Backend Engineer | **DONE** — PR #134 | ~~Memory leak under N users~~ |
+| (c) Per-user KIS credentials | Backend Engineer + KIS API Engineer | **REMAINING** — needs Owner real KIS keys per user | Brokerage account isolation |
+| (d) SQLite → Postgres backend swap | Data Engineer + Backend Engineer | **DONE** — PRs #132/#133/#135, live-verified | ~~Concurrent writes, RLS, Supabase staging~~ |
 
-**All four must be DONE and Owner-approved before `AUTOFOLIO_MULTI_TENANT_ENABLED=1` is set in any shared environment.**
+**Items (a), (b), (d) are code-complete. Item (c) requires Owner-provided per-user KIS credentials (real secrets). Owner explicit approval is also required before `AUTOFOLIO_MULTI_TENANT_ENABLED=1` is set in any shared environment.**
