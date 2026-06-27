@@ -26,6 +26,22 @@ TR_EXECUTION_NOTICE_PROD = "H0STCNI0"
 TR_EXECUTION_NOTICE_PAPER = "H0STCNI9"
 
 
+def _safe_approval_detail(response) -> str:
+    """Extract only non-secret KIS diagnostic fields (msg_cd + msg1).
+
+    SECURITY: never returns response.text / the full parsed body, which can echo
+    the approval key, appkey, or request context.
+    """
+    try:
+        data = response.json()
+    except Exception:  # noqa: BLE001 — diagnostics only
+        return ""
+    if not isinstance(data, dict):
+        return ""
+    parts = [str(p) for p in (data.get("msg_cd"), data.get("msg1")) if p]
+    return " ".join(parts)
+
+
 def _as_int(value: Any, default: int = 0) -> int:
     if value in (None, ""):
         return default
@@ -171,11 +187,21 @@ def get_approval_key(app_settings: Settings = settings, *, timeout: int = 10) ->
         raise BrokerError(f"KIS WebSocket approval request error: {type(exc).__name__}: {exc}") from exc
 
     if response.status_code >= 400:
-        raise BrokerError(f"KIS WebSocket approval failed: {response.status_code} {response.text}")
+        # SECURITY: never include response.text (can echo the approval key /
+        # appkey / request context) — only status code + KIS msg_cd/msg1.
+        raise BrokerError(
+            f"KIS WebSocket approval failed: HTTP {response.status_code} "
+            f"{_safe_approval_detail(response)}".rstrip()
+        )
     data = response.json()
     approval_key = data.get("approval_key")
     if not approval_key:
-        raise BrokerError(f"KIS WebSocket approval response missing approval_key: {data}")
+        # SECURITY: do NOT dump the full parsed body (contains approval_key on
+        # success / other request context) — only safe diagnostics.
+        raise BrokerError(
+            "KIS WebSocket approval response missing approval_key "
+            f"(msg_cd={data.get('msg_cd')} msg1={data.get('msg1')})"
+        )
     return approval_key
 
 

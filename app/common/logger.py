@@ -29,8 +29,17 @@ def get_logger(name: str) -> logging.Logger:
         "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
     )
 
+    # SECURITY: scrub credential-shaped values from every record this logger
+    # emits (defence-in-depth — see app/observability/redaction.py). Handler
+    # filters are required because Python applies handler (not ancestor-logger)
+    # filters when a child logger emits a record.
+    from app.observability.redaction import install_redaction_filter
+
+    redaction_filter = install_redaction_filter()
+
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)
+    stream_handler.addFilter(redaction_filter)
     logger.addHandler(stream_handler)
 
     file_handler = logging.handlers.RotatingFileHandler(
@@ -40,6 +49,7 @@ def get_logger(name: str) -> logging.Logger:
         encoding="utf-8",
     )
     file_handler.setFormatter(formatter)
+    file_handler.addFilter(redaction_filter)
     logger.addHandler(file_handler)
 
     return logger
@@ -48,21 +58,26 @@ def get_logger(name: str) -> logging.Logger:
 class _JsonLinesFormatter(logging.Formatter):
     """Formats each log record as a single JSON object on one line."""
 
+    _STANDARD_ATTRS: frozenset[str] = frozenset({
+        "args", "asctime", "created", "exc_info", "exc_text", "filename",
+        "funcName", "levelname", "levelno", "lineno", "message", "module",
+        "msecs", "msg", "name", "pathname", "process", "processName",
+        "relativeCreated", "stack_info", "thread", "threadName", "taskName",
+    })
+
     def format(self, record: logging.LogRecord) -> str:  # noqa: A003
+        from app.observability.redaction import redact
+
         # Resolve the rendered message first so exc_info / stack_info are included.
         message = record.getMessage()
 
         # Collect extra fields: anything that is not a standard LogRecord attribute.
-        _STANDARD_ATTRS = {
-            "args", "asctime", "created", "exc_info", "exc_text", "filename",
-            "funcName", "levelname", "levelno", "lineno", "message", "module",
-            "msecs", "msg", "name", "pathname", "process", "processName",
-            "relativeCreated", "stack_info", "thread", "threadName",
-        }
+        # Redact string values here so secrets in extra={...} cannot survive into
+        # the JSONL output even if RedactionFilter ran earlier on the message only.
         extra = {
-            k: v
+            k: (redact(v) if isinstance(v, str) else v)
             for k, v in record.__dict__.items()
-            if k not in _STANDARD_ATTRS and not k.startswith("_")
+            if k not in self._STANDARD_ATTRS and not k.startswith("_")
         }
 
         payload: dict[str, Any] = {
@@ -103,6 +118,9 @@ def get_structured_logger(name: str) -> logging.Logger:
     )
     jsonl_handler.setFormatter(_JsonLinesFormatter())
     jsonl_handler.setLevel(logging.INFO)
+    from app.observability.redaction import install_redaction_filter
+
+    jsonl_handler.addFilter(install_redaction_filter())
     logger.addHandler(jsonl_handler)
 
     # Mark so we don't double-add on repeated calls.

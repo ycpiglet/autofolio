@@ -52,3 +52,34 @@ def test_vault_save_updates_existing_data(tmp_path):
         vault.save({"step": 2})
         loaded = vault.load()
         assert loaded["step"] == 2
+
+
+def test_vault_malformed_env_key_raises_clearly(tmp_path):
+    """AUTOFOLIO_VAULT_KEY set but malformed → ValueError, not silent empty {}."""
+    import importlib
+    bad_key = "not-a-valid-fernet-key"
+    with patch.dict(os.environ, {
+        "AUTOFOLIO_HOME": str(tmp_path),
+        "AUTOFOLIO_VAULT_KEY": bad_key,
+    }):
+        import app.ui.vault as vault
+        importlib.reload(vault)
+        with pytest.raises(ValueError, match="invalid Fernet key"):
+            vault.load()
+
+
+def test_vault_valid_env_key_does_not_write_keyfile(tmp_path):
+    """AUTOFOLIO_VAULT_KEY set to a valid key → vault.key file is never created."""
+    import importlib
+    from cryptography.fernet import Fernet
+    good_key = Fernet.generate_key().decode()
+    with patch.dict(os.environ, {
+        "AUTOFOLIO_HOME": str(tmp_path),
+        "AUTOFOLIO_VAULT_KEY": good_key,
+    }):
+        import app.ui.vault as vault
+        importlib.reload(vault)
+        vault.save({"x": 1})
+        assert vault.load() == {"x": 1}
+        # The co-located key file must NOT have been created
+        assert not (tmp_path / "vault.key").exists()

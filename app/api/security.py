@@ -11,6 +11,8 @@ from typing import Any
 
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
+from app.common.fileperms import restrict_to_user
+
 _KEY_DIR = Path(os.getenv("AUTOFOLIO_HOME", ".autofolio"))
 _KEY_FILE = _KEY_DIR / "api_session.key"
 _COOKIE_NAME = "af_session"
@@ -31,10 +33,10 @@ def _load_or_create_key() -> str:
     if not _KEY_FILE.exists():
         secret = os.urandom(32).hex()
         _KEY_FILE.write_text(secret, encoding="utf-8")
-        try:
-            os.chmod(_KEY_FILE, 0o600)
-        except OSError:
-            pass
+        # SECURITY: restrict the session key file to the current user. POSIX
+        # chmod 0o600; Windows ACL lockdown is opt-in (AUTOFOLIO_HARDEN_ACL) —
+        # see app/common/fileperms.py.
+        restrict_to_user(_KEY_FILE)
         _SECRET = secret
         return _SECRET
     _SECRET = _KEY_FILE.read_text(encoding="utf-8").strip()
