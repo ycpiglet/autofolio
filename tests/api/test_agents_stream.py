@@ -420,3 +420,88 @@ class TestStreamEvents:
                 assert resp.status_code == 200
                 for _ in resp.iter_lines():
                     break
+
+
+# ── TASK-087 A2: advice lock ──────────────────────────────────────────────────
+
+class TestAdviceLock:
+    """AUTOFOLIO_ADVICE_ENABLED not set → /agents/ask returns 403 advice_locked."""
+
+    _BODY = {"agent": "cio", "question": "무엇을 해야 하나요?"}
+
+    def test_ask_blocked_when_flag_off(self, owner_client, monkeypatch):
+        """Advice flag OFF → 403 with advice_locked status."""
+        monkeypatch.delenv("AUTOFOLIO_ADVICE_ENABLED", raising=False)
+        resp = owner_client.post(
+            "/api/agents/ask",
+            json=self._BODY,
+            headers=_csrf_headers(),
+        )
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["status"] == "advice_locked"
+
+    def test_ask_allowed_when_flag_on(self, owner_client, monkeypatch):
+        """AUTOFOLIO_ADVICE_ENABLED=1 → 200 (normal operation)."""
+        monkeypatch.setenv("AUTOFOLIO_ADVICE_ENABLED", "1")
+        with patch("app.services.agents.ask", return_value="매수 권고"):
+            resp = owner_client.post(
+                "/api/agents/ask",
+                json=self._BODY,
+                headers=_csrf_headers(),
+            )
+        assert resp.status_code == 200
+
+
+# ── TASK-087 A2: recommendation lock (IC + decisions) ────────────────────────
+
+class TestIcRecommendationLock:
+    """AUTOFOLIO_RECOMMENDATION_ENABLED not set → IC endpoints return 403."""
+
+    _IC_BODY = {"topic": "삼성전자 매수 여부"}
+
+    def test_ic_run_blocked_when_flag_off(self, owner_client, monkeypatch):
+        """Recommendation flag OFF → /agents/ic/run returns 403 recommendation_locked."""
+        monkeypatch.delenv("AUTOFOLIO_RECOMMENDATION_ENABLED", raising=False)
+        resp = owner_client.post(
+            "/api/agents/ic/run",
+            json=self._IC_BODY,
+            headers=_csrf_headers(),
+        )
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["status"] == "recommendation_locked"
+
+    def test_ic_decisions_blocked_when_flag_off(self, member_client, monkeypatch):
+        """Recommendation flag OFF → /agents/ic/decisions returns 403 recommendation_locked."""
+        monkeypatch.delenv("AUTOFOLIO_RECOMMENDATION_ENABLED", raising=False)
+        resp = member_client.get("/api/agents/ic/decisions")
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["status"] == "recommendation_locked"
+
+    def test_ic_run_allowed_when_flag_on(self, owner_client, monkeypatch):
+        """AUTOFOLIO_RECOMMENDATION_ENABLED=1 → /agents/ic/run returns 202."""
+        monkeypatch.setenv("AUTOFOLIO_RECOMMENDATION_ENABLED", "1")
+        with patch("app.services.agents.run_ic", return_value={"topic": "test", "transcript": [], "decision": "ok", "path": "/tmp/test"}):
+            resp = owner_client.post(
+                "/api/agents/ic/run",
+                json=self._IC_BODY,
+                headers=_csrf_headers(),
+            )
+        assert resp.status_code == 202
+
+    def test_ic_decisions_allowed_when_flag_on(self, member_client, monkeypatch):
+        """AUTOFOLIO_RECOMMENDATION_ENABLED=1 → /agents/ic/decisions returns 200."""
+        monkeypatch.setenv("AUTOFOLIO_RECOMMENDATION_ENABLED", "1")
+        with patch("app.services.agents.list_decisions", return_value=[]):
+            resp = member_client.get("/api/agents/ic/decisions")
+        assert resp.status_code == 200
+
+    def test_ic_stream_blocked_when_flag_off(self, member_client, monkeypatch):
+        """Recommendation flag OFF → GET /agents/ic/stream/{job_id} returns 403 recommendation_locked.
+
+        The flag gate fires before the job-not-found check, so any random uuid
+        triggers the 403 without needing a real job in the registry.
+        """
+        monkeypatch.delenv("AUTOFOLIO_RECOMMENDATION_ENABLED", raising=False)
+        resp = member_client.get(f"/api/agents/ic/stream/{uuid.uuid4()}")
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["status"] == "recommendation_locked"

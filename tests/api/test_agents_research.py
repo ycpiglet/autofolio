@@ -127,3 +127,22 @@ class TestFailLoud:
         resp = error_member_client.get("/api/agents/research?symbol=005930")
         assert resp.status_code != 200
         assert resp.status_code >= 500
+
+
+# ── TASK-087 A2: recommendation lock ─────────────────────────────────────────
+
+class TestRecommendationLock:
+    """Deployment flag OFF → research endpoint returns 403 recommendation_locked."""
+
+    def test_research_blocked_when_flag_off(self, member_client, research_backend, monkeypatch):
+        """AUTOFOLIO_RECOMMENDATION_ENABLED not set → 403 recommendation_locked."""
+        monkeypatch.delenv("AUTOFOLIO_RECOMMENDATION_ENABLED", raising=False)
+        resp = member_client.get("/api/agents/research?symbol=005930")
+        assert resp.status_code == 403
+        assert resp.json()["detail"]["status"] == "recommendation_locked"
+
+    def test_research_allowed_when_flag_on(self, member_client, research_backend, monkeypatch):
+        """AUTOFOLIO_RECOMMENDATION_ENABLED=1 → 200 (normal operation)."""
+        monkeypatch.setenv("AUTOFOLIO_RECOMMENDATION_ENABLED", "1")
+        resp = member_client.get("/api/agents/research?symbol=005930")
+        assert resp.status_code == 200

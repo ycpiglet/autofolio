@@ -7,20 +7,20 @@ signal: pass
 score: 95
 priority: High
 tags: [work-items, hierarchy, numbering, generated-index]
-generated_at: 2026-06-26T21:32:50+09:00
-record_count: 196
+generated_at: 2026-06-27T03:46:44+09:00
+record_count: 198
 ---
 
 # Work Item Classification
 
 ## Bottom Line
-- Summary: generated Owner-facing numbers for `196` initiative/taskset/task/unit records.
+- Summary: generated Owner-facing numbers for `198` initiative/taskset/task/unit records.
 - Result: planners can register stable records without manually reserving human task numbers.
 
 ## Signal
 | Metric | State | Evidence |
 | --- | --- | --- |
-| Initiatives | pass | `29` records |
+| Initiatives | pass | `31` records |
 | Tasksets | pass | `14` records |
 | Tasks | pass | `125` records |
 | Units | pass | `28` records |
@@ -142,7 +142,7 @@ record_count: 196
 | 0.1.71 | Task 0.1.71 | task | `TASK-072` | `TASKSET-AR-UNCLASSIFIED` | 완료 | `agents/lead_engineer/tasks/TASK-072-dev-mock-sso-provider.md` | 작업 ID: TASK-072 |
 | 0.1.72 | Task 0.1.72 | task | `TASK-073` | `TASKSET-AR-UNCLASSIFIED` | 완료 | `agents/lead_engineer/tasks/TASK-073-defer-future-maturity-reassessment.md` | 작업 ID: TASK-073 |
 | 0.1.73 | Task 0.1.73 | task | `TASK-074` | `TASKSET-AR-UNCLASSIFIED` | 완료 | `agents/lead_engineer/tasks/TASK-074-investor-profile-survey.md` | 작업 ID: TASK-074 |
-| 0.1.74 | Task 0.1.74 | task | `TASK-087` | `TASKSET-AR-UNCLASSIFIED` | 대기 | `agents/lead_engineer/tasks/TASK-087-web-deploy-membership-gating.md` | 작업 ID: TASK-087 |
+| 0.1.74 | Task 0.1.74 | task | `TASK-087` | `TASKSET-AR-UNCLASSIFIED` | 진행 중 | `agents/lead_engineer/tasks/TASK-087-web-deploy-membership-gating.md` | 작업 ID: TASK-087 |
 | 0.1.75 | Task 0.1.75 | task | `TASK-092` | `TASKSET-AR-UNCLASSIFIED` | 완료 | `agents/lead_engineer/tasks/TASK-092-business-plan-agent-lane.md` | 작업 ID: TASK-092 |
 | 0.1.76 | Task 0.1.76 | task | `TASK-088` | `TASKSET-AR-UNCLASSIFIED` | 보류 | `agents/lead_engineer/tasks/TASK-088-presale-regulatory-clearance.md` | 작업 ID: TASK-088 |
 | 0.1.77 | Task 0.1.77 | task | `TASK-140` | `TASKSET-AR-UNCLASSIFIED` | 완료 | `agents/lead_engineer/tasks/TASK-140-ui-visual-assets-expansion-adoption.md` | 작업 ID: TASK-140 |
@@ -235,6 +235,8 @@ record_count: 196
 | 27.1.3 | Task 27.1.3 | task | `TASK-173` | `TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT` | 완료 | `agents/lead_engineer/tasks/TASK-173-portfolio-goal-gap-read-model.md` | 작업 ID: TASK-173 |
 | 27.1.4 | Task 27.1.4 | task | `TASK-174` | `TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT` | 완료 | `agents/lead_engineer/tasks/TASK-174-finance-roadmap-ui-preview.md` | 작업 ID: TASK-174 |
 | 28 | Initiative 28 | initiative | `TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT` | - | completed | `agents/project/initiatives/TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT.md` | TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT |
+| 29 | Initiative 29 | initiative | `INIT-MULTITENANT-ENGINE` | - | planned | `agents/project/initiatives/INIT-MULTITENANT-ENGINE.md` | INIT-MULTITENANT-ENGINE |
+| 30 | Initiative 30 | initiative | `TASKSET-MULTITENANT-ENGINE` | - | planned | `agents/project/initiatives/TASKSET-MULTITENANT-ENGINE.md` | TASKSET-MULTITENANT-ENGINE |
 
 ## Risks / Blockers
 - Risk: legacy `0.*` work stays readable but should gradually receive `initiative_id` when touched.

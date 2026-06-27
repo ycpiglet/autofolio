@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+from app.services.flags import guest_demo_enabled, local_auto_register_enabled
+
 
 def readiness() -> dict[str, Any]:
     """Return the current production-readiness state for membership launch."""
@@ -620,6 +622,12 @@ def _score(*, pass_count: int, watch_count: int, block_count: int) -> int:
 
 def _environment_flags() -> dict[str, bool]:
     """Expose only whether a class of config is present, never its value."""
+    from app.services.flags import (
+        auto_exec_enabled,
+        recommendation_enabled,
+        advice_enabled,
+        multi_tenant_enabled,
+    )
     return {
         "supabase_url_present": bool(os.getenv("SUPABASE_URL")),
         "membership_bank_runtime_config_present": all(
@@ -630,8 +638,12 @@ def _environment_flags() -> dict[str, bool]:
                 "AUTOFOLIO_MEMBERSHIP_BANK_ACCOUNT",
             )
         ),
-        "guest_demo_enabled": (os.getenv("AUTOFOLIO_GUEST_DEMO_ENABLED") or "").strip().lower()
-        in {"1", "true", "yes", "on"},
-        "local_auto_register_enabled": (os.getenv("AUTOFOLIO_LOCAL_AUTO_REGISTER") or "").strip().lower()
-        in {"1", "true", "yes", "on"},
+        "guest_demo_enabled": guest_demo_enabled(),
+        "local_auto_register_enabled": local_auto_register_enabled(),
+        # Presence-only: never expose the email value itself
+        "owner_email_configured": bool(os.getenv("AUTOFOLIO_OWNER_EMAIL")),
+        "auto_exec_enabled": auto_exec_enabled(),
+        "recommendation_enabled": recommendation_enabled(),
+        "advice_enabled": advice_enabled(),
+        "multi_tenant_enabled": multi_tenant_enabled(),
     }

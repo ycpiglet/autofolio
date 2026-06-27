@@ -73,6 +73,16 @@ def auto_trading(
 ) -> AutoTradingResponse:
     """Set auto_trading_enabled flag in DB (DB-backed, reflected to engine + Streamlit)."""
     from app.services import backend
+    from app.services import flags as _flags
+
+    if body.enabled and not _flags.auto_exec_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "status": "auto_exec_locked",
+                "message": "자동실행이 잠겨 있습니다: AUTOFOLIO_AUTO_EXEC_ENABLED 환경 변수를 설정하지 않으면 켤 수 없습니다.",
+            },
+        )
 
     if body.enabled and not investor_profile_completed(username_from_session(session)):
         raise HTTPException(

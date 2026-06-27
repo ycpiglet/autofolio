@@ -317,3 +317,25 @@ def mock_backend(monkeypatch):
     monkeypatch.setattr(backend_mod, "list_whitelist", lambda: SAMPLE_WHITELIST)
 
     return backend_mod
+
+
+# ── TASK-087 A2: feature-flag autouse fixtures ────────────────────────────────
+
+@pytest.fixture(autouse=True)
+def _recommendation_enabled(monkeypatch):
+    """Enable recommendation flag for all API tests by default.
+
+    Tests that validate flag-OFF behaviour must call
+    ``monkeypatch.delenv("AUTOFOLIO_RECOMMENDATION_ENABLED", raising=False)``.
+    """
+    monkeypatch.setenv("AUTOFOLIO_RECOMMENDATION_ENABLED", "1")
+
+
+@pytest.fixture(autouse=True)
+def _advice_enabled(monkeypatch):
+    """Enable advice flag for all API tests by default.
+
+    Tests that validate flag-OFF behaviour must call
+    ``monkeypatch.delenv("AUTOFOLIO_ADVICE_ENABLED", raising=False)``.
+    """
+    monkeypatch.setenv("AUTOFOLIO_ADVICE_ENABLED", "1")

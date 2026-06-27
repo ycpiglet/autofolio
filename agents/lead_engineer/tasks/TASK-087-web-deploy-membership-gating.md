@@ -5,8 +5,8 @@ display_id: TASK-087
 task_uid: 8f3c1d92-4b07-4e6a-9c2a-7d5e0a1f9b3c
 registered_at: 2026-06-18T23:46:54+09:00
 created_at: 2026-06-18T23:46:54+09:00
-updated_at: 2026-06-19T21:57:23+09:00
-status: 대기
+updated_at: 2026-06-27T03:40:18+09:00
+status: 진행 중
 owner: Lead Engineer
 assignees: [Lead Engineer, Backend Engineer, CI/CD Engineer, Compliance Officer, UI/UX Designer]
 priority: High
@@ -23,7 +23,7 @@ created: 2026-06-18
 # TASK-087 웹 배포 + 구매자 한정 회원제(게이팅·결제승인·멀티테넌트)
 
 작업 ID: TASK-087
-상태: 대기
+상태: 진행 중
 Owner: Lead Engineer
 요청 시각: 2026-06-18T23:46:54+09:00
 기록 시각: 2026-06-18T23:46:54+09:00
@@ -207,7 +207,7 @@ Owner: Lead Engineer
 - [ ] production에서 관리자가 입금 확인 후 해당 계정만 active 된다.
 - [ ] 데이터/엔진/안전장치가 user_id 단위로 격리된다(단일 owner 전제 제거).
 - [ ] production secret storage/RLS와 실제 user-owned provider execution adapter가 구현되어 있다.
-- [ ] 자동실행/추천 영업 기능은 기본 OFF 플래그로 잠겨 있다.
+- [x] 자동실행/추천 영업 기능은 기본 OFF 플래그로 잠겨 있다. (A2: `auto_exec_enabled()`·`recommendation_enabled()`·`advice_enabled()` 게이트, `flags.py` 기본 OFF/fail-closed; 전체 스위트 1704 PASS)
 - [ ] Vercel + Railway + Supabase 스테이징 배포가 동작한다(프로덕션 배포는 Owner 승인 후).
 
 ## 다음 단계(제안)
@@ -218,6 +218,47 @@ Owner: Lead Engineer
 4. Owner/R3 Vercel/Railway/Supabase external env write and staging deploy smoke.
 5. production secret storage, payment evidence retention/refund/receipt/tax, KIS terms, and per-user engine/safety implementation review.
 6. 새 local R2 후보는 현재 식별되지 않았다. 실제 apply/deploy/secret/payment/KIS/order/risk/prod boundary는 Owner/R3 승인 전 금지한다.
+
+## BUCKET A 클로즈아웃 (R2 production-readiness 코드)
+
+브랜치: `feat/task087-membership-prod-r2`  
+완료 시각: 2026-06-27T03:40:18+09:00  
+검증: 전체 스위트 1704 PASS · web lint/build GREEN · security/RLS/secret 리뷰 Approved · Opus 전체 브랜치 리뷰 "env-doc 수정 후 ready" — 수정 완료
+
+| 서브태스크 | 내용 | 상태 |
+|-----------|------|------|
+| A1 | `app/services/flags.py` — 중앙 env 피처-플래그 모듈, 전체 기본 OFF/fail-closed | 완료 |
+| A2 | 기본 OFF 락: 자동매매 `auto_exec_enabled()` 킬스위치 우선, 추천/조언 OUTPUT 엔드포인트 `recommendation_enabled()`/`advice_enabled()` 게이트 | 완료 |
+| A3 | SSO 역할 하드닝: "allowlisted 이메일=owner" 구멍 폐쇄 → owner(`AUTOFOLIO_OWNER_EMAIL`)/member(승인)/deny, fail-closed | 완료 |
+| A4 | `supabase/migrations/*.sql` — membership+trading 마이그레이션 파일 + RLS (미적용; trading 테이블 nullable user_id; apply-time service_role 계약 supabase/README.md) | 완료 |
+| A5/A6 | 메타데이터 전용 secret-store 어댑터(`secret_store.py`, vault-backed + inert Supabase stub) + 존재 확인 전용 env 로더(`runtime_config.py`); `integrations.py` 라우팅 | 완료 |
+| A7 | 배포 설정(`web/vercel.json`, `railway.json`, preflight CI) + `web/DEPLOY-NOTES.md`. 실제 deploy/secret 없음 | 완료 |
+| env-doc | `.env.example`에 신규 플래그 5개 문서화, readiness + runtime_config presence에 노출 | 완료 |
+
+**검증 증거:** 전체 스위트 1704 PASS · web lint/build GREEN · security/RLS/secret/Opus 리뷰 전부 Approved.
+
+## 남은 작업
+
+### BUCKET B — 외부 배포 (Owner/R3 게이트, 이 브랜치 범위 밖)
+
+- **Supabase 프로젝트 선택** — `tag_manual`의 STAR-TEAM 프로젝트 재사용 금지(⚠); 별도 staging 프로젝트 필요.
+- 마이그레이션 apply, Supabase RLS/Advisors/Data API grant, cross-user 격리 테스트.
+- 플랫폼 env/secrets 설정 (Vercel + Railway + Supabase).
+- Vercel + Railway + Supabase 스테이징 배포 스모크.
+- 운영 주의: `AUTOFOLIO_OWNER_EMAIL`이 런타임 env에 설정되지 않으면 SSO owner 로그인 403(by design). 배포 전 반드시 설정.
+
+### BUCKET C — KIS/법적/운영 (Owner/외부 게이트)
+
+- KIS OpenAPI 상업적 이용 약관 확인.
+- 핀테크 변호사 + 금감원 비조치의견서/유권해석 ("SW 판매 vs 유사투자자문" 경계).
+- 사업자등록 + 통신판매업 신고.
+- 결제/프라이버시 운영(manual bank-app 확인 → PG/오픈뱅킹 업그레이드 path).
+
+### INIT-MULTITENANT-ENGINE (분리 등록)
+
+멀티테넌트 엔진 격리(원래 A8)는 안전 임계 변경(~44파일/1200-1500 LOC)이므로
+`INIT-MULTITENANT-ENGINE` 이니셔티브로 분리 등록됨. `AUTOFOLIO_MULTI_TENANT_ENABLED`
+플래그로 기본 OFF 게이팅. 4단계 시퀀스 필요 — 상세는 `agents/project/initiatives/INIT-MULTITENANT-ENGINE.md` 참조.
 
 ## 비고
 

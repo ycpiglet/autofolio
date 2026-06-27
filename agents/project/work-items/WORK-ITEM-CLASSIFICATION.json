@@ -1,7 +1,7 @@
 {
   "schema": "agent-runtime-work-item-classification/v1",
-  "generated_at": "2026-06-26T21:32:50+09:00",
-  "record_count": 196,
+  "generated_at": "2026-06-27T03:46:44+09:00",
+  "record_count": 198,
   "finding_count": 0,
   "findings": [],
   "records": [
@@ -1147,7 +1147,7 @@
       "title": "작업 ID: TASK-087",
       "path": "agents/lead_engineer/tasks/TASK-087-web-deploy-membership-gating.md",
       "parent_id": "TASKSET-AR-UNCLASSIFIED",
-      "status": "대기"
+      "status": "진행 중"
     },
     {
       "key": "task:TASK-092",
@@ -2160,6 +2160,28 @@
       "path": "agents/project/initiatives/TASKSET-FINANCE-ACCOUNTING-PLANNING-SUPPORT.md",
       "parent_id": "",
       "status": "completed"
+    },
+    {
+      "key": "initiative:INIT-MULTITENANT-ENGINE",
+      "level": "initiative",
+      "number": "29",
+      "label": "Initiative 29",
+      "id": "INIT-MULTITENANT-ENGINE",
+      "title": "INIT-MULTITENANT-ENGINE",
+      "path": "agents/project/initiatives/INIT-MULTITENANT-ENGINE.md",
+      "parent_id": "",
+      "status": "planned"
+    },
+    {
+      "key": "initiative:TASKSET-MULTITENANT-ENGINE",
+      "level": "initiative",
+      "number": "30",
+      "label": "Initiative 30",
+      "id": "TASKSET-MULTITENANT-ENGINE",
+      "title": "TASKSET-MULTITENANT-ENGINE",
+      "path": "agents/project/initiatives/TASKSET-MULTITENANT-ENGINE.md",
+      "parent_id": "",
+      "status": "planned"
     }
   ]
 }

@@ -134,6 +134,16 @@ def agents_research(
     Honest gaps: there is NO live-news API (briefing is disclosure-based) and NO
     auto-trigger (this runs only on a manual request).
     """
+    from app.services import flags as _flags
+    if not _flags.recommendation_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "status": "recommendation_locked",
+                "message": "추천 기능이 잠겨 있습니다: AUTOFOLIO_RECOMMENDATION_ENABLED 환경 변수를 설정해야 합니다.",
+            },
+        )
+
     from app.services import backend
 
     sym = _validate_symbol(symbol)
@@ -187,6 +197,16 @@ def agents_ask(
     _session: Annotated[dict[str, Any], Depends(require_owner_csrf)],
 ) -> AskResponse:
     """Ask a single agent a question. Owner + CSRF required (blocks cost for guests)."""
+    from app.services import flags as _flags
+    if not _flags.advice_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "status": "advice_locked",
+                "message": "자문 기능이 잠겨 있습니다: AUTOFOLIO_ADVICE_ENABLED 환경 변수를 설정해야 합니다.",
+            },
+        )
+
     from app.services.agents import ask
 
     answer = ask(body.agent, body.question, body.context)
@@ -209,6 +229,16 @@ async def ic_run(
     run_ic is a blocking function — run it in a thread-pool executor so the
     event loop is not blocked.
     """
+    from app.services import flags as _flags
+    if not _flags.recommendation_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "status": "recommendation_locked",
+                "message": "추천 기능이 잠겨 있습니다: AUTOFOLIO_RECOMMENDATION_ENABLED 환경 변수를 설정해야 합니다.",
+            },
+        )
+
     job_id = str(uuid.uuid4())
     q: asyncio.Queue[str | None] = asyncio.Queue()
 
@@ -261,6 +291,16 @@ async def ic_stream(
     Stops when the job is done OR the client disconnects.
     SSE format: event line + data line per event.
     """
+    from app.services import flags as _flags
+    if not _flags.recommendation_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "status": "recommendation_locked",
+                "message": "추천 기능이 잠겨 있습니다: AUTOFOLIO_RECOMMENDATION_ENABLED 환경 변수를 설정해야 합니다.",
+            },
+        )
+
     if job_id not in _jobs:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -321,6 +361,16 @@ def ic_decisions(
     limit: int = Query(default=10, ge=1, le=100),
 ) -> list[dict[str, Any]]:
     """Return list of past IC decision files (most recent first)."""
+    from app.services import flags as _flags
+    if not _flags.recommendation_enabled():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "status": "recommendation_locked",
+                "message": "추천 기능이 잠겨 있습니다: AUTOFOLIO_RECOMMENDATION_ENABLED 환경 변수를 설정해야 합니다.",
+            },
+        )
+
     from app.services.agents import list_decisions
 
     return list_decisions(limit)

@@ -12,6 +12,7 @@ import hmac
 import os
 
 from app.ui import vault
+from app.services.flags import local_auto_register_enabled as _auto_register_enabled
 
 __all__ = [
     "login_or_register",
@@ -19,21 +20,12 @@ __all__ = [
     "create_or_update_user",
     "verify_password",
     "role_for_user",
+    "sso_role_for_email",
     "MIN_PASSWORD_LEN",
 ]
 
 #: Minimum length for a (new) password. Kept conservative for a local vault.
 MIN_PASSWORD_LEN = 8
-_AUTO_REGISTER_ENV = "AUTOFOLIO_LOCAL_AUTO_REGISTER"
-
-
-def _auto_register_enabled() -> bool:
-    return (os.getenv(_AUTO_REGISTER_ENV) or "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
 
 
 def _hash(password: str, salt: bytes) -> str:
@@ -94,6 +86,46 @@ def role_for_user(username: str) -> str:
         return "owner"
     role = str(rec.get("role") or "owner").strip().lower()
     return role if role in {"owner", "member"} else "owner"
+
+
+def sso_role_for_email(email: str | None) -> str | None:
+    """3-way SSO role assignment: 'owner' | 'member' | None (deny).
+
+    Resolution order:
+    1. If the SSO email matches AUTOFOLIO_OWNER_EMAIL → 'owner'.
+       Fail-closed: if AUTOFOLIO_OWNER_EMAIL is unset, no SSO email is owner.
+    2. Elif the email maps to an approved local 'member' account → 'member'.
+    3. Else → None (caller must deny / return 403).
+
+    This prevents any allowlisted-but-unapproved email from silently receiving
+    owner privileges (TASK-087 A3 security fix).
+    """
+    if not email:
+        return None
+
+    owner_email = (os.getenv("AUTOFOLIO_OWNER_EMAIL") or "").strip().lower()
+    normalized = email.strip().lower()
+
+    # 1. Owner identity check (explicit designation required)
+    if owner_email and normalized == owner_email:
+        return "owner"
+
+    # 2. Approved member account lookup (username == SSO email, case-insensitive).
+    # Vault keys are stored via _normalize_username() which does NOT lowercase, so
+    # we must normalize both sides to avoid denying a legitimate member whose SSO
+    # provider returns a differently-cased email (e.g. Member@Example.com vs
+    # member@example.com stored at registration time).
+    users = _users()
+    normalized_email = _normalize_username(email.strip().lower())
+    rec = next(
+        (v for k, v in users.items() if _normalize_username(k).lower() == normalized_email),
+        None,
+    )
+    if isinstance(rec, dict) and str(rec.get("role") or "").strip().lower() == "member":
+        return "member"
+
+    # 3. Deny — allowlisted but no matching account
+    return None
 
 
 def verify_password(username: str, password: str) -> tuple[bool, str]:

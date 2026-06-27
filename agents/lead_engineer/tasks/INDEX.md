@@ -77,7 +77,7 @@
 | [TASK-072](TASK-072-dev-mock-sso-provider.md) | 완료 | Lead Engineer | Dev mock SSO provider |
 | [TASK-073](TASK-073-defer-future-maturity-reassessment.md) | 완료 | Lead Engineer | Defer future maturity reassessment from ACT lane |
 | [TASK-074](TASK-074-investor-profile-survey.md) | 완료 | Lead Engineer | Investor profile survey and satisfaction loop |
-| [TASK-087](TASK-087-web-deploy-membership-gating.md) | 대기 | Lead Engineer | 웹 배포 + 구매자 한정 회원제 |
+| [TASK-087](TASK-087-web-deploy-membership-gating.md) | 진행 중 | Lead Engineer | 웹 배포 + 구매자 한정 회원제 |
 | [TASK-088](TASK-088-presale-regulatory-clearance.md) | 보류 | Lead Engineer | 판매 전 금융규제 클리어런스 (비조치의견서 + 샌드박스) |
 | [TASK-092](TASK-092-business-plan-agent-lane.md) | 완료 | Lead Engineer | business plan agent lane |
 | [TASK-093](TASK-093-business-plan-v1.md) | 완료 | Business Planner | Business Plan v1 |

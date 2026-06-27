@@ -8,7 +8,6 @@ Endpoints:
 from __future__ import annotations
 
 import secrets
-import os
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Cookie, HTTPException, Query, Response, status
@@ -25,18 +24,10 @@ from app.api.security import (
     encode_session,
 )
 from app.services import sso
+from app.services.auth_service import sso_role_for_email
+from app.services.flags import guest_demo_enabled
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-_GUEST_DEMO_ENV = "AUTOFOLIO_GUEST_DEMO_ENABLED"
-
-
-def guest_demo_enabled() -> bool:
-    return (os.getenv(_GUEST_DEMO_ENV) or "").strip().lower() in {
-        "1",
-        "true",
-        "yes",
-        "on",
-    }
 
 
 @router.post("/login", response_model=SessionResponse)
@@ -176,7 +167,13 @@ async def sso_callback(
     state: str,
     af_oauth_state: Annotated[str | None, Cookie(alias=OAUTH_STATE_COOKIE)] = None,
 ) -> RedirectResponse:
-    """Complete OAuth login, issue Autofolio owner session, then return to /home."""
+    """Complete OAuth login and redirect to /home.
+
+    3-way outcome:
+      - AUTOFOLIO_OWNER_EMAIL match → owner session
+      - Approved member vault account (username == SSO email) → member session
+      - Allowlisted but neither owner nor approved member → 403 Forbidden
+    """
     provider = sso.get_provider(provider_id)
     if provider is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown SSO provider")
@@ -203,13 +200,21 @@ async def sso_callback(
     if not sso.email_allowed(profile.email):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="SSO email is not allowed")
 
+    # 3-way role assignment: owner (designated only) | member (approved account) | deny
+    role = sso_role_for_email(profile.email)
+    if role is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="SSO 이메일이 승인된 계정(owner 또는 member)과 일치하지 않습니다.",
+        )
+
     csrf = secrets.token_hex(32)
     redirect_to = _frontend_redirect_url(str(state_payload.get("next") or "/home"))
     response = RedirectResponse(redirect_to, status_code=status.HTTP_303_SEE_OTHER)
     _set_cookie(
         response,
         {
-            "role": "owner",
+            "role": role,
             "username": profile.username,
             "data_source": f"sso:{provider.id}",
             "csrf_token": csrf,

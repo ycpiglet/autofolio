@@ -554,3 +554,46 @@ class TestRiskLimits:
             json={"max_order_amount": 100000.0},
         )
         assert resp.status_code == 403
+
+
+# ── Auto-exec lock (TASK-087 A2) ──────────────────────────────────────────────
+
+class TestAutoExecLock:
+    """Flag OFF → enabling auto-trading is blocked at the deployment gate."""
+
+    def test_enable_blocked_when_flag_off(self, owner_client, monkeypatch):
+        """AUTOFOLIO_AUTO_EXEC_ENABLED not set → 403 with auto_exec_locked."""
+        monkeypatch.delenv("AUTOFOLIO_AUTO_EXEC_ENABLED", raising=False)
+        resp = owner_client.post(
+            "/api/engine/auto-trading",
+            json={"enabled": True},
+            headers=owner_headers(),
+        )
+        assert resp.status_code == 403
+        body = resp.json()
+        assert body["detail"]["status"] == "auto_exec_locked"
+
+    def test_disable_allowed_when_flag_off(self, owner_client, monkeypatch):
+        """Flag OFF → disabling auto-trading is still permitted (kill-switch semantics)."""
+        monkeypatch.delenv("AUTOFOLIO_AUTO_EXEC_ENABLED", raising=False)
+        with patch("app.services.backend.set_flag"), \
+             patch("app.services.backend.get_flag", return_value=False):
+            resp = owner_client.post(
+                "/api/engine/auto-trading",
+                json={"enabled": False},
+                headers=owner_headers(),
+            )
+        assert resp.status_code == 200
+
+    def test_enable_allowed_when_flag_on(self, owner_client, monkeypatch):
+        """AUTOFOLIO_AUTO_EXEC_ENABLED=1 → enabling proceeds normally."""
+        monkeypatch.setenv("AUTOFOLIO_AUTO_EXEC_ENABLED", "1")
+        with patch("app.services.backend.set_flag"), \
+             patch("app.services.backend.get_flag", return_value=True), \
+             patch("app.api.routers.engine.investor_profile_completed", return_value=True):
+            resp = owner_client.post(
+                "/api/engine/auto-trading",
+                json={"enabled": True},
+                headers=owner_headers(),
+            )
+        assert resp.status_code == 200
