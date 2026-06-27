@@ -121,11 +121,31 @@ class _FakeCursor:
 
     def execute(self, sql, params=None):
         self._conn.executed.append((sql, params))
-        upper = sql.lstrip().upper()
-        if "RETURNING ID" in sql.upper():
-            self._conn.seq += 1
-            self.description = [("id",)]
-            self._result = [{"id": self._conn.seq}]
+        upper = sql.strip().upper()
+        if (
+            upper.startswith("SAVEPOINT")
+            or upper.startswith("RELEASE SAVEPOINT")
+            or upper.startswith("ROLLBACK TO")
+        ):
+            # Transaction-control statements for the lastval SAVEPOINT probe.
+            self.description = None
+            self._result = []
+            self.rowcount = 0
+        elif "SELECT LASTVAL()" in upper:
+            # Simulate SELECT lastval(): raise when no sequence has been used
+            # in this session (seq == 0), otherwise return the current value.
+            if self._conn.seq == 0:
+                raise Exception("lastval is not yet defined in this session")
+            self.description = [("lastval",)]
+            self._result = [{"lastval": self._conn.seq}]
+            self.rowcount = 1
+        elif upper.startswith("INSERT"):
+            # Advance the session sequence counter only for tables that have a
+            # serial PK (has_sequence=True, the default).
+            if self._conn.has_sequence:
+                self._conn.seq += 1
+            self.description = None
+            self._result = []
             self.rowcount = 1
         elif upper.startswith("SELECT"):
             self.description = [("col",)]
@@ -169,7 +189,8 @@ class _FakeCursor:
 class _FakeConnection:
     def __init__(self) -> None:
         self.executed: list = []
-        self.seq = 0
+        self.seq = 0            # last used sequence value (0 = none used yet)
+        self.has_sequence = True  # True → INSERT advances seq (serial PK table)
         self.committed = 0
         self.rolledback = 0
         self.closed = 0
@@ -190,17 +211,67 @@ class _FakeConnection:
         self.closed += 1
 
 
-def test_execute_insert_translates_appends_returning_and_sets_lastrowid():
+# --------------------------------------------------------------------------- #
+# INSERT wiring — lazy lastval(), no RETURNING rewrite
+# --------------------------------------------------------------------------- #
+
+def test_execute_insert_sql_not_modified_lastrowid_via_lastval():
+    """INSERT SQL must NOT be rewritten; lastrowid is resolved lazily via lastval()."""
     fake = _FakeConnection()
     conn = PgConnection(fake)
-    cur = conn.execute("INSERT INTO price_alerts(symbol, target_price) VALUES(?, ?)", ("005930", 70000))
-    executed_sql, executed_params = fake.executed[-1]
-    assert executed_sql == "INSERT INTO price_alerts(symbol, target_price) VALUES(%s, %s) RETURNING id"
-    assert executed_params == ("005930", 70000)
+    cur = conn.execute(
+        "INSERT INTO price_alerts(symbol, target_price) VALUES(?, ?)",
+        ("005930", 70000),
+    )
+    # Only the INSERT should have been sent at this point (no RETURNING appended).
+    insert_sql, insert_params = fake.executed[-1]
+    assert "RETURNING" not in insert_sql.upper()
+    assert insert_sql == "INSERT INTO price_alerts(symbol, target_price) VALUES(%s, %s)"
+    assert insert_params == ("005930", 70000)
+
+    # Reading lastrowid triggers the SELECT lastval() probe.
     assert cur.lastrowid == 1
-    # A second insert advances the surrogate id.
-    cur2 = conn.execute("INSERT INTO price_alerts(symbol, target_price) VALUES(?, ?)", ("000660", 100))
+
+    # Verify SELECT lastval() was actually called during the probe.
+    lastval_calls = [sql for sql, _ in fake.executed if "LASTVAL" in sql.upper()]
+    assert len(lastval_calls) >= 1
+
+    # Second insert advances the surrogate sequence value.
+    cur2 = conn.execute(
+        "INSERT INTO price_alerts(symbol, target_price) VALUES(?, ?)",
+        ("000660", 100),
+    )
+    assert "RETURNING" not in fake.executed[  # the INSERT sql entry
+        [i for i, (s, _) in enumerate(fake.executed) if s.strip().upper().startswith("INSERT")][-1]
+    ][0].upper()
     assert cur2.lastrowid == 2
+
+
+def test_execute_insert_no_id_column_sql_unchanged_and_lastrowid_none():
+    """INSERT into tables with no serial PK (e.g. investor_profiles, PK=username)
+    must pass SQL through unchanged and return lastrowid=None without raising."""
+    fake = _FakeConnection()
+    fake.has_sequence = False  # no serial column on this table
+    fake.seq = 0               # no prior sequence use in session
+    conn = PgConnection(fake)
+    cur = conn.execute(
+        "INSERT INTO investor_profiles(username, completed) VALUES(?, ?) "
+        "ON CONFLICT (username) DO UPDATE SET completed = ?",
+        ("alice", 1, 1),
+    )
+    # Find the INSERT statement that was executed.
+    insert_rows = [(sql, p) for sql, p in fake.executed if sql.strip().upper().startswith("INSERT")]
+    assert len(insert_rows) == 1
+    insert_sql, insert_params = insert_rows[0]
+    # SQL must be passed through unchanged (no RETURNING id appended).
+    assert "RETURNING" not in insert_sql.upper()
+    assert insert_sql == (
+        "INSERT INTO investor_profiles(username, completed) VALUES(%s, %s) "
+        "ON CONFLICT (username) DO UPDATE SET completed = %s"
+    )
+    assert insert_params == ("alice", 1, 1)
+    # lastrowid must be None — no exception must escape.
+    assert cur.lastrowid is None
 
 
 def test_execute_select_returns_dict_rows():
@@ -236,9 +307,14 @@ def test_execute_update_passes_rowcount_and_no_returning():
         (5,),
     )
     assert cur.rowcount == 1
+    # No prior sequence in session → lastval() probe raises → None returned safely.
     assert cur.lastrowid is None
-    executed_sql, _ = fake.executed[-1]
-    assert "RETURNING" not in executed_sql
+    # The UPDATE SQL itself must not have RETURNING.
+    update_sqls = [
+        sql for sql, _ in fake.executed if sql.strip().upper().startswith("UPDATE")
+    ]
+    assert len(update_sqls) == 1
+    assert "RETURNING" not in update_sqls[0].upper()
 
 
 def test_context_manager_commits_and_closes_on_clean_exit():

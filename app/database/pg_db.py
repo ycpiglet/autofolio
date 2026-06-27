@@ -19,11 +19,14 @@ change:
 
 * **Placeholders** — SQLite ``?`` is translated to psycopg ``%s`` (string-literal
   aware), and literal ``%`` is doubled to ``%%`` when params are bound.
-* **lastrowid** — psycopg has no ``lastrowid``. For an ``INSERT`` that lacks a
-  ``RETURNING`` clause the adapter appends ``RETURNING id`` and exposes the new
-  primary key as ``cursor.lastrowid`` (every Postgres trading table in
-  ``supabase/migrations`` uses an ``id`` PK). Callers that do not read
-  ``lastrowid`` are unaffected.
+* **lastrowid** — psycopg has no ``lastrowid``.  The adapter resolves it *lazily*:
+  when the caller reads ``cursor.lastrowid`` after an INSERT, it issues
+  ``SELECT lastval()`` to fetch the most-recent sequence value in the current
+  session.  The probe is wrapped in a SAVEPOINT so that if ``lastval()`` raises
+  (e.g. the inserted table has no serial PK, such as ``investor_profiles`` whose
+  PK is ``username``) the error is caught and the caller's transaction is left
+  intact — ``lastrowid`` returns ``None`` in that case.  The INSERT SQL is
+  **never rewritten**; callers that do not read ``lastrowid`` pay zero cost.
 
 ``psycopg`` is imported lazily (only inside :func:`connect`) so this module —
 and its pure translation helpers — stay importable and unit-testable without the
@@ -91,23 +94,61 @@ _RETURNING_RE = re.compile(r"\bRETURNING\b", re.IGNORECASE)
 def needs_returning_id(sql: str) -> bool:
     """True for an ``INSERT`` that has no ``RETURNING`` clause yet.
 
-    Such statements get ``RETURNING id`` appended so the adapter can surface the
-    new primary key as ``cursor.lastrowid``.
+    Kept as a utility helper; no longer called by the adapter's execute path
+    (lastrowid is now resolved lazily via ``SELECT lastval()``).
     """
     return bool(_INSERT_RE.match(sql)) and not _RETURNING_RE.search(sql)
 
 
 def append_returning_id(sql: str) -> str:
-    """Append ``RETURNING id`` to *sql* (after stripping a trailing ``;``)."""
+    """Append ``RETURNING id`` to *sql* (after stripping a trailing ``;``).
+
+    Kept as a utility helper; no longer called by the adapter's execute path.
+    """
     return sql.rstrip().rstrip(";").rstrip() + " RETURNING id"
 
 
 class PgCursor:
     """Thin wrapper over a psycopg cursor exposing the sqlite3 cursor surface."""
 
-    def __init__(self, cursor: Any, lastrowid: int | None = None) -> None:
+    def __init__(self, cursor: Any, connection: Any) -> None:
         self._cursor = cursor
-        self.lastrowid = lastrowid
+        self._connection = connection  # raw psycopg connection for lastval probe
+        self._lastrowid_fetched: bool = False
+        self._lastrowid_value: int | None = None
+
+    @property
+    def lastrowid(self) -> int | None:
+        """Most-recent sequence value for this session (lazy, cached).
+
+        Issues ``SELECT lastval()`` guarded by a SAVEPOINT on first access.
+        If ``lastval()`` raises (no sequence was used in this session — e.g. the
+        INSERT targeted a table with a non-serial PK like ``investor_profiles``),
+        the SAVEPOINT is rolled back and ``None`` is returned without poisoning
+        the caller's transaction.
+        """
+        if self._lastrowid_fetched:
+            return self._lastrowid_value
+        self._lastrowid_fetched = True
+        try:
+            with self._connection.cursor() as probe:
+                probe.execute("SAVEPOINT _lastval_probe")
+                try:
+                    probe.execute("SELECT lastval()")
+                    row = probe.fetchone()
+                    probe.execute("RELEASE SAVEPOINT _lastval_probe")
+                    if row is not None:
+                        val = row["lastval"] if isinstance(row, dict) else row[0]
+                        self._lastrowid_value = int(val)
+                except Exception:
+                    try:
+                        probe.execute("ROLLBACK TO SAVEPOINT _lastval_probe")
+                    except Exception:
+                        pass
+                    self._lastrowid_value = None
+        except Exception:
+            self._lastrowid_value = None
+        return self._lastrowid_value
 
     @property
     def rowcount(self) -> int:
@@ -148,19 +189,11 @@ class PgConnection:
     def execute(self, sql: str, params: Sequence[Any] | None = None) -> PgCursor:
         has_params = bool(params)
         statement = translate_placeholders(sql, has_params)
-        append_id = needs_returning_id(statement)
-        if append_id:
-            statement = append_returning_id(statement)
-
+        # NOTE: INSERT SQL is NOT rewritten.  lastrowid is resolved lazily via
+        # SELECT lastval() when (and only if) the caller reads cursor.lastrowid.
         cursor = self._connection.cursor()
         cursor.execute(statement, params if has_params else None)
-
-        lastrowid: int | None = None
-        if append_id and cursor.description is not None:
-            row = cursor.fetchone()
-            if row is not None:
-                lastrowid = row["id"] if isinstance(row, dict) else row[0]
-        return PgCursor(cursor, lastrowid)
+        return PgCursor(cursor, self._connection)
 
     def executescript(self, script: str) -> "PgConnection":
         """Run a multi-statement DDL script (sqlite3 parity, no params).
@@ -174,7 +207,7 @@ class PgConnection:
         return self
 
     def cursor(self) -> PgCursor:
-        return PgCursor(self._connection.cursor())
+        return PgCursor(self._connection.cursor(), self._connection)
 
     def commit(self) -> None:
         self._connection.commit()
