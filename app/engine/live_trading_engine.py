@@ -7,6 +7,7 @@ from app.database.repositories import Repository
 from app.engine.order_flow import OrderFlow
 from app.notification.notifier import Notifier
 from app.risk.safety_checker import SafetyChecker
+from app.services import flags
 
 
 logger = get_structured_logger(__name__)
@@ -31,12 +32,23 @@ class LiveTradingEngine:
         )
         self.notifier = notifier
 
-    def run_once(self) -> list[str]:
+    def run_once(self, *, user_id: str | None = None) -> list[str]:
         global _run_counter
         _run_counter += 1
         run_id = _run_counter
 
-        conditions = list(self.repo.list_active_conditions())
+        # Phase 3: per-user run (flag-gated). When the flag is OFF or user_id is
+        # None, eff_uid is None and the condition iteration / alert evaluation /
+        # order processing below are byte-identical to the pre-Phase-3 global
+        # path (eff_uid=None collapses every scoped call to its global form).
+        eff_uid: str | None = (
+            user_id if (flags.multi_tenant_enabled() and user_id is not None) else None
+        )
+
+        if eff_uid is not None:
+            conditions = list(self.repo.list_active_conditions(user_id=eff_uid))
+        else:
+            conditions = list(self.repo.list_active_conditions())
         log_event(logger, "engine_run_start", run=run_id, conditions=len(conditions))
 
         messages: list[str] = []
@@ -59,7 +71,7 @@ class LiveTradingEngine:
                 continue
 
             try:
-                result = self.order_flow.process_condition_once(condition)
+                result = self.order_flow.process_condition_once(condition, user_id=eff_uid)
                 messages.append(f"condition_id={cid}: {result.message}")
                 log_event(
                     logger, "condition_processed",
@@ -98,15 +110,25 @@ class LiveTradingEngine:
         )
         if self.notifier and (executed_count > 0 or error_count > 0):
             self.notifier.send_engine_summary(run_id, executed_count, error_count)
-        self.evaluate_price_alerts()
+        self.evaluate_price_alerts(user_id=eff_uid)
         return messages
 
-    def evaluate_price_alerts(self) -> list[str]:
+    def evaluate_price_alerts(self, *, user_id: str | None = None) -> list[str]:
         """가격 알림 평가 — active 알림 전체를 순회, 조건 충족 시 발송 후 비활성화.
 
         거래 시간 제한 없이 실행된다 (주문이 아닌 알림이므로).
+
+        Phase 3: when the multi-tenant flag is ON and user_id is supplied, only
+        that user's alerts are evaluated; otherwise (OFF / None) all active
+        alerts are evaluated exactly as before (byte-identical global path).
         """
-        alerts = self.repo.list_active_alerts()
+        eff_uid: str | None = (
+            user_id if (flags.multi_tenant_enabled() and user_id is not None) else None
+        )
+        if eff_uid is not None:
+            alerts = self.repo.list_active_alerts(user_id=eff_uid)
+        else:
+            alerts = self.repo.list_active_alerts()
         fired: list[str] = []
         for alert in alerts:
             alert_id = alert["id"]

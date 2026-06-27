@@ -378,6 +378,52 @@ class Repository:
                 (key, value),
             )
 
+    # ------------------------------------------------------------------
+    # Per-user engine state (Multitenant Phase 3)
+    #
+    # ``system_state`` has a single-column PRIMARY KEY (``key``), so per-user
+    # rows are stored under a namespaced key rather than requiring a schema
+    # change.  Reads fall back to the GLOBAL value (mirroring
+    # ``get_user_risk_limit``) so a user inherits the shared default until their
+    # own state diverges (e.g. their circuit breaker trips).
+    #
+    # FLAG-OFF INVARIANT: when ``multi_tenant_enabled()`` is False OR
+    # ``user_id`` is None, ``get_engine_state``/``set_engine_state`` delegate
+    # verbatim to ``get_system_state``/``set_system_state`` — byte-identical to
+    # the pre-Phase-3 global code path.
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _user_state_key(user_id: str, key: str) -> str:
+        return f"__engine_state__:{user_id}:{key}"
+
+    def get_engine_state(
+        self, key: str, default: str | None = None, *, user_id: str | None = None
+    ) -> str | None:
+        """Read engine state, per-user when flag ON + user_id, else global.
+
+        Per-user reads fall back to the GLOBAL ``system_state`` value, then to
+        *default*, so an un-diverged user inherits the shared default.
+        """
+        if flags.multi_tenant_enabled() and user_id is not None:
+            per_user = self.get_system_state(self._user_state_key(user_id, key), None)
+            if per_user is not None:
+                return per_user
+            return self.get_system_state(key, default)
+        return self.get_system_state(key, default)
+
+    def set_engine_state(
+        self, key: str, value: str, *, user_id: str | None = None
+    ) -> None:
+        """Write engine state, per-user when flag ON + user_id, else global.
+
+        Per-user writes never touch the GLOBAL row, so one user's
+        circuit-breaker trip does not disable other users.
+        """
+        if flags.multi_tenant_enabled() and user_id is not None:
+            self.set_system_state(self._user_state_key(user_id, key), value)
+            return
+        self.set_system_state(key, value)
+
     def get_global_risk_limit(self) -> dict[str, Any]:
         with get_connection(self.db_path) as conn:
             row = conn.execute(

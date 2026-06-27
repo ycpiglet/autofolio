@@ -37,7 +37,12 @@ class OrderFlow:
             else order_timeout_sec
         )
 
-    def process_condition_once(self, condition: dict) -> OrderFlowResult:
+    def process_condition_once(
+        self, condition: dict, *, user_id: str | None = None
+    ) -> OrderFlowResult:
+        # FLAG-OFF INVARIANT: user_id defaults to None. When the multi-tenant
+        # flag is OFF or user_id is None, every check()/set_engine_state() call
+        # threaded below collapses to the pre-Phase-3 global path.
         quote = self.broker.get_current_price(condition["symbol"])
         current_price = quote.price
 
@@ -49,7 +54,9 @@ class OrderFlow:
         if not triggered:
             return OrderFlowResult(False, "Condition is not triggered.")
 
-        safety = self.safety_checker.check(condition=condition, current_price=current_price, quote=quote)
+        safety = self.safety_checker.check(
+            condition=condition, current_price=current_price, quote=quote, user_id=user_id
+        )
         if not safety.allowed:
             return OrderFlowResult(False, f"Safety check rejected: {safety.reason}")
 
@@ -100,6 +107,7 @@ class OrderFlow:
             order_status=result.status.value,
             fallback_to_market=False,
             error_message=result.message if result.status == OrderStatus.FAILED else None,
+            user_id=user_id,
         )
 
         if result.status == OrderStatus.FILLED:
@@ -109,16 +117,22 @@ class OrderFlow:
                 filled_price=result.filled_price,
                 filled_quantity=result.filled_quantity,
                 raw_status=result.message,
+                user_id=user_id,
             )
             self.repo.reset_consecutive_failures()
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(True, "Order filled.", order_log_id)
 
         if result.status == OrderStatus.PENDING and order_type == OrderType.MARKET:
-            return self._poll_fill(condition, result.broker_order_id, order_log_id, fallback_label="Market order")
+            return self._poll_fill(
+                condition, result.broker_order_id, order_log_id,
+                fallback_label="Market order", user_id=user_id,
+            )
 
         if result.status == OrderStatus.PENDING:
-            return self._handle_pending_limit_order(condition, result.broker_order_id, order_log_id, current_price)
+            return self._handle_pending_limit_order(
+                condition, result.broker_order_id, order_log_id, current_price, user_id=user_id
+            )
 
         if result.status == OrderStatus.FAILED:
             self.repo.increment_consecutive_failures()
@@ -133,6 +147,8 @@ class OrderFlow:
         broker_order_id: str,
         order_log_id: int,
         current_price: float,
+        *,
+        user_id: str | None = None,
     ) -> OrderFlowResult:
         if self.order_timeout_sec > 0:
             time.sleep(self.order_timeout_sec)
@@ -146,6 +162,7 @@ class OrderFlow:
                 filled_price=status.filled_price,
                 filled_quantity=status.filled_quantity,
                 raw_status=status.message,
+                user_id=user_id,
             )
             self.repo.reset_consecutive_failures()
             self._mark_condition_triggered(condition["id"])
@@ -159,7 +176,7 @@ class OrderFlow:
                 "Failed to cancel pending order.",
             )
             self.repo.increment_consecutive_failures()
-            self.repo.set_system_state("auto_trading_enabled", "false")
+            self.repo.set_engine_state("auto_trading_enabled", "false", user_id=user_id)
             return OrderFlowResult(False, "Failed to cancel pending order. Auto trading disabled.", order_log_id)
 
         self.repo.update_order_status(order_log_id, OrderStatus.CANCELED.value)
@@ -168,9 +185,11 @@ class OrderFlow:
             self._mark_condition_triggered(condition["id"])
             return OrderFlowResult(False, "Limit order canceled. Market fallback disabled.", order_log_id)
 
-        return self._fallback_to_market(condition, current_price)
+        return self._fallback_to_market(condition, current_price, user_id=user_id)
 
-    def _fallback_to_market(self, condition: dict, current_price: float) -> OrderFlowResult:
+    def _fallback_to_market(
+        self, condition: dict, current_price: float, *, user_id: str | None = None
+    ) -> OrderFlowResult:
         request = OrderRequest(
             symbol=condition["symbol"],
             side=Side(condition["side"]),
@@ -196,6 +215,7 @@ class OrderFlow:
             order_status=result.status.value,
             fallback_to_market=True,
             error_message=result.message if result.status == OrderStatus.FAILED else None,
+            user_id=user_id,
         )
 
         if result.status == OrderStatus.FILLED:
@@ -205,6 +225,7 @@ class OrderFlow:
                 filled_price=result.filled_price,
                 filled_quantity=result.filled_quantity,
                 raw_status=result.message,
+                user_id=user_id,
             )
             self.repo.reset_consecutive_failures()
             self._mark_condition_triggered(condition["id"])
@@ -215,7 +236,7 @@ class OrderFlow:
         if result.status == OrderStatus.PENDING:
             return self._poll_fill(
                 condition, result.broker_order_id, order_log_id,
-                fallback_label="Market fallback",
+                fallback_label="Market fallback", user_id=user_id,
             )
 
         self.repo.increment_consecutive_failures()
@@ -229,6 +250,7 @@ class OrderFlow:
         order_log_id: int,
         *,
         fallback_label: str = "Order",
+        user_id: str | None = None,
     ) -> OrderFlowResult:
         """PENDING 주문을 timeout 후 체결조회로 판정하는 공통 헬퍼."""
         if self.order_timeout_sec > 0:
@@ -243,6 +265,7 @@ class OrderFlow:
                 filled_price=status.filled_price,
                 filled_quantity=status.filled_quantity,
                 raw_status=status.message,
+                user_id=user_id,
             )
             self.repo.reset_consecutive_failures()
             self._mark_condition_triggered(condition["id"])

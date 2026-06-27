@@ -32,6 +32,24 @@ router = APIRouter(prefix="/engine", tags=["engine"])
 # this lock externally to simulate a concurrent run-once in progress.
 _run_once_lock = threading.Lock()
 
+# Multitenant Phase 3: per-user single-flight locks (flag-ON only). When the
+# multi-tenant flag is OFF, the global _run_once_lock above is used exactly as
+# before — one global run-once is single-flighted process-wide (byte-identical
+# to today). When ON, each user gets an independent lock so one user's run does
+# not 409-block another user's run.
+_user_run_locks_lock = threading.Lock()
+_user_run_locks: dict[str, threading.Lock] = {}
+
+
+def _run_lock_for(user_id: str) -> threading.Lock:
+    """Return (creating on first use) the per-user single-flight run lock."""
+    with _user_run_locks_lock:
+        lock = _user_run_locks.get(user_id)
+        if lock is None:
+            lock = threading.Lock()
+            _user_run_locks[user_id] = lock
+        return lock
+
 
 @router.get("/status", response_model=EngineStatusResponse)
 def engine_status(
@@ -107,8 +125,10 @@ def run_once(
     Does NOT change KIS_ENV or broker configuration.
     """
     from app.services import backend
+    from app.services import flags as _flags
 
-    if not investor_profile_completed(username_from_session(session)):
+    username = username_from_session(session)
+    if not investor_profile_completed(username):
         raise HTTPException(
             status_code=status.HTTP_428_PRECONDITION_REQUIRED,
             detail={
@@ -117,14 +137,24 @@ def run_once(
             },
         )
 
-    acquired = _run_once_lock.acquire(blocking=False)
+    # Phase 3: per-user single-flight + per-user engine run (flag-gated).
+    # FLAG-OFF: run_uid is None → global _run_once_lock + global run_engine_once(),
+    # byte-identical to the pre-Phase-3 path.
+    run_uid = username if (_flags.multi_tenant_enabled() and username) else None
+    run_lock = _run_lock_for(run_uid) if run_uid is not None else _run_once_lock
+
+    acquired = run_lock.acquire(blocking=False)
     if not acquired:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="이미 실행 중",
         )
     try:
-        results = backend.run_engine_once()
+        results = (
+            backend.run_engine_once(user_id=run_uid)
+            if run_uid is not None
+            else backend.run_engine_once()
+        )
         return RunOnceResponse(results=results or [])
     except Exception as exc:
         raise HTTPException(
@@ -132,4 +162,4 @@ def run_once(
             detail=f"엔진 실행 오류: {exc}",
         ) from exc
     finally:
-        _run_once_lock.release()
+        run_lock.release()

@@ -66,6 +66,13 @@ _ctx_lock = threading.Lock()
 _holdings_cache_lock = threading.Lock()
 _LAST_HOLDINGS_DF: pd.DataFrame | None = None
 
+# Multitenant Phase 3: per-user engine context pool. Populated ONLY when the
+# multi-tenant flag is ON and a user_id is supplied (see _ctx_for_user). When
+# the flag is OFF this dict stays empty and _ctx() (the lru_cache(maxsize=1)
+# singleton) is used exactly as before — byte-identical to the pre-Phase-3 path.
+_user_ctx_lock = threading.Lock()
+_user_ctx: dict[str, tuple] = {}
+
 
 @lru_cache(maxsize=1)
 def _ctx():
@@ -88,6 +95,30 @@ def _ctx():
         engine = LiveTradingEngine(broker=broker, repo=repo)
         agent = ResearchAgent()
         return repo, broker, engine, agent
+
+
+def _ctx_for_user(user_id: str):
+    """Per-user engine context (Multitenant Phase 3, flag-ON only).
+
+    Shares the singleton's repo / broker / agent (same DB, same broker account)
+    but gives each user their OWN ``LiveTradingEngine`` instance so per-user runs
+    are isolated objects. Per-user engine STATE (auto_trading_enabled, etc.) is
+    isolated at the DB layer via ``Repository.get/set_engine_state``; this pool
+    isolates the in-process engine object and is the keyed companion to the
+    per-user run lock in the engine router.
+
+    Never called on the flag-OFF path: callers gate on
+    ``flags.multi_tenant_enabled() and user_id is not None`` before using this.
+    """
+    repo, broker, _engine, agent = _ctx()  # ensures DB init + whitelist seed
+    with _user_ctx_lock:
+        cached = _user_ctx.get(user_id)
+        if cached is not None:
+            return cached
+        engine = LiveTradingEngine(broker=broker, repo=repo)
+        ctx = (repo, broker, engine, agent)
+        _user_ctx[user_id] = ctx
+        return ctx
 
 
 def env() -> str:
@@ -534,7 +565,20 @@ def list_order_logs(limit: int = 200) -> pd.DataFrame:
     return pd.DataFrame(rows) if rows else pd.DataFrame()
 
 
-def run_engine_once() -> list[str]:
+def run_engine_once(user_id: str | None = None) -> list[str]:
+    """Run the trading engine once.
+
+    FLAG-OFF INVARIANT: called with no arguments (user_id=None) on every
+    pre-Phase-3 path → uses the _ctx() singleton engine and the global
+    run_once(), byte-identical to today. When the multi-tenant flag is ON and a
+    user_id is supplied, the per-user engine context + per-user run scope are
+    used so one user's run only touches their own conditions / engine state.
+    """
+    from app.services import flags as _flags
+
+    if _flags.multi_tenant_enabled() and user_id is not None:
+        _, _, engine, _ = _ctx_for_user(user_id)
+        return engine.run_once(user_id=user_id)
     _, _, engine, _ = _ctx()
     return engine.run_once()
 
