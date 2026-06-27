@@ -33,6 +33,8 @@ def _key_bytes() -> bytes:
     """Return the Fernet key bytes, sourced by priority.
 
     1. ``AUTOFOLIO_VAULT_KEY`` env var (production path — key never on disk).
+       If the env var is SET but malformed a clear ``ValueError`` is raised
+       immediately so misconfiguration is never silently hidden.
     2. Co-located ``.autofolio/vault.key`` file (DEV fallback). Generated if
        absent and a LOUD one-time warning is emitted; this preserves the exact
        historical local/test behaviour when the env var is unset, so existing
@@ -40,7 +42,16 @@ def _key_bytes() -> bytes:
     """
     env_key = os.environ.get(_ENV_KEY_NAME)
     if env_key:
-        return env_key.encode("ascii") if isinstance(env_key, str) else env_key
+        key = env_key.encode("ascii") if isinstance(env_key, str) else env_key
+        try:
+            Fernet(key)  # validate format — raises ValueError on malformed key
+        except Exception as exc:
+            raise ValueError(
+                f"Environment variable {_ENV_KEY_NAME!r} is set but contains an "
+                f"invalid Fernet key (expected 32 URL-safe base64 bytes). "
+                f"Details: {exc}"
+            ) from exc
+        return key
 
     global _warned_colocated
     _DIR.mkdir(parents=True, exist_ok=True)
@@ -77,11 +88,17 @@ def decrypt_bytes(token: bytes) -> bytes:
 
 
 def load() -> dict:
+    # Validate key eagerly so a malformed AUTOFOLIO_VAULT_KEY is always loud,
+    # even when no vault data file exists yet.  _key_bytes() raises ValueError
+    # for bad env keys; the co-located-file path never raises here.
+    key = _key_bytes()  # may raise ValueError for malformed env key
     if not _DATA.exists():
         return {}
     try:
-        return json.loads(_fernet().decrypt(_DATA.read_bytes()).decode("utf-8"))
-    except Exception:
+        return json.loads(Fernet(key).decrypt(_DATA.read_bytes()).decode("utf-8"))
+    except ValueError:
+        raise  # re-raise: malformed key slipped through — do not hide
+    except Exception:  # noqa: BLE001 — corrupted / wrong-key ciphertext → treat as empty
         return {}
 
 
