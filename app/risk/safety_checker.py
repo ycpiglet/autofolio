@@ -33,24 +33,28 @@ class SafetyChecker:
     ) -> SafetyResult:
         now = now or now_kst()
 
+        from app.services import flags as _flags
+        # Phase 2/3: per-user engine + risk context (flag-gated, default-OFF → global path).
+        # When the flag is OFF or user_id is None, _effective_uid is None and every
+        # get_engine_state / set_engine_state call below is byte-identical to the
+        # pre-multitenant GLOBAL system_state path.
+        _effective_uid: str | None = (
+            user_id if (_flags.multi_tenant_enabled() and user_id is not None) else None
+        )
+
         if quote is not None:
             data_quality = validate_price_quote(quote, now=now)
             if not data_quality.ok:
                 return SafetyResult(False, f"Market data rejected: {data_quality.reason}")
 
-        if self.repo.get_system_state("kill_switch_active", "false") == "true":
+        if self.repo.get_engine_state("kill_switch_active", "false", user_id=_effective_uid) == "true":
             return SafetyResult(False, "Kill switch is active.")
 
-        from app.services import flags as _flags
         if not _flags.auto_exec_enabled():
             return SafetyResult(False, "Auto-exec locked: AUTOFOLIO_AUTO_EXEC_ENABLED not set.")
 
-        # Phase 2: per-user risk context (flag-gated, default-OFF → global path)
-        _effective_uid: str | None = (
-            user_id if (_flags.multi_tenant_enabled() and user_id is not None) else None
-        )
-
-        if self.repo.get_system_state("auto_trading_enabled", "false") != "true":
+        # Phase 3: per-user auto-trading state (closes the Phase 2 consequence gap).
+        if self.repo.get_engine_state("auto_trading_enabled", "false", user_id=_effective_uid) != "true":
             return SafetyResult(False, "Auto trading is disabled.")
 
         # --- L0-L4 종목별 모드 체크 ---
@@ -69,13 +73,11 @@ class SafetyChecker:
         condition["symbol_mode"] = symbol_mode
 
         # --- Circuit breaker: consecutive order failures ---
-        consecutive_failures_str = self.repo.get_system_state("consecutive_order_failures", "0")
-        try:
-            consecutive_failures = int(consecutive_failures_str)
-        except (ValueError, TypeError):
-            consecutive_failures = 0
+        # Phase 3: per-user counter when flag ON + _effective_uid so user A's
+        # failures cannot trip user B's breaker (closes the cross-user hole).
+        consecutive_failures = self.repo.get_consecutive_failures(user_id=_effective_uid)
         if consecutive_failures >= 3:
-            self.repo.set_system_state("auto_trading_enabled", "false")
+            self.repo.set_engine_state("auto_trading_enabled", "false", user_id=_effective_uid)
             return SafetyResult(False, "Circuit breaker: 3 consecutive order failures.")
 
         # --- Circuit breaker: daily loss threshold ---
@@ -101,7 +103,7 @@ class SafetyChecker:
             if reference > 0:
                 loss_pct = abs(today_pnl) / reference * 100.0
                 if loss_pct >= threshold_pct:
-                    self.repo.set_system_state("auto_trading_enabled", "false")
+                    self.repo.set_engine_state("auto_trading_enabled", "false", user_id=_effective_uid)
                     return SafetyResult(
                         False,
                         "Circuit breaker triggered: daily loss exceeded threshold.",
