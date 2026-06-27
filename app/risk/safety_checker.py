@@ -29,6 +29,7 @@ class SafetyChecker:
         current_price: float,
         quote: object | None = None,
         now: datetime | None = None,
+        user_id: str | None = None,
     ) -> SafetyResult:
         now = now or now_kst()
 
@@ -43,6 +44,11 @@ class SafetyChecker:
         from app.services import flags as _flags
         if not _flags.auto_exec_enabled():
             return SafetyResult(False, "Auto-exec locked: AUTOFOLIO_AUTO_EXEC_ENABLED not set.")
+
+        # Phase 2: per-user risk context (flag-gated, default-OFF → global path)
+        _effective_uid: str | None = (
+            user_id if (_flags.multi_tenant_enabled() and user_id is not None) else None
+        )
 
         if self.repo.get_system_state("auto_trading_enabled", "false") != "true":
             return SafetyResult(False, "Auto trading is disabled.")
@@ -79,7 +85,7 @@ class SafetyChecker:
         except (ValueError, TypeError):
             threshold_pct = 3.0
 
-        today_pnl = self.repo.today_realized_pnl()
+        today_pnl = self.repo.today_realized_pnl(user_id=_effective_uid)
         # today_pnl is negative when net cash outflow exceeds inflow (net loss).
         # We compare the absolute loss against the threshold expressed as a
         # fraction of |today_pnl| relative to a reference. Because we do not
@@ -88,7 +94,7 @@ class SafetyChecker:
         # daily-amount limit exceeds the threshold, we trip the breaker.
         if today_pnl < 0:
             try:
-                limit = self.repo.get_global_risk_limit()
+                limit = self._get_risk_limit(_effective_uid)
                 reference = float(limit["max_daily_amount"])
             except Exception:
                 reference = 0.0
@@ -140,7 +146,7 @@ class SafetyChecker:
 
         quantity = int(condition["quantity"])
         order_amount = current_price * quantity
-        limit = self.repo.get_global_risk_limit()
+        limit = self._get_risk_limit(_effective_uid)
 
         max_order_amount = float(limit["max_order_amount"])
         allow_one_share_exception = bool(limit["allow_one_share_exception"])
@@ -152,12 +158,24 @@ class SafetyChecker:
                     f"Order amount {order_amount:.0f} exceeds max order amount {max_order_amount:.0f}.",
                 )
 
-        today_amount = self.repo.today_order_amount()
+        today_amount = self.repo.today_order_amount(user_id=_effective_uid)
         max_daily_amount = float(limit["max_daily_amount"])
         if today_amount + order_amount > max_daily_amount:
             return SafetyResult(False, "Daily order amount limit exceeded.")
 
         return SafetyResult(True, "Allowed.")
+
+    def _get_risk_limit(self, effective_uid: str | None) -> dict:
+        """Return the risk limit row for the given effective user scope.
+
+        When *effective_uid* is not None (flag ON + caller supplied a user_id),
+        reads the per-user limit, falling back to GLOBAL if none is seeded.
+        When None, delegates to the global limit — byte-identical to the
+        pre-Phase-2 code path.
+        """
+        if effective_uid is not None:
+            return self.repo.get_user_risk_limit(effective_uid)
+        return self.repo.get_global_risk_limit()
 
     def _policy_state(self, symbol: str) -> dict[str, str]:
         keys = (

@@ -387,6 +387,29 @@ class Repository:
                 raise RuntimeError("Global risk limit is not initialized.")
             return dict(row)
 
+    def get_user_risk_limit(self, user_id: str) -> dict[str, Any]:
+        """Return the risk limit for a specific user, falling back to GLOBAL.
+
+        Mirrors the Phase 1 flag-gate pattern: called only when flag ON and
+        user_id is provided.  Falls back to the GLOBAL row if no per-user
+        limit has been seeded (safe for early Phase 2 before per-user limits
+        are provisioned).
+        """
+        with get_connection(self.db_path) as conn:
+            row = conn.execute(
+                "SELECT * FROM risk_limits WHERE user_id = ? LIMIT 1",
+                (user_id,),
+            ).fetchone()
+            if row:
+                return dict(row)
+            # No per-user limit found — fall back to GLOBAL.
+            row = conn.execute(
+                "SELECT * FROM risk_limits WHERE scope = 'GLOBAL' LIMIT 1"
+            ).fetchone()
+            if not row:
+                raise RuntimeError("Global risk limit is not initialized.")
+            return dict(row)
+
     def update_global_risk_limit(
         self,
         *,
