@@ -264,3 +264,14 @@ Owner: Lead Engineer
 
 - 동일 세션에서 동시 작업 중인 다른 Autofolio 세션 존재(작업 트리에 다수 동시 변경). 충돌 주의.
 - 본 태스크는 Owner 대화 기록 기반 등록이며, 실제 착수는 위 선행 확인(특히 법적/약관) 이후.
+
+## BUCKET B 진행 — Supabase staging 적용 (2026-06-27T11:19:52+09:00)
+
+Owner 승인(신규 프로젝트 + mock 스테이징 자동실행) 하에 BUCKET B의 DB 티어를 실행:
+- 신규 Supabase 프로젝트 `autofolio-staging`(`rpdophwfgrwctaochewf`, ap-northeast-2) 생성.
+  기존 INACTIVE STAR-TEAM 프로젝트(`xkkbgjvywtbwyaoyvwmq`)는 비파괴(미접촉).
+- `supabase/migrations/0001~0003` 적용 → 22 테이블 / 33 RLS 정책 / RLS 미적용 0 / 보안 advisors 0 lints.
+- 증거·잔여 런북: `agents/project/MEMBERSHIP-STAGING-DEPLOY-EVIDENCE.md`.
+- 잔여(앱 티어): 백엔드 호스트(Railway/Render — 외부 계정), 앱↔Supabase 배선(= INIT-MULTITENANT-ENGINE),
+  Vercel `web/` 배포. 공개 상용 런칭은 BUCKET C(법률) 게이트. `can_launch=false` 유지.
+- secret 미커밋(공개 URL/anon만). KIS_ENV=mock. 실주문/결제 없음.
