@@ -204,11 +204,10 @@ def mt_repo(tmp_path, monkeypatch):
     return Repository(db), db
 
 
-def test_flagoff_is_default(tmp_path):
+def test_flagoff_is_default(tmp_path, monkeypatch):
     """With no env var set, multi_tenant_enabled() returns False."""
     from app.services.flags import multi_tenant_enabled
-    import os
-    os.environ.pop("AUTOFOLIO_MULTI_TENANT_ENABLED", None)
+    monkeypatch.delenv("AUTOFOLIO_MULTI_TENANT_ENABLED", raising=False)
     assert multi_tenant_enabled() is False
 
 
