@@ -397,7 +397,7 @@ class Repository:
         """
         with get_connection(self.db_path) as conn:
             row = conn.execute(
-                "SELECT * FROM risk_limits WHERE user_id = ? LIMIT 1",
+                "SELECT * FROM risk_limits WHERE user_id = ? AND (scope IS NULL OR scope <> 'GLOBAL') LIMIT 1",
                 (user_id,),
             ).fetchone()
             if row:

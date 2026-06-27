@@ -91,8 +91,22 @@ def test_flag_off_user_id_param_is_ignored(tmp_path, monkeypatch):
 # ---------- Flag-ON isolation ----------
 
 def test_per_user_circuit_breaker_isolation(tmp_path, monkeypatch):
-    """Flag ON: user_a's large loss trips circuit-breaker for user_a only.
-    user_b has no loss → passes.  Both use the SAME shared DB.
+    """Flag ON: verifies per-user PnL-SOURCE isolation of the circuit-breaker TRIGGER only.
+
+    Specifically: user_a's large loss causes the circuit-breaker to TRIGGER for user_a,
+    while user_b (no loss) does NOT trigger.  Both users share the SAME DB.
+
+    IMPORTANT — Phase 2 scope boundary:
+    - What IS isolated: the PnL source used to evaluate the circuit-breaker trigger
+      condition.  Each user's fills are read independently; user_b's check is not
+      contaminated by user_a's loss data.
+    - What is NOT yet isolated (known Phase 2 limitation): the CONSEQUENCE of a trip
+      — `set_system_state("auto_trading_enabled", "false")` — is still a GLOBAL write.
+      Under flag ON, ANY user's circuit-breaker trip disables ALL users' auto-trading.
+      Making the consequence per-user requires per-user engine_state and is deferred to
+      Phase 3.
+
+    This test confirms trigger-source isolation, not full end-to-end per-user isolation.
 
     Default: max_daily_amount=300_000, threshold=3.0%  →  trip if |pnl| >= 9_000.
     user_a loss: (60_000 - 75_000) * 1 = -15_000 → loss_pct = 5.0% → TRIPS.
