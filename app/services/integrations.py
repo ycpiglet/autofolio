@@ -12,9 +12,11 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any
 
-from app.services.secret_store import VaultSecretStore
+from app.services.secret_store import get_secret_store
 
-_STORE = VaultSecretStore()
+# Backend-selected at import: VaultSecretStore on the default SQLite/local path
+# (byte-identical), EnvelopeSecretStore when DATABASE_URL is a Postgres URL.
+_STORE = get_secret_store()
 
 _MAX_SCOPES = 12
 

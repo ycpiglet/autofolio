@@ -73,6 +73,19 @@ def _fernet() -> Fernet:
     return Fernet(_key_bytes())
 
 
+def key_bytes() -> bytes:
+    """Public accessor for the master key bytes (the envelope KEK).
+
+    Sourced with the SAME precedence as the local vault Fernet key
+    (``AUTOFOLIO_VAULT_KEY`` env → co-located dev file) and the SAME
+    fail-loud-on-malformed contract. The per-user envelope store
+    (:mod:`app.services.envelope` / ``EnvelopeSecretStore``) wraps each user's
+    DEK under this key, so the local vault and the envelope KEK share one
+    key-sourcing path and the master key never lands in the database.
+    """
+    return _key_bytes()
+
+
 def encrypt_bytes(data: bytes) -> bytes:
     """Encrypt arbitrary bytes with the vault Fernet key.
 

@@ -21,22 +21,34 @@ Logs must redact token/secret fields (never emit them).
 
 Implementations
 ---------------
-VaultSecretStore   : default — backed by the per-user Fernet vault
-                     (app/ui/vault.py).  Behavior-compatible with the
-                     existing integrations harness.
-SupabaseSecretStore: STUB — raises NotImplementedError on every call.
-                     No real Supabase connection is made.
-                     See TASK-087 for the implementation roadmap.
+VaultSecretStore    : default (SQLite/local) — backed by the per-user Fernet
+                      vault (app/ui/vault.py). Behavior-compatible with the
+                      existing integrations harness. Used whenever DATABASE_URL
+                      is NOT a Postgres URL, so the local path is byte-identical.
+EnvelopeSecretStore : Postgres (production) — durable, envelope-encrypted secret
+                      store (P2). Each user's secret is sealed under a fresh
+                      per-user DEK; the DEK is wrapped under the master KEK
+                      (AUTOFOLIO_VAULT_KEY, off-disk). Only {wrapped_dek,
+                      ciphertext, key_version} land in Postgres, so the DB host
+                      cannot read secrets without the KEK. Survives Railway's
+                      ephemeral filesystem (which a local Fernet file would not).
+SupabaseSecretStore : STUB — raises NotImplementedError on every call.
+                      No real Supabase connection is made.
+
+Backend selection lives in :func:`get_secret_store`.
 """
 from __future__ import annotations
 
+import json
 import logging
 import uuid
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 
+from app.services import envelope
 from app.ui import vault
 
 _log = logging.getLogger(__name__)
@@ -202,6 +214,24 @@ class VaultSecretStore(AbstractSecretStore):
         record = user_records.get(provider_id) if isinstance(user_records, dict) else None
         return self._to_metadata(provider_id, record)
 
+    def reveal(self, user_id: str, provider_id: str) -> str | None:
+        """SERVER-ONLY: return the plaintext secret for use at call time.
+
+        Used by the trading engine / KIS resolver to obtain a user's credential
+        at the moment of use. NEVER surface this via an API response or a log.
+        Returns ``None`` when no secret is configured. Mirrors
+        :meth:`EnvelopeSecretStore.reveal` so the engine can call the same
+        method on either backend.
+        """
+        user_key = _user_key(user_id)
+        all_records = self._load_all()
+        user_records = all_records.get(user_key, {})
+        record = user_records.get(provider_id) if isinstance(user_records, dict) else None
+        if not isinstance(record, dict):
+            return None
+        value = record.get("secret_value")
+        return value if isinstance(value, str) and value else None
+
     # ── Internal helpers ───────────────────────────────────────────────────────
 
     def _load_all(self) -> dict:
@@ -260,6 +290,278 @@ class SupabaseSecretStore(AbstractSecretStore):
 
     def read_metadata(self, user_id, provider_id) -> MetadataOnly:
         raise NotImplementedError(self._MSG)
+
+
+# ── Postgres-durable envelope store (P2) ─────────────────────────────────────
+
+class EnvelopeSecretStore(AbstractSecretStore):
+    """Durable, per-user **envelope-encrypted** secret store (Postgres backend).
+
+    Why this exists
+    ---------------
+    Production runs on Railway, whose filesystem is ephemeral (wiped on every
+    redeploy), so the local Fernet vault file used by :class:`VaultSecretStore`
+    would be LOST. This store persists secrets DURABLY through the database seam
+    (:func:`app.database.sqlite_db.get_connection`) — Postgres in production,
+    SQLite for tests/local — so the same code is exercised on both.
+
+    Envelope scheme (DEK-under-KEK)
+    ------------------------------
+    * A fresh random **DEK** (Fernet key) is generated per user/secret and seals
+      the payload: ``ciphertext = encrypt(secret, DEK)``.
+    * The DEK is **wrapped** under the master **KEK**
+      (``AUTOFOLIO_VAULT_KEY`` via :func:`app.ui.vault.key_bytes`, off-disk):
+      ``wrapped_dek = wrap(DEK, KEK)``.
+    * Only ``{wrapped_dek, ciphertext, key_version}`` (plus non-secret metadata)
+      are stored in ``integration_secret_blobs``. The KEK NEVER touches the DB,
+      so the DB host (Supabase) cannot read secrets, and DB compromise without
+      the KEK yields nothing.
+    * **Per-user isolation**: each user has a distinct DEK, so one user's
+      ``wrapped_dek``/``ciphertext`` is meaningless for another user.
+
+    All PUBLIC metadata methods return METADATA ONLY (identical contract to
+    :class:`VaultSecretStore`). The plaintext secret is surfaced ONLY by the
+    server-side :meth:`reveal` (decrypt-at-use), never via an API response.
+
+    Note on the blob table: the server-only ``integration_secret_blobs`` table
+    is the durable source of truth and carries both the encrypted secret
+    (``wrapped_dek`` + ``ciphertext`` — the ONLY secret-bearing columns) and the
+    non-secret metadata (enabled, masked_hint, account_label, scopes, note,
+    timestamps). It is keyed by the server's ``user_id`` text identifier and has
+    RLS enabled with NO client policies (server/service-role only). Mirroring
+    the client-facing ``integration_secret_metadata`` RLS view (which carries an
+    ``auth.users`` uuid FK) is deferred to P3, when real auth uuids are wired.
+    """
+
+    _TABLE = "integration_secret_blobs"
+
+    def __init__(self, db_path: Path | None = None) -> None:
+        # db_path is honored only on the SQLite backend (tests/local). On the
+        # Postgres backend get_connection ignores it and routes via DATABASE_URL.
+        self._db_path = db_path
+
+    def _connect(self):
+        from app.database.sqlite_db import get_connection
+
+        return get_connection(self._db_path)
+
+    # ── Public interface (metadata only) ─────────────────────────────────────
+
+    def write(
+        self,
+        user_id: str,
+        provider_id: str,
+        token: str | None,
+        *,
+        account_label: str | None = None,
+        scopes: list[str] | None = None,
+        enabled: bool = True,
+        note: str | None = None,
+    ) -> MetadataOnly:
+        user_key = _user_key(user_id)
+        now = _now()
+        scopes_json = json.dumps(list(scopes or []), ensure_ascii=False)
+        with self._connect() as conn:
+            existing = self._fetch(conn, user_key, provider_id)
+            if token is not None:
+                wrapped_dek, ciphertext, key_version = self._seal(token)
+                masked_hint = _masked_hint(token)
+            elif existing is not None:
+                # token=None preserves the existing secret (no re-encryption).
+                wrapped_dek = existing["wrapped_dek"]
+                ciphertext = existing["ciphertext"]
+                key_version = existing["key_version"]
+                masked_hint = existing["masked_hint"]
+            else:
+                # No token and no prior secret → metadata-only row, not configured.
+                wrapped_dek, ciphertext, key_version, masked_hint = "", "", envelope.CURRENT_KEY_VERSION, None
+            created_at = existing["created_at"] if existing else now
+            self._upsert(
+                conn,
+                user_key=user_key,
+                provider_id=provider_id,
+                wrapped_dek=wrapped_dek,
+                ciphertext=ciphertext,
+                key_version=key_version,
+                enabled=bool(enabled),
+                masked_hint=masked_hint,
+                account_label=account_label,
+                scopes_json=scopes_json,
+                note=note,
+                created_at=created_at,
+                updated_at=now,
+            )
+            record = self._fetch(conn, user_key, provider_id)
+        _log.info("secret_store.write provider=%s user=%s", provider_id, _redact_user(user_id))
+        return self._to_metadata(provider_id, record)
+
+    def rotate(self, user_id: str, provider_id: str, new_token: str) -> MetadataOnly:
+        user_key = _user_key(user_id)
+        now = _now()
+        with self._connect() as conn:
+            existing = self._fetch(conn, user_key, provider_id)
+            wrapped_dek, ciphertext, key_version = self._seal(new_token)
+            created_at = existing["created_at"] if existing else now
+            self._upsert(
+                conn,
+                user_key=user_key,
+                provider_id=provider_id,
+                wrapped_dek=wrapped_dek,
+                ciphertext=ciphertext,
+                key_version=key_version,
+                enabled=bool(existing["enabled"]) if existing else True,
+                masked_hint=_masked_hint(new_token),
+                account_label=existing["account_label"] if existing else None,
+                scopes_json=existing["scopes"] if existing else "[]",
+                note=existing["note"] if existing else None,
+                created_at=created_at,
+                updated_at=now,
+            )
+            record = self._fetch(conn, user_key, provider_id)
+        _log.info("secret_store.rotate provider=%s user=%s", provider_id, _redact_user(user_id))
+        return self._to_metadata(provider_id, record)
+
+    def disable(self, user_id: str, provider_id: str) -> MetadataOnly:
+        user_key = _user_key(user_id)
+        with self._connect() as conn:
+            conn.execute(
+                f"UPDATE {self._TABLE} SET enabled = ?, updated_at = ? "
+                "WHERE user_id = ? AND provider = ?",
+                (False, _now(), user_key, provider_id),
+            )
+            record = self._fetch(conn, user_key, provider_id)
+        _log.info("secret_store.disable provider=%s user=%s", provider_id, _redact_user(user_id))
+        return self._to_metadata(provider_id, record)
+
+    def delete(self, user_id: str, provider_id: str) -> MetadataOnly:
+        user_key = _user_key(user_id)
+        with self._connect() as conn:
+            conn.execute(
+                f"DELETE FROM {self._TABLE} WHERE user_id = ? AND provider = ?",
+                (user_key, provider_id),
+            )
+        _log.info("secret_store.delete provider=%s user=%s", provider_id, _redact_user(user_id))
+        return self._to_metadata(provider_id, None)
+
+    def read_metadata(self, user_id: str, provider_id: str) -> MetadataOnly:
+        user_key = _user_key(user_id)
+        with self._connect() as conn:
+            record = self._fetch(conn, user_key, provider_id)
+        return self._to_metadata(provider_id, record)
+
+    def reveal(self, user_id: str, provider_id: str) -> str | None:
+        """SERVER-ONLY: unwrap the DEK with the KEK, decrypt, return plaintext.
+
+        The trading engine / KIS resolver calls this at the moment a credential
+        is used. NEVER surface the return value via an API response or a log.
+        Returns ``None`` when no secret is configured.
+        """
+        user_key = _user_key(user_id)
+        with self._connect() as conn:
+            row = conn.execute(
+                f"SELECT wrapped_dek, ciphertext FROM {self._TABLE} "
+                "WHERE user_id = ? AND provider = ?",
+                (user_key, provider_id),
+            ).fetchone()
+        if row is None:
+            return None
+        record = dict(row)
+        wrapped_dek = record.get("wrapped_dek")
+        ciphertext = record.get("ciphertext")
+        if not wrapped_dek or not ciphertext:
+            return None
+        kek = vault.key_bytes()
+        dek = envelope.unwrap_dek(wrapped_dek, kek)
+        return envelope.decrypt(ciphertext, dek)
+
+    # ── Internal helpers ─────────────────────────────────────────────────────
+
+    @staticmethod
+    def _seal(token: str) -> tuple[str, str, int]:
+        """Generate a DEK, encrypt *token* under it, wrap the DEK under the KEK."""
+        kek = vault.key_bytes()
+        dek = envelope.generate_dek()
+        wrapped_dek = envelope.wrap_dek(dek, kek)
+        ciphertext = envelope.encrypt(token, dek)
+        return wrapped_dek, ciphertext, envelope.CURRENT_KEY_VERSION
+
+    def _fetch(self, conn, user_key: str, provider_id: str) -> dict | None:
+        row = conn.execute(
+            f"SELECT * FROM {self._TABLE} WHERE user_id = ? AND provider = ?",
+            (user_key, provider_id),
+        ).fetchone()
+        return dict(row) if row is not None else None
+
+    def _upsert(self, conn, **f: Any) -> None:
+        # ON CONFLICT(user_id, provider) DO UPDATE — created_at is intentionally
+        # NOT updated, so the original creation time is preserved. `excluded` is
+        # supported by both SQLite (3.24+) and Postgres.
+        conn.execute(
+            f"""
+            INSERT INTO {self._TABLE}
+                (user_id, provider, wrapped_dek, ciphertext, key_version,
+                 enabled, masked_hint, account_label, scopes, note,
+                 created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(user_id, provider) DO UPDATE SET
+                wrapped_dek = excluded.wrapped_dek,
+                ciphertext = excluded.ciphertext,
+                key_version = excluded.key_version,
+                enabled = excluded.enabled,
+                masked_hint = excluded.masked_hint,
+                account_label = excluded.account_label,
+                scopes = excluded.scopes,
+                note = excluded.note,
+                updated_at = excluded.updated_at
+            """,
+            (
+                f["user_key"], f["provider_id"], f["wrapped_dek"], f["ciphertext"],
+                f["key_version"], f["enabled"], f["masked_hint"], f["account_label"],
+                f["scopes_json"], f["note"], f["created_at"], f["updated_at"],
+            ),
+        )
+
+    @staticmethod
+    def _to_metadata(provider_id: str, record: dict | None) -> MetadataOnly:
+        # `configured` mirrors VaultSecretStore: a secret is present iff a masked
+        # hint exists (the hint is set only when a real secret is sealed).
+        configured = bool(record and record.get("masked_hint"))
+        enabled = bool(record.get("enabled")) if record else False
+        scopes_raw = record.get("scopes") if record else None
+        try:
+            scopes = json.loads(scopes_raw) if scopes_raw else []
+        except (TypeError, ValueError):
+            scopes = []
+        return {
+            "provider_id": provider_id,
+            "enabled": enabled,
+            "masked_hint": record.get("masked_hint") if record else None,
+            "audit_id": str(uuid.uuid4()),
+            "configured": configured,
+            "account_label": record.get("account_label") if record else None,
+            "scopes": list(scopes) if isinstance(scopes, list) else [],
+            "created_at": record.get("created_at") if record else None,
+            "updated_at": record.get("updated_at") if record else None,
+        }
+
+
+# ── Backend selection ────────────────────────────────────────────────────────
+
+def get_secret_store() -> AbstractSecretStore:
+    """Return the secret store for the active backend.
+
+    * ``DATABASE_URL`` is a Postgres URL → :class:`EnvelopeSecretStore`
+      (durable, envelope-encrypted; survives Railway's ephemeral filesystem).
+    * Otherwise (unset/empty → the default SQLite/local path) →
+      :class:`VaultSecretStore` (file vault), BYTE-IDENTICAL to the historical
+      behaviour. The envelope store is never even instantiated on this path.
+    """
+    from app.config.settings import settings
+    from app.database.pg_db import is_postgres_url
+
+    if is_postgres_url(settings.database_url):
+        return EnvelopeSecretStore()
+    return VaultSecretStore()
 
 
 # ── Private helpers ────────────────────────────────────────────────────────────

@@ -173,6 +173,35 @@ CREATE TABLE IF NOT EXISTS investor_checkins (
 CREATE INDEX IF NOT EXISTS idx_investor_checkins_user_created
 ON investor_checkins(username, created_at);
 
+-- integration_secret_blobs (P2): durable, per-user ENVELOPE-ENCRYPTED secrets.
+-- Server-only store used by EnvelopeSecretStore (app/services/secret_store.py).
+-- Secret-bearing columns are ONLY wrapped_dek + ciphertext (both encrypted);
+-- the plaintext secret is NEVER stored. The DEK that seals `ciphertext` is
+-- wrapped under the master KEK (AUTOFOLIO_VAULT_KEY, off-disk), so this row is
+-- useless to anyone without the KEK. The remaining columns are non-secret
+-- metadata. On the SQLite/local path this table is created but UNUSED — the
+-- factory selects VaultSecretStore there (byte-identical). The Postgres twin is
+-- supabase/migrations/0006_integration_secret_blobs.sql.
+CREATE TABLE IF NOT EXISTS integration_secret_blobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    wrapped_dek TEXT NOT NULL DEFAULT '',
+    ciphertext TEXT NOT NULL DEFAULT '',
+    key_version INTEGER NOT NULL DEFAULT 1,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    masked_hint TEXT,
+    account_label TEXT,
+    scopes TEXT NOT NULL DEFAULT '[]',
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, provider)
+);
+
+CREATE INDEX IF NOT EXISTS idx_integration_secret_blobs_user
+ON integration_secret_blobs(user_id);
+
 -- NOTE: the per-table user_id indexes are intentionally NOT created here.
 -- On an EXISTING (pre-multitenant) database, CREATE TABLE IF NOT EXISTS skips
 -- the table and the user_id column would not yet exist when this script runs,
