@@ -73,6 +73,36 @@ def _fernet() -> Fernet:
     return Fernet(_key_bytes())
 
 
+def key_bytes(*, require_env: bool = False) -> bytes:
+    """Public accessor for the master key bytes (the envelope KEK).
+
+    Sourced with the SAME precedence as the local vault Fernet key
+    (``AUTOFOLIO_VAULT_KEY`` env → co-located dev file) and the SAME
+    fail-loud-on-malformed contract. The per-user envelope store
+    (:mod:`app.services.envelope` / ``EnvelopeSecretStore``) wraps each user's
+    DEK under this key, so the local vault and the envelope KEK share one
+    key-sourcing path and the master key never lands in the database.
+
+    When *require_env* is ``True`` the co-located disk fallback is REFUSED and a
+    ``RuntimeError`` is raised if ``AUTOFOLIO_VAULT_KEY`` is unset or empty.
+    Use this on the Postgres/envelope path where the disk file cannot be trusted
+    (Railway's ephemeral filesystem wipes it on every redeploy, causing every
+    stored ``wrapped_dek`` to become permanently un-unwrappable).
+    """
+    if require_env:
+        env_key = os.environ.get(_ENV_KEY_NAME)
+        if not env_key:
+            raise RuntimeError(
+                "The Postgres/envelope secret store requires "
+                f"{_ENV_KEY_NAME!r} to be set as a non-empty environment "
+                "variable (off-disk KEK). The co-located .autofolio/vault.key "
+                "disk fallback is refused on this path — set "
+                "AUTOFOLIO_VAULT_KEY to a URL-safe base64 Fernet key before "
+                "starting the server."
+            )
+    return _key_bytes()
+
+
 def encrypt_bytes(data: bytes) -> bytes:
     """Encrypt arbitrary bytes with the vault Fernet key.
 
