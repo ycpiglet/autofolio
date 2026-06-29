@@ -39,14 +39,18 @@ Backend selection lives in :func:`get_secret_store`.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
+import sqlite3 as _sqlite3
 import uuid
 from abc import ABC, abstractmethod
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+
+from cryptography.fernet import InvalidToken
 
 from app.services import envelope
 from app.ui import vault
@@ -340,10 +344,19 @@ class EnvelopeSecretStore(AbstractSecretStore):
         # Postgres backend get_connection ignores it and routes via DATABASE_URL.
         self._db_path = db_path
 
+    @contextlib.contextmanager
     def _connect(self):
         from app.database.sqlite_db import get_connection
 
-        return get_connection(self._db_path)
+        conn = get_connection(self._db_path)
+        try:
+            with conn as c:
+                yield c
+        finally:
+            # sqlite3.Connection.__exit__ commits/rolls back but does NOT close.
+            # PgConnection.__exit__ already closes — only close here for SQLite.
+            if isinstance(conn, _sqlite3.Connection):
+                conn.close()
 
     # ── Public interface (metadata only) ─────────────────────────────────────
 
@@ -454,12 +467,14 @@ class EnvelopeSecretStore(AbstractSecretStore):
 
         The trading engine / KIS resolver calls this at the moment a credential
         is used. NEVER surface the return value via an API response or a log.
-        Returns ``None`` when no secret is configured.
+        Returns ``None`` when no secret is configured or when the blob cannot
+        be decrypted (e.g. wrapped under a rotated/old KEK — caller treats
+        this as a missing secret rather than crashing at use-time).
         """
         user_key = _user_key(user_id)
         with self._connect() as conn:
             row = conn.execute(
-                f"SELECT wrapped_dek, ciphertext FROM {self._TABLE} "
+                f"SELECT wrapped_dek, ciphertext, key_version FROM {self._TABLE} "
                 "WHERE user_id = ? AND provider = ?",
                 (user_key, provider_id),
             ).fetchone()
@@ -470,16 +485,28 @@ class EnvelopeSecretStore(AbstractSecretStore):
         ciphertext = record.get("ciphertext")
         if not wrapped_dek or not ciphertext:
             return None
-        kek = vault.key_bytes()
-        dek = envelope.unwrap_dek(wrapped_dek, kek)
-        return envelope.decrypt(ciphertext, dek)
+        kek = vault.key_bytes(require_env=True)
+        try:
+            dek = envelope.unwrap_dek(wrapped_dek, kek)
+            return envelope.decrypt(ciphertext, dek)
+        except Exception:  # InvalidToken (wrong/rotated KEK), ValueError, malformed blob
+            _log.warning(
+                "secret_store.reveal: blob undecryptable — may be wrapped under "
+                "a rotated or old KEK, or the blob is corrupt. "
+                "provider=%s user=%s key_version=%s — returning None "
+                "(no secret/DEK/KEK in this log)",
+                provider_id,
+                _redact_user(user_id),
+                record.get("key_version"),
+            )
+            return None
 
     # ── Internal helpers ─────────────────────────────────────────────────────
 
     @staticmethod
     def _seal(token: str) -> tuple[str, str, int]:
         """Generate a DEK, encrypt *token* under it, wrap the DEK under the KEK."""
-        kek = vault.key_bytes()
+        kek = vault.key_bytes(require_env=True)
         dek = envelope.generate_dek()
         wrapped_dek = envelope.wrap_dek(dek, kek)
         ciphertext = envelope.encrypt(token, dek)

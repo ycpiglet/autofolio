@@ -235,6 +235,136 @@ def test_migration_0006_parses_as_postgres():
     assert "AUTOFOLIO_VAULT_KEY" not in sql or "lives ONLY" in sql  # only mentioned in the explanatory comment
 
 
+# ── Off-disk KEK enforcement (Important fix) ─────────────────────────────────
+
+def test_envelope_store_raises_when_vault_key_unset(tmp_path, monkeypatch):
+    """EnvelopeSecretStore raises RuntimeError when AUTOFOLIO_VAULT_KEY is unset."""
+    monkeypatch.delenv("AUTOFOLIO_VAULT_KEY", raising=False)
+    import importlib
+    from app.ui import vault as vault_mod
+    importlib.reload(vault_mod)
+    import app.services.secret_store as ss_mod
+    importlib.reload(ss_mod)
+    from app.database.sqlite_db import initialize_database
+    db = tmp_path / "no_kek.db"
+    initialize_database(db)
+    st = ss_mod.EnvelopeSecretStore(db_path=db)
+    with pytest.raises(RuntimeError, match="AUTOFOLIO_VAULT_KEY"):
+        st.write("alice@example.com", "openai", "sk-test-secret-9999")
+
+
+def test_envelope_store_raises_when_vault_key_empty(tmp_path, monkeypatch):
+    """AUTOFOLIO_VAULT_KEY='' (empty string) is also rejected."""
+    monkeypatch.setenv("AUTOFOLIO_VAULT_KEY", "")
+    import importlib
+    from app.ui import vault as vault_mod
+    importlib.reload(vault_mod)
+    import app.services.secret_store as ss_mod
+    importlib.reload(ss_mod)
+    from app.database.sqlite_db import initialize_database
+    db = tmp_path / "empty_kek.db"
+    initialize_database(db)
+    st = ss_mod.EnvelopeSecretStore(db_path=db)
+    with pytest.raises(RuntimeError, match="AUTOFOLIO_VAULT_KEY"):
+        st.write("alice@example.com", "openai", "sk-test-empty-kek-0000")
+
+
+def test_envelope_store_reveal_raises_when_vault_key_unset(tmp_path, monkeypatch):
+    """reveal() also raises RuntimeError when AUTOFOLIO_VAULT_KEY is unset."""
+    kek = Fernet.generate_key()
+    monkeypatch.setenv("AUTOFOLIO_VAULT_KEY", kek.decode("ascii"))
+    import importlib
+    from app.ui import vault as vault_mod
+    importlib.reload(vault_mod)
+    import app.services.secret_store as ss_mod
+    importlib.reload(ss_mod)
+    from app.database.sqlite_db import initialize_database
+    db = tmp_path / "reveal_no_kek.db"
+    initialize_database(db)
+    st = ss_mod.EnvelopeSecretStore(db_path=db)
+    st.write("alice@example.com", "openai", "sk-valid-secret-1234")
+    # Remove KEK and retry reveal().
+    monkeypatch.delenv("AUTOFOLIO_VAULT_KEY")
+    importlib.reload(vault_mod)
+    importlib.reload(ss_mod)
+    st2 = ss_mod.EnvelopeSecretStore(db_path=db)
+    with pytest.raises(RuntimeError, match="AUTOFOLIO_VAULT_KEY"):
+        st2.reveal("alice@example.com", "openai")
+
+
+def test_envelope_store_set_reveal_with_env_kek(tmp_path, monkeypatch):
+    """With AUTOFOLIO_VAULT_KEY set, write→reveal round-trip works (existing behavior)."""
+    kek = Fernet.generate_key()
+    monkeypatch.setenv("AUTOFOLIO_VAULT_KEY", kek.decode("ascii"))
+    import importlib
+    from app.ui import vault as vault_mod
+    importlib.reload(vault_mod)
+    import app.services.secret_store as ss_mod
+    importlib.reload(ss_mod)
+    from app.database.sqlite_db import initialize_database
+    db = tmp_path / "with_kek.db"
+    initialize_database(db)
+    st = ss_mod.EnvelopeSecretStore(db_path=db)
+    st.write("alice@example.com", "kis", "sk-env-kek-round-trip-test")
+    assert st.reveal("alice@example.com", "kis") == "sk-env-kek-round-trip-test"
+
+
+# ── reveal() graceful on undecryptable blob (Minor 1) ────────────────────────
+
+def test_reveal_returns_none_on_rotated_kek_blob(tmp_path, monkeypatch):
+    """reveal() returns None (not an exception) when the blob was sealed under a different KEK."""
+    kek_v1 = Fernet.generate_key()
+    monkeypatch.setenv("AUTOFOLIO_VAULT_KEY", kek_v1.decode("ascii"))
+    import importlib
+    from app.ui import vault as vault_mod
+    importlib.reload(vault_mod)
+    import app.services.secret_store as ss_mod
+    importlib.reload(ss_mod)
+    from app.database.sqlite_db import initialize_database
+    db = tmp_path / "rotated_kek.db"
+    initialize_database(db)
+    st = ss_mod.EnvelopeSecretStore(db_path=db)
+    st.write("alice@example.com", "openai", "sk-v1-secret-1234")
+    # Swap to a different KEK (simulates a redeploy with rotated AUTOFOLIO_VAULT_KEY).
+    kek_v2 = Fernet.generate_key()
+    assert kek_v2 != kek_v1
+    monkeypatch.setenv("AUTOFOLIO_VAULT_KEY", kek_v2.decode("ascii"))
+    importlib.reload(vault_mod)
+    importlib.reload(ss_mod)
+    st2 = ss_mod.EnvelopeSecretStore(db_path=db)
+    result = st2.reveal("alice@example.com", "openai")
+    assert result is None
+
+
+# ── SQLite connection close (Minor 2) ────────────────────────────────────────
+
+def test_no_sqlite_connection_leak(tmp_path, monkeypatch):
+    """EnvelopeSecretStore closes SQLite connections — no ResourceWarning."""
+    import gc
+    import warnings
+
+    kek = Fernet.generate_key()
+    monkeypatch.setenv("AUTOFOLIO_VAULT_KEY", kek.decode("ascii"))
+    import importlib
+    from app.ui import vault as vault_mod
+    importlib.reload(vault_mod)
+    import app.services.secret_store as ss_mod
+    importlib.reload(ss_mod)
+    from app.database.sqlite_db import initialize_database
+    db = tmp_path / "leak_test.db"
+    initialize_database(db)
+    st = ss_mod.EnvelopeSecretStore(db_path=db)
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        st.write("alice@example.com", "openai", "sk-leak-test-1234")
+        st.reveal("alice@example.com", "openai")
+        gc.collect()
+
+    resource_warnings = [w for w in caught if issubclass(w.category, ResourceWarning)]
+    assert resource_warnings == [], f"SQLite connection leak: {resource_warnings}"
+
+
 # ── helpers ──────────────────────────────────────────────────────────────────
 
 def _dump_rows(db) -> list[dict]:
